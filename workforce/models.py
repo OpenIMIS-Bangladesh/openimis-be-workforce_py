@@ -34,12 +34,12 @@ class WorkforceOrganization(HistoryModel):
     id = models.AutoField(primary_key=True)
     name_bn = models.CharField(max_length=255, null=True, db_comment='Translatable name field. May use any language')
     name_en = models.CharField(max_length=255, db_comment='English name field')
-    location_id = models.ForeignKey(
+    location = models.ForeignKey(
         Location,
         models.DO_NOTHING,
         blank=False,
         null=False,
-        db_column="location_id"
+        db_column="locationId"
     )
     address = models.TextField(null=True)
     phone_number = models.CharField(max_length=20, null=True)
@@ -288,7 +288,7 @@ class WorkforceFactory(HistoryModel):
 
     class Meta:
         managed = True
-        db_table = 'employer_factories'
+        db_table = 'workforce_employer_factories'
 
 
 class WorkforceEmployee(HistoryModel):
