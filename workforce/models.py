@@ -1,5 +1,5 @@
 from django.db import models
-from core.models import HistoryModel
+from core.models import HistoryModel, User
 from location.models import Location
 
 
@@ -8,12 +8,12 @@ class WorkforceRepresentative(HistoryModel):
     type = models.CharField(max_length=255)
     name_bn = models.CharField(max_length=255, db_comment='Translatable name field. May use any language')
     name_en = models.CharField(max_length=255, db_comment='English name field')
-    location_id = models.ForeignKey(
+    location = models.ForeignKey(
         Location,
         models.DO_NOTHING,
         blank=False,
         null=False,
-        db_column="location_id"
+        db_column="locationId"
     )
     address = models.TextField(null=True)
     phone_number = models.CharField(max_length=20, null=True)
@@ -23,6 +23,12 @@ class WorkforceRepresentative(HistoryModel):
     birth_date = models.DateField(null=True)
     position = models.CharField(max_length=255, null=True)
     status = models.BooleanField(default=True)
+    user = models.ForeignKey(
+        User,
+        models.DO_NOTHING,
+        blank=False,
+        null=False
+    )
 
     class Meta:
         managed = True
@@ -49,7 +55,6 @@ class WorkforceOrganization(HistoryModel):
     parent_id = models.ForeignKey(
         "WorkforceOrganization",
         models.DO_NOTHING,
-        db_column="parent_id",
         blank=True,
         null=True,
         related_name="children",
@@ -59,7 +64,6 @@ class WorkforceOrganization(HistoryModel):
         models.DO_NOTHING,
         blank=False,
         null=False,
-        db_column="workforce_representative_id"
     )
 
     class Meta:
@@ -74,7 +78,6 @@ class WorkforceOrganizationUnit(HistoryModel):
         models.DO_NOTHING,
         blank=False,
         null=False,
-        related_name='organization'
     )
     unit_level = models.SmallIntegerField(default=1)
     name_bn = models.CharField(max_length=255, null=True, db_comment='Translatable name field. May use any language')
@@ -85,7 +88,6 @@ class WorkforceOrganizationUnit(HistoryModel):
     parent_id = models.ForeignKey(
         "WorkforceOrganizationUnit",
         models.DO_NOTHING,
-        db_column="parent_id",
         blank=True,
         null=True,
         related_name="children",
@@ -95,7 +97,6 @@ class WorkforceOrganizationUnit(HistoryModel):
         models.DO_NOTHING,
         blank=False,
         null=False,
-        db_column="workforce_representative_id"
     )
 
     class Meta:
@@ -110,6 +111,7 @@ class WorkforceOrganizationUnitDesignation(HistoryModel):
         models.DO_NOTHING,
         blank=False,
         null=False,
+        related_name='organization'
     )
     unit_id = models.ForeignKey(
         WorkforceOrganizationUnit,
@@ -121,10 +123,9 @@ class WorkforceOrganizationUnitDesignation(HistoryModel):
     name_bn = models.CharField(max_length=255, null=True, db_comment='Translatable name field. May use any language')
     name_en = models.CharField(max_length=255, db_comment='English name field')
     status = models.BooleanField(default=1)
-    parent_id = models.ForeignKey(
+    parent = models.ForeignKey(
         "WorkforceOrganizationUnitDesignation",
         models.DO_NOTHING,
-        db_column="parent_id",
         blank=True,
         null=True,
         related_name="children",
@@ -139,22 +140,21 @@ class WorkforceOrganizationUnitDesignation(HistoryModel):
 
 class WorkforceOrganizationEmployee(HistoryModel):
     id = models.AutoField(primary_key=True)
-    designation_id = models.ForeignKey(
+    designation = models.ForeignKey(
         WorkforceOrganizationUnitDesignation,
         models.DO_NOTHING,
         blank=False,
-        null=False,
-        db_column="designation_id"
+        null=False
     )
     name_bn = models.CharField(max_length=255, db_comment='Translatable name field. May use any language')
     name_en = models.CharField(max_length=255, db_comment='English name field')
     gender = models.CharField(max_length=30, null=True)
-    location_id = models.ForeignKey(
+    location = models.ForeignKey(
         Location,
         models.DO_NOTHING,
         blank=False,
         null=False,
-        db_column="location_id"
+        db_column="locationId"
     )
     address = models.TextField(null=True)
     phone_number = models.CharField(max_length=20, null=True)
@@ -164,6 +164,12 @@ class WorkforceOrganizationEmployee(HistoryModel):
     birth_certificate_no = models.CharField(max_length=30, null=True)
     passport_no = models.CharField(max_length=30, null=True)
     status = models.BooleanField(default=True)
+    user = models.ForeignKey(
+        User,
+        models.DO_NOTHING,
+        blank=False,
+        null=False
+    )
 
     class Meta:
         managed = True
@@ -176,12 +182,12 @@ class WorkforceEmployer(HistoryModel):
     employer_id_lima = models.CharField(max_length=255, null=True)
     name_bn = models.CharField(max_length=255, null=True, db_comment='Translatable name field. May use any language')
     name_en = models.CharField(max_length=255, db_comment='English name field')
-    location_id = models.ForeignKey(
+    location = models.ForeignKey(
         Location,
         models.DO_NOTHING,
         blank=False,
         null=False,
-        db_column="location_id"
+        db_column="locationId"
     )
     address = models.TextField(null=True)
     phone_number = models.CharField(max_length=20, null=True)
@@ -211,30 +217,28 @@ class WorkforceEmployer(HistoryModel):
 
 class WorkforceOffice(HistoryModel):
     id = models.AutoField(primary_key=True)
-    workforce_employer_id = models.ForeignKey(
+    workforce_employer = models.ForeignKey(
         WorkforceEmployer,
         models.DO_NOTHING,
         blank=False,
-        null=False,
-        db_column="workforce_employer_id"
+        null=False
     )
     name_bn = models.CharField(max_length=255, null=True, db_comment='Translatable name field. May use any language')
     name_en = models.CharField(max_length=255, db_comment='English name field')
-    location_id = models.ForeignKey(
+    location = models.ForeignKey(
         Location,
         models.DO_NOTHING,
         blank=False,
         null=False,
-        db_column="location_id"
+        db_column="locationId"
     )
     address = models.TextField(null=True)
     phone_number = models.CharField(max_length=20, null=True)
     email = models.EmailField(max_length=255, null=True)
     website = models.URLField(max_length=200, null=True)
-    parent_id = models.ForeignKey(
+    parent = models.ForeignKey(
         "WorkforceOffice",
         models.DO_NOTHING,
-        db_column="parent_id",
         blank=True,
         null=True,
         related_name="children",
@@ -245,7 +249,6 @@ class WorkforceOffice(HistoryModel):
         models.DO_NOTHING,
         blank=False,
         null=False,
-        db_column="workforce_representative_id"
     )
 
     class Meta:
@@ -260,18 +263,17 @@ class WorkforceFactory(HistoryModel):
         models.DO_NOTHING,
         blank=False,
         null=False,
-        db_column="workforce_employer_id"
     )
     employer_id = models.CharField(max_length=255, null=True)
     employer_id_lima = models.CharField(max_length=255, null=True)
     name_bn = models.CharField(max_length=255, null=False, db_comment='Translatable name field. May use any language')
     name_en = models.CharField(max_length=255, db_comment='English name field')
-    location_id = models.ForeignKey(
+    location = models.ForeignKey(
         Location,
         models.DO_NOTHING,
         blank=False,
         null=False,
-        db_column="location_id"
+        db_column="locationId"
     )
     address = models.TextField(null=True)
     phone_number = models.CharField(max_length=20, null=True)
@@ -283,7 +285,6 @@ class WorkforceFactory(HistoryModel):
         models.DO_NOTHING,
         blank=False,
         null=False,
-        db_column="workforce_representative_id"
     )
 
     class Meta:
@@ -295,21 +296,19 @@ class WorkforceEmployee(HistoryModel):
     id = models.AutoField(primary_key=True)
     employer_id = models.IntegerField()
     global_id = models.CharField(max_length=50, null=True)
-    present_location_id = models.ForeignKey(
+    present_location = models.ForeignKey(
         Location,
         models.DO_NOTHING,
         blank=False,
         null=False,
         related_name="employee_present_location",
-        db_column="present_location_id"
     )
-    permanent_location_id = models.ForeignKey(
+    permanent_location = models.ForeignKey(
         Location,
         models.DO_NOTHING,
         blank=False,
         null=False,
         related_name="employee_permanent_location",
-        db_column="permanent_location_id"
     )
     name_bn = models.CharField(max_length=255, db_comment='Translatable name field. May use any language')
     name_en = models.CharField(max_length=255, db_comment='English name field')
@@ -331,6 +330,12 @@ class WorkforceEmployee(HistoryModel):
     birth_certificate_no = models.CharField(max_length=30, null=True)
     passport_no = models.CharField(max_length=30, null=True)
     status = models.BooleanField(default=True)
+    user = models.ForeignKey(
+        User,
+        models.DO_NOTHING,
+        blank=False,
+        null=False
+    )
 
     class Meta:
         managed = True
