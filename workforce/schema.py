@@ -16,4 +16,5 @@ class Query(graphene.ObjectType):
 
 
 class Mutation(graphene.ObjectType):
+    create_workforce_representative = CreateWorkforceRepresentativeMutation.Field()
     create_workforce_organization = CreateWorkforceOrganizationMutation.Field()

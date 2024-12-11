@@ -1,10 +1,9 @@
 from django.db import models
-from core.models import HistoryModel, User
+from core.models import HistoryModel, InteractiveUser
 from location.models import Location
 
 
 class WorkforceRepresentative(HistoryModel):
-    id = models.AutoField(primary_key=True)
     type = models.CharField(max_length=255)
     name_bn = models.CharField(max_length=255, db_comment='Translatable name field. May use any language')
     name_en = models.CharField(max_length=255, db_comment='English name field')
@@ -12,8 +11,7 @@ class WorkforceRepresentative(HistoryModel):
         Location,
         models.DO_NOTHING,
         blank=False,
-        null=False,
-        db_column="locationId"
+        null=False
     )
     address = models.TextField(null=True)
     phone_number = models.CharField(max_length=20, null=True)
@@ -23,8 +21,8 @@ class WorkforceRepresentative(HistoryModel):
     birth_date = models.DateField(null=True)
     position = models.CharField(max_length=255, null=True)
     status = models.BooleanField(default=True)
-    user = models.ForeignKey(
-        User,
+    related_user = models.ForeignKey(
+        InteractiveUser,
         models.DO_NOTHING,
         blank=False,
         null=False
@@ -37,22 +35,20 @@ class WorkforceRepresentative(HistoryModel):
 
 # Organizations responsible for managing
 class WorkforceOrganization(HistoryModel):
-    id = models.AutoField(primary_key=True)
     name_bn = models.CharField(max_length=255, null=True, db_comment='Translatable name field. May use any language')
     name_en = models.CharField(max_length=255, db_comment='English name field')
     location = models.ForeignKey(
         Location,
         models.DO_NOTHING,
         blank=False,
-        null=False,
-        db_column="locationId"
+        null=False
     )
     address = models.TextField(null=True)
     phone_number = models.CharField(max_length=20, null=True)
     email = models.EmailField(max_length=255, null=True)
     website = models.URLField(max_length=200, null=True)
     status = models.BooleanField(default=1)
-    parent_id = models.ForeignKey(
+    parent = models.ForeignKey(
         "WorkforceOrganization",
         models.DO_NOTHING,
         blank=True,
@@ -72,7 +68,6 @@ class WorkforceOrganization(HistoryModel):
 
 
 class WorkforceOrganizationUnit(HistoryModel):
-    id = models.AutoField(primary_key=True)
     organization_id = models.ForeignKey(
         WorkforceOrganization,
         models.DO_NOTHING,
@@ -85,7 +80,7 @@ class WorkforceOrganizationUnit(HistoryModel):
     phone_number = models.CharField(max_length=20, null=True)
     email = models.EmailField(max_length=255, null=True)
     status = models.BooleanField(default=1)
-    parent_id = models.ForeignKey(
+    parent = models.ForeignKey(
         "WorkforceOrganizationUnit",
         models.DO_NOTHING,
         blank=True,
@@ -105,15 +100,14 @@ class WorkforceOrganizationUnit(HistoryModel):
 
 
 class WorkforceOrganizationUnitDesignation(HistoryModel):
-    id = models.AutoField(primary_key=True)
-    organization_id = models.ForeignKey(
+    organization = models.ForeignKey(
         WorkforceOrganization,
         models.DO_NOTHING,
         blank=False,
         null=False,
         related_name='organization'
     )
-    unit_id = models.ForeignKey(
+    unit = models.ForeignKey(
         WorkforceOrganizationUnit,
         models.DO_NOTHING,
         blank=False,
@@ -139,7 +133,6 @@ class WorkforceOrganizationUnitDesignation(HistoryModel):
 
 
 class WorkforceOrganizationEmployee(HistoryModel):
-    id = models.AutoField(primary_key=True)
     designation = models.ForeignKey(
         WorkforceOrganizationUnitDesignation,
         models.DO_NOTHING,
@@ -153,8 +146,7 @@ class WorkforceOrganizationEmployee(HistoryModel):
         Location,
         models.DO_NOTHING,
         blank=False,
-        null=False,
-        db_column="locationId"
+        null=False
     )
     address = models.TextField(null=True)
     phone_number = models.CharField(max_length=20, null=True)
@@ -164,8 +156,8 @@ class WorkforceOrganizationEmployee(HistoryModel):
     birth_certificate_no = models.CharField(max_length=30, null=True)
     passport_no = models.CharField(max_length=30, null=True)
     status = models.BooleanField(default=True)
-    user = models.ForeignKey(
-        User,
+    related_user = models.ForeignKey(
+        InteractiveUser,
         models.DO_NOTHING,
         blank=False,
         null=False
@@ -177,7 +169,6 @@ class WorkforceOrganizationEmployee(HistoryModel):
 
 
 class WorkforceEmployer(HistoryModel):
-    id = models.AutoField(primary_key=True)
     employer_id = models.CharField(max_length=255, unique=True)
     employer_id_lima = models.CharField(max_length=255, null=True)
     name_bn = models.CharField(max_length=255, null=True, db_comment='Translatable name field. May use any language')
@@ -186,8 +177,7 @@ class WorkforceEmployer(HistoryModel):
         Location,
         models.DO_NOTHING,
         blank=False,
-        null=False,
-        db_column="locationId"
+        null=False
     )
     address = models.TextField(null=True)
     phone_number = models.CharField(max_length=20, null=True)
@@ -206,8 +196,7 @@ class WorkforceEmployer(HistoryModel):
         WorkforceRepresentative,
         models.DO_NOTHING,
         blank=False,
-        null=False,
-        db_column="workforce_representative_id"
+        null=False
     )
 
     class Meta:
@@ -216,7 +205,6 @@ class WorkforceEmployer(HistoryModel):
 
 
 class WorkforceOffice(HistoryModel):
-    id = models.AutoField(primary_key=True)
     workforce_employer = models.ForeignKey(
         WorkforceEmployer,
         models.DO_NOTHING,
@@ -229,8 +217,7 @@ class WorkforceOffice(HistoryModel):
         Location,
         models.DO_NOTHING,
         blank=False,
-        null=False,
-        db_column="locationId"
+        null=False
     )
     address = models.TextField(null=True)
     phone_number = models.CharField(max_length=20, null=True)
@@ -257,7 +244,6 @@ class WorkforceOffice(HistoryModel):
 
 
 class WorkforceFactory(HistoryModel):
-    id = models.AutoField(primary_key=True)
     workforce_employer_id = models.ForeignKey(
         WorkforceEmployer,
         models.DO_NOTHING,
@@ -272,8 +258,7 @@ class WorkforceFactory(HistoryModel):
         Location,
         models.DO_NOTHING,
         blank=False,
-        null=False,
-        db_column="locationId"
+        null=False
     )
     address = models.TextField(null=True)
     phone_number = models.CharField(max_length=20, null=True)
@@ -293,7 +278,6 @@ class WorkforceFactory(HistoryModel):
 
 
 class WorkforceEmployee(HistoryModel):
-    id = models.AutoField(primary_key=True)
     employer_id = models.IntegerField()
     global_id = models.CharField(max_length=50, null=True)
     present_location = models.ForeignKey(
@@ -330,8 +314,8 @@ class WorkforceEmployee(HistoryModel):
     birth_certificate_no = models.CharField(max_length=30, null=True)
     passport_no = models.CharField(max_length=30, null=True)
     status = models.BooleanField(default=True)
-    user = models.ForeignKey(
-        User,
+    related_user = models.ForeignKey(
+        InteractiveUser,
         models.DO_NOTHING,
         blank=False,
         null=False

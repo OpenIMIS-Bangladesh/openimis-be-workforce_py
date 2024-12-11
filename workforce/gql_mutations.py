@@ -1,38 +1,50 @@
-import graphene
-from .apps import WorkforceConfig
+from core.gql.gql_mutations.base_mutation import BaseMutation, BaseHistoryModelCreateMutationMixin
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError, PermissionDenied
-from workforce.services import update_or_create_workforce_organization
-from policy import models as policy_models
-from typing import Optional, List, Dict, Any
-from core.schema import OpenIMISMutation
-from django.utils.translation import gettext_lazy, gettext as _
+from django.utils.translation import gettext as _
+
+from .apps import WorkforceConfig
+from .services.workforce_organization_services import WorkforceOrganizationServices
+from .gql_types import WorkforceOrganizationInputType, WorkforceRepresentativeInputType
+from .services.workforce_representative_services import WorkforceRepresentativeServices
+
+mutation_module = "workforce"
 
 
-class CreateWorkforceOrganizationMutation(OpenIMISMutation):
-    """
-    Workforce Organization
-    """
-    _mutation_module = "workforce"
-    _mutation_class = "CreateWorkforceOrganizationMutation"
+class CreateWorkforceRepresentativeMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateWorkforceRepresentativeMutation"
 
-    class WorkforceOrganizationInputLabel:
-        name_bn = graphene.String(required=True)
-        name_en = graphene.String(required=True)
-        location_id = graphene.Int(required=True)
-        address = graphene.String()
-        phone_number = graphene.String()
-        email = graphene.String()
-        website = graphene.String()
-        status = graphene.Boolean()
-        parent_id = graphene.Int()
-        workforce_representative_id = graphene.Int(required=True)
-
-    class Input(WorkforceOrganizationInputLabel, OpenIMISMutation.Input):
+    class Input(WorkforceRepresentativeInputType):
         pass
 
     @classmethod
-    def async_mutate(cls, user, **data) -> list[dict[str, str | Any]] | None:
+    def _mutate(cls, user, **data):
+        try:
+            if "client_mutation_id" in data:
+                data.pop('client_mutation_id')
+            if "client_mutation_label" in data:
+                data.pop('client_mutation_label')
+
+            service = WorkforceRepresentativeServices(user)
+            service.create(data)
+            return None
+        except Exception as exc:
+            return [{
+                'message': _("workforce.mutation.failed_to_create_workforce_organization"),
+                'detail': str(exc)}
+            ]
+
+
+class CreateWorkforceOrganizationMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateWorkforceOrganizationMutation"
+
+    class Input(WorkforceOrganizationInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
         try:
             if type(user) is AnonymousUser or not user.id:
                 raise ValidationError(
@@ -40,8 +52,8 @@ class CreateWorkforceOrganizationMutation(OpenIMISMutation):
             if not user.has_perms(WorkforceConfig.gql_mutation_create_workforces_perms):
                 raise PermissionDenied(_("unauthorized"))
             client_mutation_id = data.get("client_mutation_id")
-            workforce_organization = update_or_create_workforce_organization(data, user)
-            CreateWorkforceOrganizationMutation.object_mutated(user, client_mutation_id=client_mutation_id, payment=workforce_organization)
+            service = WorkforceOrganizationServices(user)
+            service.create(data)
             return None
         except Exception as exc:
             return [{
