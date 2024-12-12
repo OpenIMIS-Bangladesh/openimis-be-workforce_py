@@ -27,4 +27,4 @@ class WorkforceOrganizationInputType:
     website = graphene.String()
     status = graphene.Boolean()
     parent_id = graphene.Int()
-    workforce_representative_id = graphene.Int(required=True)
+    workforce_representative_id = graphene.UUID(required=True)

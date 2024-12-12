@@ -51,7 +51,12 @@ class CreateWorkforceOrganizationMutation(BaseHistoryModelCreateMutationMixin, B
                     _("mutation.authentication_required"))
             if not user.has_perms(WorkforceConfig.gql_mutation_create_workforces_perms):
                 raise PermissionDenied(_("unauthorized"))
-            client_mutation_id = data.get("client_mutation_id")
+
+            if "client_mutation_id" in data:
+                data.pop('client_mutation_id')
+            if "client_mutation_label" in data:
+                data.pop('client_mutation_label')
+
             service = WorkforceOrganizationServices(user)
             service.create(data)
             return None
