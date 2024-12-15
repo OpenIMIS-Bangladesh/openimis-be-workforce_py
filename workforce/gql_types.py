@@ -18,7 +18,7 @@ class WorkforceRepresentativeInputType:
 
 
 class WorkforceOrganizationInputType:
-    name_bn = graphene.String(required=True)
+    name_bn = graphene.String()
     name_en = graphene.String(required=True)
     location = graphene.Int(required=True)
     address = graphene.String()
@@ -28,3 +28,12 @@ class WorkforceOrganizationInputType:
     status = graphene.Boolean()
     parent_id = graphene.Int()
     workforce_representative_id = graphene.UUID(required=True)
+
+
+class WorkforceOrganizationUnitInputType:
+    unit_level = graphene.Int(required=True)
+    name_bn = graphene.String()
+    name_en = graphene.String(required=True)
+    phone_number = graphene.String()
+    email = graphene.String()
+    status = graphene.Boolean()

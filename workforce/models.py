@@ -68,7 +68,7 @@ class WorkforceOrganization(HistoryModel):
 
 
 class WorkforceOrganizationUnit(HistoryModel):
-    organization_id = models.ForeignKey(
+    organization = models.ForeignKey(
         WorkforceOrganization,
         models.DO_NOTHING,
         blank=False,
@@ -244,7 +244,7 @@ class WorkforceOffice(HistoryModel):
 
 
 class WorkforceFactory(HistoryModel):
-    workforce_employer_id = models.ForeignKey(
+    workforce_employer = models.ForeignKey(
         WorkforceEmployer,
         models.DO_NOTHING,
         blank=False,
