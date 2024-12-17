@@ -91,7 +91,7 @@ class WorkforceOrganizationUnit(HistoryModel):
         WorkforceRepresentative,
         models.DO_NOTHING,
         blank=False,
-        null=False,
+        null=True,
     )
 
     class Meta:
