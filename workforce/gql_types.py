@@ -14,7 +14,7 @@ class WorkforceRepresentativeInputType:
     birth_date = graphene.String(required=True)
     position = graphene.String(required=True)
     status = graphene.Boolean()
-    user_id = graphene.Int(required=True)
+    user_id = graphene.Int()
 
 
 class WorkforceOrganizationInputType:
