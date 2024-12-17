@@ -1,17 +1,74 @@
 from django.utils.translation import gettext as _
-from core.schema import signal_mutation_module_before_mutating, OrderedDjangoFilterConnectionField, filter_validity
+from core.schema import OrderedDjangoFilterConnectionField
 from .gql_queries import *
 from .gql_mutations import *
 
 
 class Query(graphene.ObjectType):
+    workforce_representatives = OrderedDjangoFilterConnectionField(
+        WorkforceRepresentativeGQLType,
+    )
     workforce_organizations = OrderedDjangoFilterConnectionField(
         WorkforceOrganizationGQLType,
     )
 
+    workforce_organization_units = OrderedDjangoFilterConnectionField(
+        WorkforceOrganizationUnitGQLType
+    )
+    workforce_organization_unit_designations = OrderedDjangoFilterConnectionField(
+        WorkforceOrganizationUnitDesignationGQLType
+    )
+    workforce_organization_employees = OrderedDjangoFilterConnectionField(
+        WorkforceOrganizationEmployeeGQLType
+    )
+    workforce_employers = OrderedDjangoFilterConnectionField(
+        WorkforceEmployerGQLType
+    )
+    workforce_offices = OrderedDjangoFilterConnectionField(
+        WorkforceOfficeGQLType
+    )
+    workforce_factories = OrderedDjangoFilterConnectionField(
+        WorkforceFactoryGQLType
+    )
+
+    def resolve_workforce_representatives(self, info, **kwargs):
+        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+            raise PermissionDenied(_("unauthorized"))
+        pass
+
     def resolve_workforce_organizations(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("unauthorized"))
+        pass
+
+    def resolve_workforce_organization_units(self, info, **kwargs):
+        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+            raise PermissionDenied(_("Unauthorized access"))
+        pass
+
+    def resolve_workforce_organization_unit_designations(self, info, **kwargs):
+        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+            raise PermissionDenied(_("Unauthorized access"))
+        pass
+
+    def resolve_workforce_organization_employees(self, info, **kwargs):
+        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+            raise PermissionDenied(_("Unauthorized access"))
+        pass
+
+    def resolve_workforce_employers(self, info, **kwargs):
+        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+            raise PermissionDenied(_("Unauthorized access"))
+        pass
+
+    def resolve_workforce_offices(self, info, **kwargs):
+        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+            raise PermissionDenied(_("Unauthorized access"))
+        pass
+
+    def resolve_workforce_factories(self, info, **kwargs):
+        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+            raise PermissionDenied(_("Unauthorized access"))
         pass
 
 
