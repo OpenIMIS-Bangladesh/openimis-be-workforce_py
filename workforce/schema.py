@@ -12,24 +12,24 @@ class Query(graphene.ObjectType):
         WorkforceOrganizationGQLType,
     )
 
-    # workforce_organization_units = OrderedDjangoFilterConnectionField(
-    #     WorkforceOrganizationUnitGQLType
-    # )
-    # workforce_organization_unit_designations = OrderedDjangoFilterConnectionField(
-    #     WorkforceOrganizationUnitDesignationGQLType
-    # )
-    # workforce_organization_employees = OrderedDjangoFilterConnectionField(
-    #     WorkforceOrganizationEmployeeGQLType
-    # )
-    # workforce_employers = OrderedDjangoFilterConnectionField(
-    #     WorkforceEmployerGQLType
-    # )
-    # workforce_offices = OrderedDjangoFilterConnectionField(
-    #     WorkforceOfficeGQLType
-    # )
-    # workforce_factories = OrderedDjangoFilterConnectionField(
-    #     WorkforceFactoryGQLType
-    # )
+    workforce_organization_units = OrderedDjangoFilterConnectionField(
+        WorkforceOrganizationUnitGQLType
+    )
+    workforce_organization_unit_designations = OrderedDjangoFilterConnectionField(
+        WorkforceOrganizationUnitDesignationGQLType
+    )
+    workforce_organization_employees = OrderedDjangoFilterConnectionField(
+        WorkforceOrganizationEmployeeGQLType
+    )
+    workforce_employers = OrderedDjangoFilterConnectionField(
+        WorkforceEmployerGQLType
+    )
+    workforce_offices = OrderedDjangoFilterConnectionField(
+        WorkforceOfficeGQLType
+    )
+    workforce_factories = OrderedDjangoFilterConnectionField(
+        WorkforceFactoryGQLType
+    )
 
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
