@@ -9,28 +9,36 @@ class Query(graphene.ObjectType):
     workforce_representatives = OrderedDjangoFilterConnectionField(
         WorkforceRepresentativeGQLType,
         client_mutation_id=graphene.String(),
+        orderBy=graphene.List(of_type=graphene.String),
     )
     workforce_organizations = OrderedDjangoFilterConnectionField(
         WorkforceOrganizationGQLType,
+        orderBy=graphene.List(of_type=graphene.String),
     )
 
     workforce_organization_units = OrderedDjangoFilterConnectionField(
-        WorkforceOrganizationUnitGQLType
+        WorkforceOrganizationUnitGQLType,
+        orderBy=graphene.List(of_type=graphene.String),
     )
     workforce_organization_unit_designations = OrderedDjangoFilterConnectionField(
-        WorkforceOrganizationUnitDesignationGQLType
+        WorkforceOrganizationUnitDesignationGQLType,
+        orderBy=graphene.List(of_type=graphene.String),
     )
     workforce_organization_employees = OrderedDjangoFilterConnectionField(
-        WorkforceOrganizationEmployeeGQLType
+        WorkforceOrganizationEmployeeGQLType,
+        orderBy=graphene.List(of_type=graphene.String),
     )
     workforce_employers = OrderedDjangoFilterConnectionField(
-        WorkforceEmployerGQLType
+        WorkforceEmployerGQLType,
+        orderBy=graphene.List(of_type=graphene.String),
     )
     workforce_offices = OrderedDjangoFilterConnectionField(
-        WorkforceOfficeGQLType
+        WorkforceOfficeGQLType,
+        orderBy=graphene.List(of_type=graphene.String),
     )
     workforce_factories = OrderedDjangoFilterConnectionField(
-        WorkforceFactoryGQLType
+        WorkforceFactoryGQLType,
+        orderBy=graphene.List(of_type=graphene.String),
     )
 
     def resolve_workforce_representatives(self, info, **kwargs):
