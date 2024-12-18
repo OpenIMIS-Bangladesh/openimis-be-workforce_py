@@ -1,4 +1,5 @@
 from django.utils.translation import gettext as _
+import graphene_django_optimizer as gql_optimizer
 from core.schema import OrderedDjangoFilterConnectionField
 from .gql_queries import *
 from .gql_mutations import *
@@ -7,6 +8,7 @@ from .gql_mutations import *
 class Query(graphene.ObjectType):
     workforce_representatives = OrderedDjangoFilterConnectionField(
         WorkforceRepresentativeGQLType,
+        client_mutation_id=graphene.String(),
     )
     workforce_organizations = OrderedDjangoFilterConnectionField(
         WorkforceOrganizationGQLType,
@@ -34,7 +36,10 @@ class Query(graphene.ObjectType):
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("unauthorized"))
-        pass
+
+        service = WorkforceRepresentativeServices(info.context.user)
+        query = service.get(**kwargs)
+        return gql_optimizer.query(query, info)
 
     def resolve_workforce_organizations(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
