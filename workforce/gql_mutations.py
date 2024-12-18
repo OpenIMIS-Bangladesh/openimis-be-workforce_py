@@ -1,6 +1,3 @@
-import graphene
-from celery.bin.graph import graph
-
 from core.gql.gql_mutations.base_mutation import BaseMutation, BaseHistoryModelCreateMutationMixin
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError, PermissionDenied
@@ -8,12 +5,13 @@ from django.utils.translation import gettext as _
 from .apps import WorkforceConfig
 from .gql_types import (
     WorkforceOrganizationInputType, WorkforceRepresentativeInputType, WorkforceOrganizationUnitInputType,
-    WorkforceOrganizationUnitDesignationInputType
+    WorkforceOrganizationUnitDesignationInputType, WorkforceOrganizationEmployeeInputType
 )
 from .services.workforce_organization_services import WorkforceOrganizationServices
 from .services.workforce_representative_services import WorkforceRepresentativeServices
 from .services.workforce_organization_unit_services import WorkforceOrganizationUnitServices
 from .services.workforce_organization_unit_designation_services import WorkforceOrganizationUnitDesignationServices
+from .services.workforce_organization_employee_services import WorkforceOrganizationEmployeeServices
 
 mutation_module = "workforce"
 
@@ -138,6 +136,31 @@ class CreateWorkforceOrganizationUnitDesignationMutation(BaseHistoryModelCreateM
         failure_message = "workforce.mutation.failed_to_create_workforce_organization_unit_designation"
         required_permission = WorkforceConfig.gql_mutation_create_workforces_perms
         service_instance = WorkforceOrganizationUnitDesignationServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission=required_permission,
+            call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class CreateWorkforceOrganizationEmployeeMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateWorkforceOrganizationEmployeeMutation"
+
+    class Input(WorkforceOrganizationEmployeeInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_create_workforce_organization_employee"
+        required_permission = WorkforceConfig.gql_mutation_create_workforces_perms
+        service_instance = WorkforceOrganizationEmployeeServices(user)
 
         result = auth_permission_validation(
             failure_message=failure_message,
