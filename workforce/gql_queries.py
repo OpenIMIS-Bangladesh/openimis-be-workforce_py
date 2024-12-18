@@ -63,7 +63,6 @@ class WorkforceOrganizationUnitGQLType(DjangoObjectType):
             "status": ["exact", "isnull"],
             "unit_level": ["exact"],
             "parent": ["exact"],
-            "workforce_representative": ["exact"],
         }
         connection_class = ExtendedConnection
 

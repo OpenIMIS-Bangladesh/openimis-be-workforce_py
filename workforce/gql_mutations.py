@@ -1,3 +1,6 @@
+import graphene
+from celery.bin.graph import graph
+
 from core.gql.gql_mutations.base_mutation import BaseMutation, BaseHistoryModelCreateMutationMixin
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError, PermissionDenied
@@ -15,12 +18,13 @@ from .services.workforce_organization_unit_designation_services import Workforce
 mutation_module = "workforce"
 
 
-def auth_permission_validation(failure_message, required_permission, service_instance, user, data):
+def auth_permission_validation(failure_message, required_permission, call_type, service_instance, user, data):
     """
     Validates user authentication and permissions, processes data, and calls the service method.
 
     :param failure_message: Error message to return on failure.
     :param required_permission: Permissions required for the action.
+    :param call_type: Type of function to call.
     :param service_instance: Instance of the service to call.
     :param user: User performing the action.
     :param data: Data to process.
@@ -34,8 +38,11 @@ def auth_permission_validation(failure_message, required_permission, service_ins
             raise PermissionDenied(_("unauthorized"))
 
         processed_data = {k: v for k, v in data.items() if k not in ["client_mutation_id", "client_mutation_label"]}
+        if data.get('client_mutation_id') and data.get('client_mutation_id') != '':
+            processed_data['json_ext'] = {'client_mutation_id': data.get('client_mutation_id')}
 
-        service_instance.create(processed_data)
+        if call_type == 'create':
+            return service_instance.create(processed_data)
         return None
     except Exception as exc:
         return [{
@@ -60,6 +67,7 @@ class CreateWorkforceRepresentativeMutation(BaseHistoryModelCreateMutationMixin,
         result = auth_permission_validation(
             failure_message=failure_message,
             required_permission=required_permission,
+            call_type='create',
             service_instance=service_instance,
             user=user,
             data=data
@@ -84,6 +92,7 @@ class CreateWorkforceOrganizationMutation(BaseHistoryModelCreateMutationMixin, B
         result = auth_permission_validation(
             failure_message=failure_message,
             required_permission=required_permission,
+            call_type='create',
             service_instance=service_instance,
             user=user,
             data=data
@@ -108,6 +117,7 @@ class CreateWorkforceOrganizationUnitMutation(BaseHistoryModelCreateMutationMixi
         result = auth_permission_validation(
             failure_message=failure_message,
             required_permission=required_permission,
+            call_type='create',
             service_instance=service_instance,
             user=user,
             data=data
@@ -132,6 +142,7 @@ class CreateWorkforceOrganizationUnitDesignationMutation(BaseHistoryModelCreateM
         result = auth_permission_validation(
             failure_message=failure_message,
             required_permission=required_permission,
+            call_type='create',
             service_instance=service_instance,
             user=user,
             data=data

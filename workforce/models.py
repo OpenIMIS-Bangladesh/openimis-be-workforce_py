@@ -87,12 +87,6 @@ class WorkforceOrganizationUnit(HistoryModel):
         null=True,
         related_name="children",
     )
-    workforce_representative = models.ForeignKey(
-        WorkforceRepresentative,
-        models.DO_NOTHING,
-        blank=False,
-        null=True,
-    )
 
     class Meta:
         managed = True
