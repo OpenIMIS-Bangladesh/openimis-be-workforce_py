@@ -4,9 +4,14 @@ MODULE_NAME = "workforce"
 
 DEFAULT_CFG = {
     "gql_query_workforces_perms": ["801001"],
-    "gql_mutation_create_workforces_perms": ["801002"],
-    "gql_mutation_update_workforces_perms": ["801003"],
-    "gql_mutation_delete_workforces_perms": ["801004"],
+    "gql_query_workforces_organization_perms": ["801002"],
+    "gql_mutation_create_workforces_organization_perms": ["801003"],
+    "gql_mutation_update_workforces_organization_perms": ["801004"],
+    "gql_mutation_delete_workforces_organization_perms": ["801005"],
+    "gql_query_workforces_employer_perms": ["801006"],
+    "gql_mutation_create_workforces_employer_perms": ["801007"],
+    "gql_mutation_update_workforces_employer_perms": ["801008"],
+    "gql_mutation_delete_workforces_employer_perms": ["801009"],
     "default_validations_disabled": False,
 }
 
