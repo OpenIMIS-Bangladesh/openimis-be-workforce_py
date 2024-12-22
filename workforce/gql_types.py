@@ -42,9 +42,12 @@ class WorkforceOrganizationUnitInputType:
 
 
 class WorkforceOrganizationUnitDesignationInputType:
+    organization = graphene.UUID(required=True)
+    unit = graphene.UUID(required=True)
     name_bn = graphene.String()
     name_en = graphene.String(required=True)
     status = graphene.Boolean()
+    parent = graphene.UUID()
     designation_level = graphene.Int(required=True)
     designation_sequence = graphene.Int(required=True)
 
