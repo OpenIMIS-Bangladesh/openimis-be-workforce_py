@@ -17,11 +17,7 @@ class WorkforceOrganizationEmployeeServices(BaseService):
         obj_data['designation'] = designation
         location = Location.objects.get(pk=obj_data['location'])
         obj_data['location'] = location
-        if obj_data.get('user_id') and obj_data.get('user_id') != '':
-            user = InteractiveUser.objects.get(pk=obj_data['user_id'])
-        else:
-            user = create_interactive_user(obj_data.get('name_en'), obj_data.get('name_bn'), obj_data.get('email'), 800)
-
+        user = InteractiveUser.objects.get(pk=obj_data['related_user'])
         obj_data['related_user'] = user
 
         return super().create(obj_data)
