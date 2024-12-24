@@ -17,7 +17,7 @@ class WorkforceOrganizationEmployeeServices(BaseService):
         obj_data['designation'] = designation
         location = Location.objects.get(pk=obj_data['location'])
         obj_data['location'] = location
-        user = InteractiveUser.objects.get(pk=obj_data['related_user'])
+        user = InteractiveUser.objects.get(uuid=obj_data['related_user'])
         obj_data['related_user'] = user
 
         return super().create(obj_data)
