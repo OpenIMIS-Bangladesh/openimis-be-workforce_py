@@ -1,11 +1,13 @@
 import graphene
 
+from core.schema import OpenIMISMutation
 
-class WorkforceRepresentativeInputType:
+
+class WorkforceRepresentativeInputType(OpenIMISMutation.Input):
     type = graphene.String(requred=True)
     name_bn = graphene.String(required=True)
     name_en = graphene.String(required=True)
-    location = graphene.Int(required=True)
+    location = graphene.String(required=True)
     address = graphene.String(required=True)
     phone_number = graphene.String()
     email = graphene.String()
@@ -14,10 +16,10 @@ class WorkforceRepresentativeInputType:
     birth_date = graphene.String(required=True)
     position = graphene.String(required=True)
     status = graphene.Boolean()
-    user_id = graphene.Int()
+    user_id = graphene.String()
 
 
-class WorkforceOrganizationInputType:
+class WorkforceOrganizationInputType(OpenIMISMutation.Input):
     name_bn = graphene.String()
     name_en = graphene.String(required=True)
     location = graphene.Int(required=True)
@@ -30,7 +32,7 @@ class WorkforceOrganizationInputType:
     workforce_representative_id = graphene.UUID(required=True)
 
 
-class WorkforceOrganizationUnitInputType:
+class WorkforceOrganizationUnitInputType(OpenIMISMutation.Input):
     organization = graphene.UUID(required=True)
     unit_level = graphene.Int()
     name_bn = graphene.String()
@@ -41,7 +43,7 @@ class WorkforceOrganizationUnitInputType:
     parent = graphene.UUID()
 
 
-class WorkforceOrganizationUnitDesignationInputType:
+class WorkforceOrganizationUnitDesignationInputType(OpenIMISMutation.Input):
     organization = graphene.UUID(required=True)
     unit = graphene.UUID(required=True)
     name_bn = graphene.String()
@@ -52,7 +54,7 @@ class WorkforceOrganizationUnitDesignationInputType:
     designation_sequence = graphene.Int(required=True)
 
 
-class WorkforceOrganizationEmployeeInputType:
+class WorkforceOrganizationEmployeeInputType(OpenIMISMutation.Input):
     designation = graphene.UUID(required=True)
     name_bn = graphene.String(required=True)
     name_en = graphene.String(required=True)
