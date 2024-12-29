@@ -6,7 +6,7 @@ from .apps import WorkforceConfig
 from .gql_types import (
     WorkforceOrganizationInputType, WorkforceRepresentativeInputType, WorkforceOrganizationUnitInputType,
     WorkforceOrganizationUnitDesignationInputType, WorkforceOrganizationEmployeeInputType,
-    WorkforceEmployerInputType
+    WorkforceEmployerInputType, WorkforceOfficeInputType
 )
 from .services.workforce_organization_services import WorkforceOrganizationServices
 from .services.workforce_representative_services import WorkforceRepresentativeServices
@@ -14,6 +14,7 @@ from .services.workforce_organization_unit_services import WorkforceOrganization
 from .services.workforce_organization_unit_designation_services import WorkforceOrganizationUnitDesignationServices
 from .services.workforce_organization_employee_services import WorkforceOrganizationEmployeeServices
 from .services.workforce_employer_services import WorkforceEmployerServices
+from .services.workforce_office_services import WorkforceOfficeServices
 
 mutation_module = "workforce"
 
@@ -46,7 +47,7 @@ def auth_permission_validation(failure_message, required_permission, call_type, 
         return None
     except Exception as exc:
         return [{
-            'message': _(failure_message),
+             'message': _(failure_message),
             'detail': str(exc)
         }]
 
@@ -188,6 +189,31 @@ class CreateWorkforceEmployerMutation(BaseHistoryModelCreateMutationMixin, BaseM
         failure_message = "workforce.mutation.failed_to_create_workforce_employer"
         required_permission = WorkforceConfig.gql_mutation_create_workforces_perms
         service_instance = WorkforceEmployerServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission=required_permission,
+            call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class CreateWorkforceOfficeMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateWorkforceOfficeMutation"
+
+    class Input(WorkforceOfficeInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_create_workforce_office"
+        required_permission = WorkforceConfig.gql_mutation_create_workforces_perms
+        service_instance = WorkforceOfficeServices(user)
 
         result = auth_permission_validation(
             failure_message=failure_message,

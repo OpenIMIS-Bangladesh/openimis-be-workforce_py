@@ -91,3 +91,17 @@ class WorkforceEmployerInputType(OpenIMISMutation.Input):
     establishment_date = graphene.String()
     status = graphene.Boolean()
     workforce_representative = graphene.UUID(required=True)
+
+
+class WorkforceOfficeInputType:
+    workforceEmployer = graphene.UUID(required=True)
+    nameBn = graphene.String()
+    nameEn = graphene.String(required=True)
+    location = graphene.Int(required=True)
+    address = graphene.String()
+    phoneNumber = graphene.String()
+    email = graphene.String()
+    website = graphene.String()
+    parent = graphene.UUID()
+    status = graphene.Boolean()
+    workforceRepresentative = graphene.UUID(required=True)
