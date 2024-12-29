@@ -34,7 +34,7 @@ class WorkforceOrganizationInputType(OpenIMISMutation.Input):
 
 class WorkforceOrganizationUnitInputType(OpenIMISMutation.Input):
     organization = graphene.UUID(required=True)
-    unit_level = graphene.Int()
+    unit_level = graphene.String()
     name_bn = graphene.String()
     name_en = graphene.String(required=True)
     phone_number = graphene.String()
