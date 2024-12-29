@@ -3,22 +3,20 @@ import logging
 from core.services import BaseService
 from location.models import Location
 from core.models import InteractiveUser
-from workforce.models import WorkforceOrganizationEmployee, WorkforceOrganizationUnitDesignation
+from workforce.models import WorkforceEmployer, WorkforceRepresentative
 from workforce.services.user_services import create_interactive_user
 
 logger = logging.getLogger(__name__)
 
 
-class WorkforceOrganizationEmployeeServices(BaseService):
-    OBJECT_TYPE = WorkforceOrganizationEmployee
+class WorkforceEmployerServices(BaseService):
+    OBJECT_TYPE = WorkforceEmployer
 
     def create(self, obj_data):
-        designation = WorkforceOrganizationUnitDesignation.objects.get(pk=obj_data['designation'])
-        obj_data['designation'] = designation
         location = Location.objects.get(pk=obj_data['location'])
         obj_data['location'] = location
-        user = InteractiveUser.objects.get(uuid=obj_data['related_user'])
-        obj_data['related_user'] = user
+        workforce_representative = WorkforceRepresentative.objects.get(pk=obj_data['workforce_representative'])
+        obj_data['workforce_representative'] = workforce_representative
 
         return super().create(obj_data)
 
