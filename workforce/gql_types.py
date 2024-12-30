@@ -105,3 +105,18 @@ class WorkforceOfficeInputType:
     parent = graphene.UUID()
     status = graphene.Boolean()
     workforceRepresentative = graphene.UUID(required=True)
+
+
+class WorkforceFactoryInputType:
+    workforceEmployer = graphene.UUID(required=True)
+    employer_id = graphene.String()
+    employer_id_lima = graphene.String()
+    nameBn = graphene.String()
+    nameEn = graphene.String(required=True)
+    location = graphene.Int(required=True)
+    address = graphene.String()
+    phoneNumber = graphene.String()
+    email = graphene.String()
+    website = graphene.String()
+    status = graphene.Boolean()
+    workforce_representative = graphene.UUID(required=True)
