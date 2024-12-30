@@ -15,7 +15,7 @@ class WorkforceRepresentative(HistoryModel):
     )
     address = models.TextField(null=True, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
-    email = models.EmailField(max_length=255, null=True, blank=True)
+    email = models.CharField(max_length=255, null=True, blank=True)
     nid = models.CharField(max_length=30, null=True, blank=True)
     passport_no = models.CharField(max_length=30, null=True, blank=True)
     birth_date = models.DateField(null=True, blank=True)
@@ -45,8 +45,8 @@ class WorkforceOrganization(HistoryModel):
     )
     address = models.TextField(null=True, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
-    email = models.EmailField(max_length=255, null=True, blank=True)
-    website = models.URLField(max_length=200, null=True, blank=True)
+    email = models.CharField(max_length=255, null=True, blank=True)
+    website = models.CharField(max_length=200, null=True, blank=True)
     status = models.BooleanField(default=1)
     parent = models.ForeignKey(
         "WorkforceOrganization",
@@ -78,7 +78,7 @@ class WorkforceOrganizationUnit(HistoryModel):
     name_bn = models.CharField(max_length=255, null=True, db_comment='Translatable name field. May use any language')
     name_en = models.CharField(max_length=255, db_comment='English name field')
     phone_number = models.CharField(max_length=20, null=True, blank=True)
-    email = models.EmailField(max_length=255, null=True, blank=True)
+    email = models.CharField(max_length=255, null=True, blank=True)
     status = models.BooleanField(default=1)
     parent = models.ForeignKey(
         "WorkforceOrganizationUnit",
@@ -144,7 +144,7 @@ class WorkforceOrganizationEmployee(HistoryModel):
     )
     address = models.TextField(null=True, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
-    email = models.EmailField(max_length=255, null=True, blank=True)
+    email = models.CharField(max_length=255, null=True, blank=True)
     birth_date = models.DateField(null=True, blank=True)
     nid = models.CharField(max_length=30, null=True, blank=True)
     birth_certificate_no = models.CharField(max_length=30, null=True, blank=True)
@@ -175,8 +175,8 @@ class WorkforceEmployer(HistoryModel):
     )
     address = models.TextField(null=True, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
-    email = models.EmailField(max_length=255, null=True, blank=True)
-    website = models.URLField(max_length=200, null=True, blank=True)
+    email = models.CharField(max_length=255, null=True, blank=True)
+    website = models.CharField(max_length=200, null=True, blank=True)
     licence_type = models.CharField(max_length=255)
     licence_number = models.CharField(max_length=255, null=True, blank=True)
     business_sector = models.CharField(max_length=255)
@@ -215,8 +215,8 @@ class WorkforceOffice(HistoryModel):
     )
     address = models.TextField(null=True, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
-    email = models.EmailField(max_length=255, null=True, blank=True)
-    website = models.URLField(max_length=200, null=True, blank=True)
+    email = models.CharField(max_length=255, null=True, blank=True)
+    website = models.CharField(max_length=200, null=True, blank=True)
     parent = models.ForeignKey(
         "WorkforceOffice",
         models.DO_NOTHING,
@@ -256,8 +256,8 @@ class WorkforceFactory(HistoryModel):
     )
     address = models.TextField(null=True, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
-    email = models.EmailField(max_length=255, null=True, blank=True)
-    website = models.URLField(max_length=200, null=True, blank=True)
+    email = models.CharField(max_length=255, null=True, blank=True)
+    website = models.CharField(max_length=200, null=True, blank=True)
     status = models.BooleanField(default=True)
     workforce_representative = models.ForeignKey(
         WorkforceRepresentative,
@@ -302,7 +302,7 @@ class WorkforceEmployee(HistoryModel):
     present_address = models.TextField(null=True, blank=True)
     permanent_address = models.TextField(null=True, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
-    email = models.EmailField(max_length=255, null=True, blank=True)
+    email = models.CharField(max_length=255, null=True, blank=True)
     birth_date = models.DateField(null=True, blank=True)
     nid = models.CharField(max_length=30, null=True, blank=True)
     birth_certificate_no = models.CharField(max_length=30, null=True, blank=True)
