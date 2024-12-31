@@ -272,7 +272,12 @@ class WorkforceFactory(HistoryModel):
 
 
 class WorkforceEmployee(HistoryModel):
-    employer_id = models.IntegerField()
+    employer_id = models.ForeignKey(
+        WorkforceEmployer,
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+    )
     global_id = models.CharField(max_length=50, null=True, blank=True)
     present_location = models.ForeignKey(
         Location,
