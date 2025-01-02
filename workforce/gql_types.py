@@ -93,42 +93,42 @@ class WorkforceEmployerInputType(OpenIMISMutation.Input):
     workforce_representative = graphene.UUID(required=True)
 
 
-class WorkforceOfficeInputType:
-    workforceEmployer = graphene.UUID(required=True)
-    nameBn = graphene.String()
-    nameEn = graphene.String(required=True)
+class WorkforceOfficeInputType(OpenIMISMutation.Input):
+    workforce_employer = graphene.UUID(required=True)
+    name_bn = graphene.String()
+    name_en = graphene.String(required=True)
     location = graphene.Int(required=True)
     address = graphene.String()
-    phoneNumber = graphene.String()
+    phone_number = graphene.String()
     email = graphene.String()
     website = graphene.String()
     parent = graphene.UUID()
     status = graphene.Boolean()
-    workforceRepresentative = graphene.UUID(required=True)
+    workforce_representative = graphene.UUID(required=True)
 
 
-class WorkforceFactoryInputType:
+class WorkforceFactoryInputType(OpenIMISMutation.Input):
     workforceEmployer = graphene.UUID(required=True)
     employer_id = graphene.String()
     employer_id_lima = graphene.String()
-    nameBn = graphene.String()
-    nameEn = graphene.String(required=True)
+    name_bn = graphene.String()
+    name_en = graphene.String(required=True)
     location = graphene.Int(required=True)
     address = graphene.String()
-    phoneNumber = graphene.String()
+    phone_number = graphene.String()
     email = graphene.String()
     website = graphene.String()
     status = graphene.Boolean()
     workforce_representative = graphene.UUID(required=True)
 
 
-class WorkforceEmployeeInputType:
+class WorkforceEmployeeInputType(OpenIMISMutation.Input):
     employer_id = graphene.UUID(required=True)
     global_id = graphene.String()
     present_location = graphene.String(required=True)
     permanent_location = graphene.String(required=True)
-    nameBn = graphene.String(required=True)
-    nameEn = graphene.String(required=True)
+    name_bn = graphene.String(required=True)
+    name_en = graphene.String(required=True)
     fathers_name = graphene.String()
     mothers_name = graphene.String()
     gender = graphene.String()
