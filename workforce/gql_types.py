@@ -4,6 +4,7 @@ from core.schema import OpenIMISMutation
 
 
 class WorkforceRepresentativeInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
     type = graphene.String(requred=True)
     name_bn = graphene.String(required=True)
     name_en = graphene.String(required=True)
@@ -20,6 +21,7 @@ class WorkforceRepresentativeInputType(OpenIMISMutation.Input):
 
 
 class WorkforceOrganizationInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
     name_bn = graphene.String()
     name_en = graphene.String(required=True)
     location = graphene.String(required=True)
@@ -33,6 +35,7 @@ class WorkforceOrganizationInputType(OpenIMISMutation.Input):
 
 
 class WorkforceOrganizationUnitInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
     organization = graphene.UUID(required=True)
     unit_level = graphene.String()
     name_bn = graphene.String()
@@ -44,6 +47,7 @@ class WorkforceOrganizationUnitInputType(OpenIMISMutation.Input):
 
 
 class WorkforceOrganizationUnitDesignationInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
     organization = graphene.UUID(required=True)
     unit = graphene.UUID(required=True)
     name_bn = graphene.String()
@@ -55,6 +59,7 @@ class WorkforceOrganizationUnitDesignationInputType(OpenIMISMutation.Input):
 
 
 class WorkforceOrganizationEmployeeInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
     designation = graphene.UUID(required=True)
     name_bn = graphene.String(required=True)
     name_en = graphene.String(required=True)
@@ -72,6 +77,7 @@ class WorkforceOrganizationEmployeeInputType(OpenIMISMutation.Input):
 
 
 class WorkforceEmployerInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
     employer_id = graphene.String(required=True, unique=True)
     employer_id_lima = graphene.String()
     name_bn = graphene.String()
@@ -94,6 +100,7 @@ class WorkforceEmployerInputType(OpenIMISMutation.Input):
 
 
 class WorkforceOfficeInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
     workforce_employer = graphene.UUID(required=True)
     name_bn = graphene.String()
     name_en = graphene.String(required=True)
@@ -108,7 +115,8 @@ class WorkforceOfficeInputType(OpenIMISMutation.Input):
 
 
 class WorkforceFactoryInputType(OpenIMISMutation.Input):
-    workforceEmployer = graphene.UUID(required=True)
+    id = graphene.String(required=False)
+    workforce_employer = graphene.UUID(required=True)
     employer_id = graphene.String()
     employer_id_lima = graphene.String()
     name_bn = graphene.String()
@@ -123,6 +131,7 @@ class WorkforceFactoryInputType(OpenIMISMutation.Input):
 
 
 class WorkforceEmployeeInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
     employer_id = graphene.UUID(required=True)
     global_id = graphene.String()
     present_location = graphene.String(required=True)
