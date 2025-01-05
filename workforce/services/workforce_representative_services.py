@@ -5,7 +5,7 @@ from core.services import BaseService
 from location.models import Location
 from django.db.models import Q
 from workforce.models import WorkforceRepresentative
-from workforce.services.user_services import create_interactive_user
+from workforce.services.user_services import create_interactive_user, update_interactive_user
 
 logger = logging.getLogger(__name__)
 
@@ -38,22 +38,11 @@ class WorkforceRepresentativeServices(BaseService):
         super().create(obj_data)
 
     def update(self, obj_data):
-        obj_id = obj_data.pop('id', None)
-        if not obj_id:
-            raise ValueError("ID is required for updating the WorkforceRepresentative")
+        location = Location.objects.get(pk=obj_data['location'])
+        obj_data['location'] = location
 
-        # Fetch the object to update
-        instance = self.OBJECT_TYPE.objects.filter(pk=obj_id, is_deleted=False).first()
-        if not instance:
-            raise ValueError(f"WorkforceRepresentative with ID {obj_id} does not exist")
+        if obj_data.get('user_id'):
+            update_interactive_user(obj_data['user_id'], obj_data['name_en'], obj_data['name_bn'])
+            obj_data.pop('user_id')
 
-        # Update the fields of the instance
-        for field, value in obj_data.items():
-            setattr(instance, field, value)
-
-        # Save the updated instance
-        instance.save()
-
-        # Log or perform any post-update actions
-        logger.info(f"Updated WorkforceRepresentative with ID {obj_id}")
-        return instance
+        super().update(obj_data)

@@ -48,10 +48,12 @@ def auth_permission_validation(failure_message, required_permission, call_type, 
 
         if call_type == 'create':
             return service_instance.create(processed_data)
+        if call_type == 'update':
+            return service_instance.update(processed_data)
         return None
     except Exception as exc:
         return [{
-             'message': _(failure_message),
+            'message': _(failure_message),
             'detail': str(exc)
         }]
 
@@ -86,8 +88,7 @@ class UpdateWorkforceRepresentativeMutation(BaseHistoryModelCreateMutationMixin,
     _mutation_class = "UpdateWorkforceRepresentativeMutation"
 
     class Input(WorkforceRepresentativeInputType):
-        id = graphene.ID(required=True)
-        print(id)
+        pass
 
     @classmethod
     def _mutate(cls, user, **data):
