@@ -3,6 +3,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils.translation import gettext as _
 from .apps import WorkforceConfig
+import graphene
 from .gql_types import (
     WorkforceOrganizationInputType, WorkforceRepresentativeInputType, WorkforceOrganizationUnitInputType,
     WorkforceOrganizationUnitDesignationInputType, WorkforceOrganizationEmployeeInputType,
@@ -72,6 +73,32 @@ class CreateWorkforceRepresentativeMutation(BaseHistoryModelCreateMutationMixin,
             failure_message=failure_message,
             required_permission=required_permission,
             call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class UpdateWorkforceRepresentativeMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWorkforceRepresentativeMutation"
+
+    class Input(WorkforceRepresentativeInputType):
+        id = graphene.ID(required=True)
+        print(id)
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_update_workforce_representative"
+        required_permission = WorkforceConfig.gql_mutation_update_workforces_perms
+        service_instance = WorkforceRepresentativeServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission=required_permission,
+            call_type='update',
             service_instance=service_instance,
             user=user,
             data=data

@@ -36,3 +36,24 @@ class WorkforceRepresentativeServices(BaseService):
         obj_data['related_user'] = user
 
         super().create(obj_data)
+
+    def update(self, obj_data):
+        obj_id = obj_data.pop('id', None)
+        if not obj_id:
+            raise ValueError("ID is required for updating the WorkforceRepresentative")
+
+        # Fetch the object to update
+        instance = self.OBJECT_TYPE.objects.filter(pk=obj_id, is_deleted=False).first()
+        if not instance:
+            raise ValueError(f"WorkforceRepresentative with ID {obj_id} does not exist")
+
+        # Update the fields of the instance
+        for field, value in obj_data.items():
+            setattr(instance, field, value)
+
+        # Save the updated instance
+        instance.save()
+
+        # Log or perform any post-update actions
+        logger.info(f"Updated WorkforceRepresentative with ID {obj_id}")
+        return instance
