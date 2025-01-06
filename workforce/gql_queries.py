@@ -55,7 +55,6 @@ class WorkforceOrganizationUnitGQLType(DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         filter_fields = {
             "id": ["exact"],
-            "organization": ["exact"],
             "name_bn": ["exact", "icontains"],
             "name_en": ["exact", "icontains"],
             "phone_number": ["exact", "icontains"],
@@ -63,6 +62,8 @@ class WorkforceOrganizationUnitGQLType(DjangoObjectType):
             "status": ["exact", "isnull"],
             "unit_level": ["exact"],
             "parent": ["exact"],
+            **prefix_filterset("organization__", WorkforceOrganizationGQLType._meta.filter_fields),
+
         }
         connection_class = ExtendedConnection
 
@@ -73,14 +74,14 @@ class WorkforceOrganizationUnitDesignationGQLType(DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         filter_fields = {
             "id": ["exact"],
-            "organization": ["exact"],
-            "unit": ["exact"],
             "name_bn": ["exact", "icontains"],
             "name_en": ["exact", "icontains"],
             "status": ["exact", "isnull"],
             "parent": ["exact", "isnull"],
             "designation_level": ["exact"],
             "designation_sequence": ["exact"],
+            **prefix_filterset("organization__", WorkforceOrganizationGQLType._meta.filter_fields),
+            **prefix_filterset("unit__", WorkforceOrganizationUnitGQLType._meta.filter_fields),
         }
         connection_class = ExtendedConnection
 
