@@ -4,7 +4,7 @@ from graphene_django import DjangoObjectType
 from .models import (
     WorkforceRepresentative, WorkforceOrganization, WorkforceOrganizationUnit,
     WorkforceOrganizationUnitDesignation, WorkforceOrganizationEmployee,
-    WorkforceEmployer, WorkforceOffice, WorkforceFactory, WorkforceEmployee
+    WorkforceEmployer, WorkforceOffice, WorkforceFactory, WorkforceEmployee, WorkforceOrganizationEmployeeDesignation
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -92,7 +92,6 @@ class WorkforceOrganizationEmployeeGQLType(DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         filter_fields = {
             "id": ["exact"],
-            "designation": ["exact"],
             "name_bn": ["exact", "icontains"],
             "name_en": ["exact", "icontains"],
             "gender": ["exact"],
@@ -103,9 +102,27 @@ class WorkforceOrganizationEmployeeGQLType(DjangoObjectType):
             "nid": ["exact"],
             "birth_certificate_no": ["exact"],
             "passport_no": ["exact"],
+            "first_joining_date": ["exact"],
             "status": ["exact", "isnull"],
             "related_user": ["exact"],
-            **prefix_filterset("location__", LocationGQLType._meta.filter_fields),  # Using Location filter fields
+            **prefix_filterset("location__", LocationGQLType._meta.filter_fields),
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceOrganizationEmployeeDesignationGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceOrganizationEmployeeDesignation
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "incharge_label": ["exact"],
+            "status": ["exact"],
+            "joining_date": ["exact"],
+            "release_date": ["exact"],
+            "released_by": ["exact"],
+            **prefix_filterset("designation__", WorkforceOrganizationUnitDesignationGQLType._meta.filter_fields),
+            **prefix_filterset("employee__", WorkforceOrganizationEmployeeGQLType._meta.filter_fields),
         }
         connection_class = ExtendedConnection
 
@@ -133,7 +150,7 @@ class WorkforceEmployerGQLType(DjangoObjectType):
             "establishment_Name": ['exact'],
             "establishment_date": ['exact'],
             "status": ["exact", "isnull"],
-            **prefix_filterset("location__", LocationGQLType._meta.filter_fields),  # Using Location filter fields
+            **prefix_filterset("location__", LocationGQLType._meta.filter_fields),
             "workforce_representative": ["exact"],
         }
         connection_class = ExtendedConnection
@@ -154,7 +171,7 @@ class WorkforceOfficeGQLType(DjangoObjectType):
             "website": ["exact", "icontains"],
             "parent": ["exact"],
             "status": ["exact", "isnull"],
-            **prefix_filterset("location__", LocationGQLType._meta.filter_fields),  # Using Location filter fields
+            **prefix_filterset("location__", LocationGQLType._meta.filter_fields),
             "workforce_representative": ["exact"],
         }
         connection_class = ExtendedConnection
@@ -171,7 +188,7 @@ class WorkforceFactoryGQLType(DjangoObjectType):
             "employer_id_lima": ["exact", "icontains"],
             "name_bn": ["exact", "icontains"],
             "name_en": ["exact", "icontains"],
-            **prefix_filterset("location__", LocationGQLType._meta.filter_fields),  # Using Location filter fields
+            **prefix_filterset("location__", LocationGQLType._meta.filter_fields),
             "address": ["exact", "icontains"],
             "phone_number": ["exact", "icontains"],
             "email": ["exact", "icontains"],
