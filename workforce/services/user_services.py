@@ -17,6 +17,7 @@ def create_interactive_user(last_name, other_names, login_name, role_id):
 
     return user
 
+
 def update_interactive_user(id, last_name, other_names):
     user = InteractiveUser.objects.get(id=id)
     user.last_name = last_name
@@ -24,6 +25,7 @@ def update_interactive_user(id, last_name, other_names):
     user.save()
 
     return user
+
 
 class UserServices:
     pass

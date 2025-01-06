@@ -18,4 +18,7 @@ class WorkforceOrganizationServices(BaseService):
         return super().create(obj_data)
 
     def update(self, obj_data):
-        return super().update(obj_data)
+        location = Location.objects.get(pk=obj_data['location'])
+        obj_data['location'] = location
+
+        super().update(obj_data)
