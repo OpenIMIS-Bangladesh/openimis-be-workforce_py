@@ -383,6 +383,31 @@ class CreateWorkforceOfficeMutation(BaseHistoryModelCreateMutationMixin, BaseMut
         return result
 
 
+class UpdateWorkforceOfficeMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWorkforceOfficeMutation"
+
+    class Input(WorkforceOfficeInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_update_workforce_office"
+        required_permission = WorkforceConfig.gql_mutation_create_workforces_perms
+        service_instance = WorkforceOfficeServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission=required_permission,
+            call_type='update',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
 class CreateWorkforceFactoryMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
     _mutation_module = mutation_module
     _mutation_class = "CreateWorkforceFactoryMutation"
@@ -408,6 +433,31 @@ class CreateWorkforceFactoryMutation(BaseHistoryModelCreateMutationMixin, BaseMu
         return result
 
 
+class UpdateWorkforceFactoryMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWorkforceFactoryMutation"
+
+    class Input(WorkforceFactoryInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_update_workforce_factory"
+        required_permission = WorkforceConfig.gql_mutation_create_workforces_perms
+        service_instance = WorkforceFactoryServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission=required_permission,
+            call_type='update',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
 class CreateWorkforceEmployeeMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
     _mutation_module = mutation_module
     _mutation_class = "CreateWorkforceEmployeeMutation"
@@ -425,6 +475,31 @@ class CreateWorkforceEmployeeMutation(BaseHistoryModelCreateMutationMixin, BaseM
             failure_message=failure_message,
             required_permission=required_permission,
             call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class UpdateWorkforceEmployeeMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWorkforceEmployeeMutation"
+
+    class Input(WorkforceEmployeeInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_update_workforce_employee"
+        required_permission = WorkforceConfig.gql_mutation_create_workforces_perms
+        service_instance = WorkforceEmployeeServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission=required_permission,
+            call_type='update',
             service_instance=service_instance,
             user=user,
             data=data
