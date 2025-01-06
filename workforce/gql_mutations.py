@@ -283,6 +283,31 @@ class CreateWorkforceOrganizationEmployeeMutation(BaseHistoryModelCreateMutation
         return result
 
 
+class UpdateWorkforceOrganizationEmployeeMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWorkforceOrganizationEmployeeMutation"
+
+    class Input(WorkforceOrganizationEmployeeInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_update_workforce_organization_employee"
+        required_permission = WorkforceConfig.gql_mutation_create_workforces_perms
+        service_instance = WorkforceOrganizationEmployeeServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission=required_permission,
+            call_type='update',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
 class CreateWorkforceEmployerMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
     _mutation_module = mutation_module
     _mutation_class = "CreateWorkforceEmployerMutation"
@@ -300,6 +325,31 @@ class CreateWorkforceEmployerMutation(BaseHistoryModelCreateMutationMixin, BaseM
             failure_message=failure_message,
             required_permission=required_permission,
             call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class UpdateWorkforceEmployerMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWorkforceEmployerMutation"
+
+    class Input(WorkforceEmployerInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_update_workforce_employer"
+        required_permission = WorkforceConfig.gql_mutation_create_workforces_perms
+        service_instance = WorkforceEmployerServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission=required_permission,
+            call_type='update',
             service_instance=service_instance,
             user=user,
             data=data

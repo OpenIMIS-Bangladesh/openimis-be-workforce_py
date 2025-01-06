@@ -21,4 +21,9 @@ class WorkforceEmployerServices(BaseService):
         return super().create(obj_data)
 
     def update(self, obj_data):
+        location = Location.objects.get(pk=obj_data['location'])
+        obj_data['location'] = location
+        workforce_representative = WorkforceRepresentative.objects.get(pk=obj_data['workforce_representative'])
+        obj_data['workforce_representative'] = workforce_representative
+
         return super().update(obj_data)
