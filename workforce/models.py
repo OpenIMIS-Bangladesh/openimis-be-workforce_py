@@ -127,12 +127,6 @@ class WorkforceOrganizationUnitDesignation(HistoryModel):
 
 
 class WorkforceOrganizationEmployee(HistoryModel):
-    designation = models.ForeignKey(
-        WorkforceOrganizationUnitDesignation,
-        models.DO_NOTHING,
-        blank=False,
-        null=False
-    )
     name_bn = models.CharField(max_length=255, db_comment='Translatable name field. May use any language')
     name_en = models.CharField(max_length=255, db_comment='English name field')
     gender = models.CharField(max_length=30, null=True, blank=True)
@@ -149,6 +143,7 @@ class WorkforceOrganizationEmployee(HistoryModel):
     nid = models.CharField(max_length=30, null=True, blank=True)
     birth_certificate_no = models.CharField(max_length=30, null=True, blank=True)
     passport_no = models.CharField(max_length=30, null=True, blank=True)
+    first_joining_date = models.DateField(null=True, blank=True)
     status = models.BooleanField(default=True)
     related_user = models.ForeignKey(
         InteractiveUser,
@@ -160,6 +155,35 @@ class WorkforceOrganizationEmployee(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_organization_employee'
+
+
+class WorkforceOrganizationEmployeeDesignation(HistoryModel):
+    designation = models.ForeignKey(
+        WorkforceOrganizationUnitDesignation,
+        models.DO_NOTHING,
+        blank=False,
+        null=False
+    )
+    employee = models.ForeignKey(
+        "WorkforceOrganizationEmployee",
+        models.DO_NOTHING,
+        blank=False,
+        null=False
+    )
+    incharge_label = models.CharField(max_length=255, null=True, blank=True)
+    status = models.BooleanField(default=True)
+    joining_date = models.DateField(null=True, blank=True)
+    release_date = models.DateField(null=True, blank=True)
+    released_by = models.ForeignKey(
+        InteractiveUser,
+        models.DO_NOTHING,
+        blank=False,
+        null=False
+    )
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_organization_employee_designations'
 
 
 class WorkforceEmployer(HistoryModel):
