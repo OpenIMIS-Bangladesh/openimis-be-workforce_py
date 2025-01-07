@@ -13,8 +13,6 @@ class WorkforceOrganizationEmployeeServices(BaseService):
     OBJECT_TYPE = WorkforceOrganizationEmployee
 
     def create(self, obj_data):
-        designation = WorkforceOrganizationUnitDesignation.objects.get(pk=obj_data['designation'])
-        obj_data['designation'] = designation
         location = Location.objects.get(pk=obj_data['location'])
         obj_data['location'] = location
         user = InteractiveUser.objects.get(uuid=obj_data['related_user'])
@@ -23,8 +21,6 @@ class WorkforceOrganizationEmployeeServices(BaseService):
         return super().create(obj_data)
 
     def update(self, obj_data):
-        designation = WorkforceOrganizationUnitDesignation.objects.get(pk=obj_data['designation'])
-        obj_data['designation'] = designation
         location = Location.objects.get(pk=obj_data['location'])
         obj_data['location'] = location
         user = InteractiveUser.objects.get(uuid=obj_data['related_user'])

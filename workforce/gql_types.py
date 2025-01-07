@@ -77,13 +77,13 @@ class WorkforceOrganizationEmployeeInputType(OpenIMISMutation.Input):
 
 
 class WorkforceOrganizationEmployeeDesignationInputType(OpenIMISMutation.Input):
-    designation = graphene.String(required=True)
-    employee = graphene.String(required=True)
+    designation = graphene.UUID(required=True)
+    employee = graphene.UUID(required=True)
     incharge_label = graphene.String(required=False)
     status = graphene.String(required=False)
     joining_date = graphene.String(required=False)
     release_date = graphene.String(required=False)
-    released_by = graphene.String(required=False)
+    released_by = graphene.UUID(required=False)
 
 
 class WorkforceEmployerInputType(OpenIMISMutation.Input):
