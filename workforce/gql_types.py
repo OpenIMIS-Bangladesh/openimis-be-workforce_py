@@ -67,7 +67,7 @@ class WorkforceOrganizationEmployeeInputType(OpenIMISMutation.Input):
     address = graphene.String()
     phone_number = graphene.String()
     email = graphene.String()
-    birth_date = graphene.String(required=True)
+    birth_date = graphene.String()
     nid = graphene.String()
     birth_certificate_no = graphene.String()
     passport_no = graphene.String()
