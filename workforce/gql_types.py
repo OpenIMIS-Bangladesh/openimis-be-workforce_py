@@ -8,7 +8,7 @@ class WorkforceRepresentativeInputType(OpenIMISMutation.Input):
     type = graphene.String(requred=True)
     name_bn = graphene.String(required=True)
     name_en = graphene.String(required=True)
-    location = graphene.String(required=True)
+    location_id = graphene.String(required=True)
     address = graphene.String(required=True)
     phone_number = graphene.String()
     email = graphene.String()

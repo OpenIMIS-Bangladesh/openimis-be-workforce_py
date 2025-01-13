@@ -25,9 +25,6 @@ class WorkforceRepresentativeServices(BaseService):
         return query
 
     def create(self, obj_data):
-        location = Location.objects.get(pk=obj_data['location'])
-        obj_data['location'] = location
-
         if obj_data.get('user_id') and obj_data.get('user_id') != '':
             user = InteractiveUser.objects.get(pk=obj_data['user_id'])
         else:
@@ -38,9 +35,6 @@ class WorkforceRepresentativeServices(BaseService):
         super().create(obj_data)
 
     def update(self, obj_data):
-        location = Location.objects.get(pk=obj_data['location'])
-        obj_data['location'] = location
-
         if obj_data.get('user_id'):
             update_interactive_user(obj_data['user_id'], obj_data['name_en'], obj_data['name_bn'])
             obj_data.pop('user_id')
