@@ -10,13 +10,7 @@ class WorkforceOrganizationUnitServices(BaseService):
     OBJECT_TYPE = WorkforceOrganizationUnit
 
     def create(self, obj_data):
-        organization = WorkforceOrganization.objects.get(pk=obj_data['organization'])
-        obj_data['organization'] = organization
-
         return super().create(obj_data)
 
     def update(self, obj_data):
-        organization = WorkforceOrganization.objects.get(pk=obj_data['organization'])
-        obj_data['organization'] = organization
-
         return super().update(obj_data)

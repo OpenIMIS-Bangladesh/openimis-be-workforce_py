@@ -36,14 +36,14 @@ class WorkforceOrganizationInputType(OpenIMISMutation.Input):
 
 class WorkforceOrganizationUnitInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
-    organization = graphene.UUID(required=True)
+    organization_id = graphene.UUID(required=True)
     unit_level = graphene.String()
     name_bn = graphene.String()
     name_en = graphene.String(required=True)
     phone_number = graphene.String()
     email = graphene.String()
     status = graphene.Boolean()
-    parent = graphene.UUID()
+    parent_id = graphene.UUID()
 
 
 class WorkforceOrganizationUnitDesignationInputType(OpenIMISMutation.Input):
