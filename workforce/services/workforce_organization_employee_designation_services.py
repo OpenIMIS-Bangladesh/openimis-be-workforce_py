@@ -15,8 +15,14 @@ class WorkforceOrganizationEmployeeDesignationServices(BaseService):
         obj_data['designation'] = designation
         employee = WorkforceOrganizationEmployee.objects.get(pk=obj_data['employee'])
         obj_data['employee'] = employee
-        released_by = InteractiveUser.objects.get(pk=obj_data['released_by'])
+        released_by = InteractiveUser.objects.get(uuid=obj_data['released_by'])
         obj_data['released_by'] = released_by
+        status = obj_data['status'].lower()
+
+        if status == 'true':
+            obj_data['status'] = True
+        else:
+            obj_data['status'] = False
 
         return super().create(obj_data)
 
@@ -25,7 +31,7 @@ class WorkforceOrganizationEmployeeDesignationServices(BaseService):
         obj_data['designation'] = designation
         employee = WorkforceOrganizationEmployee.objects.get(pk=obj_data['employee'])
         obj_data['employee'] = employee
-        released_by = InteractiveUser.objects.get(pk=obj_data['released_by'])
+        released_by = InteractiveUser.objects.get(uuid=obj_data['released_by'])
         obj_data['released_by'] = released_by
 
         return super().update(obj_data)
