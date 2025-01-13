@@ -63,7 +63,7 @@ class WorkforceOrganizationEmployeeInputType(OpenIMISMutation.Input):
     name_bn = graphene.String(required=True)
     name_en = graphene.String(required=True)
     gender = graphene.String()
-    location = graphene.String(required=True)
+    location_id = graphene.String(required=True)
     address = graphene.String()
     phone_number = graphene.String()
     email = graphene.String()
@@ -73,17 +73,17 @@ class WorkforceOrganizationEmployeeInputType(OpenIMISMutation.Input):
     passport_no = graphene.String()
     first_joining_date = graphene.String()
     status = graphene.Boolean()
-    related_user = graphene.UUID(required=True)
+    related_user_id = graphene.UUID(required=False)
 
 
 class WorkforceOrganizationEmployeeDesignationInputType(OpenIMISMutation.Input):
-    designation = graphene.UUID(required=True)
-    employee = graphene.UUID(required=True)
+    designation_id = graphene.UUID(required=True)
+    employee_id = graphene.UUID(required=True)
     incharge_label = graphene.String(required=False)
-    status = graphene.String(required=False)
+    status = graphene.Boolean(required=False)
     joining_date = graphene.String(required=False)
     release_date = graphene.String(required=False)
-    released_by = graphene.UUID(required=False)
+    released_by_id = graphene.UUID(required=False)
 
 
 class WorkforceEmployerInputType(OpenIMISMutation.Input):

@@ -88,21 +88,30 @@ class Query(graphene.ObjectType):
 class Mutation(graphene.ObjectType):
     create_workforce_representative = CreateWorkforceRepresentativeMutation.Field()
     update_workforce_representative = UpdateWorkforceRepresentativeMutation.Field()
+
     create_workforce_organization = CreateWorkforceOrganizationMutation.Field()
     update_workforce_organization = UpdateWorkforceOrganizationMutation.Field()
+
     create_workforce_organization_unit = CreateWorkforceOrganizationUnitMutation.Field()
     update_workforce_organization_unit = UpdateWorkforceOrganizationUnitMutation.Field()
+
     create_workforce_organization_unit_designation = CreateWorkforceOrganizationUnitDesignationMutation.Field()
     update_workforce_organization_unit_designation = UpdateWorkforceOrganizationUnitDesignationMutation.Field()
+
     create_workforce_organization_employee = CreateWorkforceOrganizationEmployeeMutation.Field()
     update_workforce_organization_employee = UpdateWorkforceOrganizationEmployeeMutation.Field()
+
     create_workforce_organization_employee_designation = CreateWorkforceOrganizationEmployeeDesignationMutation.Field()
     update_workforce_organization_employee_designation = UpdateWorkforceOrganizationEmployeeDesignationMutation.Field()
+
     create_workforce_employer = CreateWorkforceEmployerMutation.Field()
     update_workforce_employer = UpdateWorkforceEmployerMutation.Field()
+
     create_workforce_office = CreateWorkforceOfficeMutation.Field()
     update_workforce_office = UpdateWorkforceOfficeMutation.Field()
+
     create_workforce_factory = CreateWorkforceFactoryMutation.Field()
     update_workforce_factory = UpdateWorkforceFactoryMutation.Field()
+
     create_workforce_employee = CreateWorkforceEmployeeMutation.Field()
     update_workforce_employee = UpdateWorkforceEmployeeMutation.Field()
