@@ -48,8 +48,8 @@ class WorkforceOrganizationUnitInputType(OpenIMISMutation.Input):
 
 class WorkforceOrganizationUnitDesignationInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
-    organization = graphene.UUID(required=True)
-    unit = graphene.UUID(required=True)
+    organization_id = graphene.UUID(required=True)
+    unit_id = graphene.UUID(required=True)
     name_bn = graphene.String()
     name_en = graphene.String(required=True)
     status = graphene.String()

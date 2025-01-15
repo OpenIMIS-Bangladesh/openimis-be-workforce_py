@@ -28,15 +28,21 @@ class Query(graphene.ObjectType):
         WorkforceOrganizationEmployeeGQLType,
         orderBy=graphene.List(of_type=graphene.String),
     )
+
+    workforce_organization_employee_designations = OrderedDjangoFilterConnectionField(
+        WorkforceOrganizationEmployeeDesignationGQLType,
+        orderBy=graphene.List(of_type=graphene.String),
+    )
+
     workforce_employers = OrderedDjangoFilterConnectionField(
         WorkforceEmployerGQLType,
         orderBy=graphene.List(of_type=graphene.String),
     )
-    workforce_offices = OrderedDjangoFilterConnectionField(
+    workforce_employer_offices = OrderedDjangoFilterConnectionField(
         WorkforceOfficeGQLType,
         orderBy=graphene.List(of_type=graphene.String),
     )
-    workforce_factories = OrderedDjangoFilterConnectionField(
+    workforce_employer_factories = OrderedDjangoFilterConnectionField(
         WorkforceFactoryGQLType,
         orderBy=graphene.List(of_type=graphene.String),
     )
@@ -69,17 +75,22 @@ class Query(graphene.ObjectType):
             raise PermissionDenied(_("Unauthorized access"))
         pass
 
+    def resolve_workforce_organization_employee_designations(self, info, **kwargs):
+        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+            raise PermissionDenied(_("Unauthorized access"))
+        pass
+
     def resolve_workforce_employers(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("Unauthorized access"))
         pass
 
-    def resolve_workforce_offices(self, info, **kwargs):
+    def resolve_workforce_employer_offices(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("Unauthorized access"))
         pass
 
-    def resolve_workforce_factories(self, info, **kwargs):
+    def resolve_workforce_employer_factories(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("Unauthorized access"))
         pass
@@ -107,11 +118,11 @@ class Mutation(graphene.ObjectType):
     create_workforce_employer = CreateWorkforceEmployerMutation.Field()
     update_workforce_employer = UpdateWorkforceEmployerMutation.Field()
 
-    create_workforce_office = CreateWorkforceOfficeMutation.Field()
+    create_workforce_employer_office = CreateWorkforceOfficeMutation.Field()
     update_workforce_office = UpdateWorkforceOfficeMutation.Field()
 
-    create_workforce_factory = CreateWorkforceFactoryMutation.Field()
+    create_workforce_employer_factory = CreateWorkforceFactoryMutation.Field()
     update_workforce_factory = UpdateWorkforceFactoryMutation.Field()
 
-    create_workforce_employee = CreateWorkforceEmployeeMutation.Field()
+    create_workforce_employer_employee = CreateWorkforceEmployeeMutation.Field()
     update_workforce_employee = UpdateWorkforceEmployeeMutation.Field()
