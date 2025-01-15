@@ -28,9 +28,8 @@ class WorkforceOrganizationEmployeeServices(BaseService):
 
         created_obj = super().create(obj_data)
 
-        if created_obj is not None:
-            if created_obj.get("success") is False:
-                delete_interactive_user(user)
+        if created_obj is not None and created_obj.get("success") is False and not obj_data.get('related_user_id'):
+            delete_interactive_user(user)
 
         return created_obj
 
