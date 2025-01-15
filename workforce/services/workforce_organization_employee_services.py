@@ -5,7 +5,7 @@ from core.services import BaseService
 from location.models import Location
 from core.models import InteractiveUser
 from workforce.models import WorkforceOrganizationEmployee
-from workforce.services.user_services import create_interactive_user
+from workforce.services.user_services import create_interactive_user, delete_interactive_user
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class WorkforceOrganizationEmployeeServices(BaseService):
 
         if created_obj is not None:
             if created_obj.get("success") is False:
-                user.delete()
+                delete_interactive_user(user)
 
         return created_obj
 

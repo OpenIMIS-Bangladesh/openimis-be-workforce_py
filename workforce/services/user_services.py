@@ -27,5 +27,10 @@ def update_interactive_user(id, last_name, other_names):
     return user
 
 
+def delete_interactive_user(id):
+    InteractiveUser.objects.get(id=id).delete()
+    return True
+
+
 class UserServices:
     pass
