@@ -16,7 +16,7 @@ class WorkforceRepresentativeInputType(OpenIMISMutation.Input):
     passport_no = graphene.String()
     birth_date = graphene.String(required=True)
     position = graphene.String(required=True)
-    status = graphene.Boolean()
+    status = graphene.String()
     user_id = graphene.String()
 
 
@@ -29,7 +29,7 @@ class WorkforceOrganizationInputType(OpenIMISMutation.Input):
     phone_number = graphene.String()
     email = graphene.String()
     website = graphene.String()
-    status = graphene.Boolean()
+    status = graphene.String()
     parent_id = graphene.Int()
     workforce_representative_id = graphene.UUID(required=True)
 
@@ -42,7 +42,7 @@ class WorkforceOrganizationUnitInputType(OpenIMISMutation.Input):
     name_en = graphene.String(required=True)
     phone_number = graphene.String()
     email = graphene.String()
-    status = graphene.Boolean()
+    status = graphene.String()
     parent_id = graphene.UUID()
 
 
@@ -52,7 +52,7 @@ class WorkforceOrganizationUnitDesignationInputType(OpenIMISMutation.Input):
     unit = graphene.UUID(required=True)
     name_bn = graphene.String()
     name_en = graphene.String(required=True)
-    status = graphene.Boolean()
+    status = graphene.String()
     parent = graphene.UUID()
     designation_level = graphene.Int(required=True)
     designation_sequence = graphene.Int(required=True)
@@ -72,7 +72,7 @@ class WorkforceOrganizationEmployeeInputType(OpenIMISMutation.Input):
     birth_certificate_no = graphene.String()
     passport_no = graphene.String()
     first_joining_date = graphene.String()
-    status = graphene.Boolean()
+    status = graphene.String()
     related_user_id = graphene.UUID(required=False)
 
 
@@ -81,7 +81,7 @@ class WorkforceOrganizationEmployeeDesignationInputType(OpenIMISMutation.Input):
     designation_id = graphene.UUID(required=True)
     employee_id = graphene.UUID(required=True)
     incharge_label = graphene.String(required=False)
-    status = graphene.Boolean(required=False)
+    status = graphene.String(required=False)
     joining_date = graphene.String(required=False)
     release_date = graphene.String(required=False)
 
@@ -105,7 +105,7 @@ class WorkforceEmployerInputType(OpenIMISMutation.Input):
     association_membership_number = graphene.String()
     establishment_Name = graphene.String()
     establishment_date = graphene.String()
-    status = graphene.Boolean()
+    status = graphene.String()
     workforce_representative_id = graphene.UUID(required=True)
 
 
@@ -120,7 +120,7 @@ class WorkforceOfficeInputType(OpenIMISMutation.Input):
     email = graphene.String()
     website = graphene.String()
     parent_id = graphene.UUID()
-    status = graphene.Boolean()
+    status = graphene.String()
     workforce_representative_id = graphene.UUID(required=True)
 
 
@@ -136,7 +136,7 @@ class WorkforceFactoryInputType(OpenIMISMutation.Input):
     phone_number = graphene.String()
     email = graphene.String()
     website = graphene.String()
-    status = graphene.Boolean()
+    status = graphene.String()
     workforce_representative_id = graphene.UUID(required=True)
 
 
@@ -165,5 +165,5 @@ class WorkforceEmployeeInputType(OpenIMISMutation.Input):
     nid = graphene.String()
     birth_certificate_no = graphene.String()
     passport_no = graphene.String()
-    status = graphene.Boolean()
+    status = graphene.String()
     related_user_id = graphene.UUID(required=True)

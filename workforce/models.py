@@ -20,7 +20,7 @@ class WorkforceRepresentative(HistoryModel):
     passport_no = models.CharField(max_length=30, null=True, blank=True)
     birth_date = models.DateField(null=True, blank=True)
     position = models.CharField(max_length=255, null=True, blank=True)
-    status = models.BooleanField(default=True)
+    status = models.CharField(max_length=30, null=True, blank=True)
     related_user = models.ForeignKey(
         InteractiveUser,
         models.DO_NOTHING,
@@ -47,7 +47,7 @@ class WorkforceOrganization(HistoryModel):
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     email = models.CharField(max_length=255, null=True, blank=True)
     website = models.CharField(max_length=200, null=True, blank=True)
-    status = models.BooleanField(default=1)
+    status = models.CharField(max_length=30, null=True, blank=True)
     parent = models.ForeignKey(
         "WorkforceOrganization",
         models.DO_NOTHING,
@@ -79,7 +79,7 @@ class WorkforceOrganizationUnit(HistoryModel):
     name_en = models.CharField(max_length=255, db_comment='English name field')
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     email = models.CharField(max_length=255, null=True, blank=True)
-    status = models.BooleanField(default=1)
+    status = models.CharField(max_length=30, null=True, blank=True)
     parent = models.ForeignKey(
         "WorkforceOrganizationUnit",
         models.DO_NOTHING,
@@ -110,7 +110,7 @@ class WorkforceOrganizationUnitDesignation(HistoryModel):
     )
     name_bn = models.CharField(max_length=255, null=True, db_comment='Translatable name field. May use any language')
     name_en = models.CharField(max_length=255, db_comment='English name field')
-    status = models.BooleanField(default=1)
+    status = models.CharField(max_length=30, null=True, blank=True)
     parent = models.ForeignKey(
         "WorkforceOrganizationUnitDesignation",
         models.DO_NOTHING,
@@ -144,7 +144,7 @@ class WorkforceOrganizationEmployee(HistoryModel):
     birth_certificate_no = models.CharField(max_length=30, null=True, blank=True)
     passport_no = models.CharField(max_length=30, null=True, blank=True)
     first_joining_date = models.DateField(null=True, blank=True)
-    status = models.BooleanField(default=True)
+    status = models.CharField(max_length=30, null=True, blank=True)
     related_user = models.ForeignKey(
         InteractiveUser,
         models.DO_NOTHING,
@@ -171,7 +171,7 @@ class WorkforceOrganizationEmployeeDesignation(HistoryModel):
         null=False
     )
     incharge_label = models.CharField(max_length=255, null=True, blank=True)
-    status = models.BooleanField(default=True)
+    status = models.CharField(max_length=30, null=True, blank=True)
     joining_date = models.DateField(null=True, blank=True)
     release_date = models.DateField(null=True, blank=True)
 
@@ -204,7 +204,7 @@ class WorkforceEmployer(HistoryModel):
     association_membership_number = models.CharField(null=True, blank=True)
     establishment_Name = models.CharField(null=True, blank=True)
     establishment_date = models.DateField(null=True, blank=True)
-    status = models.BooleanField(default=True)
+    status = models.CharField(max_length=30, null=True, blank=True)
     workforce_representative = models.ForeignKey(
         WorkforceRepresentative,
         models.DO_NOTHING,
@@ -243,7 +243,7 @@ class WorkforceOffice(HistoryModel):
         null=True,
         related_name="children",
     )
-    status = models.BooleanField(default=True)
+    status = models.CharField(max_length=30, null=True, blank=True)
     workforce_representative = models.ForeignKey(
         WorkforceRepresentative,
         models.DO_NOTHING,
@@ -277,7 +277,7 @@ class WorkforceFactory(HistoryModel):
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     email = models.CharField(max_length=255, null=True, blank=True)
     website = models.CharField(max_length=200, null=True, blank=True)
-    status = models.BooleanField(default=True)
+    status = models.CharField(max_length=30, null=True, blank=True)
     workforce_representative = models.ForeignKey(
         WorkforceRepresentative,
         models.DO_NOTHING,
@@ -331,7 +331,7 @@ class WorkforceEmployee(HistoryModel):
     nid = models.CharField(max_length=30, null=True, blank=True)
     birth_certificate_no = models.CharField(max_length=30, null=True, blank=True)
     passport_no = models.CharField(max_length=30, null=True, blank=True)
-    status = models.BooleanField(default=True)
+    status = models.CharField(max_length=30, null=True, blank=True)
     related_user = models.ForeignKey(
         InteractiveUser,
         models.DO_NOTHING,
