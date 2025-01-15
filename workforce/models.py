@@ -174,12 +174,7 @@ class WorkforceOrganizationEmployeeDesignation(HistoryModel):
     status = models.BooleanField(default=True)
     joining_date = models.DateField(null=True, blank=True)
     release_date = models.DateField(null=True, blank=True)
-    released_by = models.ForeignKey(
-        InteractiveUser,
-        models.DO_NOTHING,
-        blank=False,
-        null=False
-    )
+
 
     class Meta:
         managed = True

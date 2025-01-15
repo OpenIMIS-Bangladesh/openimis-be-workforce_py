@@ -120,7 +120,6 @@ class WorkforceOrganizationEmployeeDesignationGQLType(DjangoObjectType):
             "status": ["exact"],
             "joining_date": ["exact"],
             "release_date": ["exact"],
-            "released_by": ["exact"],
             **prefix_filterset("designation__", WorkforceOrganizationUnitDesignationGQLType._meta.filter_fields),
             **prefix_filterset("employee__", WorkforceOrganizationEmployeeGQLType._meta.filter_fields),
         }
