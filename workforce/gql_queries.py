@@ -86,7 +86,24 @@ class WorkforceOrganizationUnitDesignationGQLType(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class WorkforceOrganizationEmployeeDesignationForEmployeeGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceOrganizationEmployeeDesignation
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "incharge_label": ["exact"],
+            "status": ["exact"],
+            "joining_date": ["exact"],
+            "release_date": ["exact"],
+            **prefix_filterset("designation__", WorkforceOrganizationUnitDesignationGQLType._meta.filter_fields),
+        }
+        connection_class = ExtendedConnection
+
+
 class WorkforceOrganizationEmployeeGQLType(DjangoObjectType):
+    designations = graphene.List(WorkforceOrganizationEmployeeDesignationForEmployeeGQLType)
+
     class Meta:
         model = WorkforceOrganizationEmployee
         interfaces = (graphene.relay.Node,)
@@ -108,6 +125,8 @@ class WorkforceOrganizationEmployeeGQLType(DjangoObjectType):
             **prefix_filterset("location__", LocationGQLType._meta.filter_fields),
         }
         connection_class = ExtendedConnection
+    def resolve_designations(self, info, **kwargs):
+        return self.designations.all()
 
 
 class WorkforceOrganizationEmployeeDesignationGQLType(DjangoObjectType):
