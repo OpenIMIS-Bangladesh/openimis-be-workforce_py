@@ -27,7 +27,7 @@ class WorkforceOrganizationInputType(OpenIMISMutation.Input):
     location_id = graphene.String(required=True)
     address = graphene.String()
     phone_number = graphene.String()
-    email = graphene.String()
+    email = graphene.String(required=True)
     website = graphene.String()
     status = graphene.String()
     parent_id = graphene.Int()
