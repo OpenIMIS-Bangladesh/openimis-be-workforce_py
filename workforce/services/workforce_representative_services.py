@@ -5,7 +5,7 @@ from core.services import BaseService
 from location.models import Location
 from django.db.models import Q
 from workforce.models import WorkforceRepresentative
-from workforce.services.user_services import create_interactive_user, update_interactive_user
+from workforce.services.user_services import create_interactive_user, update_interactive_user, delete_interactive_user
 
 logger = logging.getLogger(__name__)
 
@@ -26,13 +26,21 @@ class WorkforceRepresentativeServices(BaseService):
 
     def create(self, obj_data):
         if obj_data.get('user_id') and obj_data.get('user_id') != '':
-            user = InteractiveUser.objects.get(pk=obj_data['user_id'])
+            user = obj_data['user_id']
         else:
-            user = create_interactive_user(obj_data.get('name_en'), obj_data.get('name_bn'), obj_data.get('email'), 800)
+            create_user = create_interactive_user(obj_data.get('name_en'), obj_data.get('name_bn'),
+                                                  obj_data.get('email'), 800)
+            user = create_user.id
 
         obj_data['related_user'] = user
 
-        super().create(obj_data)
+        created_obj = super().create(obj_data)
+
+        if created_obj is not None:
+            if created_obj.get("success") is False:
+                delete_interactive_user(user)
+
+        return created_obj
 
     def update(self, obj_data):
         if obj_data.get('user_id'):
