@@ -123,6 +123,7 @@ class WorkforceOrganizationEmployeeGQLType(DjangoObjectType):
             "status": ["exact", "isnull"],
             "related_user": ["exact"],
             **prefix_filterset("location__", LocationGQLType._meta.filter_fields),
+            **prefix_filterset("designations__", WorkforceOrganizationEmployeeDesignationForEmployeeGQLType._meta.filter_fields),
         }
         connection_class = ExtendedConnection
     def resolve_designations(self, info, **kwargs):
