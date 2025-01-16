@@ -216,3 +216,39 @@ class WorkforceFactoryGQLType(DjangoObjectType):
             "workforce_representative": ["exact"],
         }
         connection_class = ExtendedConnection
+
+
+class WorkforceEmployeeGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceEmployee
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "employer_id": ["exact", "icontains"],
+            "global_id": ["exact", "icontains"],
+            "present_location": ["exact"],
+            "permanent_location": ["exact"],
+            "name_bn": ["exact", "icontains"],
+            "name_en": ["exact", "icontains"],
+            "fathers_name": ["exact", "icontains"],
+            "mothers_name": ["exact", "icontains"],
+            "gender": ["exact", "icontains"],
+            "marital_status": ["exact", "icontains"],
+            "photo_path": ["exact", "icontains"],
+            "photo_date": ["exact", "icontains"],
+            "position": ["exact", "icontains"],
+            "monthly_earning": ["exact", "icontains"],
+            "reference_salary": ["exact", "icontains"],
+            "present_address": ["exact", "icontains"],
+            "permanent_address": ["exact", "icontains"],
+            "phone_number": ["exact", "icontains"],
+            "email": ["exact", "icontains"],
+            "birth_date": ["exact", "icontains"],
+            "nid": ["exact", "icontains"],
+            "birth_certificate_no": ["exact", "icontains"],
+            "passport_no": ["exact", "icontains"],
+            "status": ["exact", "icontains"],
+            "related_user": ["exact", "icontains"],
+            **prefix_filterset("location__", LocationGQLType._meta.filter_fields),
+        }
+        connection_class = ExtendedConnection
