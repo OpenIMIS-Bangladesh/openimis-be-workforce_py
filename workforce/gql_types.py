@@ -142,7 +142,7 @@ class WorkforceFactoryInputType(OpenIMISMutation.Input):
 
 class WorkforceEmployeeInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
-    employer_id = graphene.UUID(required=True)
+    employer_id_id = graphene.UUID(required=True)
     global_id = graphene.String()
     present_location_id = graphene.String(required=True)
     permanent_location_id = graphene.String(required=True)
@@ -162,8 +162,8 @@ class WorkforceEmployeeInputType(OpenIMISMutation.Input):
     phone_number = graphene.String()
     email = graphene.String()
     birth_date = graphene.String()
-    nid = graphene.String()
+    nid = graphene.String(required=True)
     birth_certificate_no = graphene.String()
     passport_no = graphene.String()
     status = graphene.String()
-    related_user_id = graphene.UUID(required=True)
+    related_user_id = graphene.UUID(required=False)
