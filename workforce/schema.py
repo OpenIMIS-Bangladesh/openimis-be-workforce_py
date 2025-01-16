@@ -122,7 +122,7 @@ class Mutation(graphene.ObjectType):
     update_workforce_employer_office = UpdateWorkforceOfficeMutation.Field()
 
     create_workforce_employer_factory = CreateWorkforceFactoryMutation.Field()
-    update_workforce_factory = UpdateWorkforceFactoryMutation.Field()
+    update_workforce_employer_factory = UpdateWorkforceFactoryMutation.Field()
 
     create_workforce_employer_employee = CreateWorkforceEmployeeMutation.Field()
     update_workforce_employee = UpdateWorkforceEmployeeMutation.Field()
