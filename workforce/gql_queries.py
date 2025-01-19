@@ -252,7 +252,7 @@ class WorkforceEmployeeGQLType(DjangoObjectType):
             "birth_certificate_no": ["exact", "icontains"],
             "passport_no": ["exact", "icontains"],
             "status": ["exact", "icontains"],
-            "related_user": ["exact", "icontains"],
+            "related_user": ["exact"],
             **prefix_filterset("location__", LocationGQLType._meta.filter_fields),
         }
         connection_class = ExtendedConnection
