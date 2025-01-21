@@ -49,7 +49,25 @@ class WorkforceOrganizationGQLType(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class WorkforceOrganizationUnitDesignationForUnitGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceOrganizationUnitDesignation
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "name_bn": ["exact", "icontains"],
+            "name_en": ["exact", "icontains"],
+            "status": ["exact", "isnull"],
+            "parent": ["exact", "isnull"],
+            "designation_level": ["exact"],
+            "designation_sequence": ["exact"],
+        }
+        connection_class = ExtendedConnection
+
+
 class WorkforceOrganizationUnitGQLType(DjangoObjectType):
+    unit_designations = graphene.List(WorkforceOrganizationUnitDesignationForUnitGQLType)
+
     class Meta:
         model = WorkforceOrganizationUnit
         interfaces = (graphene.relay.Node,)
@@ -63,9 +81,13 @@ class WorkforceOrganizationUnitGQLType(DjangoObjectType):
             "unit_level": ["exact"],
             "parent": ["exact"],
             **prefix_filterset("organization__", WorkforceOrganizationGQLType._meta.filter_fields),
+            **prefix_filterset("unit_designations__", WorkforceOrganizationUnitDesignationForUnitGQLType._meta.filter_fields),
 
         }
         connection_class = ExtendedConnection
+
+    def resolve_unit_designations(self, info, **kwargs):
+        return self.unit_designations.all()
 
 
 class WorkforceOrganizationUnitDesignationGQLType(DjangoObjectType):
@@ -123,9 +145,11 @@ class WorkforceOrganizationEmployeeGQLType(DjangoObjectType):
             "status": ["exact", "isnull"],
             "related_user": ["exact"],
             **prefix_filterset("location__", LocationGQLType._meta.filter_fields),
-            **prefix_filterset("designations__", WorkforceOrganizationEmployeeDesignationForEmployeeGQLType._meta.filter_fields),
+            **prefix_filterset("designations__",
+                               WorkforceOrganizationEmployeeDesignationForEmployeeGQLType._meta.filter_fields),
         }
         connection_class = ExtendedConnection
+
     def resolve_designations(self, info, **kwargs):
         return self.designations.all()
 

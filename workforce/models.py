@@ -106,7 +106,7 @@ class WorkforceOrganizationUnitDesignation(HistoryModel):
         models.DO_NOTHING,
         blank=False,
         null=False,
-        related_name='organization_unit'
+        related_name='unit_designations'
     )
     name_bn = models.CharField(max_length=255, null=True, db_comment='Translatable name field. May use any language')
     name_en = models.CharField(max_length=255, db_comment='English name field')
