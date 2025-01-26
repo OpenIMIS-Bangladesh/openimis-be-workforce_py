@@ -171,6 +171,9 @@ class WorkforceOrganizationEmployeeDesignationGQLType(DjangoObjectType):
 
 
 class WorkforceEmployerGQLType(DjangoObjectType):
+    office_count = graphene.Int()
+    factory_count = graphene.Int()
+
     class Meta:
         model = WorkforceEmployer
         interfaces = (graphene.relay.Node,)
@@ -197,6 +200,14 @@ class WorkforceEmployerGQLType(DjangoObjectType):
             "workforce_representative": ["exact"],
         }
         connection_class = ExtendedConnection
+
+    def resolve_office_count(self, info):
+        # Return the count of WorkforceOffice related to this employer
+        return WorkforceOffice.objects.filter(workforce_employer=self.id).count()
+
+    def resolve_factory_count(self, info):
+        # Return the count of WorkforceFactory related to this employer
+        return WorkforceFactory.objects.filter(workforce_employer=self.id).count()
 
 
 class WorkforceOfficeGQLType(DjangoObjectType):
