@@ -25,25 +25,25 @@ class WorkforceRepresentativeServices(BaseService):
         return query
 
     def create(self, obj_data):
-        if obj_data.get('user_id') and obj_data.get('user_id') != '':
-            user = obj_data['user_id']
+        if obj_data.get('related_user_id') and obj_data.get('related_user_id') != '':
+            user = obj_data['related_user_id']
         else:
             create_user = create_interactive_user(obj_data.get('name_en'), obj_data.get('name_bn'),
                                                   obj_data.get('email'), 800)
             user = create_user.id
 
-        obj_data['related_user'] = user
+        obj_data['related_user_id'] = user
 
         created_obj = super().create(obj_data)
 
-        if created_obj is not None and created_obj.get("success") is False and not obj_data.get('user_id'):
+        if created_obj is not None and created_obj.get("success") is False and not obj_data.get('related_user_id'):
             delete_interactive_user(user)
 
         return created_obj
 
     def update(self, obj_data):
-        if obj_data.get('user_id'):
-            update_interactive_user(obj_data['user_id'], obj_data['name_en'], obj_data['name_bn'])
-            obj_data.pop('user_id')
+        if obj_data.get('related_user_id'):
+            update_interactive_user(obj_data['related_user_id'], obj_data['name_en'], obj_data['name_bn'])
+            obj_data.pop('related_user_id')
 
         super().update(obj_data)

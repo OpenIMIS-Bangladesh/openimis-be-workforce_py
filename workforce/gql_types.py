@@ -17,7 +17,7 @@ class WorkforceRepresentativeInputType(OpenIMISMutation.Input):
     birth_date = graphene.String(required=True)
     position = graphene.String(required=True)
     status = graphene.String()
-    user_id = graphene.String()
+    related_user_id = graphene.String()
 
 
 class WorkforceOrganizationInputType(OpenIMISMutation.Input):
