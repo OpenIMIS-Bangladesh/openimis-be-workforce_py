@@ -245,6 +245,7 @@ class WorkforceOffice(HistoryModel):
         related_name="children",
     )
     status = models.CharField(max_length=30, null=True, blank=True)
+    is_same_company_representative = models.CharField(null=True, blank=True)
     workforce_representative = models.ForeignKey(
         WorkforceRepresentative,
         models.DO_NOTHING,
@@ -279,6 +280,7 @@ class WorkforceFactory(HistoryModel):
     email = models.CharField(max_length=255, null=True, blank=True)
     website = models.CharField(max_length=200, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
+    is_same_company_representative = models.CharField(null=True, blank=True)
     workforce_representative = models.ForeignKey(
         WorkforceRepresentative,
         models.DO_NOTHING,

@@ -126,6 +126,7 @@ class WorkforceOfficeInputType(OpenIMISMutation.Input):
     website = graphene.String()
     parent_id = graphene.UUID()
     status = graphene.String()
+    is_same_company_representative = graphene.String()
     workforce_representative_id = graphene.UUID(required=True)
 
 
@@ -142,6 +143,7 @@ class WorkforceFactoryInputType(OpenIMISMutation.Input):
     email = graphene.String()
     website = graphene.String()
     status = graphene.String()
+    is_same_company_representative = graphene.String()
     workforce_representative_id = graphene.UUID(required=True)
 
 

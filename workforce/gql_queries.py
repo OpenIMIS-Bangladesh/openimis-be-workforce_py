@@ -202,11 +202,9 @@ class WorkforceEmployerGQLType(DjangoObjectType):
         connection_class = ExtendedConnection
 
     def resolve_office_count(self, info):
-        # Return the count of WorkforceOffice related to this employer
         return WorkforceOffice.objects.filter(workforce_employer=self.id).count()
 
     def resolve_factory_count(self, info):
-        # Return the count of WorkforceFactory related to this employer
         return WorkforceFactory.objects.filter(workforce_employer=self.id).count()
 
 
@@ -227,6 +225,7 @@ class WorkforceOfficeGQLType(DjangoObjectType):
             "status": ["exact", "isnull"],
             **prefix_filterset("location__", LocationGQLType._meta.filter_fields),
             "workforce_representative": ["exact"],
+            "is_same_company_representative": ["exact"],
         }
         connection_class = ExtendedConnection
 
@@ -249,6 +248,7 @@ class WorkforceFactoryGQLType(DjangoObjectType):
             "website": ["exact", "icontains"],
             "status": ["exact", "isnull"],
             "workforce_representative": ["exact"],
+            "is_same_company_representative": ["exact"],
         }
         connection_class = ExtendedConnection
 
