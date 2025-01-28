@@ -109,7 +109,7 @@ class WorkforceEmployerInputType(OpenIMISMutation.Input):
     workforce_representative_id = graphene.UUID(required=True)
 
 
-class WorkforceEmployerStatusInput(graphene.InputObjectType):
+class WorkforceEmployerStatusInput(OpenIMISMutation.Input):
     id = graphene.String(required=True)
     status = graphene.String(required=True)
 
