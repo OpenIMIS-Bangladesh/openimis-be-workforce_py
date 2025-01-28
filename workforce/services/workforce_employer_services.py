@@ -17,3 +17,11 @@ class WorkforceEmployerServices(BaseService):
 
     def update(self, obj_data):
         return super().update(obj_data)
+
+    def update_status(self, obj_data):
+        if obj_data.get('id') and obj_data.get('status'):
+            employer_id = obj_data.get("id")
+            new_status = obj_data.get("status")
+            employer = self.OBJECT_TYPE.objects.get(id=employer_id)
+            employer.status = new_status
+            employer.save()

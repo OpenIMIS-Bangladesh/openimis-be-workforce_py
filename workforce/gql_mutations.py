@@ -1,3 +1,5 @@
+from txaio.tx import failure_message
+
 from core.gql.gql_mutations.base_mutation import BaseMutation, BaseHistoryModelCreateMutationMixin
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError, PermissionDenied
@@ -8,7 +10,8 @@ from .gql_types import (
     WorkforceOrganizationInputType, WorkforceRepresentativeInputType, WorkforceOrganizationUnitInputType,
     WorkforceOrganizationUnitDesignationInputType, WorkforceOrganizationEmployeeInputType,
     WorkforceEmployerInputType, WorkforceOfficeInputType, WorkforceFactoryInputType,
-    WorkforceEmployeeInputType, WorkforceOrganizationEmployeeDesignationInputType
+    WorkforceEmployeeInputType, WorkforceOrganizationEmployeeDesignationInputType,
+    WorkforceEmployerStatusInput
 )
 from .services.workforce_organization_services import WorkforceOrganizationServices
 from .services.workforce_representative_services import WorkforceRepresentativeServices
@@ -51,6 +54,8 @@ def auth_permission_validation(failure_message, required_permission, call_type, 
             return service_instance.create(processed_data)
         if call_type == 'update':
             return service_instance.update(processed_data)
+        if call_type == 'update_status':
+            return service_instance.update_status(processed_data)
         return None
     except Exception as exc:
         return [{
@@ -401,6 +406,31 @@ class UpdateWorkforceEmployerMutation(BaseHistoryModelCreateMutationMixin, BaseM
             failure_message=failure_message,
             required_permission=required_permission,
             call_type='update',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class UpdateWorkforceEmployerStatusMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWorkforceEmployerStatusMutation"
+
+    class Input(WorkforceEmployerStatusInput):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_update_workforce_employer_status"
+        required_permission = WorkforceConfig.gql_mutation_create_workforces_perms
+        service_instance = WorkforceEmployerServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission=required_permission,
+            call_type='update_status',
             service_instance=service_instance,
             user=user,
             data=data
