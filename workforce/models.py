@@ -360,3 +360,33 @@ class WorkforceEmployee(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_employee'
+
+
+class WorkforceDocument(HistoryModel):
+    holder = models.CharField()
+    holder_type = models.CharField(max_length=30, null=True, blank=True)
+    verifier = models.ForeignKey(
+        InteractiveUser,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="verifier"  # Unique related name
+    )
+    approver = models.ForeignKey(
+        InteractiveUser,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="approver"  # Unique related name
+    )
+    document_type = models.CharField(max_length=30, null=False, blank=False)
+    path = models.CharField(max_length=255, null=True, blank=True)
+    submission_date = models.DateField(null=True, blank=True)
+    verification_date = models.DateField(null=True, blank=True)
+    approval_date = models.DateField(null=True, blank=True)
+    remarks = models.CharField(max_length=512, null=True, blank=True)
+    status = models.CharField(max_length=30, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_documents'

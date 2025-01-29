@@ -4,7 +4,8 @@ from graphene_django import DjangoObjectType
 from .models import (
     WorkforceRepresentative, WorkforceOrganization, WorkforceOrganizationUnit,
     WorkforceOrganizationUnitDesignation, WorkforceOrganizationEmployee,
-    WorkforceEmployer, WorkforceOffice, WorkforceFactory, WorkforceEmployee, WorkforceOrganizationEmployeeDesignation
+    WorkforceEmployer, WorkforceOffice, WorkforceFactory, WorkforceEmployee, WorkforceOrganizationEmployeeDesignation,
+    WorkforceDocument,
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -290,5 +291,26 @@ class WorkforceEmployeeGQLType(DjangoObjectType):
             "related_user": ["exact"],
             **prefix_filterset("present_location__", LocationGQLType._meta.filter_fields),
             **prefix_filterset("permanent_location__", LocationGQLType._meta.filter_fields),
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceDocumentGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceDocument
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "holder": ["exact"],
+            "holder_type": ["exact", "icontains"],
+            "verifier": ["exact"],
+            "approver": ["exact"],
+            "document_type": ["exact", "icontains"],
+            "path": ["exact"],
+            "submission_date": ["exact"],
+            "verification_date": ["exact"],
+            "approval_date": ["exact"],
+            "remarks": ["exact", "icontains"],
+            "status": ["exact", "icontains"],
         }
         connection_class = ExtendedConnection

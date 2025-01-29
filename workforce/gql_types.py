@@ -179,3 +179,18 @@ class WorkforceEmployeeInputType(OpenIMISMutation.Input):
     passport_no = graphene.String()
     status = graphene.String()
     related_user_id = graphene.UUID(required=False)
+
+
+class WorkforceDocumentInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    holder = graphene.UUID()
+    holder_type = graphene.String(required=True)
+    verifier_id = graphene.UUID()
+    approver_id = graphene.UUID()
+    document_type = graphene.String()
+    path = graphene.String()
+    submission_date = graphene.String()
+    verification_date = graphene.String()
+    approval_date = graphene.String()
+    remarks = graphene.String()
+    status = graphene.String()
