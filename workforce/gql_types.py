@@ -183,10 +183,10 @@ class WorkforceEmployeeInputType(OpenIMISMutation.Input):
 
 class WorkforceDocumentInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
-    holder = graphene.UUID()
+    holder = graphene.String()
     holder_type = graphene.String(required=True)
-    verifier_id = graphene.UUID()
-    approver_id = graphene.UUID()
+    verifier_id = graphene.String()
+    approver_id = graphene.String()
     document_type = graphene.String()
     path = graphene.String()
     submission_date = graphene.String()
