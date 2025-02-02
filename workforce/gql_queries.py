@@ -68,7 +68,6 @@ class WorkforceOrganizationUnitDesignationForUnitGQLType(DjangoObjectType):
 
 class WorkforceOrganizationUnitGQLType(DjangoObjectType):
     unit_designations = graphene.List(WorkforceOrganizationUnitDesignationForUnitGQLType)
-
     class Meta:
         model = WorkforceOrganizationUnit
         interfaces = (graphene.relay.Node,)
@@ -92,6 +91,7 @@ class WorkforceOrganizationUnitGQLType(DjangoObjectType):
 
 
 class WorkforceOrganizationUnitDesignationGQLType(DjangoObjectType):
+    employees = graphene.String()
     class Meta:
         model = WorkforceOrganizationUnitDesignation
         interfaces = (graphene.relay.Node,)
@@ -107,6 +107,9 @@ class WorkforceOrganizationUnitDesignationGQLType(DjangoObjectType):
             **prefix_filterset("unit__", WorkforceOrganizationUnitGQLType._meta.filter_fields),
         }
         connection_class = ExtendedConnection
+
+        def resolve_employees(self, info, **kwargs):
+            return WorkforceOrganizationEmployeeDesignation.objects.filter(designation_id=self.id).all()
 
 
 class WorkforceOrganizationEmployeeDesignationForEmployeeGQLType(DjangoObjectType):
