@@ -8,8 +8,8 @@ from datetime import datetime as py_datetime
 def add_representative_role_instance(apps, schema_editor):
     representative_role_instance = Role(
         uuid=uuid.uuid4(),
-        name="WORKFORCE REPRESENTATIVE",
-        is_system=800,
+        name="Workforce Organization Representative",
+        is_system=0,
         is_blocked=False,
         audit_user_id=-1
     )

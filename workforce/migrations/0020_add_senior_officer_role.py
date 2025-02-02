@@ -9,7 +9,7 @@ def add_senior_officer_role_instance(apps, schema_editor):
     senior_officer_role_instance = Role(
         uuid=uuid.uuid4(),
         name="Senior Officer",
-        is_system=801,
+        is_system=0,
         is_blocked=False,
         audit_user_id=-1
     )
