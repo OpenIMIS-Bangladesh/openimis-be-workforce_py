@@ -162,7 +162,8 @@ class WorkforceOrganizationEmployeeDesignation(HistoryModel):
         WorkforceOrganizationUnitDesignation,
         models.DO_NOTHING,
         blank=False,
-        null=False
+        null=False,
+        related_name="employee_designations"
     )
     employee = models.ForeignKey(
         "WorkforceOrganizationEmployee",

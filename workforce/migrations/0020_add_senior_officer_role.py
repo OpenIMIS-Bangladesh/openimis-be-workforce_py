@@ -18,7 +18,7 @@ def add_senior_officer_role_instance(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('workforce', '0002_rename_workforce_employer_id_historicalworkforcefactory_workforce_employer_and_more'),
+        ('workforce', '0019_workforcedocument_historicalworkforcedocument'),
     ]
 
     operations = [
