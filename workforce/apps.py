@@ -3,6 +3,8 @@ from django.apps import AppConfig
 MODULE_NAME = "workforce"
 
 DEFAULT_CFG = {
+    "gql_query_workforces_perms": ["801000"],
+
     # WorkforceRepresentative (801xxx)
     "gql_query_workforce_representative_perms": ["801001"],
     "gql_mutation_create_workforce_representative_perms": ["801002"],
@@ -75,6 +77,8 @@ DEFAULT_CFG = {
 
 class WorkforceConfig(AppConfig):
     name = MODULE_NAME
+
+    gql_query_workforces_perms = []
 
     gql_query_workforce_representative_perms = []
     gql_mutation_create_workforce_representative_perms = []
