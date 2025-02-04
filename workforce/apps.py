@@ -3,6 +3,7 @@ from django.apps import AppConfig
 MODULE_NAME = "workforce"
 
 DEFAULT_CFG = {
+    "gql_query_workforces_menu_perms": ["801000"],
     "gql_query_workforces_perms": ["801001"],
     "gql_query_workforces_organization_perms": ["801002"],
     "gql_mutation_create_workforces_organization_perms": ["801003"],
@@ -12,6 +13,7 @@ DEFAULT_CFG = {
     "gql_mutation_create_workforces_employer_perms": ["801007"],
     "gql_mutation_update_workforces_employer_perms": ["801008"],
     "gql_mutation_delete_workforces_employer_perms": ["801009"],
+    "gql_mutation_approve_workforces_employer_perms": ["801010"],
     "default_validations_disabled": False,
 }
 
@@ -19,10 +21,17 @@ DEFAULT_CFG = {
 class WorkforceConfig(AppConfig):
     name = MODULE_NAME
 
+    gql_query_workforces_menu_perms = []
     gql_query_workforces_perms = []
     gql_mutation_create_workforces_perms = []
     gql_mutation_update_workforces_perms = []
     gql_mutation_delete_workforces_perms = []
+    gql_query_workforces_employer_perms = []
+    gql_mutation_create_workforces_employer_perms = []
+    gql_mutation_update_workforces_employer_perms = []
+    gql_mutation_delete_workforces_employer_perms = []
+    gql_mutation_approve_workforces_employer_perms = []
+
     default_validations_disabled = None
 
     def __load_config(self, cfg):
@@ -34,4 +43,3 @@ class WorkforceConfig(AppConfig):
         from core.models import ModuleConfiguration
         cfg = ModuleConfiguration.get_or_default(MODULE_NAME, DEFAULT_CFG)
         self.__load_config(cfg)
-
