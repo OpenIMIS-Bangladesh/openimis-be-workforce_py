@@ -177,7 +177,6 @@ class WorkforceOrganizationEmployeeDesignation(HistoryModel):
     joining_date = models.DateField(null=True, blank=True)
     release_date = models.DateField(null=True, blank=True)
 
-
     class Meta:
         managed = True
         db_table = 'workforce_organization_employee_designations'
