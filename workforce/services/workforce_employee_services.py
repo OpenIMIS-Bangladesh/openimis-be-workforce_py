@@ -16,8 +16,8 @@ class WorkforceEmployeeServices(BaseService):
         if obj_data.get('related_user_id') and obj_data.get('related_user_id') != '':
             user = obj_data['related_user_id']
         else:
-            create_user = create_interactive_user(obj_data.get('name_en'), obj_data.get('name_bn'),
-                                                  obj_data.get('nid'), 800)
+            create_user = create_interactive_user(obj_data.get('first_name_en'), obj_data.get('last_name_en'),
+                                                  obj_data.get('nid'), 0)
             user = create_user.id
 
         obj_data['related_user_id'] = user
