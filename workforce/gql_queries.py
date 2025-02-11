@@ -203,9 +203,55 @@ class WorkforceOrganizationEmployeeDesignationGQLType(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class WorkforceOfficeForEmployerGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceOffice
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "name_bn": ["exact", "icontains"],
+            "name_en": ["exact", "icontains"],
+            "address": ["exact", "icontains"],
+            "phone_number": ["exact", "icontains"],
+            "email": ["exact", "icontains"],
+            "website": ["exact", "icontains"],
+            "parent": ["exact"],
+            "status": ["exact", "isnull"],
+            **prefix_filterset("location__", LocationGQLType._meta.filter_fields),
+            "workforce_representative": ["exact"],
+            "is_same_company_representative": ["exact"],
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceFactoryForEmployerGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceFactory
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "employer_id": ["exact", "icontains"],
+            "employer_id_lima": ["exact", "icontains"],
+            "name_bn": ["exact", "icontains"],
+            "name_en": ["exact", "icontains"],
+            **prefix_filterset("location__", LocationGQLType._meta.filter_fields),
+            "address": ["exact", "icontains"],
+            "phone_number": ["exact", "icontains"],
+            "email": ["exact", "icontains"],
+            "website": ["exact", "icontains"],
+            "status": ["exact", "isnull"],
+            "workforce_representative": ["exact"],
+            "is_same_company_representative": ["exact"],
+        }
+        connection_class = ExtendedConnection
+
+
 class WorkforceEmployerGQLType(DjangoObjectType):
     office_count = graphene.Int()
     factory_count = graphene.Int()
+
+    offices = graphene.List(WorkforceOfficeForEmployerGQLType)
+    factories = graphene.List(WorkforceFactoryForEmployerGQLType)
 
     class Meta:
         model = WorkforceEmployer
@@ -233,6 +279,12 @@ class WorkforceEmployerGQLType(DjangoObjectType):
             "workforce_representative": ["exact"],
         }
         connection_class = ExtendedConnection
+
+    def resolve_offices(self, info):
+        return WorkforceOffice.objects.filter(workforce_employer=self.id).all()
+
+    def resolve_factories(self, info):
+        return WorkforceFactory.objects.filter(workforce_employer=self.id).all()
 
     def resolve_office_count(self, info):
         return WorkforceOffice.objects.filter(workforce_employer=self.id).count()
