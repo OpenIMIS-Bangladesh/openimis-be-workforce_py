@@ -9,7 +9,7 @@ from .gql_types import (
     WorkforceOrganizationUnitDesignationInputType, WorkforceOrganizationEmployeeInputType,
     WorkforceEmployerInputType, WorkforceOfficeInputType, WorkforceFactoryInputType,
     WorkforceEmployeeInputType, WorkforceOrganizationEmployeeDesignationInputType,
-    WorkforceEmployerStatusInput, WorkforceDocumentInputType
+    WorkforceEmployerStatusInput, WorkforceDocumentInputType, BankInputType
 )
 from .services.workforce_organization_services import WorkforceOrganizationServices
 from .services.workforce_representative_services import WorkforceRepresentativeServices
@@ -22,6 +22,7 @@ from .services.workforce_factory_services import WorkforceFactoryServices
 from .services.workforce_employee_services import WorkforceEmployeeServices
 from .services.workforce_organization_employee_designation_services import WorkforceOrganizationEmployeeDesignationServices
 from .services.workforce_document_services import WorkforceDocumentServices
+from .services.bank_services import BankServices
 
 mutation_module = "workforce"
 
@@ -597,7 +598,7 @@ class CreateWorkforceDocumentMutation(BaseHistoryModelCreateMutationMixin, BaseM
 
     @classmethod
     def _mutate(cls, user, **data):
-        failure_message = "workforce.mutation.failed_to_update_workforce_document"
+        failure_message = "workforce.mutation.failed_to_create_workforce_document"
         required_permission = WorkforceConfig.gql_query_workforces_perms
         service_instance = WorkforceDocumentServices(user)
 
@@ -625,6 +626,56 @@ class UpdateWorkforceDocumentMutation(BaseHistoryModelCreateMutationMixin, BaseM
         failure_message = "workforce.mutation.failed_to_update_workforce_document"
         required_permission = WorkforceConfig.gql_query_workforces_perms
         service_instance = WorkforceDocumentServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission=required_permission,
+            call_type='update',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class CreateBankMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateBankMutation"
+
+    class Input(BankInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_create_bank"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = BankServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission=required_permission,
+            call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class UpdateBankMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateBankMutation"
+
+    class Input(BankInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_update_bank"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = BankServices(user)
 
         result = auth_permission_validation(
             failure_message=failure_message,

@@ -5,7 +5,7 @@ from .models import (
     WorkforceRepresentative, WorkforceOrganization, WorkforceOrganizationUnit,
     WorkforceOrganizationUnitDesignation, WorkforceOrganizationEmployee,
     WorkforceEmployer, WorkforceOffice, WorkforceFactory, WorkforceEmployee, WorkforceOrganizationEmployeeDesignation,
-    WorkforceDocument,
+    WorkforceDocument, Bank
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -400,6 +400,24 @@ class WorkforceDocumentGQLType(DjangoObjectType):
             "verification_date": ["exact"],
             "approval_date": ["exact"],
             "remarks": ["exact", "icontains"],
+            "status": ["exact", "icontains"],
+        }
+        connection_class = ExtendedConnection
+
+
+class BankGQLType(DjangoObjectType):
+    class Meta:
+        model = Bank
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "name": ["exact", "icontains"],
+            "parent": ["exact"],
+            "headquarter_address": ["exact", "icontains"],
+            "location": ["exact"],
+            "branch_name": ["exact", "icontains"],
+            "routing_number": ["exact"],
+            "contact_number": ["exact"],
             "status": ["exact", "icontains"],
         }
         connection_class = ExtendedConnection

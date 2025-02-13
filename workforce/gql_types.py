@@ -201,3 +201,15 @@ class WorkforceDocumentInputType(OpenIMISMutation.Input):
     approval_date = graphene.String()
     remarks = graphene.String()
     status = graphene.String()
+
+
+class BankInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    name = graphene.String(required=True)
+    parent_id = graphene.UUID()
+    headquarter_address = graphene.String()
+    location_id = graphene.String(required=True)
+    branch_name = graphene.String()
+    routing_number = graphene.String()
+    contact_number = graphene.String()
+    status = graphene.String()

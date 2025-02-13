@@ -54,6 +54,10 @@ class Query(graphene.ObjectType):
         WorkforceEmployeeGQLType,
         orderBy=graphene.List(of_type=graphene.String),
     )
+    banks = OrderedDjangoFilterConnectionField(
+        WorkforceEmployeeGQLType,
+        orderBy=graphene.List(of_type=graphene.String),
+    )
 
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
@@ -110,6 +114,10 @@ class Query(graphene.ObjectType):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("Unauthorized access"))
         pass
+    def resolve_banks(self, info, **kwargs):
+        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+            raise PermissionDenied(_("Unauthorized access"))
+        pass
 
 
 class Mutation(graphene.ObjectType):
@@ -146,3 +154,6 @@ class Mutation(graphene.ObjectType):
 
     create_workforce_document = CreateWorkforceDocumentMutation.Field()
     update_workforce_document = UpdateWorkforceDocumentMutation.Field()
+
+    create_bank = CreateBankMutation.Field()
+    update_bank = UpdateBankMutation.Field()

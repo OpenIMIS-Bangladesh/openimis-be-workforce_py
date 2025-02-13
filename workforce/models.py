@@ -384,3 +384,29 @@ class WorkforceDocument(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_documents'
+
+
+class Bank(HistoryModel):
+    name = models.CharField(max_length=255)
+    parent = models.ForeignKey(
+        "Bank",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="children",
+    )
+    headquarter_address = models.CharField(max_length=255, null=True, blank=True)
+    location = models.ForeignKey(
+        Location,
+        models.DO_NOTHING,
+        blank=True,
+        null=True
+    )
+    branch_name = models.CharField(max_length=255, null=True, blank=True)
+    routing_number = models.CharField(max_length=50, null=True, blank=True)
+    contact_number = models.CharField(max_length=30, null=True, blank=True)
+    status = models.CharField(max_length=30, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_banks'
