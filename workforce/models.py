@@ -294,8 +294,9 @@ class WorkforceFactory(HistoryModel):
 
 
 class WorkforceEmployee(HistoryModel):
-    employee_id = models.CharField(max_length=255, null=True, blank=True)
+    employee_id = models.CharField(max_length=255, null=True, blank=True, unique=True)
     employee_id_lima = models.CharField(max_length=255, null=True, blank=True)
+    insurance_number = models.CharField(max_length=50, unique=True)
     employee_type = models.CharField(max_length=16, null=True, blank=True, db_comment="office/factory employee")
     global_id = models.CharField(max_length=50, null=True, blank=True)
     present_location = models.ForeignKey(
@@ -343,6 +344,8 @@ class WorkforceEmployee(HistoryModel):
     birth_certificate_no = models.CharField(max_length=30, null=True, blank=True)
     passport_no = models.CharField(max_length=30, null=True, blank=True)
     registration_date = models.DateField(null=True, blank=True)
+    life_status = models.CharField(max_length=30, null=True, blank=True)
+    death_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
     related_user = models.ForeignKey(
         InteractiveUser,
