@@ -35,6 +35,7 @@ class WorkforceRepresentative(HistoryModel):
 
 # Organizations responsible for managing
 class WorkforceOrganization(HistoryModel):
+    type = models.CharField(max_length=255, null=True, blank=True)
     name_bn = models.CharField(max_length=255, null=True, db_comment='Translatable name field. May use any language')
     name_en = models.CharField(max_length=255, db_comment='English name field')
     location = models.ForeignKey(

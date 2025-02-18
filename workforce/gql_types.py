@@ -22,6 +22,7 @@ class WorkforceRepresentativeInputType(OpenIMISMutation.Input):
 
 class WorkforceOrganizationInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
+    type = graphene.String()
     name_bn = graphene.String()
     name_en = graphene.String(required=True)
     location_id = graphene.String(required=True)

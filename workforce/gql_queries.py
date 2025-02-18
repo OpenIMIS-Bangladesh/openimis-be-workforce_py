@@ -38,6 +38,7 @@ class WorkforceOrganizationGQLType(DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         filter_fields = {
             "id": ["exact"],
+            "type": ["exact"],
             "name_bn": ["exact", "icontains"],
             "name_en": ["exact", "icontains"],
             "phone_number": ["exact", "icontains"],
