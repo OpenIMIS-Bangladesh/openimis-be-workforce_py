@@ -209,7 +209,8 @@ class WorkforceDocumentInputType(OpenIMISMutation.Input):
 
 class BankInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
-    name = graphene.String(required=True)
+    name_en = graphene.String(required=True)
+    name_bn = graphene.String()
     parent_id = graphene.UUID()
     headquarter_address = graphene.String()
     location_id = graphene.String(required=True)

@@ -415,7 +415,8 @@ class WorkforceBankGQLType(DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         filter_fields = {
             "id": ["exact"],
-            "name": ["exact", "icontains"],
+            "name_en": ["exact", "icontains"],
+            "name_bn": ["exact", "icontains"],
             "parent": ["exact"],
             "headquarter_address": ["exact", "icontains"],
             "location": ["exact"],
