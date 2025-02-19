@@ -409,7 +409,7 @@ class WorkforceDocumentGQLType(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class BankGQLType(DjangoObjectType):
+class WorkforceBankGQLType(DjangoObjectType):
     class Meta:
         model = Bank
         interfaces = (graphene.relay.Node,)

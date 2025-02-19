@@ -51,11 +51,11 @@ class Query(graphene.ObjectType):
         orderBy=graphene.List(of_type=graphene.String),
     )
     workforce_documents = OrderedDjangoFilterConnectionField(
-        WorkforceEmployeeGQLType,
+        WorkforceDocumentGQLType,
         orderBy=graphene.List(of_type=graphene.String),
     )
     banks = OrderedDjangoFilterConnectionField(
-        WorkforceEmployeeGQLType,
+        WorkforceBankGQLType,
         orderBy=graphene.List(of_type=graphene.String),
     )
 
