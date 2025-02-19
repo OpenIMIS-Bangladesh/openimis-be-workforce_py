@@ -391,7 +391,8 @@ class WorkforceDocument(HistoryModel):
 
 
 class Bank(HistoryModel):
-    name = models.CharField(max_length=255)
+    name_bn = models.CharField(max_length=255)
+    name_en = models.CharField(max_length=255, null=True, blank=True)
     parent = models.ForeignKey(
         "Bank",
         models.DO_NOTHING,
@@ -406,7 +407,6 @@ class Bank(HistoryModel):
         blank=True,
         null=True
     )
-    branch_name = models.CharField(max_length=255, null=True, blank=True)
     routing_number = models.CharField(max_length=50, null=True, blank=True)
     contact_number = models.CharField(max_length=30, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
