@@ -213,7 +213,6 @@ class BankInputType(OpenIMISMutation.Input):
     parent_id = graphene.UUID()
     headquarter_address = graphene.String()
     location_id = graphene.String(required=True)
-    branch_name = graphene.String()
     routing_number = graphene.String()
     contact_number = graphene.String()
     status = graphene.String()

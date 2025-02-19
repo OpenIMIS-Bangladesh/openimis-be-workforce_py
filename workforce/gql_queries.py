@@ -419,7 +419,6 @@ class WorkforceBankGQLType(DjangoObjectType):
             "parent": ["exact"],
             "headquarter_address": ["exact", "icontains"],
             "location": ["exact"],
-            "branch_name": ["exact", "icontains"],
             "routing_number": ["exact"],
             "contact_number": ["exact"],
             "status": ["exact", "icontains"],
