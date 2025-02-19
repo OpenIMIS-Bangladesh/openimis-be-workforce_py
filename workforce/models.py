@@ -414,3 +414,92 @@ class Bank(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_banks'
+
+
+class WorkforceEmployeeDependent(HistoryModel):
+    eis_insurance_no = models.CharField(max_length=50)
+    first_name_bn = models.CharField(max_length=255, null=True, blank=True)
+    last_name_bn = models.CharField(max_length=255, null=True, blank=True)
+    first_name_en = models.CharField(max_length=255)
+    last_name_en = models.CharField(max_length=255, null=True, blank=True)
+    father_name_bn = models.CharField(max_length=255, null=True, blank=True)
+    father_name_en = models.CharField(max_length=255, null=True, blank=True)
+    mother_name_bn = models.CharField(max_length=255, null=True, blank=True)
+    mother_name_en = models.CharField(max_length=255, null=True, blank=True)
+    marital_status = models.CharField(max_length=30)
+    gender = models.CharField(max_length=30)
+    occupation = models.CharField(max_length=30)
+    email = models.CharField(max_length=255, null=True, blank=True)
+    phone_number = models.CharField(max_length=20)
+    birth_date = models.DateField()
+    nid = models.CharField(max_length=30, null=True, blank=True)
+    birth_certificate_no = models.CharField(max_length=30, null=True, blank=True)
+    present_location = models.ForeignKey(
+        Location,
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="employee_dependent_present_location",
+    )
+    permanent_location = models.ForeignKey(
+        Location,
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="employee_dependent_permanent_location",
+    )
+    life_status = models.CharField(max_length=30)
+    death_date = models.DateField(null=True, blank=True)
+    disability_status = models.CharField(max_length=30, null=True, blank=True)
+    relation_type = models.CharField(max_length=50)
+    relation_with_worker = models.CharField(max_length=50)
+    last_verification_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=30, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_employee_dependent'
+
+
+class WorkforceEmployeeGuardian(HistoryModel):
+    first_name_bn = models.CharField(max_length=255, null=True, blank=True)
+    last_name_bn = models.CharField(max_length=255, null=True, blank=True)
+    first_name_en = models.CharField(max_length=255)
+    last_name_en = models.CharField(max_length=255, null=True, blank=True)
+    father_name_bn = models.CharField(max_length=255, null=True, blank=True)
+    father_name_en = models.CharField(max_length=255, null=True, blank=True)
+    mother_name_bn = models.CharField(max_length=255, null=True, blank=True)
+    mother_name_en = models.CharField(max_length=255, null=True, blank=True)
+    marital_status = models.CharField(max_length=30)
+    gender = models.CharField(max_length=30)
+    occupation = models.CharField(max_length=30)
+    email = models.CharField(max_length=255, null=True, blank=True)
+    phone_number = models.CharField(max_length=20)
+    birth_date = models.DateField()
+    nid = models.CharField(max_length=30, null=True, blank=True)
+    birth_certificate_no = models.CharField(max_length=30, null=True, blank=True)
+    present_location = models.ForeignKey(
+        Location,
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="employee_guardian_present_location",
+    )
+    permanent_location = models.ForeignKey(
+        Location,
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="employee_guardian_permanent_location",
+    )
+    life_status = models.CharField(max_length=30)
+    death_date = models.DateField(null=True, blank=True)
+    disability_status = models.CharField(max_length=30, null=True, blank=True)
+    relation_type = models.CharField(max_length=50)
+    relation_with_worker = models.CharField(max_length=50)
+    last_verification_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=30, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_employee_guardian'
