@@ -5,7 +5,7 @@ from .models import (
     WorkforceRepresentative, WorkforceOrganization, WorkforceOrganizationUnit,
     WorkforceOrganizationUnitDesignation, WorkforceOrganizationEmployee,
     WorkforceEmployer, WorkforceOffice, WorkforceFactory, WorkforceEmployee, WorkforceOrganizationEmployeeDesignation,
-    WorkforceDocument, Bank
+    WorkforceDocument, Bank, WorkforceEmployeeDependent
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -423,5 +423,41 @@ class WorkforceBankGQLType(DjangoObjectType):
             "routing_number": ["exact"],
             "contact_number": ["exact"],
             "status": ["exact", "icontains"],
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceEmployeeDependentGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceEmployeeDependent
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "eis_insurance_no": ["exact"],
+            "first_name_bn": ["exact", "icontains"],
+            "last_name_bn": ["exact", "icontains"],
+            "first_name_en": ["exact", "icontains"],
+            "last_name_en": ["exact", "icontains"],
+            "father_name_bn": ["exact", "icontains"],
+            "father_name_en": ["exact", "icontains"],
+            "mother_name_bn": ["exact", "icontains"],
+            "mother_name_en": ["exact", "icontains"],
+            "marital_status": ["exact"],
+            "gender": ["exact"],
+            "occupation": ["exact", "icontains"],
+            "email": ["exact"],
+            "phone_number": ["exact"],
+            "birth_date": ["exact"],
+            "nid": ["exact"],
+            "birth_certificate_no": ["exact"],
+            "life_status": ["exact", "icontains"],
+            "death_date": ["exact"],
+            "disability_status": ["exact", "icontains"],
+            "relation_type": ["exact", "icontains"],
+            "relation_with_worker": ["exact", "icontains"],
+            "last_verification_date": ["exact"],
+            "status": ["exact", "icontains"],
+            **prefix_filterset("present_location__", LocationGQLType._meta.filter_fields),
+            **prefix_filterset("permanent_location__", LocationGQLType._meta.filter_fields),
         }
         connection_class = ExtendedConnection
