@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('workforce', '0029_remove_workforceemployeeguardian_permanent_location_and_more'),
+        ('workforce', '0030_bank_type_historicalbank_type'),
     ]
 
     operations = [
