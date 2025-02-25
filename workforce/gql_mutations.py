@@ -3,14 +3,13 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils.translation import gettext as _
 from .apps import WorkforceConfig
-import graphene
 from .gql_types import (
     WorkforceOrganizationInputType, WorkforceRepresentativeInputType, WorkforceOrganizationUnitInputType,
     WorkforceOrganizationUnitDesignationInputType, WorkforceOrganizationEmployeeInputType,
     WorkforceEmployerInputType, WorkforceOfficeInputType, WorkforceFactoryInputType,
     WorkforceEmployeeInputType, WorkforceOrganizationEmployeeDesignationInputType,
     WorkforceEmployerStatusInput, WorkforceDocumentInputType, BankInputType,
-    WorkforceEmployeeDependentInputType
+    WorkforceEmployeeDependentInputType, WorkforceEmployeeDesignationInputType
 )
 from .services.workforce_organization_services import WorkforceOrganizationServices
 from .services.workforce_representative_services import WorkforceRepresentativeServices
@@ -21,7 +20,8 @@ from .services.workforce_employer_services import WorkforceEmployerServices
 from .services.workforce_office_services import WorkforceOfficeServices
 from .services.workforce_factory_services import WorkforceFactoryServices
 from .services.workforce_employee_services import WorkforceEmployeeServices
-from .services.workforce_organization_employee_designation_services import WorkforceOrganizationEmployeeDesignationServices
+from .services.workforce_organization_employee_designation_services import \
+    WorkforceOrganizationEmployeeDesignationServices
 from .services.workforce_document_services import WorkforceDocumentServices
 from .services.bank_services import BankServices
 from .services.workforce_employee_dependent_services import WorkforceEmployeeDependentServices
@@ -746,7 +746,7 @@ class CreateWorkforceEmployeeDesignationMutation(BaseHistoryModelCreateMutationM
     _mutation_module = mutation_module
     _mutation_class = "CreateWorkforceEmployeeDesignationMutation"
 
-    class Input(WorkforceEmployeeDependentInputType):
+    class Input(WorkforceEmployeeDesignationInputType):
         pass
 
     @classmethod
@@ -771,7 +771,7 @@ class UpdateWorkforceEmployeeDesignationMutation(BaseHistoryModelCreateMutationM
     _mutation_module = mutation_module
     _mutation_class = "UpdateWorkforceEmployeeDesignationMutation"
 
-    class Input(WorkforceEmployeeDependentInputType):
+    class Input(WorkforceEmployeeDesignationInputType):
         pass
 
     @classmethod
