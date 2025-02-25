@@ -62,6 +62,10 @@ class Query(graphene.ObjectType):
         WorkforceEmployeeDependentGQLType,
         orderBy=graphene.List(of_type=graphene.String),
     )
+    workforce_employee_designation = OrderedDjangoFilterConnectionField(
+        WorkforceEmployeeDesignationGQLType,
+        orderBy=graphene.List(of_type=graphene.String),
+    )
 
 
     def resolve_workforce_representatives(self, info, **kwargs):
@@ -127,6 +131,10 @@ class Query(graphene.ObjectType):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("Unauthorized access"))
         pass
+    def resolve_workforce_employee_designations(self, info, **kwargs):
+        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+            raise PermissionDenied(_("Unauthorized access"))
+        pass
 
 
 class Mutation(graphene.ObjectType):
@@ -169,3 +177,6 @@ class Mutation(graphene.ObjectType):
 
     create_workforce_employee_dependent = CreateWorkforceEmployeeDependentMutation.Field()
     update_workforce_employee_dependent = UpdateWorkforceEmployeeDependentMutation.Field()
+
+    create_workforce_employee_designation = CreateWorkforceEmployeeDesignationMutation.Field()
+    update_workforce_employee_designation = UpdateWorkforceEmployeeDesignationMutation.Field()

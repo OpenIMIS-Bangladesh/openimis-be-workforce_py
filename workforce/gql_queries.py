@@ -5,7 +5,7 @@ from .models import (
     WorkforceRepresentative, WorkforceOrganization, WorkforceOrganizationUnit,
     WorkforceOrganizationUnitDesignation, WorkforceOrganizationEmployee,
     WorkforceEmployer, WorkforceOffice, WorkforceFactory, WorkforceEmployee, WorkforceOrganizationEmployeeDesignation,
-    WorkforceDocument, Bank, WorkforceEmployeeDependent
+    WorkforceDocument, Bank, WorkforceEmployeeDependent, WorkforceEmployeeDesignation
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -384,6 +384,24 @@ class WorkforceEmployeeGQLType(DjangoObjectType):
             "status": ["exact"],
             **prefix_filterset("present_location__", LocationGQLType._meta.filter_fields),
             **prefix_filterset("permanent_location__", LocationGQLType._meta.filter_fields),
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceEmployeeDesignationGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceEmployeeDesignation
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "company_id": ["exact"],
+            "factory_id": ["exact"],
+            "office_id": ["exact"],
+            "join_date": ["exact"],
+            "resignation_date": ["exact"],
+            "resignation_reason": ["exact", "icontains"],
+            "monthly_salary": ["exact"],
+            "status": ["exact", "icontains"],
         }
         connection_class = ExtendedConnection
 

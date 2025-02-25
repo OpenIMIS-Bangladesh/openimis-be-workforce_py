@@ -192,6 +192,18 @@ class WorkforceEmployeeInputType(OpenIMISMutation.Input):
     related_user_id = graphene.UUID()
 
 
+class WorkforceEmployeeDesignationInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    company_id = graphene.String(required=True)
+    factory_id = graphene.String()
+    office_id = graphene.String()
+    join_date = graphene.String()
+    resignation_date = graphene.String()
+    resignation_reason = graphene.String()
+    monthly_salary = graphene.String()
+    status = graphene.String()
+
+
 class WorkforceDocumentInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
     holder = graphene.String()

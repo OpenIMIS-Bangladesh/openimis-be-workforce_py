@@ -361,6 +361,21 @@ class WorkforceEmployee(HistoryModel):
         db_table = 'workforce_employee'
 
 
+class WorkforceEmployeeDesignation(HistoryModel):
+    company_id = models.CharField(max_length=30)
+    factory_id = models.CharField(null=True, blank=True, max_length=30)
+    office_id = models.CharField(null=True, blank=True, max_length=30)
+    join_date = models.DateField(null=True, blank=True)
+    resignation_date = models.DateField(null=True, blank=True)
+    resignation_reason = models.TextField(null=True, blank=True)
+    monthly_salary = models.CharField(null=True, blank=True, max_length=30)
+    status = models.CharField(max_length=30, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_employee_designation'
+
+
 class WorkforceDocument(HistoryModel):
     holder = models.CharField()
     holder_type = models.CharField(max_length=30, null=True, blank=True)

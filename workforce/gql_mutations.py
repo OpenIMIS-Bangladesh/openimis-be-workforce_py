@@ -25,6 +25,7 @@ from .services.workforce_organization_employee_designation_services import Workf
 from .services.workforce_document_services import WorkforceDocumentServices
 from .services.bank_services import BankServices
 from .services.workforce_employee_dependent_services import WorkforceEmployeeDependentServices
+from .services.workforce_employee_designation_services import WorkforceEmployeeDesignationServices
 
 mutation_module = "workforce"
 
@@ -728,6 +729,56 @@ class UpdateWorkforceEmployeeDependentMutation(BaseHistoryModelCreateMutationMix
         failure_message = "workforce.mutation.failed_to_update_workforce_employee_dependent"
         required_permission = WorkforceConfig.gql_query_workforces_perms
         service_instance = WorkforceEmployeeDependentServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission=required_permission,
+            call_type='update',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class CreateWorkforceEmployeeDesignationMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateWorkforceEmployeeDesignationMutation"
+
+    class Input(WorkforceEmployeeDependentInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_create_workforce_employee_designation"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = WorkforceEmployeeDesignationServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission=required_permission,
+            call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class UpdateWorkforceEmployeeDesignationMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWorkforceEmployeeDesignationMutation"
+
+    class Input(WorkforceEmployeeDependentInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_update_workforce_employee_designation"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = WorkforceEmployeeDesignationServices(user)
 
         result = auth_permission_validation(
             failure_message=failure_message,
