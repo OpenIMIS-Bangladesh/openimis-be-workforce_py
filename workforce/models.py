@@ -476,3 +476,33 @@ class WorkforceEmployeeDependent(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_employee_dependent'
+
+
+class WorkforceEmployeeAccident(HistoryModel):
+    employee = models.ForeignKey(
+        WorkforceEmployee,
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="employee"  # Unique related name
+    )
+    injury_type = models.CharField(max_length=30, default="deceased")
+    accident_date = models.DateField()
+    accident_time = models.CharField()
+    accident_type = models.CharField(max_length=30)
+    duty_status = models.CharField(max_length=30)
+    in_outside_factory = models.CharField(max_length=30)
+    death_date = models.DateField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    accident_location = models.ForeignKey(
+        Location,
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="employee_accident_location",
+    )
+    status = models.CharField(max_length=30, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_employee_accident'

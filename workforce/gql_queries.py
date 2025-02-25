@@ -5,7 +5,7 @@ from .models import (
     WorkforceRepresentative, WorkforceOrganization, WorkforceOrganizationUnit,
     WorkforceOrganizationUnitDesignation, WorkforceOrganizationEmployee,
     WorkforceEmployer, WorkforceOffice, WorkforceFactory, WorkforceEmployee, WorkforceOrganizationEmployeeDesignation,
-    WorkforceDocument, Bank, WorkforceEmployeeDependent, WorkforceEmployeeDesignation
+    WorkforceDocument, Bank, WorkforceEmployeeDependent, WorkforceEmployeeDesignation, WorkforceEmployeeAccident
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -478,5 +478,26 @@ class WorkforceEmployeeDependentGQLType(DjangoObjectType):
             "status": ["exact", "icontains"],
             **prefix_filterset("present_location__", LocationGQLType._meta.filter_fields),
             **prefix_filterset("permanent_location__", LocationGQLType._meta.filter_fields),
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceEmployeeAccidentGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceEmployeeAccident
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "employee_id": ["exact"],
+            "injury_type": ["exact", "contains"],
+            "accident_date": ["exact"],
+            "accident_time": ["exact"],
+            "accident_type": ["exact", "contains"],
+            "duty_status": ["exact", "contains"],
+            "in_outside_factory": ["exact", "contains"],
+            "death_date": ["exact"],
+            "description": ["exact", "contains"],
+            "accident_location": ["exact"],
+            "status": ["exact", "icontains"],
         }
         connection_class = ExtendedConnection

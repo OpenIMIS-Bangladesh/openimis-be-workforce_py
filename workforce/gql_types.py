@@ -260,3 +260,18 @@ class WorkforceEmployeeDependentInputType(OpenIMISMutation.Input):
     relation_with_worker = graphene.String(required=True)
     last_verification_date = graphene.String()
     status = graphene.String()
+
+
+class WorkforceEmployeeAccidentInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    employee_id = graphene.String(required=True)
+    injury_type = graphene.String(required=True)
+    accident_date = graphene.String(required=True)
+    accident_time = graphene.String(required=True)
+    accident_type = graphene.String(required=True)
+    duty_status = graphene.String(required=True)
+    in_outside_factory = graphene.String(required=True)
+    death_date = graphene.String()
+    description = graphene.String()
+    accident_location_id = graphene.String(required=True)
+    status = graphene.String()
