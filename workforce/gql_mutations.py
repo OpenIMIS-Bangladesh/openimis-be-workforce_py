@@ -593,8 +593,8 @@ class CreateWorkforceEmployeeMutation(BaseHistoryModelCreateMutationMixin, BaseM
                         "workforce_company_id": workforce_employer_id,
                         "workforce_factory_id": workforce_factory_id,
                         "join_date": join_date,
-                        "monthly_salary": created_obj.get('monthly_earning', None),  # Safely get 'monthly_earning'
-                        "position": created_obj.get('position', None),  # Safely get 'position'
+                        "monthly_salary": monthly_earning,  # Safely get 'monthly_earning'
+                        "position": position,  # Safely get 'position'
                     }
 
                     # Proceed with creating the employee designation
