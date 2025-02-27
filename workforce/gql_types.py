@@ -187,6 +187,7 @@ class WorkforceEmployeeInputType(OpenIMISMutation.Input):
     passport_no = graphene.String()
     registration_date = graphene.String()
     life_status = graphene.String()
+    disability_status = graphene.String()
     death_date = graphene.String()
     status = graphene.String()
     related_user_id = graphene.UUID()

@@ -106,7 +106,7 @@ class UpdateWorkforceRepresentativeMutation(BaseHistoryModelCreateMutationMixin,
     @classmethod
     def _mutate(cls, user, **data):
         failure_message = "workforce.mutation.failed_to_update_workforce_representative"
-        required_permission = WorkforceConfig.gql_mutation_update_workforces_perms
+        required_permission = WorkforceConfig.gql_query_workforces_perms
         service_instance = WorkforceRepresentativeServices(user)
 
         result = auth_permission_validation(

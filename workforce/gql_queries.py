@@ -380,9 +380,11 @@ class WorkforceEmployeeGQLType(DjangoObjectType):
             "birth_certificate_no": ["exact"],
             "passport_no": ["exact"],
             "registration_date": ["exact"],
-            "life_status": ["icontains"],
+            "life_status": ["exact", "icontains"],
+            "disability_status": ["exact", "icontains"],
             "death_date": ["icontains"],
             "status": ["exact"],
+            "related_user_id": ["exact"],
             **prefix_filterset("present_location__", LocationGQLType._meta.filter_fields),
             **prefix_filterset("permanent_location__", LocationGQLType._meta.filter_fields),
         }
