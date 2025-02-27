@@ -362,9 +362,32 @@ class WorkforceEmployee(HistoryModel):
 
 
 class WorkforceEmployeeDesignation(HistoryModel):
-    company_id = models.CharField(max_length=30)
-    factory_id = models.CharField(null=True, blank=True, max_length=30)
-    office_id = models.CharField(null=True, blank=True, max_length=30)
+    workforce_employee = models.ForeignKey(
+        WorkforceEmployee,
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="employee_designation_employee_id",
+    )
+    workforce_company = models.ForeignKey(
+        WorkforceEmployer,
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+    )
+    workforce_factory = models.ForeignKey(
+        WorkforceFactory,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+    )
+    workforce_office = models.ForeignKey(
+        WorkforceOffice,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+    )
+    position = models.CharField(max_length=255, null=True, blank=True)
     join_date = models.DateField(null=True, blank=True)
     resignation_date = models.DateField(null=True, blank=True)
     resignation_reason = models.TextField(null=True, blank=True)

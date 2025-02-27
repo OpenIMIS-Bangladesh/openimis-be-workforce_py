@@ -3,6 +3,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils.translation import gettext as _
 from .apps import WorkforceConfig
+import graphene
 from .gql_types import (
     WorkforceOrganizationInputType, WorkforceRepresentativeInputType, WorkforceOrganizationUnitInputType,
     WorkforceOrganizationUnitDesignationInputType, WorkforceOrganizationEmployeeInputType,
@@ -549,6 +550,11 @@ class CreateWorkforceEmployeeMutation(BaseHistoryModelCreateMutationMixin, BaseM
     _mutation_class = "CreateWorkforceEmployeeMutation"
 
     class Input(WorkforceEmployeeInputType):
+        workforce_employer_id = graphene.UUID()
+        workforce_factory_id = graphene.UUID()
+        join_date = graphene.Date()
+        position = graphene.String()
+        monthly_earning = graphene.String()
         pass
 
     @classmethod
@@ -556,6 +562,12 @@ class CreateWorkforceEmployeeMutation(BaseHistoryModelCreateMutationMixin, BaseM
         failure_message = "workforce.mutation.failed_to_create_workforce_employee"
         required_permission = WorkforceConfig.gql_query_workforces_perms
         service_instance = WorkforceEmployeeServices(user)
+
+        workforce_employer_id = data.pop('workforce_employer_id')
+        workforce_factory_id = data.pop('workforce_factory_id')
+        join_date = data.pop('join_date')
+        position = data.pop('position')
+        monthly_earning = data.pop('monthly_earning')
 
         result = auth_permission_validation(
             failure_message=failure_message,
@@ -565,6 +577,28 @@ class CreateWorkforceEmployeeMutation(BaseHistoryModelCreateMutationMixin, BaseM
             user=user,
             data=data
         )
+
+        if result and isinstance(result, dict):
+            # Check success flag
+            if result.get("success") is True:  # Ensure success is True
+                # Get the "data" field from result
+                created_obj = result.get("data")
+
+                if created_obj:  # Ensure created_obj is not None or empty
+                    # Extract values with default fallback if necessary
+                    employee_designation_service = WorkforceEmployeeDesignationServices(user)
+
+                    employee_designation_obj = {
+                        "workforce_employee_id": created_obj.get('id', None),  # Safely get 'id', default to None if missing
+                        "workforce_company_id": workforce_employer_id,
+                        "workforce_factory_id": workforce_factory_id,
+                        "join_date": join_date,
+                        "monthly_salary": created_obj.get('monthly_earning', None),  # Safely get 'monthly_earning'
+                        "position": created_obj.get('position', None),  # Safely get 'position'
+                    }
+
+                    # Proceed with creating the employee designation
+                    d_created_obj = employee_designation_service.create(employee_designation_obj)
 
         return result
 
