@@ -488,6 +488,8 @@ class WorkforceEmployeeDependent(HistoryModel):
         null=False,
         related_name="employee_dependent_permanent_location",
     )
+    present_address = models.TextField(null=True, blank=True)
+    permanent_address = models.TextField(null=True, blank=True)
     life_status = models.CharField(max_length=30)
     death_date = models.DateField(null=True, blank=True)
     disability_status = models.CharField(max_length=30, null=True, blank=True)

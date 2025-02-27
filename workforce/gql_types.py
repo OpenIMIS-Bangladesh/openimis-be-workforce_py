@@ -256,6 +256,8 @@ class WorkforceEmployeeDependentInputType(OpenIMISMutation.Input):
     birth_certificate_no = graphene.String()
     present_location_id = graphene.String()
     permanent_location_id = graphene.String()
+    present_address = graphene.String()
+    permanent_address = graphene.String()
     life_status = graphene.String(required=True)
     death_date = graphene.String()
     disability_status = graphene.String()
