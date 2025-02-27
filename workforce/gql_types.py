@@ -194,9 +194,11 @@ class WorkforceEmployeeInputType(OpenIMISMutation.Input):
 
 class WorkforceEmployeeDesignationInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
-    company_id = graphene.String(required=True)
-    factory_id = graphene.String()
-    office_id = graphene.String()
+    workforce_employee_id = graphene.String(required=True)
+    workforce_company_id = graphene.String(required=True)
+    workforce_factory_id = graphene.String()
+    workforce_office_id = graphene.String()
+    position = graphene.String()
     join_date = graphene.String()
     resignation_date = graphene.String()
     resignation_reason = graphene.String()
@@ -274,4 +276,17 @@ class WorkforceEmployeeAccidentInputType(OpenIMISMutation.Input):
     death_date = graphene.String()
     description = graphene.String()
     accident_location_id = graphene.String(required=True)
+    status = graphene.String()
+
+
+class WorkforceEmployeeAccountInfoInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    beneficiary_type = graphene.String(required=True)
+    beneficiary_id = graphene.String(required=True)
+    on_behalf_of = graphene.String(required=True)
+    present_location_id = graphene.String(required=True)
+    permanent_location_id = graphene.String()
+    bank_id = graphene.String(required=True)
+    account_holder_name = graphene.String(required=True)
+    account_number = graphene.String(required=True)
     status = graphene.String()

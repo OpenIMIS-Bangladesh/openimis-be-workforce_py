@@ -5,7 +5,8 @@ from .models import (
     WorkforceRepresentative, WorkforceOrganization, WorkforceOrganizationUnit,
     WorkforceOrganizationUnitDesignation, WorkforceOrganizationEmployee,
     WorkforceEmployer, WorkforceOffice, WorkforceFactory, WorkforceEmployee, WorkforceOrganizationEmployeeDesignation,
-    WorkforceDocument, Bank, WorkforceEmployeeDependent, WorkforceEmployeeDesignation, WorkforceEmployeeAccident
+    WorkforceDocument, Bank, WorkforceEmployeeDependent, WorkforceEmployeeDesignation, WorkforceEmployeeAccident,
+    WorkforceEmployeeAccountInfo
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -394,9 +395,11 @@ class WorkforceEmployeeDesignationGQLType(DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         filter_fields = {
             "id": ["exact"],
-            "company_id": ["exact"],
-            "factory_id": ["exact"],
-            "office_id": ["exact"],
+            "workforce_employee_id": ["exact"],
+            "workforce_company_id": ["exact"],
+            "workforce_factory_id": ["exact"],
+            "workforce_office_id": ["exact"],
+            "position": ["exact"],
             "join_date": ["exact"],
             "resignation_date": ["exact"],
             "resignation_reason": ["exact", "icontains"],
@@ -499,5 +502,26 @@ class WorkforceEmployeeAccidentGQLType(DjangoObjectType):
             "description": ["exact", "contains"],
             "accident_location": ["exact"],
             "status": ["exact", "icontains"],
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceEmployeeAccountInfoGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceEmployeeAccountInfo
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "beneficiary_type": ["exact"],
+            "beneficiary_id": ["exact"],
+            "on_behalf_of": ["exact", "contains"],
+            "present_location_id": ["exact"],
+            "permanent_location_id": ["exact"],
+            "bank_id": ["exact"],
+            "account_holder_name": ["exact", "contains"],
+            "account_number": ["exact", "contains"],
+            "status": ["exact", "icontains"],
+            **prefix_filterset("present_location__", LocationGQLType._meta.filter_fields),
+            **prefix_filterset("permanent_location__", LocationGQLType._meta.filter_fields),
         }
         connection_class = ExtendedConnection

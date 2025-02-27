@@ -529,3 +529,37 @@ class WorkforceEmployeeAccident(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_employee_accident'
+
+
+class WorkforceEmployeeAccountInfo(HistoryModel):
+    beneficiary_type = models.CharField(max_length=30)
+    beneficiary_id = models.CharField(max_length=50)
+    on_behalf_of = models.CharField(max_length=30)
+    present_location = models.ForeignKey(
+        Location,
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="dependent_present_location",
+    )
+    permanent_location = models.ForeignKey(
+        Location,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="dependent_permanent_location",
+    )
+    bank = models.ForeignKey(
+        Bank,
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="workforce_dependent_bank",
+    )
+    account_holder_name = models.CharField(max_length=255)
+    account_number = models.CharField(max_length=50)
+    status = models.CharField(max_length=30, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_employee_account_info'
