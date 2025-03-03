@@ -341,6 +341,15 @@ class WorkforceFactoryGQLType(DjangoObjectType):
 
 
 class WorkforceEmployeeGQLType(DjangoObjectType):
+    join_date = graphene.String()
+    resignation_date = graphene.String()
+    resignation_reason = graphene.String()
+    monthly_salary = graphene.String()
+    position = graphene.String()
+    workforce_company_id = graphene.String()
+    workforce_factory_id = graphene.String()
+    workforce_office_id = graphene.String()
+
     class Meta:
         model = WorkforceEmployee
         interfaces = (graphene.relay.Node,)
@@ -389,6 +398,54 @@ class WorkforceEmployeeGQLType(DjangoObjectType):
             **prefix_filterset("permanent_location__", LocationGQLType._meta.filter_fields),
         }
         connection_class = ExtendedConnection
+
+        def resolve_join_dates(self, info):
+            return WorkforceEmployeeDesignation.objects.filter(
+                workforce_employee_id=self.id,
+                status__iexact='active'
+            ).order_by('-id').first()
+
+        def resolve_resignation_dates(self, info):
+            return WorkforceEmployeeDesignation.objects.filter(
+                workforce_employee_id=self.id,
+                status__iexact='active'
+            ).order_by('-id').first()
+
+        def resolve_resignation_reasons(self, info):
+            return WorkforceEmployeeDesignation.objects.filter(
+                workforce_employee_id=self.id,
+                status__iexact='active'
+            ).order_by('-id').first()
+
+        def resolve_monthly_salary(self, info):
+            return WorkforceEmployeeDesignation.objects.filter(
+                workforce_employee_id=self.id,
+                status__iexact='active'
+            ).order_by('-id').first()
+
+        def resolve_positions(self, info):
+            return WorkforceEmployeeDesignation.objects.filter(
+                workforce_employee_id=self.id,
+                status__iexact='active'
+            ).order_by('-id').first()
+
+        def resolve_workforce_company_ids(self, info):
+            return WorkforceEmployeeDesignation.objects.filter(
+                workforce_employee_id=self.id,
+                status__iexact='active'
+            ).order_by('-id').first()
+
+        def resolve_workforce_office_ids(self, info):
+            return WorkforceEmployeeDesignation.objects.filter(
+                workforce_employee_id=self.id,
+                status__iexact='active'
+            ).order_by('-id').first()
+
+        def resolve_workforce_factory_ids(self, info):
+            return WorkforceEmployeeDesignation.objects.filter(
+                workforce_employee_id=self.id,
+                status__iexact='active'
+            ).order_by('-id').first()
 
 
 class WorkforceEmployeeDesignationGQLType(DjangoObjectType):
