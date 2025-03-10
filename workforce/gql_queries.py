@@ -1,12 +1,14 @@
 import graphene
+from django_filters import Filter
+from django_filters import CharFilter
 from graphene_django import DjangoObjectType
-
+from django.contrib.postgres.fields import JSONField
 from .models import (
     WorkforceRepresentative, WorkforceOrganization, WorkforceOrganizationUnit,
     WorkforceOrganizationUnitDesignation, WorkforceOrganizationEmployee,
     WorkforceEmployer, WorkforceOffice, WorkforceFactory, WorkforceEmployee, WorkforceOrganizationEmployeeDesignation,
     WorkforceDocument, Bank, WorkforceEmployeeDependent, WorkforceEmployeeDesignation, WorkforceEmployeeAccident,
-    WorkforceEmployeeAccountInfo
+    WorkforceEmployeeAccountInfo, WorkforceTemporaryApplication
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -584,6 +586,62 @@ class WorkforceEmployeeAccountInfoGQLType(DjangoObjectType):
             "account_holder_name": ["exact", "contains"],
             "account_number": ["exact", "contains"],
             "status": ["exact", "icontains"],
+            **prefix_filterset("present_location__", LocationGQLType._meta.filter_fields),
+            **prefix_filterset("permanent_location__", LocationGQLType._meta.filter_fields),
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceTemporaryApplicationGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceTemporaryApplication
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "employee_id": ["exact"],
+            "employee_id_lima": ["exact"],
+            "insurance_number": ["exact"],
+            "employee_type": ["exact"],
+            "global_id": ["exact"],
+            "first_name_bn": ["exact"],
+            "last_name_bn": ["exact"],
+            "other_name": ["exact"],
+            "first_name_en": ["exact"],
+            "last_name_en": ["exact"],
+            "father_name_bn": ["exact"],
+            "father_name_en": ["exact"],
+            "mother_name_bn": ["exact"],
+            "mother_name_en": ["exact"],
+            "spouse_name_bn": ["exact"],
+            "spouse_name_en": ["exact"],
+            "citizenship": ["exact"],
+            "privacy_law": ["exact"],
+            "marital_status": ["exact"],
+            "gender": ["exact"],
+            "photo_path": ["exact"],
+            "photo_date": ["exact"],
+            "position": ["exact"],
+            "monthly_earning": ["exact"],
+            "reference_salary": ["exact"],
+            "present_address": ["exact"],
+            "permanent_address": ["exact"],
+            "phone_number": ["exact"],
+            "email": ["exact"],
+            "birth_date": ["exact"],
+            "nid": ["exact"],
+            "birth_certificate_no": ["exact"],
+            "passport_no": ["exact"],
+            "registration_date": ["exact"],
+            "life_status": ["exact", "icontains"],
+            "disability_status": ["exact", "icontains"],
+            "death_date": ["icontains"],
+            "related_user_id": ["exact"],
+            "employee_designation_info": ["exact"],
+            "employee_document_info": ["exact"],
+            "employee_bank_info": ["exact"],
+            "employee_dependent_info": ["exact"],
+            "employee_accident_info": ["exact"],
+            "status": ["exact"],
             **prefix_filterset("present_location__", LocationGQLType._meta.filter_fields),
             **prefix_filterset("permanent_location__", LocationGQLType._meta.filter_fields),
         }
