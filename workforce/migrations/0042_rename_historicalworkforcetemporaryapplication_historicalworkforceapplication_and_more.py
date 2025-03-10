@@ -8,7 +8,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('location', '0018_auto_20230925_2243'),
-        ('core', '0031_alter_mutationlog_client_mutation_id'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('workforce', '0041_workforcetemporaryapplication_and_more'),
     ]
