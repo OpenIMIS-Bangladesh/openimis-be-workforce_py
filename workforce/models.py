@@ -633,6 +633,13 @@ class WorkforceApplication(HistoryModel):
     employee_dependent_info = models.JSONField(null=True, blank=True)
     employee_accident_info = models.JSONField(null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
+    organization = models.ForeignKey(
+        WorkforceOrganization,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_application_organization",
+    )
 
     class Meta:
         managed = True
