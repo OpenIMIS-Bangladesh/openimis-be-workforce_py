@@ -9,16 +9,16 @@ class Migration(migrations.Migration):
     dependencies = [
         ('location', '0018_auto_20230925_2243'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('workforce', '0041_workforcetemporaryapplication_and_more'),
+        ('workforce', '0041_WorkforceApplication_and_more'),
     ]
 
     operations = [
         migrations.RenameModel(
-            old_name='HistoricalWorkforceTemporaryApplication',
+            old_name='HistoricalWorkforceApplication',
             new_name='HistoricalWorkforceApplication',
         ),
         migrations.RenameModel(
-            old_name='WorkforceTemporaryApplication',
+            old_name='WorkforceApplication',
             new_name='WorkforceApplication',
         ),
         migrations.AlterModelOptions(

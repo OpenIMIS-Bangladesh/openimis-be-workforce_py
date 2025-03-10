@@ -31,7 +31,7 @@ from .services.workforce_employee_dependent_services import WorkforceEmployeeDep
 from .services.workforce_employee_designation_services import WorkforceEmployeeDesignationServices
 from .services.workforce_employee_accident_services import WorkforceEmployeeAccidentServices
 from .services.workforce_employee_account_info_services import WorkforceEmployeeAccountInfoServices
-from .services.workforce_temporary_application_services import WorkforceTemporaryApplicationServices
+from .services.workforce_temporary_application_services import WorkforceApplicationServices
 
 mutation_module = "workforce"
 
@@ -931,9 +931,9 @@ class UpdateWorkforceEmployeeAccountInfoMutation(BaseHistoryModelCreateMutationM
         return result
 
 
-class CreateWorkforceTemporaryApplicationMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+class CreateWorkforceApplicationMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
     _mutation_module = mutation_module
-    _mutation_class = "CreateWorkforceTemporaryApplicationMutation"
+    _mutation_class = "CreateWorkforceApplicationMutation"
 
     class Input(WorkforceApplicationInputType):
         pass
@@ -942,7 +942,7 @@ class CreateWorkforceTemporaryApplicationMutation(BaseHistoryModelCreateMutation
     def _mutate(cls, user, **data):
         failure_message = "workforce.mutation.failed_to_create_workforce_temporary_application"
         required_permission = WorkforceConfig.gql_query_workforces_perms
-        service_instance = WorkforceTemporaryApplicationServices(user)
+        service_instance = WorkforceApplicationServices(user)
 
         result = auth_permission_validation(
             failure_message=failure_message,
@@ -956,9 +956,9 @@ class CreateWorkforceTemporaryApplicationMutation(BaseHistoryModelCreateMutation
         return result
 
 
-class UpdateWorkforceTemporaryApplicationMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+class UpdateWorkforceApplicationMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
     _mutation_module = mutation_module
-    _mutation_class = "UpdateWorkforceTemporaryApplicationMutation"
+    _mutation_class = "UpdateWorkforceApplicationMutation"
 
     class Input(WorkforceApplicationInputType):
         pass
@@ -967,7 +967,7 @@ class UpdateWorkforceTemporaryApplicationMutation(BaseHistoryModelCreateMutation
     def _mutate(cls, user, **data):
         failure_message = "workforce.mutation.failed_to_update_workforce_temporary_application"
         required_permission = WorkforceConfig.gql_query_workforces_perms
-        service_instance = WorkforceTemporaryApplicationServices(user)
+        service_instance = WorkforceApplicationServices(user)
 
         result = auth_permission_validation(
             failure_message=failure_message,

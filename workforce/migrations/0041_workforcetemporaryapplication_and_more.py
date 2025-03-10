@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='WorkforceTemporaryApplication',
+            name='WorkforceApplication',
             fields=[
                 ('id', models.UUIDField(db_column='UUID', default=None, editable=False, primary_key=True, serialize=False)),
                 ('is_deleted', models.BooleanField(db_column='isDeleted', default=False)),
@@ -84,7 +84,7 @@ class Migration(migrations.Migration):
             bases=(dirtyfields.dirtyfields.DirtyFieldsMixin, models.Model),
         ),
         migrations.CreateModel(
-            name='HistoricalWorkforceTemporaryApplication',
+            name='HistoricalWorkforceApplication',
             fields=[
                 ('id', models.UUIDField(db_column='UUID', db_index=True, default=None, editable=False)),
                 ('is_deleted', models.BooleanField(db_column='isDeleted', default=False)),

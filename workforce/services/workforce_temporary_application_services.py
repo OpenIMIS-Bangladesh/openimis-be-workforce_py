@@ -1,13 +1,13 @@
 import logging
 
 from core.services import BaseService
-from workforce.models import WorkforceTemporaryApplication
+from workforce.models import WorkforceApplication
 
 logger = logging.getLogger(__name__)
 
 
-class WorkforceTemporaryApplicationServices(BaseService):
-    OBJECT_TYPE = WorkforceTemporaryApplication
+class WorkforceApplicationServices(BaseService):
+    OBJECT_TYPE = WorkforceApplication
 
     def create(self, obj_data):
         return super().create(obj_data)

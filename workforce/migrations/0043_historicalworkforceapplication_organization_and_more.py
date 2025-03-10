@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('workforce', '0042_rename_historicalworkforcetemporaryapplication_historicalworkforceapplication_and_more'),
+        ('workforce', '0042_rename_historicalWorkforceApplication_historicalworkforceapplication_and_more'),
     ]
 
     operations = [

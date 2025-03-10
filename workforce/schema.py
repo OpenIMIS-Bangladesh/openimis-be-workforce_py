@@ -210,5 +210,5 @@ class Mutation(graphene.ObjectType):
     create_workforce_employee_account_info = CreateWorkforceEmployeeAccountInfoMutation.Field()
     update_workforce_employee_account_info = UpdateWorkforceEmployeeAccountInfoMutation.Field()
 
-    create_workforce_temporary_application = CreateWorkforceTemporaryApplicationMutation.Field()
-    update_workforce_temporary_application = UpdateWorkforceTemporaryApplicationMutation.Field()
+    create_workforce_temporary_application = CreateWorkforceApplicationMutation.Field()
+    update_workforce_temporary_application = UpdateWorkforceApplicationMutation.Field()
