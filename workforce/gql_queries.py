@@ -8,7 +8,7 @@ from .models import (
     WorkforceOrganizationUnitDesignation, WorkforceOrganizationEmployee,
     WorkforceEmployer, WorkforceOffice, WorkforceFactory, WorkforceEmployee, WorkforceOrganizationEmployeeDesignation,
     WorkforceDocument, Bank, WorkforceEmployeeDependent, WorkforceEmployeeDesignation, WorkforceEmployeeAccident,
-    WorkforceEmployeeAccountInfo, WorkforceTemporaryApplication
+    WorkforceEmployeeAccountInfo, WorkforceApplication
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -594,7 +594,7 @@ class WorkforceEmployeeAccountInfoGQLType(DjangoObjectType):
 
 class WorkforceApplicationGQLType(DjangoObjectType):
     class Meta:
-        model = WorkforceTemporaryApplication
+        model = WorkforceApplication
         interfaces = (graphene.relay.Node,)
         filter_fields = {
             "id": ["exact"],
