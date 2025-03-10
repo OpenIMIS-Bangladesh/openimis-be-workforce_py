@@ -12,7 +12,7 @@ from .gql_types import (
     WorkforceEmployerStatusInput, WorkforceDocumentInputType, BankInputType,
     WorkforceEmployeeDependentInputType, WorkforceEmployeeDesignationInputType,
     WorkforceEmployeeAccidentInputType, WorkforceEmployeeAccountInfoInputType,
-    WorkforceTemporaryApplicationInputType,
+    WorkforceApplicationInputType,
 )
 from .services.workforce_organization_services import WorkforceOrganizationServices
 from .services.workforce_representative_services import WorkforceRepresentativeServices
@@ -935,7 +935,7 @@ class CreateWorkforceTemporaryApplicationMutation(BaseHistoryModelCreateMutation
     _mutation_module = mutation_module
     _mutation_class = "CreateWorkforceTemporaryApplicationMutation"
 
-    class Input(WorkforceTemporaryApplicationInputType):
+    class Input(WorkforceApplicationInputType):
         pass
 
     @classmethod
@@ -960,7 +960,7 @@ class UpdateWorkforceTemporaryApplicationMutation(BaseHistoryModelCreateMutation
     _mutation_module = mutation_module
     _mutation_class = "UpdateWorkforceTemporaryApplicationMutation"
 
-    class Input(WorkforceTemporaryApplicationInputType):
+    class Input(WorkforceApplicationInputType):
         pass
 
     @classmethod

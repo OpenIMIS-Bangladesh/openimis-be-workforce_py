@@ -567,7 +567,7 @@ class WorkforceEmployeeAccountInfo(HistoryModel):
         db_table = 'workforce_employee_account_info'
 
 
-class WorkforceTemporaryApplication(HistoryModel):
+class WorkforceApplication(HistoryModel):
     employee_id = models.CharField(max_length=255, null=True, blank=True)
     employee_id_lima = models.CharField(max_length=255, null=True, blank=True)
     insurance_number = models.CharField(max_length=50, null=True, blank=True)
@@ -636,4 +636,4 @@ class WorkforceTemporaryApplication(HistoryModel):
 
     class Meta:
         managed = True
-        db_table = 'workforce_temporary_applications'
+        db_table = 'workforce_applications'

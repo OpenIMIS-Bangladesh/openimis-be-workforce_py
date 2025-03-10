@@ -592,7 +592,7 @@ class WorkforceEmployeeAccountInfoGQLType(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class WorkforceTemporaryApplicationGQLType(DjangoObjectType):
+class WorkforceApplicationGQLType(DjangoObjectType):
     class Meta:
         model = WorkforceTemporaryApplication
         interfaces = (graphene.relay.Node,)
@@ -636,11 +636,11 @@ class WorkforceTemporaryApplicationGQLType(DjangoObjectType):
             "disability_status": ["exact", "icontains"],
             "death_date": ["icontains"],
             "related_user_id": ["exact"],
-            "employee_designation_info": ["exact"],
-            "employee_document_info": ["exact"],
-            "employee_bank_info": ["exact"],
-            "employee_dependent_info": ["exact"],
-            "employee_accident_info": ["exact"],
+            "employee_designation_info": [],
+            "employee_document_info": [],
+            "employee_bank_info": [],
+            "employee_dependent_info": [],
+            "employee_accident_info": [],
             "status": ["exact"],
             **prefix_filterset("present_location__", LocationGQLType._meta.filter_fields),
             **prefix_filterset("permanent_location__", LocationGQLType._meta.filter_fields),
