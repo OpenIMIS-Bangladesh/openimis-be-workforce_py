@@ -195,6 +195,7 @@ class WorkforceEmployeeInputType(OpenIMISMutation.Input):
 
 class WorkforceEmployeeDesignationInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
+    workforce_application_id = graphene.String()
     workforce_employee_id = graphene.String(required=True)
     workforce_company_id = graphene.String(required=True)
     workforce_factory_id = graphene.String()
@@ -209,6 +210,7 @@ class WorkforceEmployeeDesignationInputType(OpenIMISMutation.Input):
 
 class WorkforceDocumentInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
+    workforce_application_id = graphene.String()
     holder = graphene.String()
     holder_type = graphene.String(required=True)
     verifier_id = graphene.String()
@@ -224,6 +226,7 @@ class WorkforceDocumentInputType(OpenIMISMutation.Input):
 
 class BankInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
+    workforce_application_id = graphene.String()
     name_en = graphene.String(required=True)
     name_bn = graphene.String()
     parent_id = graphene.UUID()
@@ -237,6 +240,7 @@ class BankInputType(OpenIMISMutation.Input):
 
 class WorkforceEmployeeDependentInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
+    workforce_application_id = graphene.String()
     eis_insurance_no = graphene.String()
     first_name_bn = graphene.String(required=True)
     last_name_bn = graphene.String()
@@ -269,6 +273,7 @@ class WorkforceEmployeeDependentInputType(OpenIMISMutation.Input):
 
 class WorkforceEmployeeAccidentInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
+    workforce_application_id = graphene.String()
     employee_id = graphene.String(required=True)
     injury_type = graphene.String(required=True)
     accident_date = graphene.String(required=True)

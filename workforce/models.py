@@ -362,6 +362,13 @@ class WorkforceEmployee(HistoryModel):
 
 
 class WorkforceEmployeeDesignation(HistoryModel):
+    workforce_application = models.ForeignKey(
+        "WorkforceApplication",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="employee_designation_application",
+    )
     workforce_employee = models.ForeignKey(
         WorkforceEmployee,
         models.DO_NOTHING,
@@ -400,6 +407,13 @@ class WorkforceEmployeeDesignation(HistoryModel):
 
 
 class WorkforceDocument(HistoryModel):
+    workforce_application = models.ForeignKey(
+        "WorkforceApplication",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_document_application",
+    )
     holder = models.CharField()
     holder_type = models.CharField(max_length=30, null=True, blank=True)
     verifier = models.ForeignKey(
@@ -430,6 +444,13 @@ class WorkforceDocument(HistoryModel):
 
 
 class Bank(HistoryModel):
+    workforce_application = models.ForeignKey(
+        "WorkforceApplication",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_bank_application",
+    )
     name_bn = models.CharField(max_length=255)
     name_en = models.CharField(max_length=255, null=True, blank=True)
     parent = models.ForeignKey(
@@ -457,6 +478,13 @@ class Bank(HistoryModel):
 
 
 class WorkforceEmployeeDependent(HistoryModel):
+    workforce_application = models.ForeignKey(
+        "WorkforceApplication",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_employee_dependent_application",
+    )
     eis_insurance_no = models.CharField(max_length=50, null=True, blank=True)
     first_name_bn = models.CharField(max_length=255, null=True, blank=True)
     last_name_bn = models.CharField(max_length=255, null=True, blank=True)
@@ -504,6 +532,13 @@ class WorkforceEmployeeDependent(HistoryModel):
 
 
 class WorkforceEmployeeAccident(HistoryModel):
+    workforce_application = models.ForeignKey(
+        "WorkforceApplication",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_employee_accident_application",
+    )
     employee = models.ForeignKey(
         WorkforceEmployee,
         models.DO_NOTHING,
@@ -632,7 +667,6 @@ class WorkforceApplication(HistoryModel):
     employee_bank_info = models.JSONField(null=True, blank=True)
     employee_dependent_info = models.JSONField(null=True, blank=True)
     employee_accident_info = models.JSONField(null=True, blank=True)
-    status = models.CharField(max_length=30, null=True, blank=True)
     organization = models.ForeignKey(
         WorkforceOrganization,
         models.DO_NOTHING,
@@ -640,6 +674,7 @@ class WorkforceApplication(HistoryModel):
         null=True,
         related_name="workforce_application_organization",
     )
+    status = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:
         managed = True

@@ -455,6 +455,7 @@ class WorkforceEmployeeDesignationGQLType(DjangoObjectType):
         model = WorkforceEmployeeDesignation
         interfaces = (graphene.relay.Node,)
         filter_fields = {
+            "workforce_application_id": ['exact'],
             "id": ["exact"],
             "workforce_employee_id": ["exact"],
             "workforce_company_id": ["exact"],
@@ -476,6 +477,7 @@ class WorkforceDocumentGQLType(DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         filter_fields = {
             "id": ["exact"],
+            "workforce_application_id": ['exact'],
             "holder": ["exact"],
             "holder_type": ["exact", "icontains"],
             "verifier": ["exact"],
@@ -497,6 +499,7 @@ class WorkforceBankGQLType(DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         filter_fields = {
             "id": ["exact"],
+            "workforce_application_id": ['exact'],
             "name_en": ["exact", "icontains"],
             "name_bn": ["exact", "icontains"],
             "parent": ["exact"],
@@ -516,6 +519,7 @@ class WorkforceEmployeeDependentGQLType(DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         filter_fields = {
             "id": ["exact"],
+            "workforce_application_id": ['exact'],
             "eis_insurance_no": ["exact"],
             "first_name_bn": ["exact", "icontains"],
             "last_name_bn": ["exact", "icontains"],
@@ -556,6 +560,7 @@ class WorkforceEmployeeAccidentGQLType(DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         filter_fields = {
             "id": ["exact"],
+            "workforce_application_id": ['exact'],
             "employee_id": ["exact"],
             "injury_type": ["exact", "contains"],
             "accident_date": ["exact"],
