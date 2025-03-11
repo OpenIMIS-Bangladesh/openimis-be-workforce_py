@@ -74,7 +74,7 @@ class Query(graphene.ObjectType):
         WorkforceEmployeeAccountInfoGQLType,
         orderBy=graphene.List(of_type=graphene.String),
     )
-    workforce_temporary_application = OrderedDjangoFilterConnectionField(
+    workforce_application = OrderedDjangoFilterConnectionField(
         WorkforceApplicationGQLType,
         orderBy=graphene.List(of_type=graphene.String),
     )
