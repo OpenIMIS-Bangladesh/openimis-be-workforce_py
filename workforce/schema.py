@@ -154,7 +154,7 @@ class Query(graphene.ObjectType):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("Unauthorized access"))
         pass
-    def resolve_workforce_temporary_applications(self, info, **kwargs):
+    def resolve_workforce_applications(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("Unauthorized access"))
         pass
@@ -210,5 +210,5 @@ class Mutation(graphene.ObjectType):
     create_workforce_employee_account_info = CreateWorkforceEmployeeAccountInfoMutation.Field()
     update_workforce_employee_account_info = UpdateWorkforceEmployeeAccountInfoMutation.Field()
 
-    create_workforce_temporary_application = CreateWorkforceApplicationMutation.Field()
-    update_workforce_temporary_application = UpdateWorkforceApplicationMutation.Field()
+    create_workforce_application = CreateWorkforceApplicationMutation.Field()
+    update_workforce_application = UpdateWorkforceApplicationMutation.Field()

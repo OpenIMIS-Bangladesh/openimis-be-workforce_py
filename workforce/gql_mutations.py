@@ -31,7 +31,7 @@ from .services.workforce_employee_dependent_services import WorkforceEmployeeDep
 from .services.workforce_employee_designation_services import WorkforceEmployeeDesignationServices
 from .services.workforce_employee_accident_services import WorkforceEmployeeAccidentServices
 from .services.workforce_employee_account_info_services import WorkforceEmployeeAccountInfoServices
-from .services.workforce_temporary_application_services import WorkforceApplicationServices
+from .services.workforce_application_services import WorkforceApplicationServices
 
 mutation_module = "workforce"
 
@@ -940,7 +940,7 @@ class CreateWorkforceApplicationMutation(BaseHistoryModelCreateMutationMixin, Ba
 
     @classmethod
     def _mutate(cls, user, **data):
-        failure_message = "workforce.mutation.failed_to_create_workforce_temporary_application"
+        failure_message = "workforce.mutation.failed_to_create_workforce_application"
         required_permission = WorkforceConfig.gql_query_workforces_perms
         service_instance = WorkforceApplicationServices(user)
 
@@ -965,7 +965,7 @@ class UpdateWorkforceApplicationMutation(BaseHistoryModelCreateMutationMixin, Ba
 
     @classmethod
     def _mutate(cls, user, **data):
-        failure_message = "workforce.mutation.failed_to_update_workforce_temporary_application"
+        failure_message = "workforce.mutation.failed_to_update_workforce_application"
         required_permission = WorkforceConfig.gql_query_workforces_perms
         service_instance = WorkforceApplicationServices(user)
 

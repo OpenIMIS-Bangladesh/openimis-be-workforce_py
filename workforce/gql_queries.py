@@ -646,6 +646,7 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "employee_bank_info": [],
             "employee_dependent_info": [],
             "employee_accident_info": [],
+            "organization_id": ["exact"],
             "status": ["exact"],
             **prefix_filterset("present_location__", LocationGQLType._meta.filter_fields),
             **prefix_filterset("permanent_location__", LocationGQLType._meta.filter_fields),
