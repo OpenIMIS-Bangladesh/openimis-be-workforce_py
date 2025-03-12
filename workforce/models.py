@@ -593,7 +593,15 @@ class WorkforceEmployeeAccountInfo(HistoryModel):
         null=False,
         related_name="workforce_dependent_bank",
     )
+    branch = models.ForeignKey(
+        Bank,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_dependent_branch",
+    )
     account_holder_name = models.CharField(max_length=255)
+    account_owner_name = models.CharField(max_length=255, null=True, blank=True)
     account_number = models.CharField(max_length=50)
     status = models.CharField(max_length=30, null=True, blank=True)
 

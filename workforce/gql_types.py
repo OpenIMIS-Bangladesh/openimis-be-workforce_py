@@ -295,7 +295,9 @@ class WorkforceEmployeeAccountInfoInputType(OpenIMISMutation.Input):
     present_location_id = graphene.String(required=True)
     permanent_location_id = graphene.String()
     bank_id = graphene.String(required=True)
+    branch_id = graphene.String(required=True)
     account_holder_name = graphene.String(required=True)
+    account_owner_name = graphene.String(required=True)
     account_number = graphene.String(required=True)
     status = graphene.String()
 
