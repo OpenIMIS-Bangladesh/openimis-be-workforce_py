@@ -571,6 +571,7 @@ class WorkforceEmployeeAccidentGQLType(DjangoObjectType):
             "death_date": ["exact"],
             "description": ["exact", "contains"],
             "accident_location": ["exact"],
+            "rejoin_date": ["exact"],
             "status": ["exact", "icontains"],
         }
         connection_class = ExtendedConnection
@@ -649,6 +650,8 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "employee_dependent_info": [],
             "employee_accident_info": [],
             "organization_id": ["exact"],
+            "employee_employer_id": [],
+            "employee_factory_id": [],
             "status": ["exact"],
             **prefix_filterset("present_location__", LocationGQLType._meta.filter_fields),
             **prefix_filterset("permanent_location__", LocationGQLType._meta.filter_fields),

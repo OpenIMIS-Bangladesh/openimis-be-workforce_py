@@ -284,6 +284,7 @@ class WorkforceEmployeeAccidentInputType(OpenIMISMutation.Input):
     death_date = graphene.String()
     description = graphene.String()
     accident_location_id = graphene.String(required=True)
+    rejoin_date = graphene.String()
     status = graphene.String()
 
 
@@ -350,4 +351,6 @@ class WorkforceApplicationInputType(OpenIMISMutation.Input):
     employee_dependent_info = graphene.String()
     employee_accident_info = graphene.String()
     organization_id = graphene.String()
+    employee_employer_id = graphene.String()
+    employee_factory_id = graphene.String()
     status = graphene.String()

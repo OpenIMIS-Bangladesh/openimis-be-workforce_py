@@ -554,6 +554,7 @@ class WorkforceEmployeeAccident(HistoryModel):
     in_outside_factory = models.CharField(max_length=30)
     death_date = models.DateField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+    rejoin_date = models.DateField(null=True, blank=True)
     accident_location = models.ForeignKey(
         Location,
         models.DO_NOTHING,
@@ -681,6 +682,18 @@ class WorkforceApplication(HistoryModel):
         blank=True,
         null=True,
         related_name="workforce_application_organization",
+    )
+    employee_employer = models.ForeignKey(
+        WorkforceEmployer,
+        models.DO_NOTHING,
+        blank=True,
+        null=True
+    )
+    employee_factory = models.ForeignKey(
+        WorkforceFactory,
+        models.DO_NOTHING,
+        blank=True,
+        null=True
     )
     status = models.CharField(max_length=30, null=True, blank=True)
 
