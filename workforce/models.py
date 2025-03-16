@@ -612,64 +612,12 @@ class WorkforceEmployeeAccountInfo(HistoryModel):
 
 
 class WorkforceApplication(HistoryModel):
-    employee_id = models.CharField(max_length=255, null=True, blank=True)
-    employee_id_lima = models.CharField(max_length=255, null=True, blank=True)
-    insurance_number = models.CharField(max_length=50, null=True, blank=True)
-    employee_type = models.CharField(max_length=16, null=True, blank=True, db_comment="office/factory employee")
-    global_id = models.CharField(max_length=50, null=True, blank=True)
-    present_location = models.ForeignKey(
-        Location,
+    workforce_employee = models.ForeignKey(
+        WorkforceEmployee,
         models.DO_NOTHING,
         blank=True,
         null=True,
-        related_name="temporary_present_location",
-    )
-    permanent_location = models.ForeignKey(
-        Location,
-        models.DO_NOTHING,
-        blank=True,
-        null=True,
-        related_name="temporary_permanent_location",
-    )
-    first_name_bn = models.CharField(max_length=255, null=True, blank=True,
-                                     db_comment='Translatable first name field. May use any language')
-    last_name_bn = models.CharField(max_length=255, null=True, blank=True,
-                                    db_comment='Translatable last name field. May use any language')
-    other_name = models.CharField(max_length=255, null=True, blank=True, db_comment='Other name field')
-    first_name_en = models.CharField(max_length=255, null=True, blank=True)
-    last_name_en = models.CharField(max_length=255, null=True, blank=True)
-    father_name_bn = models.CharField(max_length=255, null=True, blank=True)
-    father_name_en = models.CharField(max_length=255, null=True, blank=True)
-    mother_name_bn = models.CharField(max_length=255, null=True, blank=True)
-    mother_name_en = models.CharField(max_length=255, null=True, blank=True)
-    spouse_name_bn = models.CharField(max_length=255, null=True, blank=True)
-    spouse_name_en = models.CharField(max_length=255, null=True, blank=True)
-    citizenship = models.CharField(max_length=50, null=True, blank=True, default='Bangladeshi')
-    privacy_law = models.CharField(max_length=255, null=True, blank=True)
-    marital_status = models.CharField(max_length=30, null=True, blank=True)
-    gender = models.CharField(max_length=30, null=True, blank=True)
-    photo_path = models.CharField(max_length=255, null=True, blank=True)
-    photo_date = models.DateField(null=True, blank=True)
-    position = models.CharField(max_length=255, null=True, blank=True)
-    monthly_earning = models.CharField(max_length=255, null=True, blank=True)
-    reference_salary = models.CharField(max_length=255, null=True, blank=True)
-    present_address = models.TextField(null=True, blank=True)
-    permanent_address = models.TextField(null=True, blank=True)
-    phone_number = models.CharField(max_length=20, null=True, blank=True)
-    email = models.CharField(max_length=255, null=True, blank=True)
-    birth_date = models.DateField(null=True, blank=True)
-    nid = models.CharField(max_length=30, null=True, blank=True)
-    birth_certificate_no = models.CharField(max_length=30, null=True, blank=True)
-    passport_no = models.CharField(max_length=30, null=True, blank=True)
-    registration_date = models.DateField(null=True, blank=True)
-    life_status = models.CharField(max_length=30, null=True, blank=True)
-    disability_status = models.CharField(max_length=30, null=True, blank=True)
-    death_date = models.DateField(null=True, blank=True)
-    related_user = models.ForeignKey(
-        InteractiveUser,
-        models.DO_NOTHING,
-        blank=True,
-        null=True
+        related_name="workforce_employee",
     )
     employee_designation_info = models.JSONField(null=True, blank=True)
     employee_document_info = models.JSONField(null=True, blank=True)
