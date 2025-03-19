@@ -601,6 +601,7 @@ class WorkforceEmployeeAccountInfoGQLType(DjangoObjectType):
 
 
 class WorkforceApplicationGQLType(DjangoObjectType):
+    workforce_employee = graphene.Field(lambda: WorkforceEmployeeGQLType)
     class Meta:
         model = WorkforceApplication
         interfaces = (graphene.relay.Node,)
@@ -617,3 +618,6 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "status": ["exact"],
         }
         connection_class = ExtendedConnection
+
+        def resolve_workforce_employee(self, info):
+            return self.workforce_employee
