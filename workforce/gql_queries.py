@@ -606,6 +606,7 @@ class WorkforceApplicationGQLType(DjangoObjectType):
         model = WorkforceApplication
         interfaces = (graphene.relay.Node,)
         filter_fields = {
+            "id": ["exact"],
             "workforce_employee_id": ["exact"],
             "employee_designation_info": [],
             "employee_document_info": [],
