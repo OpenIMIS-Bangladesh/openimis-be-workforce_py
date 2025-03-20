@@ -304,6 +304,7 @@ class WorkforceEmployeeAccountInfoInputType(OpenIMISMutation.Input):
 
 
 class WorkforceApplicationInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
     workforce_employee_id = graphene.String()
     employee_designation_info = graphene.String()
     employee_document_info = graphene.String()
