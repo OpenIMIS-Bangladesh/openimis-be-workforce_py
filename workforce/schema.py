@@ -89,8 +89,8 @@ class Query(graphene.ObjectType):
         return gql_optimizer.query(query, info)
 
     def resolve_workforce_organizations(self, info, **kwargs):
-        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
-            raise PermissionDenied(_("unauthorized"))
+        # if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+        #     raise PermissionDenied(_("unauthorized"))
         pass
 
     def resolve_workforce_organization_units(self, info, **kwargs):
@@ -136,8 +136,8 @@ class Query(graphene.ObjectType):
             raise PermissionDenied(_("Unauthorized access"))
         pass
     def resolve_banks(self, info, **kwargs):
-        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
-            raise PermissionDenied(_("Unauthorized access"))
+        # if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+        #     raise PermissionDenied(_("Unauthorized access"))
         pass
     def resolve_workforce_employee_dependents(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
