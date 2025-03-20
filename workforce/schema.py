@@ -127,8 +127,8 @@ class Query(graphene.ObjectType):
             raise PermissionDenied(_("Unauthorized access"))
         pass
     def resolve_workforce_employer_employees(self, info, **kwargs):
-        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
-            raise PermissionDenied(_("Unauthorized access"))
+        # if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+        #     raise PermissionDenied(_("Unauthorized access"))
         pass
     def resolve_workforce_documents(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
