@@ -76,6 +76,7 @@ class Query(graphene.ObjectType):
     )
     workforce_application = OrderedDjangoFilterConnectionField(
         WorkforceApplicationGQLType,
+        client_mutation_id=graphene.String(),
         orderBy=graphene.List(of_type=graphene.String),
     )
 
@@ -155,9 +156,9 @@ class Query(graphene.ObjectType):
             raise PermissionDenied(_("Unauthorized access"))
         pass
     def resolve_workforce_applications(self, info, **kwargs):
-        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
-            raise PermissionDenied(_("Unauthorized access"))
-        pass
+        service = WorkforceApplicationServices(info.context.user)
+        query = service.get(**kwargs)
+        return gql_optimizer.query(query, info)
 
 
 class Mutation(graphene.ObjectType):
