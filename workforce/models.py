@@ -353,7 +353,8 @@ class WorkforceEmployee(HistoryModel):
         InteractiveUser,
         models.DO_NOTHING,
         blank=False,
-        null=False
+        null=False,
+        related_name="employee_related_user",
     )
 
     class Meta:

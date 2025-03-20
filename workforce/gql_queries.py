@@ -3,6 +3,8 @@ from django_filters import Filter
 from django_filters import CharFilter
 from graphene_django import DjangoObjectType
 from django.contrib.postgres.fields import JSONField
+
+from core.gql_queries import InteractiveUserGQLType
 from .models import (
     WorkforceRepresentative, WorkforceOrganization, WorkforceOrganizationUnit,
     WorkforceOrganizationUnitDesignation, WorkforceOrganizationEmployee,
@@ -395,7 +397,7 @@ class WorkforceEmployeeGQLType(DjangoObjectType):
             "disability_status": ["exact", "icontains"],
             "death_date": ["icontains"],
             "status": ["exact"],
-            "related_user_id": ["exact"],
+            **prefix_filterset("related_user__", InteractiveUserGQLType._meta.filter_fields),
             **prefix_filterset("present_location__", LocationGQLType._meta.filter_fields),
             **prefix_filterset("permanent_location__", LocationGQLType._meta.filter_fields),
         }
