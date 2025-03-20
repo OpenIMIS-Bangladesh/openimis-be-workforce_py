@@ -114,18 +114,18 @@ class Query(graphene.ObjectType):
         pass
 
     def resolve_workforce_employers(self, info, **kwargs):
-        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
-            raise PermissionDenied(_("Unauthorized access"))
+        # if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+        #     raise PermissionDenied(_("Unauthorized access"))
         pass
 
     def resolve_workforce_employer_offices(self, info, **kwargs):
-        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
-            raise PermissionDenied(_("Unauthorized access"))
+        # if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+        #     raise PermissionDenied(_("Unauthorized access"))
         pass
 
     def resolve_workforce_employer_factories(self, info, **kwargs):
-        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
-            raise PermissionDenied(_("Unauthorized access"))
+        # if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+        #     raise PermissionDenied(_("Unauthorized access"))
         pass
     def resolve_workforce_employer_employees(self, info, **kwargs):
         # if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
