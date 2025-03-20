@@ -632,6 +632,7 @@ class WorkforceApplication(HistoryModel):
         null=True,
         related_name="workforce_application_organization",
     )
+    organization_type = models.CharField(max_length=50, null=True, blank=True)
     employee_employer = models.ForeignKey(
         WorkforceEmployer,
         models.DO_NOTHING,
@@ -644,6 +645,7 @@ class WorkforceApplication(HistoryModel):
         blank=True,
         null=True
     )
+    application_type = models.CharField(max_length=50, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:
