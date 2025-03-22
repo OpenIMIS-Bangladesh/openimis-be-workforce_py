@@ -946,7 +946,7 @@ class CreateWorkforceApplicationMutation(BaseHistoryModelCreateMutationMixin, Ba
 
         result = auth_permission_validation(
             failure_message=failure_message,
-            required_permission=required_permission,
+            required_permission='',
             call_type='create',
             service_instance=service_instance,
             user=user,
