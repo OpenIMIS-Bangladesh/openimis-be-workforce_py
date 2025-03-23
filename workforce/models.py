@@ -646,6 +646,7 @@ class WorkforceApplication(HistoryModel):
         null=True
     )
     application_type = models.CharField(max_length=50, null=True, blank=True)
+    is_submitted = models.CharField(max_length=30, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:
