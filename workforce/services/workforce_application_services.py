@@ -2,6 +2,8 @@ import logging
 
 from core.services import BaseService
 from workforce.models import WorkforceApplication
+from django.db.models import Q
+
 
 logger = logging.getLogger(__name__)
 
