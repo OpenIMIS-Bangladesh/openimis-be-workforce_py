@@ -12,7 +12,7 @@ from .gql_types import (
     WorkforceEmployerStatusInput, WorkforceDocumentInputType, BankInputType,
     WorkforceEmployeeDependentInputType, WorkforceEmployeeDesignationInputType,
     WorkforceEmployeeAccidentInputType, WorkforceEmployeeAccountInfoInputType,
-    WorkforceApplicationInputType,
+    WorkforceApplicationInputType, WorkforceDocumentTypeInputType
 )
 from .services.workforce_organization_services import WorkforceOrganizationServices
 from .services.workforce_representative_services import WorkforceRepresentativeServices
@@ -32,7 +32,7 @@ from .services.workforce_employee_designation_services import WorkforceEmployeeD
 from .services.workforce_employee_accident_services import WorkforceEmployeeAccidentServices
 from .services.workforce_employee_account_info_services import WorkforceEmployeeAccountInfoServices
 from .services.workforce_application_services import WorkforceApplicationServices
-
+from .services.workforce_document_type_services import WorkforceDocumentTypeServices
 mutation_module = "workforce"
 
 
@@ -972,6 +972,56 @@ class UpdateWorkforceApplicationMutation(BaseHistoryModelCreateMutationMixin, Ba
         result = auth_permission_validation(
             failure_message=failure_message,
             required_permission='',
+            call_type='update',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class CreateWorkforceDocumentTypeMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateWorkforceDocumentTypeMutation"
+
+    class Input(WorkforceDocumentTypeInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_create_workforce_document_type"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = WorkforceDocumentTypeServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission=required_permission,
+            call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class UpdateWorkforceDocumentTypeMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWorkforceDocumentTypeMutation"
+
+    class Input(WorkforceDocumentTypeInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_update_workforce_document_type"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = WorkforceDocumentTypeServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission=required_permission,
             call_type='update',
             service_instance=service_instance,
             user=user,

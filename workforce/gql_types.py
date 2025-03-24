@@ -318,3 +318,14 @@ class WorkforceApplicationInputType(OpenIMISMutation.Input):
     application_type = graphene.String()
     is_submitted = graphene.String()
     status = graphene.String()
+
+
+class WorkforceDocumentTypeInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    field_id = graphene.String()
+    application_type = graphene.String()
+    document_type = graphene.String()
+    document_count = graphene.String()
+    name_bn = graphene.String()
+    name_en = graphene.String()
+    status = graphene.String()

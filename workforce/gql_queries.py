@@ -10,7 +10,7 @@ from .models import (
     WorkforceOrganizationUnitDesignation, WorkforceOrganizationEmployee,
     WorkforceEmployer, WorkforceOffice, WorkforceFactory, WorkforceEmployee, WorkforceOrganizationEmployeeDesignation,
     WorkforceDocument, Bank, WorkforceEmployeeDependent, WorkforceEmployeeDesignation, WorkforceEmployeeAccident,
-    WorkforceEmployeeAccountInfo, WorkforceApplication
+    WorkforceEmployeeAccountInfo, WorkforceApplication, WorkforceDocumentType
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -627,3 +627,20 @@ class WorkforceApplicationGQLType(DjangoObjectType):
 
         def resolve_workforce_employee(self, info):
             return self.workforce_employee
+
+
+class WorkforceDocumentTypeGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceDocumentType
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "field_id": ["exact"],
+            "document_type": ["exact"],
+            "application_type": ["exact"],
+            "document_count": ["exact"],
+            "name_bn": ["exact", "contains"],
+            "name_en": ["exact", "contains"],
+            "status": ["exact"],
+        }
+        connection_class = ExtendedConnection
