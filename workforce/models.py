@@ -655,12 +655,12 @@ class WorkforceApplication(HistoryModel):
 
 
 class WorkforceDocumentType(HistoryModel):
-    field_id = models.CharField(max_length=50, null=True, blank=True)
-    application_type = models.CharField(max_length=50, null=True, blank=True)
-    document_type = models.CharField(max_length=50, null=True, blank=True)
-    document_count = models.CharField(max_length=50, null=True, blank=True)
-    name_bn = models.CharField(max_length=50, null=True, blank=True)
-    name_en = models.CharField(max_length=50, null=True, blank=True)
+    field_id = models.CharField(max_length=500, null=True, blank=True)
+    application_type = models.CharField(max_length=500, null=True, blank=True)
+    document_type = models.CharField(max_length=500, null=True, blank=True)
+    document_count = models.CharField(max_length=30, null=True, blank=True)
+    name_bn = models.CharField(max_length=500, null=True, blank=True)
+    name_en = models.CharField(max_length=500, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:
