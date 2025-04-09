@@ -329,3 +329,11 @@ class WorkforceDocumentTypeInputType(OpenIMISMutation.Input):
     name_bn = graphene.String()
     name_en = graphene.String()
     status = graphene.String()
+
+
+class WorkforceDocumentMapInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    workforce_document_type_id = graphene.UUID()
+    mapped_by_id = graphene.String()
+    type = graphene.String()
+    status = graphene.String()

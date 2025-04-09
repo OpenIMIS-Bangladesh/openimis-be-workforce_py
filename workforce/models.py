@@ -666,3 +666,26 @@ class WorkforceDocumentType(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_document_type'
+
+
+class WorkforceDocumentMap(HistoryModel):
+    workforce_document_type = models.ForeignKey(
+        WorkforceDocumentType,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_document_type",
+    )
+    mapped_by = models.ForeignKey(
+        InteractiveUser,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="mapped_by",
+    )
+    type = models.CharField(max_length=500, null=True, blank=True)
+    status = models.CharField(max_length=30, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_document_map'
