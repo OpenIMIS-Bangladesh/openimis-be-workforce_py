@@ -432,7 +432,7 @@ class WorkforceDocument(HistoryModel):
         related_name="approver"  # Unique related name
     )
     document_type = models.CharField(max_length=30, null=False, blank=False)
-    path = models.CharField(max_length=255, null=True, blank=True)
+    path = models.FileField(upload_to='workforce_documents/', null=True, blank=True)
     submission_date = models.DateField(null=True, blank=True)
     verification_date = models.DateField(null=True, blank=True)
     approval_date = models.DateField(null=True, blank=True)

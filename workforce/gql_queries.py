@@ -3,6 +3,7 @@ from django_filters import Filter
 from django_filters import CharFilter
 from graphene_django import DjangoObjectType
 from django.contrib.postgres.fields import JSONField
+from django.db.models import FileField
 
 from core.gql_queries import InteractiveUserGQLType
 from .models import (
@@ -477,6 +478,7 @@ class WorkforceDocumentGQLType(DjangoObjectType):
     class Meta:
         model = WorkforceDocument
         interfaces = (graphene.relay.Node,)
+        connection_class = ExtendedConnection
         filter_fields = {
             "id": ["exact"],
             "workforce_application_id": ['exact'],
@@ -485,14 +487,13 @@ class WorkforceDocumentGQLType(DjangoObjectType):
             "verifier": ["exact"],
             "approver": ["exact"],
             "document_type": ["exact", "icontains"],
-            "path": ["exact"],
+            # "path": ["exact"],
             "submission_date": ["exact"],
             "verification_date": ["exact"],
             "approval_date": ["exact"],
             "remarks": ["exact", "icontains"],
             "status": ["exact", "icontains"],
         }
-        connection_class = ExtendedConnection
 
 
 class WorkforceBankGQLType(DjangoObjectType):
