@@ -1,6 +1,8 @@
 from django.db import models
 from core.models import HistoryModel, InteractiveUser
 from location.models import Location
+from django.utils import timezone
+from datetime import timedelta
 
 
 class WorkforceRepresentative(HistoryModel):
@@ -647,6 +649,7 @@ class WorkforceApplication(HistoryModel):
     )
     application_type = models.CharField(max_length=50, null=True, blank=True)
     is_submitted = models.CharField(max_length=30, null=True, blank=True)
+    verified_by = models.CharField(max_length=30, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:
@@ -689,3 +692,33 @@ class WorkforceDocumentMap(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_document_map'
+
+
+class WorkforceUser(models.Model):
+    name_bn = models.CharField(max_length=255)
+    first_name_en = models.CharField(max_length=255)
+    last_name_en = models.CharField(max_length=255, default=" ")
+    nid = models.CharField(max_length=30)
+    phone_number = models.CharField(max_length=20)
+    status = models.CharField(max_length=30, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_user'
+
+
+# class WorkforceOtp(models.Model):
+#     workforce_user = models.ForeignKey(
+#         WorkforceUser,
+#         models.DO_NOTHING,
+#         blank=False,
+#         null=False,
+#         related_name="workforce_user",
+#     )
+#     phone_number = models.CharField(max_length=20)
+#     expiry_date = models.DateTimeField(default=timezone.now() + timedelta(minutes=5))
+#     status = models.CharField(max_length=30, null=True, blank=True)
+#
+#     class Meta:
+#         managed = True
+#         db_table = 'workforce_otp'

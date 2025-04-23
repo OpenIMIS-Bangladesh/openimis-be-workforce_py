@@ -89,6 +89,11 @@ class Query(graphene.ObjectType):
         client_mutation_id=graphene.String(),
         orderBy=graphene.List(of_type=graphene.String),
     )
+    workforce_user = OrderedDjangoFilterConnectionField(
+        WorkforceUserGQLType,
+        client_mutation_id=graphene.String(),
+        orderBy=graphene.List(of_type=graphene.String),
+    )
 
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
@@ -177,6 +182,10 @@ class Query(graphene.ObjectType):
         service = WorkforceDocumentMapServices(info.context.user)
         query = service.get(**kwargs)
         return gql_optimizer.query(query, info)
+    def resolve_workforce_user(self, info, **kwargs):
+        service = WorkforceUserServices()
+        query = service.get(**kwargs)
+        return gql_optimizer.query(query, info)
 
 
 class Mutation(graphene.ObjectType):
@@ -237,3 +246,6 @@ class Mutation(graphene.ObjectType):
 
     create_workforce_document_map = CreateWorkforceDocumentMapMutation.Field()
     update_workforce_document_map = UpdateWorkforceDocumentMapMutation.Field()
+
+    create_workforce_user = CreateWorkforceUserMutation.Field()
+    update_workforce_user = UpdateWorkforceUserMutation.Field()

@@ -1,8 +1,10 @@
 from core.gql.gql_mutations.base_mutation import BaseMutation, BaseHistoryModelCreateMutationMixin
+from graphql_jwt.mutations import JSONWebTokenMutation, mixins
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils.translation import gettext as _
 from .apps import WorkforceConfig
+import uuid
 import graphene
 from .gql_types import (
     WorkforceOrganizationInputType, WorkforceRepresentativeInputType, WorkforceOrganizationUnitInputType,
@@ -12,7 +14,8 @@ from .gql_types import (
     WorkforceEmployerStatusInput, WorkforceDocumentInputType, BankInputType,
     WorkforceEmployeeDependentInputType, WorkforceEmployeeDesignationInputType,
     WorkforceEmployeeAccidentInputType, WorkforceEmployeeAccountInfoInputType,
-    WorkforceApplicationInputType, WorkforceDocumentTypeInputType, WorkforceDocumentMapInputType
+    WorkforceApplicationInputType, WorkforceDocumentTypeInputType, WorkforceDocumentMapInputType,
+    WorkforceUserInputType
 )
 from .services.workforce_organization_services import WorkforceOrganizationServices
 from .services.workforce_representative_services import WorkforceRepresentativeServices
@@ -34,6 +37,7 @@ from .services.workforce_employee_account_info_services import WorkforceEmployee
 from .services.workforce_application_services import WorkforceApplicationServices
 from .services.workforce_document_type_services import WorkforceDocumentTypeServices
 from .services.workforce_document_map_services import WorkforceDocumentMapServices
+from .services.workforce_user_services import WorkforceUserServices
 mutation_module = "workforce"
 
 
@@ -55,6 +59,27 @@ def auth_permission_validation(failure_message, required_permission, call_type, 
 
         if not user.has_perms(required_permission):
             raise PermissionDenied(_("unauthorized"))
+
+        processed_data = {k: v for k, v in data.items() if k not in ["client_mutation_id", "client_mutation_label"]}
+        if data.get('client_mutation_id') and data.get('client_mutation_id') != '':
+            processed_data['json_ext'] = {'client_mutation_id': data.get('client_mutation_id')}
+
+        if call_type == 'create':
+            return service_instance.create(processed_data)
+        if call_type == 'update':
+            return service_instance.update(processed_data)
+        if call_type == 'update_status':
+            return service_instance.update_status(processed_data)
+        return None
+    except Exception as exc:
+        return [{
+            'message': _(failure_message),
+            'detail': str(exc)
+        }]
+
+
+def no_auth_validation(failure_message, call_type, service_instance, data):
+    try:
 
         processed_data = {k: v for k, v in data.items() if k not in ["client_mutation_id", "client_mutation_label"]}
         if data.get('client_mutation_id') and data.get('client_mutation_id') != '':
@@ -1076,6 +1101,54 @@ class UpdateWorkforceDocumentMapMutation(BaseHistoryModelCreateMutationMixin, Ba
             call_type='update',
             service_instance=service_instance,
             user=user,
+            data=data
+        )
+
+        return result
+
+
+class CreateWorkforceUserMutation(mixins.ResolveMixin, JSONWebTokenMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateWorkforceUserMutation"
+
+    class Input(WorkforceUserInputType):
+        password = graphene.String()
+        internal_id = graphene.String()
+        pass
+
+    @classmethod
+    def mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_create_workforce_user"
+        service_instance = WorkforceUserServices()
+
+        result = no_auth_validation(
+            failure_message=failure_message,
+            call_type='create',
+            service_instance=service_instance,
+            data=data
+        )
+
+        return result
+        # return cls(internal_id=result.get("internal_id"))
+
+
+class UpdateWorkforceUserMutation(mixins.ResolveMixin, JSONWebTokenMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWorkforceUserMutation"
+
+    class Input(WorkforceUserInputType):
+        password = graphene.String()
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_update_workforce_user"
+        service_instance = WorkforceUserServices()
+
+        result = no_auth_validation(
+            failure_message=failure_message,
+            call_type='update',
+            service_instance=service_instance,
             data=data
         )
 

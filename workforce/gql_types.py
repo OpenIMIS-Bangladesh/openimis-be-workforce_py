@@ -317,6 +317,7 @@ class WorkforceApplicationInputType(OpenIMISMutation.Input):
     employee_factory_id = graphene.String()
     application_type = graphene.String()
     is_submitted = graphene.String()
+    verified_by = graphene.String()
     status = graphene.String()
 
 
@@ -336,4 +337,15 @@ class WorkforceDocumentMapInputType(OpenIMISMutation.Input):
     workforce_document_type_id = graphene.UUID()
     mapped_by_id = graphene.String()
     type = graphene.String()
+    status = graphene.String()
+
+
+class WorkforceUserInputType(OpenIMISMutation.Input):
+    client_mutation_label = graphene.String(required=False)
+    id = graphene.String(required=False)
+    name_bn = graphene.String(required=True)
+    first_name_en = graphene.String(required=True)
+    last_name_en = graphene.String()
+    nid = graphene.String(required=True)
+    phone_number = graphene.String(required=True)
     status = graphene.String()

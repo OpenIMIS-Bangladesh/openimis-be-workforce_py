@@ -11,7 +11,8 @@ from .models import (
     WorkforceOrganizationUnitDesignation, WorkforceOrganizationEmployee,
     WorkforceEmployer, WorkforceOffice, WorkforceFactory, WorkforceEmployee, WorkforceOrganizationEmployeeDesignation,
     WorkforceDocument, Bank, WorkforceEmployeeDependent, WorkforceEmployeeDesignation, WorkforceEmployeeAccident,
-    WorkforceEmployeeAccountInfo, WorkforceApplication, WorkforceDocumentType, WorkforceDocumentMap
+    WorkforceEmployeeAccountInfo, WorkforceApplication, WorkforceDocumentType, WorkforceDocumentMap,
+    WorkforceUser
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -622,6 +623,7 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "employee_factory_id": [],
             "application_type": ["exact"],
             "is_submitted": ["exact"],
+            "verified_by": ["exact"],
             "status": ["exact"],
         }
         connection_class = ExtendedConnection
@@ -656,6 +658,22 @@ class WorkforceDocumentMapGQLType(DjangoObjectType):
             "workforce_document_type_id": ["exact"],
             "mapped_by_id": ["exact"],
             "type": ["contains"],
+            "status": ["exact"],
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceUserGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceUser
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "name_bn": ["exact", "contains"],
+            "first_name_en": ["exact", "contains"],
+            "last_name_en": ["exact", "contains"],
+            "nid": ["exact", "contains"],
+            "phone_number": ["exact"],
             "status": ["exact"],
         }
         connection_class = ExtendedConnection
