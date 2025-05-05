@@ -37,4 +37,16 @@ class WorkforceUserServices():
         return {"internal_id": str(uuid.uuid4())}
 
     def update(self, obj_data):
-        return super().update(obj_data)
+        data = {
+            "username": obj_data.get('nid'),
+            "other_names": ' ',
+            "last_name": obj_data.get('last_name_en'),
+            "phone": obj_data.get('phone_number'),
+            "email": '',
+            "language": 'en',
+            "health_facility_id": 1,
+            "password": obj_data.get('password'),
+            "roles": obj_data.get("roles", []),
+        }
+
+        create_or_update_interactive_user(None, data, 1, False)
