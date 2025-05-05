@@ -4,7 +4,6 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils.translation import gettext as _
 from .apps import WorkforceConfig
-import uuid
 import graphene
 from .gql_types import (
     WorkforceOrganizationInputType, WorkforceRepresentativeInputType, WorkforceOrganizationUnitInputType,
@@ -1111,13 +1110,20 @@ class CreateWorkforceUserMutation(mixins.ResolveMixin, JSONWebTokenMutation):
     _mutation_module = mutation_module
     _mutation_class = "CreateWorkforceUserMutation"
 
-    class Input(WorkforceUserInputType):
-        password = graphene.String()
+    class Arguments:
+        name_bn = graphene.String(required=True)
+        first_name_en = graphene.String(required=True)
+        last_name_en = graphene.String()
+        nid = graphene.String(required=True)
+        phone_number = graphene.String(required=True)
+        password = graphene.String(required=True)
         internal_id = graphene.String()
-        pass
+        status = graphene.String()
+
+    internal_id = graphene.String()
 
     @classmethod
-    def mutate(cls, user, **data):
+    def mutate(cls, root, info, **data):
         failure_message = "workforce.mutation.failed_to_create_workforce_user"
         service_instance = WorkforceUserServices()
 
@@ -1128,8 +1134,10 @@ class CreateWorkforceUserMutation(mixins.ResolveMixin, JSONWebTokenMutation):
             data=data
         )
 
-        return result
-        # return cls(internal_id=result.get("internal_id"))
+        if isinstance(result, list):
+            raise Exception(result[0]['message'] + ": " + result[0].get('detail', ''))
+
+        return cls(internal_id=result.get('internal_id'))
 
 
 class UpdateWorkforceUserMutation(mixins.ResolveMixin, JSONWebTokenMutation):
