@@ -3,6 +3,8 @@ from core.models import HistoryModel, InteractiveUser
 from location.models import Location
 from django.utils import timezone
 from datetime import timedelta
+import secrets
+import uuid
 
 
 class WorkforceRepresentative(HistoryModel):
@@ -695,6 +697,7 @@ class WorkforceDocumentMap(HistoryModel):
 
 
 class WorkforceUser(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name_bn = models.CharField(max_length=255)
     first_name_en = models.CharField(max_length=255)
     last_name_en = models.CharField(max_length=255, default=" ")
@@ -708,14 +711,13 @@ class WorkforceUser(models.Model):
 
 
 # class WorkforceOtp(models.Model):
-#     workforce_user = models.ForeignKey(
-#         WorkforceUser,
-#         models.DO_NOTHING,
-#         blank=False,
-#         null=False,
-#         related_name="workforce_user",
-#     )
+#     name_bn = models.CharField(max_length=255)
+#     first_name_en = models.CharField(max_length=255)
+#     last_name_en = models.CharField(max_length=255, default=" ")
+#     nid = models.CharField(max_length=30)
 #     phone_number = models.CharField(max_length=20)
+#     otp = str(secrets.randbelow(90000) + 10000)
+#     creation_date = models.DateTimeField(default=timezone.now())
 #     expiry_date = models.DateTimeField(default=timezone.now() + timedelta(minutes=5))
 #     status = models.CharField(max_length=30, null=True, blank=True)
 #
