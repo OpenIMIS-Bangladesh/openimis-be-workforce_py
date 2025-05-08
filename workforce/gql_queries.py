@@ -681,3 +681,7 @@ class WorkforceUserGQLType(DjangoObjectType):
 
 class WorkforceOtpGQLType(graphene.ObjectType):
     status = graphene.String()
+    name_bn = graphene.String()
+    first_name_en = graphene.String()
+    nid = graphene.String()
+    phone_number = graphene.String()

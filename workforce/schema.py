@@ -3,6 +3,8 @@ import graphene_django_optimizer as gql_optimizer
 from core.schema import OrderedDjangoFilterConnectionField
 from .gql_queries import *
 from .gql_mutations import *
+from django.db.models import F
+from django.utils import timezone
 
 
 class Query(graphene.ObjectType):
@@ -192,11 +194,49 @@ class Query(graphene.ObjectType):
         query = service.get(**kwargs)
         return gql_optimizer.query(query, info)
     def resolve_workforce_otp(self, info, id, otp):
+        now = timezone.now()
         try:
             otp_obj = WorkforceOtp.objects.only("id", "otp", "status").get(id=id, otp=otp, status="active")
-            return WorkforceOtpGQLType(status=otp_obj.status)
+
+            if otp_obj.expiry_date < now:
+                otp_obj.attempts = F('attempts') + 1
+                otp_obj.status = 'expired'
+                otp_obj.save(update_fields=['status', 'attempts'])
+
+                return WorkforceOtpGQLType(status='expired')
+
+            otp_obj.attempts = F('attempts') + 1
+            otp_obj.status = 'used'
+            otp_obj.save(update_fields=['status', 'attempts'])
+
+            return WorkforceOtpGQLType(
+                status='active',
+                name_bn=otp_obj.name_bn,
+                first_name_en=otp_obj.first_name_en,
+                nid=otp_obj.nid,
+                phone_number=otp_obj.phone_number
+            )
+
         except WorkforceOtp.DoesNotExist:
-            return None
+            # Wrong OTP or inactive
+            try:
+                otp_obj = WorkforceOtp.objects.get(id=id)
+
+                otp_obj.attempts = F('attempts') + 1
+                otp_obj.save(update_fields=['attempts'])
+                otp_obj.refresh_from_db()
+
+                # If too many tries, mark status
+                if otp_obj.attempts >= 3 and otp_obj.status == 'active':
+                    otp_obj.status = 'too-many-tries'
+                    otp_obj.save(update_fields=['status'])
+
+                    return WorkforceOtpGQLType(status='too-many-tries')
+
+                return WorkforceOtpGQLType(status='invalid')
+
+            except WorkforceOtp.DoesNotExist:
+                return WorkforceOtpGQLType(status='not-found')
 
 
 class Mutation(graphene.ObjectType):
