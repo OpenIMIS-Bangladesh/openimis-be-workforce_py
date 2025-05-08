@@ -94,6 +94,11 @@ class Query(graphene.ObjectType):
         client_mutation_id=graphene.String(),
         orderBy=graphene.List(of_type=graphene.String),
     )
+    workforce_otp = graphene.Field(
+        WorkforceOtpGQLType,
+        id=graphene.UUID(required=True),
+        otp=graphene.String(required=True),
+    )
 
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
@@ -186,6 +191,12 @@ class Query(graphene.ObjectType):
         service = WorkforceUserServices()
         query = service.get(**kwargs)
         return gql_optimizer.query(query, info)
+    def resolve_workforce_otp(self, info, id, otp):
+        try:
+            otp_obj = WorkforceOtp.objects.only("id", "otp", "status").get(id=id, otp=otp, status="active")
+            return WorkforceOtpGQLType(status=otp_obj.status)
+        except WorkforceOtp.DoesNotExist:
+            return None
 
 
 class Mutation(graphene.ObjectType):
@@ -249,3 +260,5 @@ class Mutation(graphene.ObjectType):
 
     create_workforce_user = CreateWorkforceUserMutation.Field()
     update_workforce_user = UpdateWorkforceUserMutation.Field()
+
+    create_workforce_otp = CreateWorkforceOtpMutation.Field()

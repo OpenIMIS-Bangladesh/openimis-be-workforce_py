@@ -12,7 +12,7 @@ from .models import (
     WorkforceEmployer, WorkforceOffice, WorkforceFactory, WorkforceEmployee, WorkforceOrganizationEmployeeDesignation,
     WorkforceDocument, Bank, WorkforceEmployeeDependent, WorkforceEmployeeDesignation, WorkforceEmployeeAccident,
     WorkforceEmployeeAccountInfo, WorkforceApplication, WorkforceDocumentType, WorkforceDocumentMap,
-    WorkforceUser
+    WorkforceUser, WorkforceOtp
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -677,3 +677,7 @@ class WorkforceUserGQLType(DjangoObjectType):
             "status": ["exact"],
         }
         connection_class = ExtendedConnection
+
+
+class WorkforceOtpGQLType(graphene.ObjectType):
+    status = graphene.String()

@@ -7,6 +7,14 @@ import secrets
 import uuid
 
 
+def generate_otp():
+    return str(secrets.randbelow(90000) + 10000)
+
+
+def expiry_time():
+    return timezone.now() + timedelta(minutes=5)
+
+
 class WorkforceRepresentative(HistoryModel):
     type = models.CharField(max_length=255)
     name_bn = models.CharField(max_length=255, db_comment='Translatable name field. May use any language')
@@ -710,17 +718,19 @@ class WorkforceUser(models.Model):
         db_table = 'workforce_user'
 
 
-# class WorkforceOtp(models.Model):
-#     name_bn = models.CharField(max_length=255)
-#     first_name_en = models.CharField(max_length=255)
-#     last_name_en = models.CharField(max_length=255, default=" ")
-#     nid = models.CharField(max_length=30)
-#     phone_number = models.CharField(max_length=20)
-#     otp = str(secrets.randbelow(90000) + 10000)
-#     creation_date = models.DateTimeField(default=timezone.now())
-#     expiry_date = models.DateTimeField(default=timezone.now() + timedelta(minutes=5))
-#     status = models.CharField(max_length=30, null=True, blank=True)
-#
-#     class Meta:
-#         managed = True
-#         db_table = 'workforce_otp'
+class WorkforceOtp(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name_bn = models.CharField(max_length=255)
+    first_name_en = models.CharField(max_length=255)
+    last_name_en = models.CharField(max_length=255, default=" ")
+    nid = models.CharField(max_length=30)
+    phone_number = models.CharField(max_length=20)
+    otp = models.CharField(max_length=6, default=generate_otp)
+    creation_date = models.DateTimeField(default=timezone.now)
+    expiry_date = models.DateTimeField(default=expiry_time)
+    attempts = models.IntegerField(default=0)
+    status = models.CharField(max_length=30, default='active')
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_otp'

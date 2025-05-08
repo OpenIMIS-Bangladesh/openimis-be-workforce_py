@@ -37,6 +37,7 @@ from .services.workforce_application_services import WorkforceApplicationService
 from .services.workforce_document_type_services import WorkforceDocumentTypeServices
 from .services.workforce_document_map_services import WorkforceDocumentMapServices
 from .services.workforce_user_services import WorkforceUserServices
+from .services.workforce_otp_services import WorkforceOtpServices
 mutation_module = "workforce"
 
 
@@ -1172,3 +1173,40 @@ class UpdateWorkforceUserMutation(mixins.ResolveMixin, JSONWebTokenMutation):
             raise Exception(result[0]['message'] + ": " + result[0].get('detail', ''))
 
         return cls(internal_id=result.get('internal_id'))
+
+
+class CreateWorkforceOtpMutation(mixins.ResolveMixin, graphene.Mutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateWorkforceOtpMutation"
+
+    class Arguments:
+        name_bn = graphene.String(required=True)
+        first_name_en = graphene.String(required=True)
+        last_name_en = graphene.String()
+        nid = graphene.String(required=True)
+        phone_number = graphene.String(required=True)
+        otp = graphene.String()
+        creation_date = graphene.String()
+        expiry_date = graphene.String()
+        attempts = graphene.Int()
+        internal_id = graphene.String()
+        status = graphene.String()
+
+    internal_id = graphene.String()
+
+    @classmethod
+    def mutate(cls, root, info, **data):
+        failure_message = "workforce.mutation.failed_to_create_workforce_otp"
+        service_instance = WorkforceOtpServices()
+
+        result = no_auth_validation(
+            failure_message=failure_message,
+            call_type='create',
+            service_instance=service_instance,
+            data=data
+        )
+
+        if isinstance(result, list):
+            raise Exception(result[0]['message'] + ": " + result[0].get('detail', ''))
+
+        return result
