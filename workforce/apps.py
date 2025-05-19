@@ -71,6 +71,9 @@ DEFAULT_CFG = {
     "gql_mutation_update_workforce_document_perms": ["811003"],
     "gql_mutation_delete_workforce_document_perms": ["811004"],
 
+    # WorkforceChecker (812xxx)
+    "gql_workforce_checker_perms": ["812001"],
+
     "default_validations_disabled": False,
 }
 
@@ -144,6 +147,9 @@ class WorkforceConfig(AppConfig):
     gql_mutation_create_workforce_document_perms = []
     gql_mutation_update_workforce_document_perms = []
     gql_mutation_delete_workforce_document_perms = []
+
+    # WorkforceChecker (812xxx)
+    gql_workforce_checker_perms = []
 
     default_validations_disabled = None
 
