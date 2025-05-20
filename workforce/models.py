@@ -742,7 +742,7 @@ class WorkforceApplicationMovement(HistoryModel):
         models.DO_NOTHING,
         blank=False,
         null=False,
-        related_name="application_id",
+        related_name="application",
     )
     note = models.TextField(null=True, blank=True)
     action = models.CharField(max_length=255, null=True, blank=True)
@@ -751,56 +751,56 @@ class WorkforceApplicationMovement(HistoryModel):
         models.DO_NOTHING,
         blank=True,
         null=True,
-        related_name="to_employee_record_id",
+        related_name="to_employee_record",
     )
     from_employee_record_id = models.ForeignKey(
         WorkforceOrganizationEmployee,
         models.DO_NOTHING,
         blank=True,
         null=True,
-        related_name="from_employee_record_id",
+        related_name="from_employee_record",
     )
     to_office_unit_organogram_id = models.ForeignKey(
         WorkforceOrganizationUnitDesignation,
         models.DO_NOTHING,
         blank=True,
         null=True,
-        related_name="to_office_unit_organogram_id",
+        related_name="to_office_unit_organogram",
     )
     from_office_unit_organogram_id = models.ForeignKey(
         WorkforceOrganizationUnitDesignation,
         models.DO_NOTHING,
         blank=True,
         null=True,
-        related_name="from_office_unit_organogram_id",
+        related_name="from_office_unit_organogram",
     )
     to_office_id = models.ForeignKey(
         WorkforceOrganization,
         models.DO_NOTHING,
         blank=True,
         null=True,
-        related_name="to_office_id",
+        related_name="to_office",
     )
     from_office_id = models.ForeignKey(
         WorkforceOrganization,
         models.DO_NOTHING,
         blank=True,
         null=True,
-        related_name="from_office_id",
+        related_name="from_office",
     )
     to_office_unit_id = models.ForeignKey(
         WorkforceOrganizationUnit,
         models.DO_NOTHING,
         blank=True,
         null=True,
-        related_name="to_office_unit_id",
+        related_name="to_office_unit",
     )
     from_office_unit_id = models.ForeignKey(
         WorkforceOrganizationUnit,
         models.DO_NOTHING,
         blank=True,
         null=True,
-        related_name="from_office_unit_id",
+        related_name="from_office_unit",
     )
     is_current = models.BooleanField(null=True, blank=True)
     is_cc = models.BooleanField(null=True, blank=True)
