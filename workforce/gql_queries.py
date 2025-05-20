@@ -12,7 +12,7 @@ from .models import (
     WorkforceEmployer, WorkforceOffice, WorkforceFactory, WorkforceEmployee, WorkforceOrganizationEmployeeDesignation,
     WorkforceDocument, Bank, WorkforceEmployeeDependent, WorkforceEmployeeDesignation, WorkforceEmployeeAccident,
     WorkforceEmployeeAccountInfo, WorkforceApplication, WorkforceDocumentType, WorkforceDocumentMap,
-    WorkforceUser, WorkforceOtp
+    WorkforceUser, WorkforceOtp, WorkforceApplicationMovement
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -684,3 +684,41 @@ class WorkforceOtpGQLType(graphene.ObjectType):
     first_name_en = graphene.String()
     nid = graphene.String()
     phone_number = graphene.String()
+
+
+class WorkforceApplicationMovementGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceApplicationMovement
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "application_id": ["exact"],
+            "note": ["exact", "contains"],
+            "action": ["exact", "contains"],
+            "to_employee_record_id": ["exact",],
+            "from_employee_record_id": ["exact", ],
+            "to_office_unit_organogram_id": ["exact"],
+            "from_office_unit_organogram_id": ["exact"],
+            "to_office_id": ["exact"],
+            "from_office_id": ["exact"],
+            "to_office_unit_id": ["exact"],
+            "from_office_unit_id": ["exact"],
+            "is_current": ["exact"],
+            "is_cc": ["exact"],
+            "is_committee_head": ["exact"],
+            "is_committee_member": ["exact"],
+            "to_employee_name_bng": ["exact", "contains"],
+            "from_employee_name_bng": ["exact", "contains"],
+            "to_employee_name_eng": ["exact", "contains"],
+            "from_employee_name_eng": ["exact", "contains"],
+            "to_employee_designation_bng": ["exact", "contains"],
+            "from_employee_designation_bng": ["exact", "contains"],
+            "to_office_name_bng": ["exact", "contains"],
+            "from_office_name_bng": ["exact", "contains"],
+            "to_employee_unit_name_bng": ["exact", "contains"],
+            "from_employee_unit_name_bng": ["exact", "contains"],
+            "from_employee_username": ["exact", "contains"],
+            "deadline_date": ["exact"],
+            "status": ["exact", "icontains"],
+        }
+        connection_class = ExtendedConnection

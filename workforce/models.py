@@ -735,80 +735,91 @@ class WorkforceOtp(models.Model):
         managed = True
         db_table = 'workforce_otp'
 
-#
-# class WorkforceApplicationMovement(HistoryModel):
-#     application_id = models.ForeignKey(
-#         WorkforceApplication,
-#         models.DO_NOTHING,
-#         blank=False,
-#         null=False,
-#         related_name="application_id",
-#     )
-#     note = models.TextField(null=True, blank=True)
-#     action = models.CharField(max_length=255, null=True, blank=True)
-#     to_employee_record_id = models.ForeignKey(
-#         WorkforceOrganizationEmployee,
-#         models.DO_NOTHING,
-#         blank=True,
-#         null=True,
-#         related_name="to_employee_record_id",
-#     )
-#     from_employee_record_id = models.ForeignKey(
-#         WorkforceOrganizationEmployee,
-#         models.DO_NOTHING,
-#         blank=True,
-#         null=True,
-#         related_name="from_employee_record_id",
-#     )
-#     to_office_unit_organogram_id = models.ForeignKey(
-#         WorkforceOrganizationUnitDesignation,
-#         models.DO_NOTHING,
-#         blank=True,
-#         null=True,
-#         related_name="to_office_unit_organogram_id",
-#     )
-#     from_office_unit_organogram_id = models.ForeignKey(
-#         WorkforceOrganizationUnitDesignation,
-#         models.DO_NOTHING,
-#         blank=True,
-#         null=True,
-#         related_name="from_office_unit_organogram_id",
-#     )
-#     to_office_id = models.ForeignKey(
-#         WorkforceOrganization,
-#         models.DO_NOTHING,
-#         blank=True,
-#         null=True,
-#         related_name="to_office_id",
-#     )
-#     from_office_id = models.ForeignKey(
-#         WorkforceOrganization,
-#         models.DO_NOTHING,
-#         blank=True,
-#         null=True,
-#         related_name="from_office_id",
-#     )
-#     to_office_unit_id = models.ForeignKey(
-#         WorkforceOrganizationUnit,
-#         models.DO_NOTHING,
-#         blank=True,
-#         null=True,
-#         related_name="to_office_unit_id",
-#     )
-#     from_office_unit_id = models.ForeignKey(
-#         WorkforceOrganizationUnit,
-#         models.DO_NOTHING,
-#         blank=True,
-#         null=True,
-#         related_name="from_office_unit_id",
-#     )
-#
-#     document_type = models.CharField(max_length=500, null=True, blank=True)
-#     document_count = models.CharField(max_length=30, null=True, blank=True)
-#     name_bn = models.CharField(max_length=500, null=True, blank=True)
-#     name_en = models.CharField(max_length=500, null=True, blank=True)
-#     status = models.CharField(max_length=30, null=True, blank=True)
-#
-#     class Meta:
-#         managed = True
-#         db_table = 'workforce_application_movement'
+
+class WorkforceApplicationMovement(HistoryModel):
+    application_id = models.ForeignKey(
+        WorkforceApplication,
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="application_id",
+    )
+    note = models.TextField(null=True, blank=True)
+    action = models.CharField(max_length=255, null=True, blank=True)
+    to_employee_record_id = models.ForeignKey(
+        WorkforceOrganizationEmployee,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="to_employee_record_id",
+    )
+    from_employee_record_id = models.ForeignKey(
+        WorkforceOrganizationEmployee,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="from_employee_record_id",
+    )
+    to_office_unit_organogram_id = models.ForeignKey(
+        WorkforceOrganizationUnitDesignation,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="to_office_unit_organogram_id",
+    )
+    from_office_unit_organogram_id = models.ForeignKey(
+        WorkforceOrganizationUnitDesignation,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="from_office_unit_organogram_id",
+    )
+    to_office_id = models.ForeignKey(
+        WorkforceOrganization,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="to_office_id",
+    )
+    from_office_id = models.ForeignKey(
+        WorkforceOrganization,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="from_office_id",
+    )
+    to_office_unit_id = models.ForeignKey(
+        WorkforceOrganizationUnit,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="to_office_unit_id",
+    )
+    from_office_unit_id = models.ForeignKey(
+        WorkforceOrganizationUnit,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="from_office_unit_id",
+    )
+    is_current = models.BooleanField(null=True, blank=True)
+    is_cc = models.BooleanField(null=True, blank=True)
+    is_committee_head = models.BooleanField(null=True, blank=True)
+    is_committee_member = models.BooleanField(null=True, blank=True)
+    to_employee_name_bng = models.CharField(max_length=255, null=True, blank=True)
+    from_employee_name_bng = models.CharField(max_length=255, null=True, blank=True)
+    to_employee_name_eng = models.CharField(max_length=255, null=True, blank=True)
+    from_employee_name_eng = models.CharField(max_length=255, null=True, blank=True)
+    to_employee_designation_bng = models.CharField(max_length=255, null=True, blank=True)
+    from_employee_designation_bng = models.CharField(max_length=255, null=True, blank=True)
+    to_office_name_bng = models.CharField(max_length=255, null=True, blank=True)
+    from_office_name_bng = models.CharField(max_length=255, null=True, blank=True)
+    to_employee_unit_name_bng = models.CharField(max_length=255, null=True, blank=True)
+    from_employee_unit_name_bng = models.CharField(max_length=255, null=True, blank=True)
+    from_employee_username = models.CharField(max_length=255, null=True, blank=True)
+    deadline_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=30, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_application_movement'
