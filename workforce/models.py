@@ -737,7 +737,7 @@ class WorkforceOtp(models.Model):
 
 
 class WorkforceApplicationMovement(HistoryModel):
-    application_id = models.ForeignKey(
+    application = models.ForeignKey(
         WorkforceApplication,
         models.DO_NOTHING,
         blank=False,
@@ -746,56 +746,56 @@ class WorkforceApplicationMovement(HistoryModel):
     )
     note = models.TextField(null=True, blank=True)
     action = models.CharField(max_length=255, null=True, blank=True)
-    to_employee_record_id = models.ForeignKey(
+    to_employee_record = models.ForeignKey(
         WorkforceOrganizationEmployee,
         models.DO_NOTHING,
         blank=True,
         null=True,
         related_name="to_employee_record",
     )
-    from_employee_record_id = models.ForeignKey(
+    from_employee_record = models.ForeignKey(
         WorkforceOrganizationEmployee,
         models.DO_NOTHING,
         blank=True,
         null=True,
         related_name="from_employee_record",
     )
-    to_office_unit_organogram_id = models.ForeignKey(
+    to_office_unit_organogram = models.ForeignKey(
         WorkforceOrganizationUnitDesignation,
         models.DO_NOTHING,
         blank=True,
         null=True,
         related_name="to_office_unit_organogram",
     )
-    from_office_unit_organogram_id = models.ForeignKey(
+    from_office_unit_organogram = models.ForeignKey(
         WorkforceOrganizationUnitDesignation,
         models.DO_NOTHING,
         blank=True,
         null=True,
         related_name="from_office_unit_organogram",
     )
-    to_office_id = models.ForeignKey(
+    to_office = models.ForeignKey(
         WorkforceOrganization,
         models.DO_NOTHING,
         blank=True,
         null=True,
         related_name="to_office",
     )
-    from_office_id = models.ForeignKey(
+    from_office = models.ForeignKey(
         WorkforceOrganization,
         models.DO_NOTHING,
         blank=True,
         null=True,
         related_name="from_office",
     )
-    to_office_unit_id = models.ForeignKey(
+    to_office_unit = models.ForeignKey(
         WorkforceOrganizationUnit,
         models.DO_NOTHING,
         blank=True,
         null=True,
         related_name="to_office_unit",
     )
-    from_office_unit_id = models.ForeignKey(
+    from_office_unit = models.ForeignKey(
         WorkforceOrganizationUnit,
         models.DO_NOTHING,
         blank=True,
