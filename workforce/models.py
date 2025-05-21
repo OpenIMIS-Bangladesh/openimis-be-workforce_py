@@ -660,6 +660,8 @@ class WorkforceApplication(HistoryModel):
     application_type = models.CharField(max_length=50, null=True, blank=True)
     is_submitted = models.BooleanField(null=True, blank=True)
     verified_by = models.CharField(max_length=30, null=True, blank=True)
+    phone_number = models.CharField(max_length=20, null=True, blank=True)
+    tracking_number = models.CharField(max_length=30, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:

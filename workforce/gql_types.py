@@ -318,6 +318,7 @@ class WorkforceApplicationInputType(OpenIMISMutation.Input):
     application_type = graphene.String()
     is_submitted = graphene.String()
     verified_by = graphene.Boolean()
+    phone_number = graphene.String()
     status = graphene.String()
 
 

@@ -623,6 +623,8 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "employee_factory_id": [],
             "application_type": ["exact"],
             "is_submitted": ["exact"],
+            "phone_number": ["exact"],
+            "tracking_number": ["exact"],
             "status": ["exact"],
         }
         connection_class = ExtendedConnection

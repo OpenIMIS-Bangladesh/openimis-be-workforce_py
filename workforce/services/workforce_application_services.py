@@ -1,5 +1,5 @@
 import logging
-
+import random
 from core.services import BaseService
 from workforce.models import WorkforceApplication
 from django.db.models import Q
@@ -23,6 +23,10 @@ class WorkforceApplicationServices(BaseService):
         return query
 
     def create(self, obj_data):
+        phone_number = obj_data.get("phone_number")
+        if phone_number:
+            tracking_number = phone_number + str(random.randint(0,99)).zfill(2)
+            obj_data["tracking_number"] = tracking_number
         return super().create(obj_data)
 
     def update(self, obj_data):
