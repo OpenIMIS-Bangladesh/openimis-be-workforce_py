@@ -74,6 +74,9 @@ DEFAULT_CFG = {
     # WorkforceChecker (812xxx)
     "gql_workforce_checker_perms": ["812001"],
 
+    # WorkforceApprover (813xxx)
+    "gql_workforce_approver_perms": ["813001"],
+
     "default_validations_disabled": False,
 }
 
@@ -151,6 +154,8 @@ class WorkforceConfig(AppConfig):
     # WorkforceChecker (812xxx)
     gql_workforce_checker_perms = []
 
+    # WorkforceChecker (813xxx)
+    gql_workforce_approver_perms = []
     default_validations_disabled = None
 
     def __load_config(self, cfg):
