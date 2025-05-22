@@ -103,6 +103,7 @@ class Query(graphene.ObjectType):
     )
     workforce_application_movement = OrderedDjangoFilterConnectionField(
         WorkforceApplicationMovementGQLType,
+        client_mutation_id=graphene.String(),
         orderBy=graphene.List(of_type=graphene.String),
     )
 
@@ -243,8 +244,9 @@ class Query(graphene.ObjectType):
                 return WorkforceOtpGQLType(status='not-found')
 
     def resolve_workforce_application_movements(self, info, **kwargs):
-        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
-            raise PermissionDenied(_("Unauthorized access"))
+        # if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+        #     raise PermissionDenied(_("Unauthorized access"))
+        pass
 
 
 class Mutation(graphene.ObjectType):

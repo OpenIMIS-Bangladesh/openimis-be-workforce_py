@@ -1253,7 +1253,7 @@ class UpdateWorkforceApplicationMovementMutation(BaseHistoryModelCreateMutationM
 
         result = auth_permission_validation(
             failure_message=failure_message,
-            required_permission=required_permission,
+            required_permission=None,
             call_type='update',
             service_instance=service_instance,
             user=user,
