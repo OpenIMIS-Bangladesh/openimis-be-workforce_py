@@ -19,7 +19,7 @@ class WorkforceApplicationServices(BaseService):
         if client_mutation_id:
             filters.append(Q(json_ext__contains={"client_mutation_id": client_mutation_id}))
 
-        query = model.objects.filter(*filters, is_deleted=False).all()
+        query = model.objects.filter(*filters, is_deleted=False).order_by('-date_created')
         return query
 
     def create(self, obj_data):
