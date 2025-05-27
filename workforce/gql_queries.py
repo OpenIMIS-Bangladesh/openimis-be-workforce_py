@@ -68,6 +68,7 @@ class WorkforceOrganizationEmployeeDesignationForUnitDesignationGQLType(DjangoOb
             "status": ["exact"],
             "joining_date": ["exact"],
             "release_date": ["exact"],
+            "employee_id": ["exact"]
         }
         connection_class = ExtendedConnection
 
