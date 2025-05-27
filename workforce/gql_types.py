@@ -363,7 +363,7 @@ class WorkforceOtpInputType(OpenIMISMutation.Input):
 
 class WorkforceApplicationMovementInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
-    application_id = graphene.String()
+    application_id = graphene.String(required=True)
     note = graphene.String()
     action = graphene.String()
     to_employee_record_id = graphene.String()
