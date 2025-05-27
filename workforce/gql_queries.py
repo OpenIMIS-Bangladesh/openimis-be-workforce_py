@@ -722,6 +722,10 @@ class WorkforceApplicationMovementGQLType(DjangoObjectType):
             "from_employee_unit_name_bng": ["exact", "contains"],
             "from_employee_username": ["exact", "contains"],
             "deadline_date": ["exact"],
+            "is_reverted": ["exact"],
+            "reverting_date": ["exact"],
+            "reverted_by": ["exact"],
+            "revert_note": ["exact"],
             "status": ["exact", "icontains"],
         }
         connection_class = ExtendedConnection

@@ -820,6 +820,16 @@ class WorkforceApplicationMovement(HistoryModel):
     from_employee_unit_name_bng = models.CharField(max_length=255, null=True, blank=True)
     from_employee_username = models.CharField(max_length=255, null=True, blank=True)
     deadline_date = models.DateField(null=True, blank=True)
+    is_reverted = models.BooleanField(null=True, blank=True)
+    reverting_date = models.DateField(null=True, blank=True)
+    reverted_by = models.ForeignKey(
+        WorkforceOrganizationEmployee,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="reverted_by",
+    )
+    revert_note = models.TextField(null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:

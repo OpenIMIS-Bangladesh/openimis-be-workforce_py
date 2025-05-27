@@ -390,4 +390,8 @@ class WorkforceApplicationMovementInputType(OpenIMISMutation.Input):
     from_employee_unit_name_bng = graphene.String()
     from_employee_username = graphene.String()
     deadline_date = graphene.String()
+    is_reverted = graphene.Boolean()
+    reverting_date = graphene.String()
+    reverted_by = graphene.String()
+    revert_note = graphene.String()
     status = graphene.String()
