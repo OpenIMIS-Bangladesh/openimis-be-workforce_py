@@ -1,3 +1,4 @@
+import graphene
 from django.utils.translation import gettext as _
 import graphene_django_optimizer as gql_optimizer
 from core.schema import OrderedDjangoFilterConnectionField
@@ -28,6 +29,7 @@ class Query(graphene.ObjectType):
     )
     workforce_organization_employees = OrderedDjangoFilterConnectionField(
         WorkforceOrganizationEmployeeGQLType,
+        username=graphene.String(required=False),
         orderBy=graphene.List(of_type=graphene.String),
     )
 
@@ -130,10 +132,16 @@ class Query(graphene.ObjectType):
             raise PermissionDenied(_("Unauthorized access"))
         pass
 
-    def resolve_workforce_organization_employees(self, info, **kwargs):
+    def resolve_workforce_organization_employees(self, info, username=None, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("Unauthorized access"))
-        pass
+
+        qs = WorkforceOrganizationEmployee.objects.all()
+
+        if username:
+            qs = qs.filter(related_user__login_name__iexact=username)
+
+        return qs
 
     def resolve_workforce_organization_employee_designations(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
