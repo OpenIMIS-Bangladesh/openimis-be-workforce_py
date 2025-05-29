@@ -216,7 +216,7 @@ class WorkforceDocumentInputType(OpenIMISMutation.Input):
     verifier_id = graphene.String()
     approver_id = graphene.String()
     document_type = graphene.String()
-    path = graphene.String()
+    path = graphene.String(required=False)
     submission_date = graphene.String()
     verification_date = graphene.String()
     approval_date = graphene.String()
