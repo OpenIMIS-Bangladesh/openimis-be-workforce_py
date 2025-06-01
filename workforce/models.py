@@ -711,7 +711,8 @@ class WorkforceUser(models.Model):
     name_bn = models.CharField(max_length=255)
     first_name_en = models.CharField(max_length=255)
     last_name_en = models.CharField(max_length=255, default=" ")
-    nid = models.CharField(max_length=30)
+    nid = models.CharField(max_length=30, null=True, blank=True)
+    birth_certificate_no = models.CharField(max_length=30, null=True, blank=True)
     phone_number = models.CharField(max_length=20)
     status = models.CharField(max_length=30, null=True, blank=True)
 
