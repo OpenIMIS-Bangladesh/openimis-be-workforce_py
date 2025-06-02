@@ -17,6 +17,7 @@ class WorkforceOtpServices():
             first_name_en=obj_data.get("first_name_en"),
             last_name_en=obj_data.get("last_name_en"),
             nid=obj_data.get("nid"),
+            birth_certificate_no=obj_data.get("birth_certificate_no"),
             phone_number=obj_data.get("phone_number"),
             status=obj_data.get("status"),
         )

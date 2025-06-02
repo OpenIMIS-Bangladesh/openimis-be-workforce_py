@@ -227,6 +227,7 @@ class Query(graphene.ObjectType):
                 name_bn=otp_obj.name_bn,
                 first_name_en=otp_obj.first_name_en,
                 nid=otp_obj.nid,
+                birth_certificate_no=otp_obj.birth_certificate_no,
                 phone_number=otp_obj.phone_number
             )
 
