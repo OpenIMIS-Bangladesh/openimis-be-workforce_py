@@ -358,6 +358,7 @@ class WorkforceOtpInputType(OpenIMISMutation.Input):
     name_bn = graphene.String()
     first_name_en = graphene.String()
     nid = graphene.String()
+    birth_certificate_no = graphene.String()
     phone_number = graphene.String()
 
 
