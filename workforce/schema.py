@@ -1,4 +1,5 @@
 import graphene
+import os
 from django.utils.translation import gettext as _
 import graphene_django_optimizer as gql_optimizer
 from core.schema import OrderedDjangoFilterConnectionField
@@ -6,6 +7,7 @@ from .gql_queries import *
 from .gql_mutations import *
 from django.db.models import F
 from django.utils import timezone
+import requests
 
 
 class Query(graphene.ObjectType):
@@ -107,6 +109,9 @@ class Query(graphene.ObjectType):
         WorkforceApplicationMovementGQLType,
         client_mutation_id=graphene.String(),
         orderBy=graphene.List(of_type=graphene.String),
+    )
+    workforce_nid_verification = graphene.String(
+        nid=graphene.NonNull(graphene.String)
     )
 
     def resolve_workforce_representatives(self, info, **kwargs):
@@ -257,6 +262,32 @@ class Query(graphene.ObjectType):
         #     raise PermissionDenied(_("Unauthorized access"))
         pass
 
+    def resolve_workforce_nid_verification(self, info, nid):
+        api_key = os.environ.get('LIMS_API_KEY')
+        base_url = os.environ.get('LIMS_API_BASE_URL')
+        token_url = f"{base_url}/user/api/v1/users/token"
+        token_params = {"apiKey": api_key}
+
+        try:
+            token_response = requests.get(token_url, params=token_params, headers={"accept": "application/json"})
+            token_response.raise_for_status()
+            access_token = token_response.json()["payload"]["access_token"]
+        except Exception as e:
+            return {"error": f"Token error: {str(e)}"}
+
+        details_url = f"{base_url}/organization/api/v1/workforces/details"
+        headers = {
+            "accept": "application/json",
+            "Authorization": f"Bearer {access_token}"
+        }
+        params = {"nidNumber": nid}
+
+        try:
+            details_response = requests.get(details_url, headers=headers, params=params)
+            details_response.raise_for_status()
+            return details_response.json().get("payload", {})
+        except Exception as e:
+            return {"error": f"NID fetch error: {str(e)}"}
 
 class Mutation(graphene.ObjectType):
     create_workforce_representative = CreateWorkforceRepresentativeMutation.Field()
