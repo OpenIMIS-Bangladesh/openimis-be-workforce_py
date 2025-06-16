@@ -8,6 +8,7 @@ from .gql_mutations import *
 from django.db.models import F
 from django.utils import timezone
 import requests
+from graphene.types.generic import GenericScalar
 
 
 class Query(graphene.ObjectType):
@@ -110,7 +111,7 @@ class Query(graphene.ObjectType):
         client_mutation_id=graphene.String(),
         orderBy=graphene.List(of_type=graphene.String),
     )
-    workforce_nid_verification = graphene.String(
+    workforce_nid_verification = GenericScalar(
         nid=graphene.NonNull(graphene.String)
     )
 
