@@ -319,6 +319,7 @@ class WorkforceApplicationInputType(OpenIMISMutation.Input):
     is_submitted = graphene.String()
     verified_by = graphene.Boolean()
     phone_number = graphene.String()
+    application_summary = graphene.String()
     status = graphene.String()
 
 
@@ -394,5 +395,31 @@ class WorkforceApplicationMovementInputType(OpenIMISMutation.Input):
     is_reverted = graphene.Boolean()
     reverting_date = graphene.String()
     reverted_by = graphene.String()
+    revert_note = graphene.String()
+    status = graphene.String()
+
+
+class WorkforceApplicationSummaryInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    application_data = graphene.String()
+    meeting_date = graphene.String()
+    status = graphene.String()
+
+
+class WorkforceApplicationSummaryMovementInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    application_summary_id = graphene.UUID()
+    comment = graphene.String()
+    action = graphene.String()
+    from_workforce_organization_employee_id = graphene.UUID()
+    to_workforce_organization_employee_id = graphene.UUID()
+    is_current = graphene.Boolean()
+    is_cc = graphene.Boolean()
+    is_committee_head = graphene.Boolean()
+    is_committee_member = graphene.Boolean()
+    deadline_date = graphene.String()
+    is_reverted = graphene.Boolean()
+    reverting_date = graphene.String()
+    reverted_by_id = graphene.String()
     revert_note = graphene.String()
     status = graphene.String()

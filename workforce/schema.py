@@ -114,6 +114,16 @@ class Query(graphene.ObjectType):
     workforce_nid_verification = GenericScalar(
         nid=graphene.NonNull(graphene.String)
     )
+    workforce_application_summary = OrderedDjangoFilterConnectionField(
+        WorkforceApplicationSummaryGQLType,
+        client_mutation_id=graphene.String(),
+        orderBy=graphene.List(of_type=graphene.String),
+    )
+    workforce_application_summary_movement = OrderedDjangoFilterConnectionField(
+        WorkforceApplicationSummaryMovementGQLType,
+        client_mutation_id=graphene.String(),
+        orderBy=graphene.List(of_type=graphene.String),
+    )
 
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
@@ -290,6 +300,14 @@ class Query(graphene.ObjectType):
         except Exception as e:
             return {"error": f"NID fetch error: {str(e)}"}
 
+    def resolve_workforce_application_summary(self, info, **kwargs):
+        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+            raise PermissionDenied(_("Unauthorized access"))
+    def resolve_workforce_application_summary_movement(self, info, **kwargs):
+        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+            raise PermissionDenied(_("Unauthorized access"))
+
+
 class Mutation(graphene.ObjectType):
     create_workforce_representative = CreateWorkforceRepresentativeMutation.Field()
     update_workforce_representative = UpdateWorkforceRepresentativeMutation.Field()
@@ -356,3 +374,9 @@ class Mutation(graphene.ObjectType):
 
     create_workforce_application_movement = CreateWorkforceApplicationMovementMutation.Field()
     update_workforce_application_movement = UpdateWorkforceApplicationMovementMutation.Field()
+
+    create_workforce_application_summary = CreateWorkforceApplicationSummaryMutation.Field()
+    update_workforce_application_summary = UpdateWorkforceApplicationSummaryMutation.Field()
+
+    create_workforce_application_summary_movement = CreateWorkforceApplicationSummaryMovementMutation.Field()
+    update_workforce_application_summary_movement = UpdateWorkforceApplicationSummaryMovementMutation.Field()

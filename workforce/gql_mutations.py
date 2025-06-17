@@ -14,7 +14,8 @@ from .gql_types import (
     WorkforceEmployeeDependentInputType, WorkforceEmployeeDesignationInputType,
     WorkforceEmployeeAccidentInputType, WorkforceEmployeeAccountInfoInputType,
     WorkforceApplicationInputType, WorkforceDocumentTypeInputType, WorkforceDocumentMapInputType,
-    WorkforceUserInputType, WorkforceApplicationMovementInputType
+    WorkforceUserInputType, WorkforceApplicationMovementInputType, WorkforceApplicationSummaryInputType,
+    WorkforceApplicationSummaryMovementInputType
 )
 from .services.workforce_organization_services import WorkforceOrganizationServices
 from .services.workforce_representative_services import WorkforceRepresentativeServices
@@ -39,6 +40,9 @@ from .services.workforce_document_map_services import WorkforceDocumentMapServic
 from .services.workforce_user_services import WorkforceUserServices
 from .services.workforce_otp_services import WorkforceOtpServices
 from .services.workforce_application_movement_services import WorkforceApplicationMovementServices
+from .services.workforce_application_summary_services import WorkforceApplicationSummaryServices
+from .services.workforce_application_summary_movement_services import WorkforceApplicationSummaryMovementServices
+
 mutation_module = "workforce"
 
 
@@ -1255,6 +1259,106 @@ class UpdateWorkforceApplicationMovementMutation(BaseHistoryModelCreateMutationM
         result = auth_permission_validation(
             failure_message=failure_message,
             required_permission=None,
+            call_type='update',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class CreateWorkforceApplicationSummaryMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateWorkforceApplicationSummaryMutation"
+
+    class Input(WorkforceApplicationSummaryInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_create_workforce_application_summary"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = WorkforceApplicationSummaryServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission=required_permission,
+            call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class UpdateWorkforceApplicationSummaryMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWorkforceApplicationSummaryMutation"
+
+    class Input(WorkforceApplicationSummaryInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_update_workforce_application_summary"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = WorkforceApplicationSummaryServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission=required_permission,
+            call_type='update',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class CreateWorkforceApplicationSummaryMovementMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateWorkforceApplicationSummaryMovementMutation"
+
+    class Input(WorkforceApplicationSummaryMovementInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_create_workforce_application_summary_movement"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = WorkforceApplicationSummaryMovementServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission=required_permission,
+            call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class UpdateWorkforceApplicationSummaryMovementMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWorkforceApplicationSummaryMovementMutation"
+
+    class Input(WorkforceApplicationSummaryMovementInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_update_workforce_application_summary_movement"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = WorkforceApplicationSummaryMovementServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission=required_permission,
             call_type='update',
             service_instance=service_instance,
             user=user,

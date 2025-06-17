@@ -12,7 +12,7 @@ from .models import (
     WorkforceEmployer, WorkforceOffice, WorkforceFactory, WorkforceEmployee, WorkforceOrganizationEmployeeDesignation,
     WorkforceDocument, Bank, WorkforceEmployeeDependent, WorkforceEmployeeDesignation, WorkforceEmployeeAccident,
     WorkforceEmployeeAccountInfo, WorkforceApplication, WorkforceDocumentType, WorkforceDocumentMap,
-    WorkforceUser, WorkforceOtp, WorkforceApplicationMovement
+    WorkforceUser, WorkforceOtp, WorkforceApplicationMovement, WorkforceApplicationSummary, WorkforceApplicationSummaryMovement
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -626,6 +626,7 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "is_submitted": ["exact"],
             "phone_number": ["exact"],
             "tracking_number": ["exact"],
+            "application_summary": ["exact"],
             "status": ["exact"],
         }
         connection_class = ExtendedConnection
@@ -728,5 +729,43 @@ class WorkforceApplicationMovementGQLType(DjangoObjectType):
             "reverted_by": ["exact"],
             "revert_note": ["exact"],
             "status": ["exact", "icontains"],
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceApplicationSummaryGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceApplicationSummary
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "application_data": [],
+            "meeting_date": ["exact"],
+            "status": ["exact"],
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceApplicationSummaryMovementGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceApplicationSummaryMovement
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "application_summary_id": [],
+            "comment": [],
+            "action": ["exact"],
+            "from_workforce_organization_employee_id": ["exact"],
+            "to_workforce_organization_employee_id": ["exact"],
+            "is_current": ["exact"],
+            "is_cc": ["exact"],
+            "is_committee_head": ["exact"],
+            "is_committee_member": ["exact"],
+            "deadline_date": ["exact"],
+            "is_reverted": ["exact"],
+            "reverting_date": ["exact"],
+            "reverted_by_id": ["exact"],
+            "revert_note": [],
+            "status": ["exact"],
         }
         connection_class = ExtendedConnection
