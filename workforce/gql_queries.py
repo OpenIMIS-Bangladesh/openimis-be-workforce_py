@@ -743,7 +743,7 @@ class WorkforceApplicationSummaryGQLType(DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         filter_fields = {
             "id": ["exact"],
-            "application_data": ["exact"],
+            "application_data": [],
             "meeting_date": ["exact"],
             "remarks": [],
             "name": ["exact"],
