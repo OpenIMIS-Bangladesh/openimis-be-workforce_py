@@ -403,6 +403,8 @@ class WorkforceApplicationSummaryInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
     application_data = graphene.String()
     meeting_date = graphene.String()
+    remarks = graphene.String()
+    name = graphene.String()
     status = graphene.String()
 
 

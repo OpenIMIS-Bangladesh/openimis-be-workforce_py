@@ -848,6 +848,8 @@ class WorkforceApplicationMovement(HistoryModel):
 class WorkforceApplicationSummary(HistoryModel):
     application_data = models.JSONField(null=True, blank=True)
     meeting_date = models.DateField(null=True, blank=True)
+    remarks = models.TextField(null=True, blank=True)
+    name = models.CharField(max_length=100, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:
