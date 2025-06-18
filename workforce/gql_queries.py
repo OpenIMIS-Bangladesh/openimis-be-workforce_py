@@ -473,7 +473,8 @@ class WorkforceEmployeeDesignationGQLType(DjangoObjectType):
             "monthly_salary": ["exact"],
             "status": ["exact", "icontains"],
             **prefix_filterset("workforce_employee__", {
-                "email": ["exact"]
+                "email": ["exact"],
+                "nid": ["exact", "icontains"],
             }),
         }
         connection_class = ExtendedConnection
