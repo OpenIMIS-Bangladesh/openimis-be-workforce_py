@@ -662,11 +662,26 @@ class WorkforceApplication(HistoryModel):
     verified_by = models.CharField(max_length=30, null=True, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     tracking_number = models.CharField(max_length=30, null=True, blank=True)
-    application_summary = models.ForeignKey(
+    cf_application_summary = models.ForeignKey(
         "WorkforceApplicationSummary",
         models.DO_NOTHING,
         blank=True,
-        null=True
+        null=True,
+        related_name="cf_application_summary"
+    )
+    eis_application_summary = models.ForeignKey(
+        "WorkforceApplicationSummary",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="eis_application_summary"
+    )
+    blwf_application_summary = models.ForeignKey(
+        "WorkforceApplicationSummary",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="blwf_application_summary"
     )
     status = models.CharField(max_length=30, null=True, blank=True)
 
@@ -851,6 +866,7 @@ class WorkforceApplicationSummary(HistoryModel):
     remarks = models.TextField(null=True, blank=True)
     name = models.CharField(max_length=100, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
+    organization_type = models.CharField(max_length=30, null=True, blank=True)
     year = models.IntegerField(null=True, blank=True)
     month = models.CharField(max_length=20, null=True, blank=True)
     class Meta:

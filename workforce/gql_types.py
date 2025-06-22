@@ -319,7 +319,9 @@ class WorkforceApplicationInputType(OpenIMISMutation.Input):
     is_submitted = graphene.String()
     verified_by = graphene.Boolean()
     phone_number = graphene.String()
-    application_summary = graphene.String()
+    cf_application_summary = graphene.String()
+    eis_application_summary = graphene.String()
+    blwf_application_summary = graphene.String()
     status = graphene.String()
 
 
@@ -406,6 +408,7 @@ class WorkforceApplicationSummaryInputType(OpenIMISMutation.Input):
     remarks = graphene.String()
     name = graphene.String()
     status = graphene.String()
+    organization_type = graphene.String()
     year = graphene.Int()
     month = graphene.String()
 

@@ -630,7 +630,9 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "is_submitted": ["exact"],
             "phone_number": ["exact"],
             "tracking_number": ["exact"],
-            "application_summary": ["exact"],
+            "cf_application_summary": ["exact"],
+            "eis_application_summary": ["exact"],
+            "blwf_application_summary": ["exact"],
             "status": ["exact"],
         }
         connection_class = ExtendedConnection
@@ -748,6 +750,7 @@ class WorkforceApplicationSummaryGQLType(DjangoObjectType):
             "remarks": [],
             "name": ["exact"],
             "status": ["exact"],
+            "organization_type": ["exact"],
             "year": ["exact"],         
             "month": ["exact"],
         }
