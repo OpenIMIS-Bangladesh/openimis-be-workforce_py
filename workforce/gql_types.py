@@ -406,6 +406,8 @@ class WorkforceApplicationSummaryInputType(OpenIMISMutation.Input):
     remarks = graphene.String()
     name = graphene.String()
     status = graphene.String()
+    year = graphene.Int()
+    month = graphene.String()
 
 
 class WorkforceApplicationSummaryMovementInputType(OpenIMISMutation.Input):

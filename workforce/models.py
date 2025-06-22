@@ -851,7 +851,8 @@ class WorkforceApplicationSummary(HistoryModel):
     remarks = models.TextField(null=True, blank=True)
     name = models.CharField(max_length=100, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
-
+    year = models.IntegerField(null=True, blank=True)
+    month = models.CharField(max_length=20, null=True, blank=True)
     class Meta:
         managed = True
         db_table = 'workforce_application_summary'

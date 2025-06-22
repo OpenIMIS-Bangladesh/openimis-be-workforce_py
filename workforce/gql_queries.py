@@ -748,6 +748,8 @@ class WorkforceApplicationSummaryGQLType(DjangoObjectType):
             "remarks": [],
             "name": ["exact"],
             "status": ["exact"],
+            "year": ["exact"],         
+            "month": ["exact"],
         }
         connection_class = ExtendedConnection
 
