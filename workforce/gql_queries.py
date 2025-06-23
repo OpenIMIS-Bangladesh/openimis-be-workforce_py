@@ -609,6 +609,24 @@ class WorkforceEmployeeAccountInfoGQLType(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class WorkforceApplicationSummaryGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceApplicationSummary
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "application_data": [],
+            "meeting_date": ["exact"],
+            "remarks": [],
+            "name": ["exact"],
+            "status": ["exact"],
+            "organization_type": ["exact"],
+            "year": ["exact"],         
+            "month": ["exact"],
+        }
+        connection_class = ExtendedConnection
+
+
 class WorkforceApplicationGQLType(DjangoObjectType):
     workforce_employee = graphene.Field(lambda: WorkforceEmployeeGQLType)
     class Meta:
@@ -630,9 +648,9 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "is_submitted": ["exact"],
             "phone_number": ["exact"],
             "tracking_number": ["exact"],
-            "cf_application_summary": ["exact"],
-            "eis_application_summary": ["exact"],
-            "blwf_application_summary": ["exact"],
+            **prefix_filterset("cf_application_summary__", WorkforceApplicationSummaryGQLType._meta.filter_fields),
+            **prefix_filterset("eis_application_summary__", WorkforceApplicationSummaryGQLType._meta.filter_fields),
+            **prefix_filterset("blwf_application_summary__", WorkforceApplicationSummaryGQLType._meta.filter_fields),
             "status": ["exact"],
         }
         connection_class = ExtendedConnection
@@ -735,24 +753,6 @@ class WorkforceApplicationMovementGQLType(DjangoObjectType):
             "reverted_by": ["exact"],
             "revert_note": ["exact"],
             "status": ["exact", "icontains"],
-        }
-        connection_class = ExtendedConnection
-
-
-class WorkforceApplicationSummaryGQLType(DjangoObjectType):
-    class Meta:
-        model = WorkforceApplicationSummary
-        interfaces = (graphene.relay.Node,)
-        filter_fields = {
-            "id": ["exact"],
-            "application_data": [],
-            "meeting_date": ["exact"],
-            "remarks": [],
-            "name": ["exact"],
-            "status": ["exact"],
-            "organization_type": ["exact"],
-            "year": ["exact"],         
-            "month": ["exact"],
         }
         connection_class = ExtendedConnection
 
