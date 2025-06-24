@@ -494,6 +494,7 @@ class WorkforceDocumentGQLType(DjangoObjectType):
             "approver": ["exact"],
             "document_type": ["exact", "icontains"],
             "path": ["exact"],
+            "url": ["exact"],
             "submission_date": ["exact"],
             "verification_date": ["exact"],
             "approval_date": ["exact"],
