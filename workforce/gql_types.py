@@ -323,6 +323,7 @@ class WorkforceApplicationInputType(OpenIMISMutation.Input):
     cf_application_summary_id = graphene.String()
     eis_application_summary_id = graphene.String()
     blwf_application_summary_id = graphene.String()
+    grant_money_id = graphene.String()
     status = graphene.String()
 
 
@@ -430,4 +431,12 @@ class WorkforceApplicationSummaryMovementInputType(OpenIMISMutation.Input):
     reverting_date = graphene.String()
     reverted_by_id = graphene.String()
     revert_note = graphene.String()
+    status = graphene.String()
+
+
+class WorkforceGrantMoneyInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    organization_type = graphene.String()
+    application_type = graphene.String()
+    grant_money = graphene.Float()
     status = graphene.String()

@@ -12,7 +12,8 @@ from .models import (
     WorkforceEmployer, WorkforceOffice, WorkforceFactory, WorkforceEmployee, WorkforceOrganizationEmployeeDesignation,
     WorkforceDocument, Bank, WorkforceEmployeeDependent, WorkforceEmployeeDesignation, WorkforceEmployeeAccident,
     WorkforceEmployeeAccountInfo, WorkforceApplication, WorkforceDocumentType, WorkforceDocumentMap,
-    WorkforceUser, WorkforceOtp, WorkforceApplicationMovement, WorkforceApplicationSummary, WorkforceApplicationSummaryMovement
+    WorkforceUser, WorkforceOtp, WorkforceApplicationMovement, WorkforceApplicationSummary, WorkforceApplicationSummaryMovement,
+    WorkforceGrantMoney
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -652,6 +653,7 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             **prefix_filterset("cf_application_summary__", WorkforceApplicationSummaryGQLType._meta.filter_fields),
             **prefix_filterset("eis_application_summary__", WorkforceApplicationSummaryGQLType._meta.filter_fields),
             **prefix_filterset("blwf_application_summary__", WorkforceApplicationSummaryGQLType._meta.filter_fields),
+            "grant_money_id": ["exact"],
             "status": ["exact"],
         }
         connection_class = ExtendedConnection
@@ -778,6 +780,20 @@ class WorkforceApplicationSummaryMovementGQLType(DjangoObjectType):
             "reverting_date": ["exact"],
             "reverted_by_id": ["exact"],
             "revert_note": [],
+            "status": ["exact"],
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceGrantMoneyGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceGrantMoney
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "organization_type": ["exact"],
+            "application_type": ["exact"],
+            "grant_money": ["exact"],
             "status": ["exact"],
         }
         connection_class = ExtendedConnection

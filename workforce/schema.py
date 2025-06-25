@@ -125,6 +125,10 @@ class Query(graphene.ObjectType):
         client_mutation_id=graphene.String(),
         orderBy=graphene.List(of_type=graphene.String),
     )
+    workforce_grant_money = OrderedDjangoFilterConnectionField(
+        WorkforceGrantMoneyGQLType,
+        orderBy=graphene.List(of_type=graphene.String),
+    )
 
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
@@ -305,7 +309,9 @@ class Query(graphene.ObjectType):
     def resolve_workforce_application_summary_movement(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("Unauthorized access"))
-
+    def resolve_workforce_grant_money(self, info, **kwargs):
+        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+            raise PermissionDenied(_("Unauthorized access"))
 
 class Mutation(graphene.ObjectType):
     create_workforce_representative = CreateWorkforceRepresentativeMutation.Field()
@@ -379,3 +385,6 @@ class Mutation(graphene.ObjectType):
 
     create_workforce_application_summary_movement = CreateWorkforceApplicationSummaryMovementMutation.Field()
     update_workforce_application_summary_movement = UpdateWorkforceApplicationSummaryMovementMutation.Field()
+
+    create_workforce_grant_money = CreateWorkforceGrantMoneyMutation.Field()
+    update_workforce_grant_money = UpdateWorkforceGrantMoneyMutation.Field()

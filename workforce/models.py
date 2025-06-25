@@ -684,6 +684,13 @@ class WorkforceApplication(HistoryModel):
         null=True,
         related_name="blwf_application_summary"
     )
+    grant_money = models.ForeignKey(
+        "WorkforceGrantMoney",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="application_grant_money"
+    )
     status = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:
@@ -919,3 +926,14 @@ class WorkforceApplicationSummaryMovement(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_application_summary_movement'
+
+
+class WorkforceGrantMoney(HistoryModel):
+    organization_type = models.CharField(max_length=50, null=True, blank=True)
+    application_type = models.CharField(max_length=50, null=True, blank=True)
+    grant_money = models.FloatField(null=True, blank=True)
+    status = models.CharField(max_length=30, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_grant_money'
