@@ -80,6 +80,9 @@ DEFAULT_CFG = {
     # WorkforceFactoryAdmin (814xxx)
     "gql_workforce_factory_admin_perms": ["814001"],
 
+    # WorkforceDirector (815xxx)
+    "gql_workforce_director_perms": ["815001"],
+
     "default_validations_disabled": False,
 }
 
@@ -162,6 +165,9 @@ class WorkforceConfig(AppConfig):
 
     # WorkforceFactoryAdmin (814xxx)
     gql_workforce_factory_admin_perms = []
+
+    # WorkforceDirector (815xxx)
+    gql_workforce_director_perms = []
 
     default_validations_disabled = None
 
