@@ -703,6 +703,7 @@ class WorkforceUserGQLType(DjangoObjectType):
             "first_name_en": ["exact", "contains"],
             "last_name_en": ["exact", "contains"],
             "nid": ["exact", "contains"],
+            "birth_certificate_no": ["exact"],
             "phone_number": ["exact"],
             "status": ["exact"],
         }
