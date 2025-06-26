@@ -654,6 +654,7 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             **prefix_filterset("eis_application_summary__", WorkforceApplicationSummaryGQLType._meta.filter_fields),
             **prefix_filterset("blwf_application_summary__", WorkforceApplicationSummaryGQLType._meta.filter_fields),
             "grant_money_id": ["exact"],
+            "metadata": [],
             "status": ["exact"],
         }
         connection_class = ExtendedConnection

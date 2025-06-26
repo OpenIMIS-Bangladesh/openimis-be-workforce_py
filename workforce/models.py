@@ -691,6 +691,7 @@ class WorkforceApplication(HistoryModel):
         null=True,
         related_name="application_grant_money"
     )
+    metadata = models.JSONField(null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:
