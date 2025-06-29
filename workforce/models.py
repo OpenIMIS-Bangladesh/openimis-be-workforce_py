@@ -444,7 +444,8 @@ class WorkforceDocument(HistoryModel):
         related_name="approver"  # Unique related name
     )
     document_type = models.CharField(max_length=30, null=False, blank=False)
-    path = models.CharField(null=True, blank=True)
+    path = models.CharField(max_length=512, null=True, blank=True)
+    url = models.CharField(max_length=512, null=True, blank=True)
     submission_date = models.DateField(null=True, blank=True)
     verification_date = models.DateField(null=True, blank=True)
     approval_date = models.DateField(null=True, blank=True)
@@ -683,6 +684,14 @@ class WorkforceApplication(HistoryModel):
         null=True,
         related_name="blwf_application_summary"
     )
+    grant_money = models.ForeignKey(
+        "WorkforceGrantMoney",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="application_grant_money"
+    )
+    metadata = models.JSONField(null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:
@@ -918,3 +927,14 @@ class WorkforceApplicationSummaryMovement(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_application_summary_movement'
+
+
+class WorkforceGrantMoney(HistoryModel):
+    organization_type = models.CharField(max_length=50, null=True, blank=True)
+    application_type = models.CharField(max_length=50, null=True, blank=True)
+    grant_money = models.FloatField(null=True, blank=True)
+    status = models.CharField(max_length=30, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_grant_money'

@@ -4,11 +4,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import IsAuthenticated
 from workforce.services.file_services import save_uploaded_file, retrieve_file_response
 
 
 class FileUploadView(APIView):
     parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         file = request.FILES.get('file')
@@ -20,6 +22,8 @@ class FileUploadView(APIView):
 
 
 class FileRetrieveView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, filename):
         try:
             return retrieve_file_response(filename)

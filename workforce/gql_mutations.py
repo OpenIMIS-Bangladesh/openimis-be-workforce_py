@@ -15,7 +15,7 @@ from .gql_types import (
     WorkforceEmployeeAccidentInputType, WorkforceEmployeeAccountInfoInputType,
     WorkforceApplicationInputType, WorkforceDocumentTypeInputType, WorkforceDocumentMapInputType,
     WorkforceUserInputType, WorkforceApplicationMovementInputType, WorkforceApplicationSummaryInputType,
-    WorkforceApplicationSummaryMovementInputType
+    WorkforceApplicationSummaryMovementInputType, WorkforceGrantMoneyInputType
 )
 from .services.workforce_organization_services import WorkforceOrganizationServices
 from .services.workforce_representative_services import WorkforceRepresentativeServices
@@ -42,6 +42,7 @@ from .services.workforce_otp_services import WorkforceOtpServices
 from .services.workforce_application_movement_services import WorkforceApplicationMovementServices
 from .services.workforce_application_summary_services import WorkforceApplicationSummaryServices
 from .services.workforce_application_summary_movement_services import WorkforceApplicationSummaryMovementServices
+from .services.workforce_grant_money_services import WorkforceGrantMoneyServices
 
 mutation_module = "workforce"
 
@@ -1355,6 +1356,56 @@ class UpdateWorkforceApplicationSummaryMovementMutation(BaseHistoryModelCreateMu
         failure_message = "workforce.mutation.failed_to_update_workforce_application_summary_movement"
         required_permission = WorkforceConfig.gql_query_workforces_perms
         service_instance = WorkforceApplicationSummaryMovementServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission=required_permission,
+            call_type='update',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class CreateWorkforceGrantMoneyMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateWorkforceGrantMoneyMutation"
+
+    class Input(WorkforceGrantMoneyInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_create_workforce_grant_money"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = WorkforceGrantMoneyServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission=required_permission,
+            call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class UpdateWorkforceGrantMoneyMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWorkforceGrantMoneyMutation"
+
+    class Input(WorkforceGrantMoneyInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_update_workforce_grant_money"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = WorkforceGrantMoneyServices(user)
 
         result = auth_permission_validation(
             failure_message=failure_message,
