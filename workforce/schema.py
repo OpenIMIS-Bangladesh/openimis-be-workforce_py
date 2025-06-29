@@ -306,6 +306,10 @@ class Query(graphene.ObjectType):
     def resolve_workforce_application_summary(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("Unauthorized access"))
+
+        service = WorkforceApplicationSummaryServices(info.context.user)
+        query = service.get(**kwargs)
+        return gql_optimizer.query(query, info)
     def resolve_workforce_application_summary_movement(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("Unauthorized access"))
