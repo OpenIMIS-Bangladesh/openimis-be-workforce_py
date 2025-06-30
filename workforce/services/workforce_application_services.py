@@ -39,6 +39,7 @@ class WorkforceApplicationServices(BaseService):
                 )
 
                 obj_data["grant_money_id"] = grant.id
+                obj_data["grant_amount"] = grant.grant_money
 
             except ObjectDoesNotExist:
                 logger.warning(
