@@ -82,6 +82,9 @@ DEFAULT_CFG = {
 
     # WorkforceDirector (815xxx)
     "gql_workforce_director_perms": ["815001"],
+    
+    # WorkforceAssociation (816xxx)
+    "gql_workforce_association_perms": ["816001"],
 
     "default_validations_disabled": False,
 }
