@@ -51,15 +51,4 @@ def delete_interactive_user(id):
 
 
 class UserServices:
-    OBJECT_TYPE = WorkforceUser
-
-    def get(self, **kwargs):
-        filters = []
-        model = self.OBJECT_TYPE
-
-        client_mutation_id = kwargs.get("client_mutation_id", None)
-        if client_mutation_id:
-            filters.append(Q(json_ext__contains={"client_mutation_id": client_mutation_id}))
-
-        query = model.objects.filter(*filters, is_deleted=False).all()
-        return query
+    pass
