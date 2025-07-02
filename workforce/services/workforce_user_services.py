@@ -11,8 +11,9 @@ class WorkforceUserServices():
     OBJECT_TYPE = WorkforceUser
 
     def create(self, obj_data):
+        login_name = obj_data.get('nid') or obj_data.get('birth_certificate_no')
         data = {
-            "username": obj_data.get('nid'),
+            "username": login_name,
             "other_names": ' ',
             "last_name": obj_data.get('last_name_en'),
             "phone": obj_data.get('phone_number'),
