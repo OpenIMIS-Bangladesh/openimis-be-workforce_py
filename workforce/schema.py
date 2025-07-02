@@ -222,7 +222,7 @@ class Query(graphene.ObjectType):
         query = service.get(**kwargs)
         return gql_optimizer.query(query, info)
     def resolve_workforce_user(self, info, **kwargs):
-        service = WorkforceUserServices()
+        service = WorkforceUserServices(info.context.user)
         query = service.get(**kwargs)
         return gql_optimizer.query(query, info)
     def resolve_workforce_otp(self, info, id, otp):

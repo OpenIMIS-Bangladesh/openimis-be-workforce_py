@@ -1,5 +1,8 @@
 from core.models import InteractiveUser, User
 from location.models import UserDistrict
+from workforce.models import WorkforceUser
+from django.db.models import Q
+
 
 def create_interactive_user(last_name, other_names, login_name, role_id):
     user = InteractiveUser.objects.create(
@@ -48,4 +51,15 @@ def delete_interactive_user(id):
 
 
 class UserServices:
-    pass
+    OBJECT_TYPE = WorkforceUser
+
+    def get(self, **kwargs):
+        filters = []
+        model = self.OBJECT_TYPE
+
+        client_mutation_id = kwargs.get("client_mutation_id", None)
+        if client_mutation_id:
+            filters.append(Q(json_ext__contains={"client_mutation_id": client_mutation_id}))
+
+        query = model.objects.filter(*filters, is_deleted=False).all()
+        return query
