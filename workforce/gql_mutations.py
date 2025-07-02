@@ -1122,6 +1122,7 @@ class CreateWorkforceUserMutation(mixins.ResolveMixin, JSONWebTokenMutation):
         first_name_en = graphene.String(required=True)
         last_name_en = graphene.String()
         nid = graphene.String(required=True)
+        birth_certificate_no = graphene.String()
         phone_number = graphene.String(required=True)
         password = graphene.String(required=True)
         internal_id = graphene.String()
