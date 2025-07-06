@@ -638,6 +638,7 @@ class WorkforceApplication(HistoryModel):
     employee_bank_info = models.JSONField(null=True, blank=True)
     employee_dependent_info = models.JSONField(null=True, blank=True)
     employee_accident_info = models.JSONField(null=True, blank=True)
+    employee_children_info = models.JSONField(null=True, blank=True)
     organization = models.ForeignKey(
         WorkforceOrganization,
         models.DO_NOTHING,
