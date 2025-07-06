@@ -642,6 +642,7 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "employee_bank_info": [],
             "employee_dependent_info": [],
             "employee_accident_info": [],
+            "employee_children_info": [],
             "organization_id": ["exact"],
             "organization_type": ["exact"],
             "employee_employer_id": ["exact"],
