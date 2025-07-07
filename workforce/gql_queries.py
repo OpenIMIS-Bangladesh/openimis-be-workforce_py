@@ -636,7 +636,6 @@ class WorkforceApplicationGQLType(DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         filter_fields = {
             "id": ["exact"],
-            "workforce_employee_id": ["exact"],
             "employee_designation_info": [],
             "employee_document_info": [],
             "employee_bank_info": [],
@@ -651,6 +650,7 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "is_submitted": ["exact"],
             "phone_number": ["exact"],
             "tracking_number": ["exact"],
+            **prefix_filterset("workforce_employee__", WorkforceEmployeeGQLType._meta.filter_fields),
             **prefix_filterset("cf_application_summary__", WorkforceApplicationSummaryGQLType._meta.filter_fields),
             **prefix_filterset("eis_application_summary__", WorkforceApplicationSummaryGQLType._meta.filter_fields),
             **prefix_filterset("blwf_application_summary__", WorkforceApplicationSummaryGQLType._meta.filter_fields),
