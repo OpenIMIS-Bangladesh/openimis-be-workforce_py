@@ -13,7 +13,7 @@ from .models import (
     WorkforceDocument, Bank, WorkforceEmployeeDependent, WorkforceEmployeeDesignation, WorkforceEmployeeAccident,
     WorkforceEmployeeAccountInfo, WorkforceApplication, WorkforceDocumentType, WorkforceDocumentMap,
     WorkforceUser, WorkforceOtp, WorkforceApplicationMovement, WorkforceApplicationSummary, WorkforceApplicationSummaryMovement,
-    WorkforceGrantMoney
+    WorkforceGrantMoney, WorkforceDiseases
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -799,6 +799,24 @@ class WorkforceGrantMoneyGQLType(DjangoObjectType):
             "application_type": ["exact"],
             "grant_money": ["exact"],
             "application_type_no": ["exact"],
+            "status": ["exact"],
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceDiseasesGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceDiseases
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "grade": ["exact"],
+            "disease_type": ["exact"],
+            "disease_name": ["exact"],
+            "disease_no": ["exact"],
+            "documents": [],
+            "minimum_donation_amount": ["exact"],
+            "maximum_donation_amount": ["exact"],
             "status": ["exact"],
         }
         connection_class = ExtendedConnection

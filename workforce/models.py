@@ -941,3 +941,18 @@ class WorkforceGrantMoney(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_grant_money'
+
+
+class WorkforceDiseases(HistoryModel):
+    grade = models.CharField(max_length=2)
+    disease_type = models.CharField(max_length=100, null=True, blank=True)
+    disease_name = models.CharField(max_length=100, null=True, blank=True)
+    disease_no = models.CharField(max_length=4, null=True, blank=True)
+    documents = models.JSONField(null=True, blank=True)
+    minimum_donation_amount = models.FloatField()
+    maximum_donation_amount = models.FloatField()
+    status = models.CharField(max_length=30, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_diseases'
