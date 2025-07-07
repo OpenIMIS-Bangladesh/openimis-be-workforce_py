@@ -1,5 +1,6 @@
 import logging
 import random
+from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from core.services import BaseService
 from workforce.models import WorkforceApplication, WorkforceGrantMoney
@@ -40,6 +41,14 @@ class WorkforceApplicationServices(BaseService):
 
                 obj_data["grant_money_id"] = grant.id
                 obj_data["grant_amount"] = grant.grant_money
+
+                # Tracking number generation
+                year_suffix = str(datetime.now().year)[-2:]
+                application_type_no = str(grant.application_type_no).zfill(2)
+                existing_count = WorkforceApplication.objects.count()
+                application_count_str = str(existing_count + 1).zfill(6)
+                tracking_number = f"{year_suffix}{application_type_no}{application_count_str}"
+                obj_data["tracking_number"] = tracking_number
 
             except ObjectDoesNotExist:
                 logger.warning(
