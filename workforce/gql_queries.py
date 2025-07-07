@@ -798,6 +798,7 @@ class WorkforceGrantMoneyGQLType(DjangoObjectType):
             "organization_type": ["exact"],
             "application_type": ["exact"],
             "grant_money": ["exact"],
+            "application_type_no": ["exact"],
             "status": ["exact"],
         }
         connection_class = ExtendedConnection
