@@ -946,8 +946,8 @@ class WorkforceGrantMoney(HistoryModel):
 
 class WorkforceDiseases(HistoryModel):
     grade = models.CharField(max_length=2)
-    disease_type = models.CharField(max_length=100, null=True, blank=True)
-    disease_name = models.CharField(max_length=100, null=True, blank=True)
+    disease_type = models.CharField(max_length=512, null=True, blank=True)
+    disease_name = models.CharField(max_length=512, null=True, blank=True)
     disease_no = models.CharField(max_length=4, null=True, blank=True)
     documents = models.JSONField(null=True, blank=True)
     minimum_donation_amount = models.FloatField()
