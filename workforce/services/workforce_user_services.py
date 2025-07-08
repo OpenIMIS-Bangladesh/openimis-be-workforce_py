@@ -1,6 +1,7 @@
 from core.services.userServices import create_or_update_interactive_user
 import logging
 import uuid
+from django.db.models import Q
 
 from workforce.models import WorkforceUser
 from workforce.services.workforce_employee_services import WorkforceEmployeeServices
