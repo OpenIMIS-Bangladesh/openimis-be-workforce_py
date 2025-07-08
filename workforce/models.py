@@ -315,15 +315,15 @@ class WorkforceEmployee(HistoryModel):
     present_location = models.ForeignKey(
         Location,
         models.DO_NOTHING,
-        blank=False,
-        null=False,
+        blank=True,
+        null=True,
         related_name="employee_present_location",
     )
     permanent_location = models.ForeignKey(
         Location,
         models.DO_NOTHING,
-        blank=False,
-        null=False,
+        blank=True,
+        null=True,
         related_name="employee_permanent_location",
     )
     first_name_bn = models.CharField(max_length=255, null=True, blank=True,

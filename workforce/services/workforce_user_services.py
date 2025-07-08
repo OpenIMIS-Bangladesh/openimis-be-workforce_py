@@ -3,6 +3,8 @@ import logging
 import uuid
 
 from workforce.models import WorkforceUser
+from workforce.services.workforce_employee_services import WorkforceEmployeeServices
+from core.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +26,8 @@ class WorkforceUserServices():
             "roles": obj_data.get("roles", []),
         }
 
-        create_or_update_interactive_user(None, data, 1, False)
+        created_user = create_or_update_interactive_user(None, data, 1, False)
+        create_user_id = created_user[0].id
 
         user_obj = WorkforceUser.objects.create(
             name_bn=obj_data.get("name_bn"),
@@ -34,6 +37,20 @@ class WorkforceUserServices():
             phone_number=obj_data.get("phone_number"),
             status=obj_data.get("status"),
         )
+
+        user = User.objects.get(i_user=1)
+
+        employee_service = WorkforceEmployeeServices(user)
+        employee_data = {
+            "first_name_bn": obj_data.get("name_bn"),
+            "last_name_bn": "",
+            "first_name_en": obj_data.get("first_name_en"),
+            "last_name_en": "",
+            "nid": obj_data.get("nid"),
+            "birth_certificate_no": obj_data.get('birth_certificate_no'),
+            "related_user_id": create_user_id,
+        }
+        employee_create = employee_service.create(employee_data)
 
         return {"internal_id": str(uuid.uuid4())}
 
@@ -58,7 +75,8 @@ class WorkforceUserServices():
 
         client_mutation_id = kwargs.get("client_mutation_id", None)
         if client_mutation_id:
-            filters.append(Q(json_ext__contains={"client_mutation_id": client_mutation_id}))
+            filters.append(
+                Q(json_ext__contains={"client_mutation_id": client_mutation_id}))
 
         query = model.objects.filter(*filters, status='active').all()
         return query
