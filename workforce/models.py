@@ -660,6 +660,7 @@ class WorkforceApplication(HistoryModel):
         null=True
     )
     application_type = models.CharField(max_length=50, null=True, blank=True)
+    association_type = models.CharField(max_length=50, null=True, blank=True)
     is_submitted = models.BooleanField(null=True, blank=True)
     verified_by = models.CharField(max_length=30, null=True, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)

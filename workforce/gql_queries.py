@@ -647,6 +647,7 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "employee_employer_id": ["exact"],
             "employee_factory_id": ["exact"],
             "application_type": ["exact"],
+            "association_type": ["exact"],
             "is_submitted": ["exact"],
             "phone_number": ["exact"],
             "tracking_number": ["exact"],
