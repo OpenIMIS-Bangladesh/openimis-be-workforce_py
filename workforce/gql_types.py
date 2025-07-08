@@ -445,3 +445,15 @@ class WorkforceGrantMoneyInputType(OpenIMISMutation.Input):
     grant_money = graphene.Float()
     application_type_no = graphene.String()
     status = graphene.String()
+
+
+class WorkforceDiseasesInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    grade = graphene.String(required=True)
+    disease_type = graphene.String()
+    disease_name = graphene.String()
+    disease_no = graphene.String(required=True)
+    documents = graphene.String()
+    minimum_donation_amount = graphene.Float(required=True)
+    maximum_donation_amount = graphene.Float(required=True)
+    status = graphene.String()
