@@ -12,7 +12,8 @@ from .models import (
     WorkforceEmployer, WorkforceOffice, WorkforceFactory, WorkforceEmployee, WorkforceOrganizationEmployeeDesignation,
     WorkforceDocument, Bank, WorkforceEmployeeDependent, WorkforceEmployeeDesignation, WorkforceEmployeeAccident,
     WorkforceEmployeeAccountInfo, WorkforceApplication, WorkforceDocumentType, WorkforceDocumentMap,
-    WorkforceUser, WorkforceOtp, WorkforceApplicationMovement, WorkforceApplicationSummary, WorkforceApplicationSummaryMovement,
+    WorkforceUser, WorkforceOtp, WorkforceApplicationMovement, WorkforceApplicationSummary,
+    WorkforceApplicationSummaryMovement,
     WorkforceGrantMoney, WorkforceDiseases
 )
 from core import prefix_filterset, ExtendedConnection
@@ -481,29 +482,6 @@ class WorkforceEmployeeDesignationGQLType(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
-class WorkforceDocumentGQLType(DjangoObjectType):
-    class Meta:
-        model = WorkforceDocument
-        interfaces = (graphene.relay.Node,)
-        connection_class = ExtendedConnection
-        filter_fields = {
-            "id": ["exact"],
-            "workforce_application_id": ['exact'],
-            "holder": ["exact"],
-            "holder_type": ["exact", "icontains"],
-            "verifier": ["exact"],
-            "approver": ["exact"],
-            "document_type": ["exact", "icontains"],
-            "path": ["exact"],
-            "url": ["exact"],
-            "submission_date": ["exact"],
-            "verification_date": ["exact"],
-            "approval_date": ["exact"],
-            "remarks": ["exact", "icontains"],
-            "status": ["exact", "icontains"],
-        }
-
-
 class WorkforceBankGQLType(DjangoObjectType):
     class Meta:
         model = Bank
@@ -623,7 +601,7 @@ class WorkforceApplicationSummaryGQLType(DjangoObjectType):
             "name": ["exact"],
             "status": ["exact"],
             "organization_type": ["exact"],
-            "year": ["exact"],         
+            "year": ["exact"],
             "month": ["exact"],
         }
         connection_class = ExtendedConnection
@@ -631,6 +609,7 @@ class WorkforceApplicationSummaryGQLType(DjangoObjectType):
 
 class WorkforceApplicationGQLType(DjangoObjectType):
     workforce_employee = graphene.Field(lambda: WorkforceEmployeeGQLType)
+
     class Meta:
         model = WorkforceApplication
         interfaces = (graphene.relay.Node,)
@@ -664,6 +643,29 @@ class WorkforceApplicationGQLType(DjangoObjectType):
 
         def resolve_workforce_employee(self, info):
             return self.workforce_employee
+
+
+class WorkforceDocumentGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceDocument
+        interfaces = (graphene.relay.Node,)
+        connection_class = ExtendedConnection
+        filter_fields = {
+            "id": ["exact"],
+            "holder": ["exact"],
+            "holder_type": ["exact", "icontains"],
+            "verifier": ["exact"],
+            "approver": ["exact"],
+            "document_type": ["exact", "icontains"],
+            "path": ["exact"],
+            "url": ["exact"],
+            "submission_date": ["exact"],
+            "verification_date": ["exact"],
+            "approval_date": ["exact"],
+            "remarks": ["exact", "icontains"],
+            "status": ["exact", "icontains"],
+            **prefix_filterset("workforce_application__", WorkforceApplicationGQLType._meta.filter_fields),
+        }
 
 
 class WorkforceDocumentTypeGQLType(DjangoObjectType):
@@ -732,7 +734,7 @@ class WorkforceApplicationMovementGQLType(DjangoObjectType):
             "application_id": ["exact"],
             "note": ["exact", "contains"],
             "action": ["exact", "contains"],
-            "to_employee_record_id": ["exact",],
+            "to_employee_record_id": ["exact", ],
             "from_employee_record_id": ["exact", ],
             "to_office_unit_organogram_id": ["exact"],
             "from_office_unit_organogram_id": ["exact"],
