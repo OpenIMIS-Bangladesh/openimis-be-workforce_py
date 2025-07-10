@@ -1,14 +1,12 @@
 import os
-from dotenv import load_dotenv
 import logging
 from django.db.models import Q
 from django.utils import timezone
-from sms_services import send_bulk_sms
+from workforce.services.workforce_sms_services import send_bulk_sms
 from workforce.models import WorkforceOtp
 
-load_dotenv()
 logger = logging.getLogger(__name__)
-BULKSMS_API_KEY = os.getenv("BULKSMS_API_KEY")
+BULKSMS_API_KEY = os.environ.get("BULKSMS_API_KEY")
 
 
 class WorkforceOtpServices():
@@ -25,9 +23,8 @@ class WorkforceOtpServices():
             phone_number=obj_data.get("phone_number"),
             status=obj_data.get("status"),
         )
-        print(f"==========================> otp {otp_obj.otp}")
-        message = f"Your verification code is {otp_obj.otp}. This code will expire in 5 minutes. Please do not share this code with anyone"
 
+        message = f"Your verification code is {otp_obj.otp}. This code will expire in 5 minutes. Please do not share this code with anyone"
         send_bulk_sms(BULKSMS_API_KEY, otp_obj.phone_number, message)
 
         return {"internal_id": otp_obj.id}
