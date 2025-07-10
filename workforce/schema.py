@@ -358,6 +358,7 @@ class Mutation(graphene.ObjectType):
 
     create_workforce_document = CreateWorkforceDocumentMutation.Field()
     update_workforce_document = UpdateWorkforceDocumentMutation.Field()
+    delete_workforce_document = DeleteWorkforceDocumentMutation.Field()
 
     create_bank = CreateBankMutation.Field()
     update_bank = UpdateBankMutation.Field()
