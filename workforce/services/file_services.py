@@ -41,3 +41,15 @@ def retrieve_file_response(filename):
         return response
     except Exception as e:
         raise Http404(f"Error retrieving file: {str(e)}")
+
+
+def delete_uploaded_file(filename):
+    try:
+        file_path = os.path.join('content', 'workforce', filename)
+        if default_storage.exists(file_path):
+            default_storage.delete(file_path)
+            return True
+        else:
+            return False
+    except Exception as e:
+        return False
