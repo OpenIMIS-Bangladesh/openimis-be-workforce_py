@@ -705,6 +705,9 @@ class WorkforceApplication(HistoryModel):
 class WorkforceDocumentType(HistoryModel):
     field_id = models.CharField(max_length=500, null=True, blank=True)
     application_type = models.CharField(max_length=500, null=True, blank=True)
+    organization_type = models.CharField(max_length=500, null=True, blank=True)
+    application_for = models.CharField(max_length=500, null=True, blank=True)
+    document_type_no = models.IntegerField(null=True, blank=True)
     document_type = models.CharField(max_length=500, null=True, blank=True)
     document_count = models.CharField(max_length=30, null=True, blank=True)
     name_bn = models.CharField(max_length=500, null=True, blank=True)
