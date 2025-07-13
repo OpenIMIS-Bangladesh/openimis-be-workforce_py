@@ -194,7 +194,8 @@ class Query(graphene.ObjectType):
     def resolve_workforce_documents(self, info, **kwargs):
         # if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
         #     raise PermissionDenied(_("Unauthorized access"))
-        pass
+        return WorkforceDocument.objects.filter(is_deleted=False)
+
     def resolve_banks(self, info, **kwargs):
         # if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
         #     raise PermissionDenied(_("Unauthorized access"))
@@ -358,7 +359,6 @@ class Mutation(graphene.ObjectType):
 
     create_workforce_document = CreateWorkforceDocumentMutation.Field()
     update_workforce_document = UpdateWorkforceDocumentMutation.Field()
-    delete_workforce_document = DeleteWorkforceDocumentMutation.Field()
 
     create_bank = CreateBankMutation.Field()
     update_bank = UpdateBankMutation.Field()

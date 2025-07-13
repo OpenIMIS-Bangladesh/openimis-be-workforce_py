@@ -222,6 +222,7 @@ class WorkforceDocumentInputType(OpenIMISMutation.Input):
     verification_date = graphene.String()
     approval_date = graphene.String()
     remarks = graphene.String()
+    is_deleted = graphene.Boolean()
     status = graphene.String()
 
 
