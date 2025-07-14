@@ -1,9 +1,9 @@
 import logging
 import random
 from datetime import datetime
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned, ValidationError
 from core.services import BaseService
-from workforce.models import WorkforceApplication, WorkforceGrantMoney
+from workforce.models import WorkforceApplication, WorkforceGrantMoney, WorkforceEmployee
 from django.db.models import Q
 
 logger = logging.getLogger(__name__)
@@ -44,6 +44,28 @@ class WorkforceApplicationServices(BaseService):
                 application_count_str = str(existing_count + 1).zfill(6)
                 tracking_number = f"{year_suffix}{application_type_no}{application_count_str}"
                 obj_data["tracking_number"] = tracking_number
+
+                # Restrict to 1 application per NID for disabilityAssistance
+                if application_type == "disabilityAssistance":
+                    try:
+                        workforce_employee = WorkforceEmployee.objects.get(
+                            id=obj_data.get("workforce_employee_id")
+                        )
+                        employee_nid = workforce_employee.nid
+
+                        existing_applications = WorkforceApplication.objects.filter(
+                            application_type="disabilityAssistance",
+                            workforce_employee__nid=employee_nid
+                        )
+
+                        if existing_applications.exists():
+                            raise ValidationError(
+                                "An application for disability assistance already exists for this NID."
+                            )
+
+                    except ObjectDoesNotExist:
+                        logger.warning("No matching WorkforceEmployee found for given ID.")
+                        raise ValidationError("Invalid employee ID provided.")
 
             except ObjectDoesNotExist:
                 logger.warning(
