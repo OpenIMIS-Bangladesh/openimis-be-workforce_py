@@ -24,13 +24,8 @@ class WorkforceApplicationServices(BaseService):
         return query
 
     def create(self, obj_data):
-        phone_number = obj_data.get("phone_number")
         application_type = obj_data.get("application_type")
         organization_type = obj_data.get("organization_type")
-
-        if phone_number:
-            tracking_number = phone_number + str(random.randint(0,99)).zfill(2)
-            obj_data["tracking_number"] = tracking_number
 
         if application_type and organization_type:
             try:
