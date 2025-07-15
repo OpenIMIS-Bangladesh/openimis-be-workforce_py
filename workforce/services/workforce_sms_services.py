@@ -1,16 +1,16 @@
 import requests
+import os
 
 
-def send_bulk_sms(api_key, sender_id, messages):
-    """
-    Send bulk SMS using bulksmsbd.net API.
+def send_sms(messages):
+    return send_bulk_sms(messages)
 
-    :param api_key: str - Your API key
-    :param sender_id: str - Your sender ID
-    :param messages: list of dicts - Each dict must have 'to' and 'message' keys
-    :return: dict - API response
-    """
-    url = "http://bulksmsbd.net/api/smsapimany"
+
+def send_bulk_sms(messages):
+    url = os.environ.get("BULKSMS_API_URL")
+    api_key = os.environ.get("BULKSMS_API_KEY")
+    sender_id = os.environ.get("BULKSMS_SENDER_ID")
+
     payload = {
         "api_key": api_key,
         "senderid": sender_id,
