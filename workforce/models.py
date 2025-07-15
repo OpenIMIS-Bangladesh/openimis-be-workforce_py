@@ -938,6 +938,8 @@ class WorkforceApplicationSummaryMovement(HistoryModel):
 class WorkforceGrantMoney(HistoryModel):
     organization_type = models.CharField(max_length=50, null=True, blank=True)
     application_type = models.CharField(max_length=50, null=True, blank=True)
+    application_type_name_bn = models.CharField(max_length=50, null=True, blank=True)
+    application_type_name_en = models.CharField(max_length=50, null=True, blank=True)
     grant_money = models.FloatField(null=True, blank=True)
     application_type_no = models.CharField(max_length=2, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)

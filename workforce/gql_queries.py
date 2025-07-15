@@ -803,6 +803,8 @@ class WorkforceGrantMoneyGQLType(DjangoObjectType):
             "id": ["exact"],
             "organization_type": ["exact"],
             "application_type": ["exact"],
+            "application_type_name_bn": ["exact"],
+            "application_type_name_en": ["exact"],
             "grant_money": ["exact"],
             "application_type_no": ["exact"],
             "status": ["exact"],
