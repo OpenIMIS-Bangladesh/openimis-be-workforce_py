@@ -447,6 +447,8 @@ class WorkforceGrantMoneyInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
     organization_type = graphene.String()
     application_type = graphene.String()
+    application_type_name_bn = graphene.String()
+    application_type_name_en = graphene.String()
     grant_money = graphene.Float()
     application_type_no = graphene.String()
     status = graphene.String()
