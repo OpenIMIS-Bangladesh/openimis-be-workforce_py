@@ -343,6 +343,7 @@ class WorkforceDocumentTypeInputType(OpenIMISMutation.Input):
     document_count = graphene.String()
     name_bn = graphene.String()
     name_en = graphene.String()
+    workforce_disease = graphene.String()
     status = graphene.String()
 
 

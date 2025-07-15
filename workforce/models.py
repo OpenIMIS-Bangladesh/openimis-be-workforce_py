@@ -712,6 +712,13 @@ class WorkforceDocumentType(HistoryModel):
     document_count = models.CharField(max_length=30, null=True, blank=True)
     name_bn = models.CharField(max_length=500, null=True, blank=True)
     name_en = models.CharField(max_length=500, null=True, blank=True)
+    workforce_disease = models.ForeignKey(
+        "WorkforceDiseases",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="disease"
+    )
     status = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:
