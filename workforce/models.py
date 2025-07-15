@@ -428,7 +428,7 @@ class WorkforceDocument(HistoryModel):
         related_name="workforce_document_application",
     )
     holder = models.CharField()
-    holder_type = models.CharField(max_length=30, null=True, blank=True)
+    holder_type = models.CharField(max_length=512, null=True, blank=True)
     verifier = models.ForeignKey(
         InteractiveUser,
         models.DO_NOTHING,
@@ -443,7 +443,7 @@ class WorkforceDocument(HistoryModel):
         null=True,
         related_name="approver"  # Unique related name
     )
-    document_type = models.CharField(max_length=30, null=False, blank=False)
+    document_type = models.CharField(max_length=512, null=False, blank=False)
     path = models.CharField(max_length=512, null=True, blank=True)
     url = models.CharField(max_length=512, null=True, blank=True)
     submission_date = models.DateField(null=True, blank=True)
