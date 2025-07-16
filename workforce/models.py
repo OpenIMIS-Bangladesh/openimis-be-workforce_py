@@ -294,6 +294,7 @@ class WorkforceFactory(HistoryModel):
     website = models.CharField(max_length=200, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
     is_same_company_representative = models.SmallIntegerField(default=0)
+    association_type = models.CharField(max_length=50, null=True, blank=True)
     workforce_representative = models.ForeignKey(
         WorkforceRepresentative,
         models.DO_NOTHING,
