@@ -444,6 +444,13 @@ class WorkforceDocument(HistoryModel):
         null=True,
         related_name="approver"  # Unique related name
     )
+    factory = models.ForeignKey(
+        WorkforceFactory,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="factory"  # Unique related name
+    )
     document_type = models.CharField(max_length=512, null=False, blank=False)
     path = models.CharField(max_length=512, null=True, blank=True)
     url = models.CharField(max_length=512, null=True, blank=True)
