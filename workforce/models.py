@@ -703,6 +703,7 @@ class WorkforceApplication(HistoryModel):
     )
     metadata = models.JSONField(null=True, blank=True)
     grant_amount = models.CharField(max_length=20, null=True, blank=True)
+    submitted_by = models.CharField(max_length=50, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:
