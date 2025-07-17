@@ -51,6 +51,7 @@ class Query(graphene.ObjectType):
     )
     workforce_employer_factories = OrderedDjangoFilterConnectionField(
         WorkforceFactoryGQLType,
+        client_mutation_id=graphene.String(),
         orderBy=graphene.List(of_type=graphene.String),
     )
     workforce_employer_employees = OrderedDjangoFilterConnectionField(
@@ -184,9 +185,9 @@ class Query(graphene.ObjectType):
         pass
 
     def resolve_workforce_employer_factories(self, info, **kwargs):
-        # if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
-        #     raise PermissionDenied(_("Unauthorized access"))
-        pass
+        service = WorkforceFactoryServices(info.context.user)
+        query = service.get(**kwargs)
+        return gql_optimizer.query(query, info)
     def resolve_workforce_employer_employees(self, info, **kwargs):
         # if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
         #     raise PermissionDenied(_("Unauthorized access"))

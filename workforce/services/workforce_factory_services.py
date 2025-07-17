@@ -2,13 +2,25 @@ import logging
 
 from core.services import BaseService
 from location.models import Location
-from workforce.models import WorkforceFactory, WorkforceEmployer, WorkforceRepresentative
+from workforce.models import WorkforceFactory, WorkforceEmployer
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 
 
 class WorkforceFactoryServices(BaseService):
     OBJECT_TYPE = WorkforceFactory
+
+    def get(self, **kwargs):
+        filters = []
+        model = self.OBJECT_TYPE
+
+        client_mutation_id = kwargs.get("client_mutation_id", None)
+        if client_mutation_id:
+            filters.append(Q(json_ext__contains={"client_mutation_id": client_mutation_id}))
+
+        query = model.objects.filter(*filters, is_deleted=False).all()
+        return query
 
     def create(self, obj_data):
         if obj_data.get('is_same_company_representative') == "1":
