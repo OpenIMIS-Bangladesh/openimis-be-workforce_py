@@ -464,3 +464,17 @@ class WorkforceDiseasesInputType(OpenIMISMutation.Input):
     minimum_donation_amount = graphene.Float(required=True)
     maximum_donation_amount = graphene.Float(required=True)
     status = graphene.String()
+
+class WorkforceEducationInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    application_id = graphene.String(required=True)
+    workforce_employee_id = graphene.String(required=False)
+    workforce_dependant_id = graphene.String(required=False)
+    education_level = graphene.String(required=False)
+    applicant_type = graphene.String(required=False)
+    education_board = graphene.String(required=False)
+    passing_year = graphene.Int(required=False)
+    roll_number = graphene.String(required=False)
+    registration_number = graphene.String(required=False)
+    result = graphene.Float(required=False)
+    institution = graphene.String(required=False)

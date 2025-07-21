@@ -1024,6 +1024,7 @@ class WorkforceEducation(HistoryModel):
         max_length=50, null=True, blank=True)
     result = models.DecimalField(
         max_digits=5, decimal_places=2, null=True, blank=True)
+    institution = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         managed = True

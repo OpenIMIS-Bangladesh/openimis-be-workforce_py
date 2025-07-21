@@ -14,7 +14,7 @@ from .models import (
     WorkforceEmployeeAccountInfo, WorkforceApplication, WorkforceDocumentType, WorkforceDocumentMap,
     WorkforceUser, WorkforceOtp, WorkforceApplicationMovement, WorkforceApplicationSummary,
     WorkforceApplicationSummaryMovement,
-    WorkforceGrantMoney, WorkforceDiseases
+    WorkforceGrantMoney, WorkforceDiseases, WorkforceEducation
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -570,7 +570,7 @@ class WorkforceEmployeeDependentGQLType(DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         filter_fields = {
             "id": ["exact"],
-            **prefix_filterset("application__", WorkforceApplicationGQLType._meta.filter_fields),
+            **prefix_filterset("workforce_employee_dependent_application__", WorkforceApplicationGQLType._meta.filter_fields),
             "eis_insurance_no": ["exact"],
             "name_en": ["exact", "icontains"],
             "name_bn": ["exact", "icontains"],
@@ -828,5 +828,25 @@ class WorkforceDiseasesGQLType(DjangoObjectType):
             "minimum_donation_amount": ["exact"],
             "maximum_donation_amount": ["exact"],
             "status": ["exact"],
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceEducationGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceEducation
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            **prefix_filterset("application__", WorkforceApplicationGQLType._meta.filter_fields),
+            "workforce_employee": ["exact"],
+            "workforce_dependant": ["exact"],
+            "education_level": ["exact", "icontains"],
+            "applicant_type": ["exact", "icontains"],
+            "education_board": ["exact", "icontains"],
+            "passing_year": ["exact"],
+            "roll_number": ["exact", "icontains"],
+            "registration_number": ["exact", "icontains"],
+            "result": ["exact", "gte", "lte"],
+            "institution": ["exact", "icontains"],
         }
         connection_class = ExtendedConnection
