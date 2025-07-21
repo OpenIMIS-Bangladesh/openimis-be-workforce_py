@@ -86,6 +86,9 @@ DEFAULT_CFG = {
     # WorkforceAssociation (816xxx)
     "gql_workforce_association_perms": ["816001"],
 
+    # WorkforceSectionAdmin (817xxx)
+    "gql_workforce_section_admin_perms": ["817001"],
+
     "default_validations_disabled": False,
 }
 
@@ -171,6 +174,9 @@ class WorkforceConfig(AppConfig):
 
     # WorkforceDirector (815xxx)
     gql_workforce_director_perms = []
+
+    # WorkforceSectionAdmin (817xxx)
+    gql_workforce_section_admin_perms = []
 
     default_validations_disabled = None
 
