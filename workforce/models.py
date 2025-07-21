@@ -1015,13 +1015,13 @@ class WorkforceEducation(HistoryModel):
         null=True,
         related_name="educations",
     )
-    education_level = models.CharField(max_length=50, null=True, blank=True)
-    applicant_type = models.CharField(max_length=50, null=True, blank=True)
-    education_board = models.CharField(max_length=50, null=True, blank=True)
+    education_level = models.CharField(null=True, blank=True)
+    applicant_type = models.CharField(null=True, blank=True)
+    education_board = models.CharField(null=True, blank=True)
     passing_year = models.IntegerField(null=True, blank=True)
-    roll_number = models.CharField(max_length=50, null=True, blank=True)
+    roll_number = models.CharField(null=True, blank=True)
     registration_number = models.CharField(
-        max_length=50, null=True, blank=True)
+        null=True, blank=True)
     result = models.DecimalField(
         max_digits=5, decimal_places=2, null=True, blank=True)
     institution = models.CharField(max_length=255, null=True, blank=True)
