@@ -522,23 +522,19 @@ class WorkforceEmployeeDependent(HistoryModel):
         related_name="workforce_employee_dependent_application",
     )
     eis_insurance_no = models.CharField(max_length=50, null=True, blank=True)
-    first_name_bn = models.CharField(max_length=255, null=True, blank=True)
-    last_name_bn = models.CharField(max_length=255, null=True, blank=True)
-    first_name_en = models.CharField(max_length=255)
-    last_name_en = models.CharField(max_length=255, null=True, blank=True)
-    father_name_bn = models.CharField(max_length=255, null=True, blank=True)
-    father_name_en = models.CharField(max_length=255, null=True, blank=True)
-    mother_name_bn = models.CharField(max_length=255, null=True, blank=True)
-    mother_name_en = models.CharField(max_length=255, null=True, blank=True)
-    marital_status = models.CharField(max_length=30)
-    gender = models.CharField(max_length=30)
-    occupation = models.CharField(max_length=30)
+    name_bn = models.CharField(max_length=255, null=True, blank=True)
+    name_en = models.CharField(max_length=255, null=True, blank=True)
+    father_name = models.CharField(max_length=255, null=True, blank=True)
+    mother_name = models.CharField(max_length=255, null=True, blank=True)
+    marital_status = models.CharField(max_length=30, null=True, blank=True)
+    gender = models.CharField(max_length=30, null=True, blank=True)
+    occupation = models.CharField(max_length=30, null=True, blank=True)
     email = models.CharField(max_length=255, null=True, blank=True)
     phone_number = models.CharField(max_length=20)
     birth_date = models.DateField()
     nid = models.CharField(max_length=30, null=True, blank=True)
-    birth_certificate_no = models.CharField(
-        max_length=30, null=True, blank=True)
+    birth_certificate_no = models.CharField(max_length=30, null=True, blank=True)
+    percentage_of_cf_grant = models.CharField(max_length=30, null=True, blank=True)
     present_location = models.ForeignKey(
         Location,
         models.DO_NOTHING,
@@ -555,10 +551,9 @@ class WorkforceEmployeeDependent(HistoryModel):
     )
     present_address = models.TextField(null=True, blank=True)
     permanent_address = models.TextField(null=True, blank=True)
-    life_status = models.CharField(max_length=30)
+    life_status = models.CharField(max_length=30, null=True, blank=True)
     death_date = models.DateField(null=True, blank=True)
     disability_status = models.CharField(max_length=30, null=True, blank=True)
-    relation_type = models.CharField(max_length=50)
     relation_with_worker = models.CharField(max_length=50)
     last_verification_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
@@ -998,54 +993,6 @@ class WorkforceGrantMoney(HistoryModel):
         db_table = 'workforce_grant_money'
 
 
-class WorkforceDependant(HistoryModel):
-    application = models.ForeignKey(
-        WorkforceApplication,
-        on_delete=models.DO_NOTHING,
-        blank=False,
-        null=False,
-        related_name="dependants",
-    )
-    workforce_employee = models.ForeignKey(
-        WorkforceEmployee,
-        on_delete=models.DO_NOTHING,
-        blank=False,
-        null=False,
-        related_name="dependants",
-    )
-    name_en = models.CharField(max_length=255, null=True, blank=True)
-    name_bn = models.CharField(max_length=255, null=True, blank=True)
-    father_name = models.CharField(max_length=255, null=True, blank=True)
-    mother_name = models.CharField(max_length=255, null=True, blank=True)
-    percentage_of_cf_grant = models.FloatField(null=True, blank=True)
-    present_location = models.ForeignKey(
-        Location,
-        on_delete=models.DO_NOTHING,
-        blank=True,
-        null=True,
-        related_name="present_location",
-    )
-    permanent_location = models.ForeignKey(
-        Location,
-        on_delete=models.DO_NOTHING,
-        blank=True,
-        null=True,
-        related_name="permanent_location",
-    )
-    present_address = models.TextField(null=True, blank=True)
-    permanent_address = models.TextField(null=True, blank=True)
-    nid = models.CharField(max_length=255, null=True, blank=True)
-    birth_certificate_number = models.CharField(
-        max_length=255, null=True, blank=True)
-    date_of_birth = models.DateField(null=True, blank=True)
-    gender = models.CharField(max_length=255, null=True, blank=True)
-    relationship = models.CharField(max_length=255, null=True, blank=True)
-
-    class Meta:
-        managed = True
-        db_table = 'workforce_dependants'
-
-
 class WorkforceEducation(HistoryModel):
     application = models.ForeignKey(
         WorkforceApplication,
@@ -1062,7 +1009,7 @@ class WorkforceEducation(HistoryModel):
         related_name="educations",
     )
     workforce_dependant = models.ForeignKey(
-        WorkforceDependant,
+        WorkforceEmployeeDependent,
         on_delete=models.DO_NOTHING,
         blank=True,
         null=True,

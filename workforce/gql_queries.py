@@ -76,8 +76,10 @@ class WorkforceOrganizationEmployeeDesignationForUnitDesignationGQLType(DjangoOb
 
 
 class WorkforceOrganizationUnitDesignationForUnitGQLType(DjangoObjectType):
-    employee_designations = graphene.List(WorkforceOrganizationEmployeeDesignationForUnitDesignationGQLType)
-    active_employee_designation = graphene.List(WorkforceOrganizationEmployeeDesignationForUnitDesignationGQLType)
+    employee_designations = graphene.List(
+        WorkforceOrganizationEmployeeDesignationForUnitDesignationGQLType)
+    active_employee_designation = graphene.List(
+        WorkforceOrganizationEmployeeDesignationForUnitDesignationGQLType)
 
     class Meta:
         model = WorkforceOrganizationUnitDesignation
@@ -104,7 +106,8 @@ class WorkforceOrganizationUnitDesignationForUnitGQLType(DjangoObjectType):
 
 
 class WorkforceOrganizationUnitGQLType(DjangoObjectType):
-    unit_designations = graphene.List(WorkforceOrganizationUnitDesignationForUnitGQLType)
+    unit_designations = graphene.List(
+        WorkforceOrganizationUnitDesignationForUnitGQLType)
 
     class Meta:
         model = WorkforceOrganizationUnit
@@ -168,7 +171,8 @@ class WorkforceOrganizationEmployeeDesignationForEmployeeGQLType(DjangoObjectTyp
 
 
 class WorkforceOrganizationEmployeeGQLType(DjangoObjectType):
-    designations = graphene.List(WorkforceOrganizationEmployeeDesignationForEmployeeGQLType)
+    designations = graphene.List(
+        WorkforceOrganizationEmployeeDesignationForEmployeeGQLType)
 
     class Meta:
         model = WorkforceOrganizationEmployee
@@ -458,138 +462,6 @@ class WorkforceEmployeeGQLType(DjangoObjectType):
             ).order_by('-id').first()
 
 
-class WorkforceEmployeeDesignationGQLType(DjangoObjectType):
-    class Meta:
-        model = WorkforceEmployeeDesignation
-        interfaces = (graphene.relay.Node,)
-        filter_fields = {
-            "workforce_application_id": ['exact'],
-            "id": ["exact"],
-            "workforce_employee_id": ["exact"],
-            "workforce_company_id": ["exact"],
-            "workforce_factory_id": ["exact"],
-            "workforce_office_id": ["exact"],
-            "position": ["exact"],
-            "join_date": ["exact"],
-            "resignation_date": ["exact"],
-            "resignation_reason": ["exact", "icontains"],
-            "monthly_salary": ["exact"],
-            "status": ["exact", "icontains"],
-            **prefix_filterset("workforce_employee__", {
-                "email": ["exact"],
-                "nid": ["exact", "icontains"],
-            }),
-        }
-        connection_class = ExtendedConnection
-
-
-class WorkforceBankGQLType(DjangoObjectType):
-    class Meta:
-        model = Bank
-        interfaces = (graphene.relay.Node,)
-        filter_fields = {
-            "id": ["exact"],
-            "workforce_application_id": ['exact'],
-            "name_en": ["exact", "icontains"],
-            "name_bn": ["exact", "icontains"],
-            "parent": ["exact"],
-            "headquarter_address": ["exact", "icontains"],
-            "location": ["exact"],
-            "type": ["exact"],
-            "routing_number": ["exact"],
-            "contact_number": ["exact"],
-            "status": ["exact", "icontains"],
-        }
-        connection_class = ExtendedConnection
-
-
-class WorkforceEmployeeDependentGQLType(DjangoObjectType):
-    class Meta:
-        model = WorkforceEmployeeDependent
-        interfaces = (graphene.relay.Node,)
-        filter_fields = {
-            "id": ["exact"],
-            "workforce_application_id": ['exact'],
-            "eis_insurance_no": ["exact"],
-            "first_name_bn": ["exact", "icontains"],
-            "last_name_bn": ["exact", "icontains"],
-            "first_name_en": ["exact", "icontains"],
-            "last_name_en": ["exact", "icontains"],
-            "father_name_bn": ["exact", "icontains"],
-            "father_name_en": ["exact", "icontains"],
-            "mother_name_bn": ["exact", "icontains"],
-            "mother_name_en": ["exact", "icontains"],
-            "marital_status": ["exact"],
-            "gender": ["exact"],
-            "occupation": ["exact", "icontains"],
-            "email": ["exact"],
-            "phone_number": ["exact"],
-            "birth_date": ["exact"],
-            "nid": ["exact"],
-            "birth_certificate_no": ["exact"],
-            "present_location_id": ["exact"],
-            "permanent_location_id": ["exact"],
-            "present_address": ["exact", "icontains"],
-            "permanent_address": ["exact", "icontains"],
-            "life_status": ["exact", "icontains"],
-            "death_date": ["exact"],
-            "disability_status": ["exact", "icontains"],
-            "relation_type": ["exact", "icontains"],
-            "relation_with_worker": ["exact", "icontains"],
-            "last_verification_date": ["exact"],
-            "status": ["exact", "icontains"],
-            **prefix_filterset("present_location__", LocationGQLType._meta.filter_fields),
-            **prefix_filterset("permanent_location__", LocationGQLType._meta.filter_fields),
-        }
-        connection_class = ExtendedConnection
-
-
-class WorkforceEmployeeAccidentGQLType(DjangoObjectType):
-    class Meta:
-        model = WorkforceEmployeeAccident
-        interfaces = (graphene.relay.Node,)
-        filter_fields = {
-            "id": ["exact"],
-            "workforce_application_id": ['exact'],
-            "employee_id": ["exact"],
-            "injury_type": ["exact", "contains"],
-            "accident_date": ["exact"],
-            "accident_time": ["exact"],
-            "accident_type": ["exact", "contains"],
-            "duty_status": ["exact", "contains"],
-            "in_outside_factory": ["exact", "contains"],
-            "death_date": ["exact"],
-            "description": ["exact", "contains"],
-            "accident_location": ["exact"],
-            "rejoin_date": ["exact"],
-            "status": ["exact", "icontains"],
-        }
-        connection_class = ExtendedConnection
-
-
-class WorkforceEmployeeAccountInfoGQLType(DjangoObjectType):
-    class Meta:
-        model = WorkforceEmployeeAccountInfo
-        interfaces = (graphene.relay.Node,)
-        filter_fields = {
-            "id": ["exact"],
-            "beneficiary_type": ["exact"],
-            "beneficiary_id": ["exact"],
-            "on_behalf_of": ["exact", "contains"],
-            "present_location_id": ["exact"],
-            "permanent_location_id": ["exact"],
-            "bank_id": ["exact"],
-            "branch_id": ["exact"],
-            "account_holder_name": ["exact", "contains"],
-            "account_owner_name": ["exact", "contains"],
-            "account_number": ["exact", "contains"],
-            "status": ["exact", "icontains"],
-            **prefix_filterset("present_location__", LocationGQLType._meta.filter_fields),
-            **prefix_filterset("permanent_location__", LocationGQLType._meta.filter_fields),
-        }
-        connection_class = ExtendedConnection
-
-
 class WorkforceApplicationSummaryGQLType(DjangoObjectType):
     class Meta:
         model = WorkforceApplicationSummary
@@ -645,6 +517,132 @@ class WorkforceApplicationGQLType(DjangoObjectType):
 
         def resolve_workforce_employee(self, info):
             return self.workforce_employee
+
+
+class WorkforceEmployeeDesignationGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceEmployeeDesignation
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "workforce_application_id": ['exact'],
+            "id": ["exact"],
+            "workforce_employee_id": ["exact"],
+            "workforce_company_id": ["exact"],
+            "workforce_factory_id": ["exact"],
+            "workforce_office_id": ["exact"],
+            "position": ["exact"],
+            "join_date": ["exact"],
+            "resignation_date": ["exact"],
+            "resignation_reason": ["exact", "icontains"],
+            "monthly_salary": ["exact"],
+            "status": ["exact", "icontains"],
+            **prefix_filterset("workforce_employee__", {
+                "email": ["exact"],
+                "nid": ["exact", "icontains"],
+            }),
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceBankGQLType(DjangoObjectType):
+    class Meta:
+        model = Bank
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "workforce_application_id": ['exact'],
+            "name_en": ["exact", "icontains"],
+            "name_bn": ["exact", "icontains"],
+            "parent": ["exact"],
+            "headquarter_address": ["exact", "icontains"],
+            "location": ["exact"],
+            "type": ["exact"],
+            "routing_number": ["exact"],
+            "contact_number": ["exact"],
+            "status": ["exact", "icontains"],
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceEmployeeDependentGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceEmployeeDependent
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            **prefix_filterset("application__", WorkforceApplicationGQLType._meta.filter_fields),
+            "eis_insurance_no": ["exact"],
+            "name_en": ["exact", "icontains"],
+            "name_bn": ["exact", "icontains"],
+            "father_name": ["exact", "icontains"],
+            "mother_name": ["exact", "icontains"],
+            "marital_status": ["exact"],
+            "gender": ["exact"],
+            "occupation": ["exact", "icontains"],
+            "email": ["exact"],
+            "phone_number": ["exact"],
+            "birth_date": ["exact"],
+            "nid": ["exact"],
+            "birth_certificate_no": ["exact"],
+            "present_address": ["exact", "icontains"],
+            "permanent_address": ["exact", "icontains"],
+            "life_status": ["exact", "icontains"],
+            "death_date": ["exact"],
+            "disability_status": ["exact", "icontains"],
+            "relation_with_worker": ["exact", "icontains"],
+            "last_verification_date": ["exact"],
+            "status": ["exact", "icontains"],
+            "percentage_of_cf_grant": ["exact"],
+            **prefix_filterset("present_location__", LocationGQLType._meta.filter_fields),
+            **prefix_filterset("permanent_location__", LocationGQLType._meta.filter_fields),
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceEmployeeAccidentGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceEmployeeAccident
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "workforce_application_id": ['exact'],
+            "employee_id": ["exact"],
+            "injury_type": ["exact", "contains"],
+            "accident_date": ["exact"],
+            "accident_time": ["exact"],
+            "accident_type": ["exact", "contains"],
+            "duty_status": ["exact", "contains"],
+            "in_outside_factory": ["exact", "contains"],
+            "death_date": ["exact"],
+            "description": ["exact", "contains"],
+            "accident_location": ["exact"],
+            "rejoin_date": ["exact"],
+            "status": ["exact", "icontains"],
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceEmployeeAccountInfoGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceEmployeeAccountInfo
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "beneficiary_type": ["exact"],
+            "beneficiary_id": ["exact"],
+            "on_behalf_of": ["exact", "contains"],
+            "present_location_id": ["exact"],
+            "permanent_location_id": ["exact"],
+            "bank_id": ["exact"],
+            "branch_id": ["exact"],
+            "account_holder_name": ["exact", "contains"],
+            "account_owner_name": ["exact", "contains"],
+            "account_number": ["exact", "contains"],
+            "status": ["exact", "icontains"],
+            **prefix_filterset("present_location__", LocationGQLType._meta.filter_fields),
+            **prefix_filterset("permanent_location__", LocationGQLType._meta.filter_fields),
+        }
+        connection_class = ExtendedConnection
 
 
 class WorkforceDocumentGQLType(DjangoObjectType):
