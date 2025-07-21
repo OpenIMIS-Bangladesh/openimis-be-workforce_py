@@ -964,6 +964,33 @@ class WorkforceGrantMoney(HistoryModel):
         managed = True
         db_table = 'workforce_grant_money'
 
+class WorkforceEducation(HistoryModel):
+    application = models.ForeignKey(
+        WorkforceApplication,
+        on_delete=models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="educations", 
+    )
+    workforce_employee = models.ForeignKey(
+        WorkforceEmployee,
+        on_delete=models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="educations",
+    )
+    education_level = models.CharField(max_length=50, null=True, blank=True)
+    applicant_type = models.CharField(max_length=50, null=True, blank=True)
+    education_board = models.CharField(max_length=50, null=True, blank=True)
+    passing_year = models.IntegerField(null=True, blank=True)
+    roll_number = models.CharField(max_length=50, null=True, blank=True)
+    registration_number = models.CharField(max_length=50, null=True, blank=True)
+    result = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_education'
+
 
 class WorkforceDiseases(HistoryModel):
     grade = models.CharField(max_length=2)
