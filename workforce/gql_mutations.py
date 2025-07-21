@@ -1486,7 +1486,7 @@ class CreateWorkforceEducationMutation(BaseHistoryModelCreateMutationMixin, Base
 
         result = auth_permission_validation(
             failure_message=failure_message,
-            required_permission=required_permission,
+            required_permission="",
             call_type='create',
             service_instance=service_instance,
             user=user,
@@ -1511,7 +1511,7 @@ class UpdateWorkforceEducationMutation(BaseHistoryModelCreateMutationMixin, Base
 
         result = auth_permission_validation(
             failure_message=failure_message,
-            required_permission=required_permission,
+            required_permission="",
             call_type='update',
             service_instance=service_instance,
             user=user,

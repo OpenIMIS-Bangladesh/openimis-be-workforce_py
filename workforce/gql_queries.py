@@ -570,7 +570,7 @@ class WorkforceEmployeeDependentGQLType(DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         filter_fields = {
             "id": ["exact"],
-            **prefix_filterset("workforce_employee_dependent_application__", WorkforceApplicationGQLType._meta.filter_fields),
+            **prefix_filterset("workforce_application__", WorkforceApplicationGQLType._meta.filter_fields),
             "eis_insurance_no": ["exact"],
             "name_en": ["exact", "icontains"],
             "name_bn": ["exact", "icontains"],
