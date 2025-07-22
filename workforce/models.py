@@ -1025,7 +1025,7 @@ class WorkforceEducation(HistoryModel):
     child_birth_date = models.DateField(null=True, blank=True)
     child_nid_no = models.CharField(max_length=30, null=True, blank=True)
     child_birth_certificate_no = models.CharField(max_length=30, null=True, blank=True)
-    child_study_class = models.CharField(max_length=30, null=True, blank=True)
+    study_class = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:
         managed = True
