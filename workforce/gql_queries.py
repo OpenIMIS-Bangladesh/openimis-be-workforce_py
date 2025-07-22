@@ -853,6 +853,6 @@ class WorkforceEducationGQLType(DjangoObjectType):
             "child_birth_date": ["exact", "icontains"],
             "child_nid_no": ["exact", "icontains"],
             "child_birth_certificate_no": ["exact", "icontains"],
-            "child_study_class": ["exact", "icontains"],
+            "study_class": ["exact", "icontains"],
         }
         connection_class = ExtendedConnection

@@ -484,4 +484,4 @@ class WorkforceEducationInputType(OpenIMISMutation.Input):
     child_birth_date = graphene.String(required=False)
     child_nid_no = graphene.String(required=False)
     child_birth_certificate_no = graphene.String(required=False)
-    child_study_class = graphene.String(required=False)
+    study_class = graphene.String(required=False)
