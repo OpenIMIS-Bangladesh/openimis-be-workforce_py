@@ -10,7 +10,7 @@ from .gql_types import (
     WorkforceOrganizationUnitDesignationInputType, WorkforceOrganizationEmployeeInputType,
     WorkforceEmployerInputType, WorkforceOfficeInputType, WorkforceFactoryInputType,
     WorkforceEmployeeInputType, WorkforceOrganizationEmployeeDesignationInputType,
-    WorkforceEmployerStatusInput, WorkforceDocumentInputType, BankInputType,
+    WorkforceEmployerStatusInput, WorkforceDocumentInputType, WorkforceBankInputType,
     WorkforceEmployeeDependentInputType, WorkforceEmployeeDesignationInputType,
     WorkforceEmployeeAccidentInputType, WorkforceEmployeeAccountInfoInputType,
     WorkforceApplicationInputType, WorkforceDocumentTypeInputType, WorkforceDocumentMapInputType,
@@ -716,11 +716,11 @@ class UpdateWorkforceDocumentMutation(BaseHistoryModelCreateMutationMixin, BaseM
         return result
 
 
-class CreateBankMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+class CreateWorkforceBankMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
     _mutation_module = mutation_module
     _mutation_class = "CreateBankMutation"
 
-    class Input(BankInputType):
+    class Input(WorkforceBankInputType):
         pass
 
     @classmethod
@@ -741,11 +741,11 @@ class CreateBankMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
         return result
 
 
-class UpdateBankMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+class UpdateWorkforceBankMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
     _mutation_module = mutation_module
     _mutation_class = "UpdateBankMutation"
 
-    class Input(BankInputType):
+    class Input(WorkforceBankInputType):
         pass
 
     @classmethod
