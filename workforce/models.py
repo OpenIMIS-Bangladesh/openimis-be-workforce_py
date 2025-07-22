@@ -484,7 +484,7 @@ class Bank(HistoryModel):
     bank_code = models.CharField(max_length=15, null=True, blank=True)
     branch_code = models.CharField(max_length=15, null=True, blank=True)
     district_code = models.CharField(max_length=15, null=True, blank=True)
-    district_name_en = models.CharField(max_length=15, null=True, blank=True)
+    district_name_en = models.CharField(max_length=255, null=True, blank=True)
     routing_number = models.CharField(max_length=15, null=True, blank=True)
     parent = models.ForeignKey(
         "Bank",
