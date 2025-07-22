@@ -1025,6 +1025,12 @@ class WorkforceEducation(HistoryModel):
     result = models.DecimalField(
         max_digits=5, decimal_places=2, null=True, blank=True)
     institution = models.CharField(max_length=255, null=True, blank=True)
+    child_name_en = models.CharField(max_length=255, null=True, blank=True)
+    child_name_bn = models.CharField(max_length=255, null=True, blank=True)
+    child_birth_date = models.DateField(null=True, blank=True)
+    child_nid_no = models.CharField(max_length=30, null=True, blank=True)
+    child_birth_certificate_no = models.CharField(max_length=30, null=True, blank=True)
+    child_study_class = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:
         managed = True
