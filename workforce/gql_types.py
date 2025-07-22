@@ -487,3 +487,18 @@ class WorkforceEducationInputType(OpenIMISMutation.Input):
     child_nid_no = graphene.String(required=False)
     child_birth_certificate_no = graphene.String(required=False)
     study_class = graphene.String(required=False)
+
+
+class WorkforceEmployeeBankingInfoInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    name_bn = graphene.String(required=False)
+    name_en = graphene.String(required=False)
+    account_holder_name = graphene.String(required=False)
+    employee_id = graphene.String(required=False)
+    application_id = graphene.String(required=False)
+    dependant_id = graphene.String(required=False)
+    bank_id = graphene.String(required=False)
+    type = graphene.String(required=False)
+    amount = graphene.String(required=False)
+    account_no = graphene.String(required=False)
+    status = graphene.String()

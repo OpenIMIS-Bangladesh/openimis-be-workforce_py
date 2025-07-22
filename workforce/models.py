@@ -1045,3 +1045,46 @@ class WorkforceDiseases(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_diseases'
+
+
+class WorkforceEmployeeBankingInfo(HistoryModel):
+    name_bn = models.CharField(
+        max_length=255, null=True, blank=True, db_comment='Translatable name field. May use any language')
+    name_en = models.CharField(max_length=255, null=True, blank=True, db_comment='English name field')
+    account_holder_name = models.CharField(max_length=255, null=True, blank=True)
+    employee = models.ForeignKey(
+        WorkforceEmployee,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="employee_banking_employee_id",
+    )
+    application = models.ForeignKey(
+        "WorkforceApplication",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="employee_banking_info_application",
+    )
+    dependant = models.ForeignKey(
+        WorkforceEmployeeDependent,
+        on_delete=models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="employee_banking_dependents",
+    )
+    bank = models.ForeignKey(
+        Bank,
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="workforce_banking_bank",
+    )
+    type = models.CharField(max_length=255, null=True, blank=True)
+    amount = models.CharField(max_length=20, null=True, blank=True)
+    account_no = models.CharField(max_length=20, null=True, blank=True)
+    status = models.CharField(max_length=30, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_employee_banking_info'

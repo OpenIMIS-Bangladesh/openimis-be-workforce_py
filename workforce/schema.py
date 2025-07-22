@@ -139,6 +139,11 @@ class Query(graphene.ObjectType):
         WorkforceEducationGQLType,
         orderBy=graphene.List(of_type=graphene.String),
     )
+    workforce_employee_banking_info = OrderedDjangoFilterConnectionField(
+        WorkforceEmployeeBankingInfoGQLType,
+        client_mutation_id=graphene.String(),
+        orderBy=graphene.List(of_type=graphene.String),
+    )
 
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
@@ -334,6 +339,10 @@ class Query(graphene.ObjectType):
 
     def resolve_workforce_educations(self, info, **kwargs):
         pass
+    def resolve_workforce_employee_banking_info(self, info, **kwargs):
+        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+            raise PermissionDenied(_("Unauthorized access"))
+        pass
 
 
 class Mutation(graphene.ObjectType):
@@ -417,3 +426,6 @@ class Mutation(graphene.ObjectType):
 
     create_workforce_education = CreateWorkforceEducationMutation.Field()
     update_workforce_education = UpdateWorkforceEducationMutation.Field()
+
+    create_workforce_employee_banking_info = CreateWorkforceEmployeeBankingInfoMutation.Field()
+    update_workforce_employee_banking_info = UpdateWorkforceEmployeeBankingInfoMutation.Field()

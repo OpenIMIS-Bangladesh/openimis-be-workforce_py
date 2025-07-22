@@ -14,7 +14,7 @@ from .models import (
     WorkforceEmployeeAccountInfo, WorkforceApplication, WorkforceDocumentType, WorkforceDocumentMap,
     WorkforceUser, WorkforceOtp, WorkforceApplicationMovement, WorkforceApplicationSummary,
     WorkforceApplicationSummaryMovement,
-    WorkforceGrantMoney, WorkforceDiseases, WorkforceEducation
+    WorkforceGrantMoney, WorkforceDiseases, WorkforceEducation, WorkforceEmployeeBankingInfo
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -856,5 +856,26 @@ class WorkforceEducationGQLType(DjangoObjectType):
             "child_nid_no": ["exact", "icontains"],
             "child_birth_certificate_no": ["exact", "icontains"],
             "study_class": ["exact", "icontains"],
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceEmployeeBankingInfoGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceEmployeeBankingInfo
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "name_bn": ["exact", "icontains"],
+            "name_en": ["exact", "icontains"],
+            "account_holder_name": ["exact", "icontains"],
+            "employee_id": ["exact"],
+            "application_id": ["exact"],
+            "dependant_id": ["exact"],
+            "bank_id": ["exact"],
+            "type": ["exact", "icontains"],
+            "amount": ["exact", "icontains"],
+            "account_no": ["exact", "icontains"],
+            "status": ["exact"],
         }
         connection_class = ExtendedConnection
