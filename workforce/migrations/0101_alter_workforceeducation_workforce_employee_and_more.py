@@ -14,7 +14,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('location', '0019_alter_location_code'),
         ('workforce', '0100_workforceeducation_historicalworkforceeducation'),
     ]
 
@@ -56,7 +55,7 @@ class Migration(migrations.Migration):
                 'db_table': 'workforce_dependants',
                 'managed': True,
             },
-            bases=(dirtyfields.dirtyfields.DirtyFieldsMixin, core.utils.CachedModelMixin, models.Model),
+            bases=(dirtyfields.dirtyfields.DirtyFieldsMixin, core.utils, models.Model),
         ),
         migrations.CreateModel(
             name='HistoricalWorkforceDependant',

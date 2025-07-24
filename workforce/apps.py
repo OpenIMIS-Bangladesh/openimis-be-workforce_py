@@ -92,6 +92,10 @@ DEFAULT_CFG = {
     # WorkforceDoctor (818xxx)
     "gql_workforce_doctor_perms": ["818001"],
 
+    # WorkforceCheckerTwo (812xxx)
+    "gql_workforce_checker_two_perms": ["819001"],
+
+
     "default_validations_disabled": False,
 }
 
@@ -183,6 +187,9 @@ class WorkforceConfig(AppConfig):
 
     # WorkforceDoctor (818xxx)
     gql_workforce_doctor_perms = []
+
+    # WorkforceCheckerTwo (819xxx)
+    gql_workforce_checker_two_perms = []
 
     default_validations_disabled = None
 
