@@ -526,29 +526,31 @@ class WorkforceEmployeeDependent(HistoryModel):
     eis_insurance_no = models.CharField(max_length=50, null=True, blank=True)
     name_bn = models.CharField(max_length=255, null=True, blank=True)
     name_en = models.CharField(max_length=255, null=True, blank=True)
-    father_name = models.CharField(max_length=255, null=True, blank=True)
-    mother_name = models.CharField(max_length=255, null=True, blank=True)
+    father_name_bn = models.CharField(max_length=255, null=True, blank=True)
+    father_name_en = models.CharField(max_length=255, null=True, blank=True)
+    mother_name_bn = models.CharField(max_length=255, null=True, blank=True)
+    mother_name_en = models.CharField(max_length=255, null=True, blank=True)
     marital_status = models.CharField(max_length=30, null=True, blank=True)
     gender = models.CharField(max_length=30, null=True, blank=True)
     occupation = models.CharField(max_length=30, null=True, blank=True)
     email = models.CharField(max_length=255, null=True, blank=True)
-    phone_number = models.CharField(max_length=20)
-    birth_date = models.DateField()
+    phone_number = models.CharField(null=True, blank=True, max_length=20)
+    birth_date = models.DateField(null=True, blank=True)
     nid = models.CharField(max_length=30, null=True, blank=True)
     birth_certificate_no = models.CharField(max_length=30, null=True, blank=True)
     percentage_of_cf_grant = models.CharField(max_length=30, null=True, blank=True)
     present_location = models.ForeignKey(
         Location,
         models.DO_NOTHING,
-        blank=False,
-        null=False,
+        blank=True,
+        null=True,
         related_name="employee_dependent_present_location",
     )
     permanent_location = models.ForeignKey(
         Location,
         models.DO_NOTHING,
-        blank=False,
-        null=False,
+        blank=True,
+        null=True,
         related_name="employee_dependent_permanent_location",
     )
     present_address = models.TextField(null=True, blank=True)
@@ -556,7 +558,7 @@ class WorkforceEmployeeDependent(HistoryModel):
     life_status = models.CharField(max_length=30, null=True, blank=True)
     death_date = models.DateField(null=True, blank=True)
     disability_status = models.CharField(max_length=30, null=True, blank=True)
-    relation_with_worker = models.CharField(max_length=50)
+    relation_with_worker = models.CharField(max_length=50, null=True, blank=True)
     last_verification_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
 

@@ -1,9 +1,9 @@
+import json
 import logging
-import random
 from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned, ValidationError
 from core.services import BaseService
-from workforce.models import WorkforceApplication, WorkforceGrantMoney, WorkforceEmployee
+from workforce.models import WorkforceApplication, WorkforceGrantMoney, WorkforceEmployee, WorkforceEmployeeDependent
 from django.db.models import Q
 
 logger = logging.getLogger(__name__)
@@ -74,7 +74,43 @@ class WorkforceApplicationServices(BaseService):
                 logger.error("Multiple WorkforceGrantMoney entries found. Expected only one.")
                 raise
 
-        return super().create(obj_data)
+        # Save dependents data to workforce_employee_dependent table
+        application = super().create(obj_data)
+        application_id = application.get("data", {}).get("id")
+        application_instance = WorkforceApplication.objects.get(id=application_id)
+        user_id = self.user.id
+        dependents_data = obj_data.get("employee_dependent_info")
+
+        if dependents_data:
+            try:
+                dependents = json.loads(dependents_data)
+                for dep in dependents:
+                    dep_instance = WorkforceEmployeeDependent(
+                        workforce_application=application_instance,
+                        name_bn=dep.get("nameBn"),
+                        name_en=dep.get("nameEn"),
+                        father_name_bn=dep.get("fatherNameBn"),
+                        father_name_en=dep.get("fatherNameEn"),
+                        mother_name_bn=dep.get("motherNameBn"),
+                        mother_name_en=dep.get("motherNameEn"),
+                        nid=dep.get("nid"),
+                        phone_number=dep.get("phoneNumber"),
+                        email=dep.get("email"),
+                        occupation=dep.get("occupation"),
+                        birth_certificate_no=dep.get("birthCertificateNo"),
+                        marital_status=dep.get("maritalStatus"),
+                        present_address=dep.get("presentAddress"),
+                        permanent_address=dep.get("permanentAddress"),
+                        user_created_id=user_id,
+                        user_updated_id=user_id,
+                        status="active"
+                    )
+                    dep_instance.save(username=self.user.username)
+
+            except Exception as e:
+                logger.error(f"Failed to save dependent: {e}")
+
+        return application
 
     def update(self, obj_data):
         return super().update(obj_data)
