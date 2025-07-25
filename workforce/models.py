@@ -471,6 +471,13 @@ class WorkforceDocument(HistoryModel):
         null=True,
         related_name="document_type_for_documents"  # Unique related name
     )
+    dependent = models.ForeignKey(
+        "WorkforceEmployeeDependent",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_dependent"  # Unique related name
+    )
     document_type = models.CharField(max_length=512, null=False, blank=False)
     path = models.CharField(max_length=512, null=True, blank=True)
     url = models.CharField(max_length=512, null=True, blank=True)

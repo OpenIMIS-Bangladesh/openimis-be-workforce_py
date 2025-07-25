@@ -662,6 +662,7 @@ class WorkforceDocumentGQLType(DjangoObjectType):
             "approver": ["exact"],
             "factory": ["exact"],
             "workforce_document_type": ["exact"],
+            "dependent_id": ["exact"],
             "document_type": ["exact", "icontains"],
             "path": ["exact"],
             "url": ["exact"],

@@ -344,6 +344,7 @@ class WorkforceDocumentTypeInputType(OpenIMISMutation.Input):
     application_for = graphene.String()
     document_type_no = graphene.Int()
     document_type = graphene.String()
+    dependent_id = graphene.String()
     document_count = graphene.String()
     name_bn = graphene.String()
     name_en = graphene.String()
