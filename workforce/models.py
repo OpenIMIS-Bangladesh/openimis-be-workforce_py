@@ -441,7 +441,7 @@ class WorkforceDocument(HistoryModel):
         null=True,
         related_name="workforce_document_application",
     )
-    holder = models.CharField()
+    holder = models.CharField(max_length=512, null=True, blank=True)
     holder_type = models.CharField(max_length=512, null=True, blank=True)
     verifier = models.ForeignKey(
         InteractiveUser,
@@ -471,7 +471,7 @@ class WorkforceDocument(HistoryModel):
         null=True,
         related_name="document_type_for_documents"  # Unique related name
     )
-    dependent = models.ForeignKey(
+    workforce_dependent = models.ForeignKey(
         "WorkforceEmployeeDependent",
         models.DO_NOTHING,
         blank=True,
