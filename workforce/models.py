@@ -750,6 +750,7 @@ class WorkforceDocumentType(HistoryModel):
         null=True,
         related_name="disease"
     )
+    mandatory_for_applicant = models.BooleanField(null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:

@@ -692,6 +692,7 @@ class WorkforceDocumentTypeGQLType(DjangoObjectType):
             "name_bn": ["exact", "contains"],
             "name_en": ["exact", "contains"],
             "workforce_disease": ["exact"],
+            "mandatory_for_applicant": ["exact"],
             "status": ["exact"],
         }
         connection_class = ExtendedConnection
