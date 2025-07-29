@@ -363,13 +363,13 @@ class WorkforceEmployee(HistoryModel):
     reference_salary = models.CharField(max_length=255, null=True, blank=True)
     present_address = models.TextField(null=True, blank=True)
     permanent_address = models.TextField(null=True, blank=True)
-    phone_number = models.CharField(max_length=20, null=True, blank=True)
-    email = models.CharField(max_length=255, null=True, blank=True)
+    phone_number = models.CharField(max_length=20, null=True, blank=True, unique=True)
+    email = models.CharField(max_length=255, null=True, blank=True, unique=True)
     birth_date = models.DateField(null=True, blank=True)
-    nid = models.CharField(max_length=30, null=True, blank=True)
+    nid = models.CharField(max_length=30, null=True, blank=True, unique=True)
     birth_certificate_no = models.CharField(
-        max_length=30, null=True, blank=True)
-    passport_no = models.CharField(max_length=30, null=True, blank=True)
+        max_length=30, null=True, blank=True, unique=True)
+    passport_no = models.CharField(max_length=30, null=True, blank=True, unique=True)
     registration_date = models.DateField(null=True, blank=True)
     life_status = models.CharField(max_length=30, null=True, blank=True)
     disability_status = models.CharField(max_length=30, null=True, blank=True)
@@ -786,10 +786,10 @@ class WorkforceUser(models.Model):
     name_bn = models.CharField(max_length=255)
     first_name_en = models.CharField(max_length=255)
     last_name_en = models.CharField(max_length=255, default=" ")
-    nid = models.CharField(max_length=30, null=True, blank=True)
+    nid = models.CharField(max_length=30, null=True, blank=True, unique=True)
     birth_certificate_no = models.CharField(
-        max_length=30, null=True, blank=True)
-    phone_number = models.CharField(max_length=20)
+        max_length=30, null=True, blank=True, unique=True)
+    phone_number = models.CharField(max_length=20, unique=True)
     status = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:
