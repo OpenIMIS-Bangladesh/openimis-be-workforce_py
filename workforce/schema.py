@@ -146,6 +146,11 @@ class Query(graphene.ObjectType):
         client_mutation_id=graphene.String(),
         orderBy=graphene.List(of_type=graphene.String),
     )
+    workforce_missing_documents = GenericScalar(
+        holder_type=graphene.NonNull(graphene.String),
+        application_id=graphene.String(),
+        dependent_id=graphene.String()
+    )
 
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
@@ -349,6 +354,12 @@ class Query(graphene.ObjectType):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("Unauthorized access"))
         pass
+    def resolve_workforce_missing_documents(self, info, holder_type, application_id=None, dependent_id=None):
+        return {
+            "holder_type": holder_type,
+            "application_id": application_id,
+            "dependent_id": dependent_id
+        }
 
 
 class Mutation(graphene.ObjectType):
