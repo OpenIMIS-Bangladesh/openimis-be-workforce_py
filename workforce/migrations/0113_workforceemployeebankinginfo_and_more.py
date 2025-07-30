@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
                 'db_table': 'workforce_employee_banking_info',
                 'managed': True,
             },
-            bases=(dirtyfields.dirtyfields.DirtyFieldsMixin, core.utils, models.Model),
+             bases=(dirtyfields.dirtyfields.DirtyFieldsMixin, core.utils.CachedModelMixin, models.Model),
         ),
         migrations.CreateModel(
             name='HistoricalWorkforceEmployeeBankingInfo',
