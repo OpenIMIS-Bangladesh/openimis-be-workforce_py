@@ -507,12 +507,6 @@ class Bank(HistoryModel):
         null=True,
         related_name="children",
     )
-    location = models.ForeignKey(
-        Location,
-        models.DO_NOTHING,
-        blank=True,
-        null=True
-    )
     contact_number = models.CharField(max_length=30, null=True, blank=True)
     type = models.CharField(max_length=30, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)

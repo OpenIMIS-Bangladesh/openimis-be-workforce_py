@@ -240,7 +240,6 @@ class WorkforceBankInputType(OpenIMISMutation.Input):
     district_name_en = graphene.String()
     routing_number = graphene.String()
     parent_id = graphene.UUID()
-    location_id = graphene.String(required=True)
     contact_number = graphene.String()
     type = graphene.String()
     status = graphene.String()
