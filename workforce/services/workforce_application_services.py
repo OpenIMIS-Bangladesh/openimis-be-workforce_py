@@ -3,8 +3,9 @@ import logging
 from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned, ValidationError
 from core.services import BaseService
-from workforce.models import WorkforceApplication, WorkforceGrantMoney, WorkforceEmployee, WorkforceEmployeeDependent
+from workforce.models import WorkforceApplication, WorkforceGrantMoney, WorkforceEmployee, WorkforceEmployeeDependent, WorkforceEmployeeBankingInfo
 from django.db.models import Q
+from .helper_service import clean_dependents_data
 
 logger = logging.getLogger(__name__)
 
@@ -80,8 +81,9 @@ class WorkforceApplicationServices(BaseService):
         application_instance = WorkforceApplication.objects.get(id=application_id)
         user_id = self.user.id
         dependents_data = obj_data.get("employee_dependent_info")
+        # dependents_data = clean_dependents_data(dependents_data)
 
-        if dependents_data:
+        if dependents_data and dependents_data != "[{}]":
             try:
                 dependents = json.loads(dependents_data)
                 for dep in dependents:
@@ -113,4 +115,58 @@ class WorkforceApplicationServices(BaseService):
         return application
 
     def update(self, obj_data):
-        return super().update(obj_data)
+        application = super().update(obj_data)
+
+        application_id = obj_data.get("id")
+        user_id = self.user.id
+
+        try:
+            application_instance = WorkforceApplication.objects.get(id=application_id)
+        except WorkforceApplication.DoesNotExist:
+            raise ValidationError("Invalid application ID provided.")
+
+        dependents_data = obj_data.get("employee_dependent_info", [])
+        # dependents_data = clean_dependents_data(dependents_data)
+
+        if dependents_data:
+            try:
+                existing_dependents = WorkforceEmployeeDependent.objects.filter(
+                    workforce_application=application_instance
+                )
+
+                for dependent in existing_dependents:
+                    WorkforceEmployeeBankingInfo.objects.filter(
+                        dependant=dependent
+                    ).delete()
+
+                existing_dependents.delete()
+
+                dependents = json.loads(dependents_data)
+                for dep in dependents:
+                    dep_instance = WorkforceEmployeeDependent(
+                        workforce_application=application_instance,
+                        name_bn=dep.get("nameBn"),
+                        name_en=dep.get("nameEn"),
+                        father_name_bn=dep.get("fatherNameBn"),
+                        father_name_en=dep.get("fatherNameEn"),
+                        mother_name_bn=dep.get("motherNameBn"),
+                        mother_name_en=dep.get("motherNameEn"),
+                        nid=dep.get("nid"),
+                        phone_number=dep.get("phoneNumber"),
+                        email=dep.get("email"),
+                        occupation=dep.get("occupation"),
+                        birth_certificate_no=dep.get("birthCertificateNo"),
+                        marital_status=dep.get("maritalStatus"),
+                        present_address=dep.get("presentAddress"),
+                        permanent_address=dep.get("permanentAddress"),
+                        user_created_id=user_id,
+                        user_updated_id=user_id,
+                        status="active"
+                    )
+                    dep_instance.save(username=self.user.username)
+
+            except Exception as e:
+                logger.error(f"Error while updating dependents: {e}")
+                raise ValidationError("Failed to update dependents.")
+
+        return application
