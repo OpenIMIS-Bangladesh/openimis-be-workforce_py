@@ -478,6 +478,7 @@ class WorkforceDocument(HistoryModel):
         null=True,
         related_name="workforce_dependent"  # Unique related name
     )
+    note = models.CharField(max_length=1024, null=True, blank=True)
     document_type = models.CharField(max_length=512, null=False, blank=False)
     path = models.CharField(max_length=512, null=True, blank=True)
     url = models.CharField(max_length=512, null=True, blank=True)
