@@ -91,6 +91,7 @@ class Query(graphene.ObjectType):
         orderBy=graphene.List(of_type=graphene.String),
         status_in=graphene.List(graphene.String),
         association_type_in=graphene.List(graphene.String),
+        application_type_in=graphene.List(graphene.String),
         submitted_by_in=graphene.List(graphene.String)
     )
     workforce_document_type = OrderedDjangoFilterConnectionField(
