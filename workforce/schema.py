@@ -1,3 +1,6 @@
+import uuid
+from uuid import UUID
+
 import graphene
 import os
 from django.utils.translation import gettext as _
@@ -354,12 +357,54 @@ class Query(graphene.ObjectType):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("Unauthorized access"))
         pass
-    def resolve_workforce_missing_documents(self, info, holder_type, application_id=None, dependent_id=None):
-        return {
-            "holder_type": holder_type,
-            "application_id": application_id,
-            "dependent_id": dependent_id
-        }
+
+    def resolve_workforce_missing_documents(self, info, application_id, holder_type, dependent_id=None):
+        try:
+            app = WorkforceApplication.objects.get(id=application_id)
+        except WorkforceApplication.DoesNotExist:
+            return []
+
+        # Get required document types for the application
+        required_documents_qs = WorkforceDocumentType.objects.filter(
+            organization_type=app.organization_type,
+            application_type=app.application_type
+        )
+
+        required_document_ids = set(required_documents_qs.values_list('id', flat=True))
+
+        # Get already submitted documents by holder type
+        submitted_qs = WorkforceDocument.objects.filter(
+            workforce_application_id=application_id,
+            holder_type=holder_type,
+        )
+
+        if holder_type == "dependent":
+            if not dependent_id:
+                raise Exception("dependent_id is required when holder_type is 'dependent'")
+            submitted_qs = submitted_qs.filter(workforce_dependent_id=dependent_id)
+        else:
+            submitted_qs = submitted_qs.filter(workforce_dependent_id__isnull=True)
+
+        submitted_document_ids = set(submitted_qs.values_list('workforce_document_type_id', flat=True))
+
+        # Calculate missing document IDs
+        missing_document_ids = required_document_ids - submitted_document_ids
+
+        # Fetch full info for missing documents
+        missing_documents_qs = WorkforceDocumentType.objects.filter(id__in=missing_document_ids).values(
+            'id', 'field_id', 'application_type', 'document_type',
+            'name_bn', 'name_en', 'application_for', 'document_type_no',
+            'organization_type', 'mandatory_for_applicant'
+        )
+
+        missing_documents = []
+        for doc in missing_documents_qs:
+            for key, value in doc.items():
+                if isinstance(value, uuid.UUID):
+                    doc[key] = str(value)
+            missing_documents.append(doc)
+
+        return missing_documents
 
 
 class Mutation(graphene.ObjectType):
