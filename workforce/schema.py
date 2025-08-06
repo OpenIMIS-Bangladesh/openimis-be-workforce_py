@@ -91,7 +91,7 @@ class Query(graphene.ObjectType):
         orderBy=graphene.List(of_type=graphene.String),
         status_in=graphene.List(graphene.String),
         association_type_in=graphene.List(graphene.String),
-        application_type_in=graphene.List(graphene.String)
+        submitted_by_in=graphene.List(graphene.String)
     )
     workforce_document_type = OrderedDjangoFilterConnectionField(
         WorkforceDocumentTypeGQLType,
@@ -237,7 +237,8 @@ class Query(graphene.ObjectType):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("Unauthorized access"))
         pass
-    def resolve_workforce_application(self, info, status_in=None, association_type_in=None,  application_type_in=None, **kwargs):
+    def resolve_workforce_application(self, info, status_in=None, association_type_in=None, application_type_in=None, submitted_by_in=None,
+                                      **kwargs):
         service = WorkforceApplicationServices(info.context.user)
         query = service.get(**kwargs)
         if status_in:
@@ -246,6 +247,8 @@ class Query(graphene.ObjectType):
             query = query.filter(association_type__in=association_type_in)
         if application_type_in:
             query = query.filter(application_type__in=application_type_in)
+        if submitted_by_in:
+            query = query.filter(submitted_by__in=submitted_by_in)
         return gql_optimizer.query(query, info)
     def resolve_workforce_document_types(self, info, **kwargs):
         service = WorkforceDocumentTypeServices(info.context.user)
