@@ -83,8 +83,8 @@ DEFAULT_CFG = {
     # WorkforceDirector (815xxx)
     "gql_workforce_director_perms": ["815001"],
     
-    # WorkforceAssociation (816xxx)
-    "gql_workforce_association_perms": ["816001"],
+    # WorkforceBGMEAAssociation (816xxx)
+    "gql_workforce_bgmea_association_perms": ["816001"],
 
     # WorkforceSectionAdmin (817xxx)
     "gql_workforce_section_admin_perms": ["817001"],
@@ -95,6 +95,8 @@ DEFAULT_CFG = {
     # WorkforceCheckerTwo (812xxx)
     "gql_workforce_checker_two_perms": ["819001"],
 
+    # WorkforceBKMEAAssociation (821xxx)
+    "gql_workforce_bkmea_association_perms": ["821001"],
 
     "default_validations_disabled": False,
 }
@@ -190,6 +192,12 @@ class WorkforceConfig(AppConfig):
 
     # WorkforceCheckerTwo (819xxx)
     gql_workforce_checker_two_perms = []
+
+    # WorkforceBGMEAAssociation (816xxx)
+    gql_workforce_bgmea_association_perms = []
+
+    # WorkforceBKMEAAssociation (821xxx)
+    gql_workforce_bkmea_association_perms = []
 
     default_validations_disabled = None
 
