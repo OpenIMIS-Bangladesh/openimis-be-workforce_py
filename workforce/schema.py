@@ -94,10 +94,11 @@ class Query(graphene.ObjectType):
         application_type_in=graphene.List(graphene.String),
         submitted_by_in=graphene.List(graphene.String)
     )
-    workforce_document_type = OrderedDjangoFilterConnectionField(
+    workforce_document_types = OrderedDjangoFilterConnectionField(
         WorkforceDocumentTypeGQLType,
         client_mutation_id=graphene.String(),
         orderBy=graphene.List(of_type=graphene.String),
+        application_for_in=graphene.List(graphene.String)
     )
     workforce_document_map = OrderedDjangoFilterConnectionField(
         WorkforceDocumentMapGQLType,
@@ -249,9 +250,11 @@ class Query(graphene.ObjectType):
         if submitted_by_in:
             query = query.filter(submitted_by__in=submitted_by_in)
         return gql_optimizer.query(query, info)
-    def resolve_workforce_document_types(self, info, **kwargs):
+    def resolve_workforce_document_types(self, info, application_for_in=None, **kwargs):
         service = WorkforceDocumentTypeServices(info.context.user)
         query = service.get(**kwargs)
+        if application_for_in:
+            query = query.filter(application_for__in=application_for_in)
         return gql_optimizer.query(query, info)
     def resolve_workforce_user(self, info, **kwargs):
         service = WorkforceUserServices(info.context.user)
