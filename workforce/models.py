@@ -283,8 +283,8 @@ class WorkforceFactory(HistoryModel):
     workforce_employer = models.ForeignKey(
         WorkforceEmployer,
         models.DO_NOTHING,
-        blank=False,
-        null=False,
+        blank=True,
+        null=True,
     )
     employer_id = models.CharField(max_length=255, null=True, blank=True)
     employer_id_lima = models.CharField(max_length=255, null=True, blank=True)

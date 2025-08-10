@@ -133,7 +133,7 @@ class WorkforceOfficeInputType(OpenIMISMutation.Input):
 
 class WorkforceFactoryInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
-    workforce_employer_id = graphene.UUID(required=True)
+    workforce_employer_id = graphene.UUID(required=False)
     employer_id = graphene.String()
     employer_id_lima = graphene.String()
     name_bn = graphene.String()

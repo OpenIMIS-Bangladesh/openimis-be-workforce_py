@@ -3,9 +3,11 @@ import logging
 from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned, ValidationError
 from core.services import BaseService
-from workforce.models import WorkforceApplication, WorkforceGrantMoney, WorkforceEmployee, WorkforceEmployeeDependent, WorkforceEmployeeBankingInfo
+from workforce.models import (
+    WorkforceApplication, WorkforceGrantMoney, WorkforceEmployee, WorkforceEmployeeDependent,
+    WorkforceEmployeeBankingInfo, WorkforceDocument, WorkforceFactory
+)
 from django.db.models import Q
-from .helper_service import clean_dependents_data
 
 logger = logging.getLogger(__name__)
 
@@ -118,6 +120,7 @@ class WorkforceApplicationServices(BaseService):
         application = super().update(obj_data)
 
         application_id = obj_data.get("id")
+        application_status = obj_data.get("status", [])
         user_id = self.user.id
 
         try:
@@ -126,7 +129,6 @@ class WorkforceApplicationServices(BaseService):
             raise ValidationError("Invalid application ID provided.")
 
         dependents_data = obj_data.get("employee_dependent_info", [])
-        # dependents_data = clean_dependents_data(dependents_data)
 
         if dependents_data:
             try:
@@ -168,5 +170,51 @@ class WorkforceApplicationServices(BaseService):
             except Exception as e:
                 logger.error(f"Error while updating dependents: {e}")
                 raise ValidationError("Failed to update dependents.")
+
+            if application_status == "new":
+                application_instance = WorkforceApplication.objects.get(id=application_id)
+                employee_factory_id = application_instance.employee_factory_id
+
+                factory = WorkforceFactory.objects.filter(id=employee_factory_id).first()
+                association_type = factory.association_type if factory else None
+
+                if association_type:
+                    application_instance.association_type = association_type
+                    application_instance.save(
+                        username=self.user.username,
+                        update_fields=["association_type"]
+                    )
+
+                factory_documents = WorkforceDocument.objects.filter(
+                    factory_id=employee_factory_id
+                )
+
+                new_documents = []
+                for doc in factory_documents:
+                    holder_type = "dependent" if doc.workforce_dependent_id else "applicant"
+
+                    new_doc = WorkforceDocument(
+                        workforce_application=application_instance,
+                        holder=doc.holder,
+                        holder_type=holder_type,
+                        verifier=doc.verifier,
+                        approver=doc.approver,
+                        workforce_document_type=doc.workforce_document_type,
+                        workforce_dependent=doc.workforce_dependent,
+                        note=doc.note,
+                        document_type=doc.document_type,
+                        path=doc.path,
+                        url=doc.url,
+                        submission_date=doc.submission_date,
+                        verification_date=doc.verification_date,
+                        approval_date=doc.approval_date,
+                        remarks=doc.remarks,
+                        status=doc.status or "active",
+                        user_created_id=self.user.id,
+                        user_updated_id=self.user.id
+                    )
+                    new_doc.save(username=self.user.username)
+
+                WorkforceDocument.objects.bulk_create(new_documents)
 
         return application
