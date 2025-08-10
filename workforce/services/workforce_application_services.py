@@ -61,7 +61,7 @@ class WorkforceApplicationServices(BaseService):
 
                         if existing_applications.exists():
                             raise ValidationError(
-                                "An application for disability assistance already exists for this NID."
+                                "An application for financial assistance already exists for this NID."
                             )
 
                     except ObjectDoesNotExist:
