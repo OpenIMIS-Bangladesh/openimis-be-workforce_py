@@ -336,7 +336,7 @@ class WorkforceFactoryGQLType(DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         filter_fields = {
             "id": ["exact"],
-            "workforce_employer": ["exact"],
+            "workforce_employer_id": ["exact"],
             "employer_id": ["exact", "icontains"],
             "employer_id_lima": ["exact", "icontains"],
             "name_bn": ["exact", "icontains"],
@@ -347,7 +347,7 @@ class WorkforceFactoryGQLType(DjangoObjectType):
             "email": ["exact", "icontains"],
             "website": ["exact", "icontains"],
             "status": ["exact", "isnull"],
-            "workforce_representative": ["exact"],
+            "workforce_representative_id": ["exact"],
             "association_type": ["exact"],
             "is_same_company_representative": ["exact"],
         }

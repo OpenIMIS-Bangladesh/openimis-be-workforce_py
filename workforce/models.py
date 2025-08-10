@@ -307,8 +307,8 @@ class WorkforceFactory(HistoryModel):
     workforce_representative = models.ForeignKey(
         WorkforceRepresentative,
         models.DO_NOTHING,
-        blank=False,
-        null=False,
+        blank=True,
+        null=True,
     )
 
     class Meta:
