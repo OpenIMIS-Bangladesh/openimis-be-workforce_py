@@ -46,8 +46,8 @@ class WorkforceApplicationServices(BaseService):
                 tracking_number = f"{year_suffix}{application_type_no}{application_count_str}"
                 obj_data["tracking_number"] = tracking_number
 
-                # Restrict to 1 application per NID for disabilityAssistance
-                if application_type == "disabilityAssistance":
+                # Restrict to 1 application per NID for financialAssistance
+                if application_type == "financialAssistance":
                     try:
                         workforce_employee = WorkforceEmployee.objects.get(
                             id=obj_data.get("workforce_employee_id")
@@ -55,7 +55,7 @@ class WorkforceApplicationServices(BaseService):
                         employee_nid = workforce_employee.nid
 
                         existing_applications = WorkforceApplication.objects.filter(
-                            application_type="disabilityAssistance",
+                            application_type="financialAssistance",
                             workforce_employee__nid=employee_nid
                         )
 
