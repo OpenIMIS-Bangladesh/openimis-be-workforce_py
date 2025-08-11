@@ -146,7 +146,7 @@ class WorkforceFactoryInputType(OpenIMISMutation.Input):
     status = graphene.String()
     association_type = graphene.String()
     is_same_company_representative = graphene.String()
-    workforce_representative_id = graphene.UUID()
+    workforce_representative_id = graphene.String()
 
 
 class WorkforceEmployeeInputType(OpenIMISMutation.Input):
