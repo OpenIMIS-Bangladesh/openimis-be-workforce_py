@@ -185,36 +185,33 @@ class WorkforceApplicationServices(BaseService):
                         update_fields=["association_type"]
                     )
 
-                factory_documents = WorkforceDocument.objects.filter(
-                    factory_id=employee_factory_id
-                )
-
-                new_documents = []
-                for doc in factory_documents:
-                    holder_type = "dependent" if doc.workforce_dependent_id else "applicant"
-
-                    new_doc = WorkforceDocument(
-                        workforce_application=application_instance,
-                        holder=doc.holder,
-                        holder_type=holder_type,
-                        verifier=doc.verifier,
-                        approver=doc.approver,
-                        workforce_document_type=doc.workforce_document_type,
-                        workforce_dependent=doc.workforce_dependent,
-                        note=doc.note,
-                        document_type=doc.document_type,
-                        path=doc.path,
-                        url=doc.url,
-                        submission_date=doc.submission_date,
-                        verification_date=doc.verification_date,
-                        approval_date=doc.approval_date,
-                        remarks=doc.remarks,
-                        status=doc.status or "active",
-                        user_created_id=self.user.id,
-                        user_updated_id=self.user.id
+                if employee_factory_id:
+                    factory_documents = WorkforceDocument.objects.filter(
+                        factory_id=employee_factory_id
                     )
-                    new_doc.save(username=self.user.username)
+                    for doc in factory_documents:
+                        holder_type = "dependent" if doc.workforce_dependent_id else "applicant"
 
-                WorkforceDocument.objects.bulk_create(new_documents)
+                        new_doc = WorkforceDocument(
+                            workforce_application=application_instance,
+                            holder=doc.holder,
+                            holder_type=holder_type,
+                            verifier=doc.verifier,
+                            approver=doc.approver,
+                            workforce_document_type=doc.workforce_document_type,
+                            workforce_dependent=doc.workforce_dependent,
+                            note=doc.note,
+                            document_type=doc.document_type,
+                            path=doc.path,
+                            url=doc.url,
+                            submission_date=doc.submission_date,
+                            verification_date=doc.verification_date,
+                            approval_date=doc.approval_date,
+                            remarks=doc.remarks,
+                            status=doc.status or "active",
+                            user_created_id=self.user.id,
+                            user_updated_id=self.user.id
+                        )
+                        new_doc.save(username=self.user.username)
 
         return application
