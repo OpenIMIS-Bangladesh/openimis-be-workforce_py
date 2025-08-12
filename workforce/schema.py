@@ -367,6 +367,24 @@ class Query(graphene.ObjectType):
         pass
 
     def resolve_workforce_missing_documents(self, info, application_id):
+
+        """
+        current distinct application_for in workforce_document_type table
+        - normal_death_institutional_on_work
+        - self_non_institutional
+        - normal_death_institutional
+        - dependent_institutional
+        - dependent
+        - disease
+        - self_institutional
+        - permanent_disability
+        - accidental_death
+        - normal_death
+        - self
+        - temporary_disability
+        - dependent_non_institutional
+
+        """
         try:
             app = WorkforceApplication.objects.get(id=application_id)
         except WorkforceApplication.DoesNotExist:
@@ -390,8 +408,12 @@ class Query(graphene.ObjectType):
         # Get submitted document IDs for applicant
         applicant_submitted_ids = set(applicant_docs.values_list('workforce_document_type_id', flat=True))
 
-        # EXCLUDE dependent-type docs for applicant
-        exclude_application_for = ['dependent', 'normal_death', 'accidental_death']
+        # EXCLUDE those application_for docs for applicant
+        exclude_application_for = [
+            'dependent', 'normal_death', 'accidental_death',
+            'dependent_non_institutional', 'dependent_institutional',
+            'normal_death_institutional', 'normal_death_institutional_on_work'
+        ]
         applicant_required_qs = required_documents_qs.exclude(application_for__in=exclude_application_for)
         applicant_required_ids = set(applicant_required_qs.values_list('id', flat=True))
 
@@ -414,8 +436,12 @@ class Query(graphene.ObjectType):
             "missing_documents": applicant_missing_docs
         }]
 
-        # INCLUDE only dependent-type docs for dependents
-        include_application_for = ['dependent', 'normal_death', 'accidental_death']
+        # Documents for dependent
+        include_application_for = [
+            'dependent', 'normal_death', 'accidental_death',
+            'dependent_non_institutional', 'dependent_institutional',
+            'normal_death_institutional', 'normal_death_institutional_on_work'
+        ]
         dependent_required_qs = required_documents_qs.filter(application_for__in=include_application_for)
         dependent_required_ids = set(dependent_required_qs.values_list('id', flat=True))
 
