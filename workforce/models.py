@@ -316,6 +316,57 @@ class WorkforceFactory(HistoryModel):
         db_table = 'workforce_employer_factories'
 
 
+class WorkforceFactoryRegistration(HistoryModel):
+    workforce_employer = models.ForeignKey(
+        WorkforceEmployer,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+    )
+    employer_id = models.CharField(max_length=255, null=True, blank=True)
+    employer_id_lima = models.CharField(max_length=255, null=True, blank=True)
+    name_bn = models.CharField(
+        max_length=255, null=False, db_comment='Translatable name field. May use any language')
+    name_en = models.CharField(max_length=255, db_comment='English name field')
+    location = models.ForeignKey(
+        Location,
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="factory_location"
+    )
+    address = models.TextField(null=True, blank=True)
+    phone_number = models.CharField(max_length=20, null=True, blank=True)
+    email = models.CharField(max_length=255, null=True, blank=True)
+    website = models.CharField(max_length=200, null=True, blank=True)
+    status = models.CharField(max_length=30, null=True, blank=True)
+    is_same_company_representative = models.SmallIntegerField(default=0)
+    association_type = models.CharField(max_length=50, null=True, blank=True)
+    
+    representative_type = models.CharField(max_length=255)
+    representative_name_bn = models.CharField(
+        max_length=255, db_comment='Translatable name field. May use any language')
+    representative_name_en = models.CharField(max_length=255, db_comment='English name field')
+    representative_location = models.ForeignKey(
+        Location,
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="representative_location"
+    )
+    representative_address = models.TextField(null=True, blank=True)
+    representative_phone_number = models.CharField(max_length=20, null=True, blank=True)
+    representative_email = models.CharField(max_length=255, null=True, blank=True)
+    representative_nid = models.CharField(max_length=30, null=True, blank=True)
+    representative_passport_no = models.CharField(max_length=30, null=True, blank=True)
+    representative_birth_date = models.DateField(null=True, blank=True)
+    representative_position = models.CharField(max_length=255, null=True, blank=True)
+    representative_status = models.CharField(max_length=30, null=True, blank=True)
+    class Meta:
+        managed = True
+        db_table = 'workforce_employer_registrable_factories'
+
+
 class WorkforceEmployee(HistoryModel):
     employee_id = models.CharField(
         max_length=255, null=True, blank=True, unique=True)
@@ -363,13 +414,16 @@ class WorkforceEmployee(HistoryModel):
     reference_salary = models.CharField(max_length=255, null=True, blank=True)
     present_address = models.TextField(null=True, blank=True)
     permanent_address = models.TextField(null=True, blank=True)
-    phone_number = models.CharField(max_length=20, null=True, blank=True, unique=True)
-    email = models.CharField(max_length=255, null=True, blank=True, unique=True)
+    phone_number = models.CharField(
+        max_length=20, null=True, blank=True, unique=True)
+    email = models.CharField(max_length=255, null=True,
+                             blank=True, unique=True)
     birth_date = models.DateField(null=True, blank=True)
     nid = models.CharField(max_length=30, null=True, blank=True, unique=True)
     birth_certificate_no = models.CharField(
         max_length=30, null=True, blank=True, unique=True)
-    passport_no = models.CharField(max_length=30, null=True, blank=True, unique=True)
+    passport_no = models.CharField(
+        max_length=30, null=True, blank=True, unique=True)
     registration_date = models.DateField(null=True, blank=True)
     life_status = models.CharField(max_length=30, null=True, blank=True)
     disability_status = models.CharField(max_length=30, null=True, blank=True)
@@ -539,8 +593,10 @@ class WorkforceEmployeeDependent(HistoryModel):
     phone_number = models.CharField(null=True, blank=True, max_length=20)
     birth_date = models.DateField(null=True, blank=True)
     nid = models.CharField(max_length=30, null=True, blank=True)
-    birth_certificate_no = models.CharField(max_length=30, null=True, blank=True)
-    percentage_of_cf_grant = models.CharField(max_length=30, null=True, blank=True)
+    birth_certificate_no = models.CharField(
+        max_length=30, null=True, blank=True)
+    percentage_of_cf_grant = models.CharField(
+        max_length=30, null=True, blank=True)
     present_location = models.ForeignKey(
         Location,
         models.DO_NOTHING,
@@ -560,7 +616,8 @@ class WorkforceEmployeeDependent(HistoryModel):
     life_status = models.CharField(max_length=30, null=True, blank=True)
     death_date = models.DateField(null=True, blank=True)
     disability_status = models.CharField(max_length=30, null=True, blank=True)
-    relation_with_worker = models.CharField(max_length=50, null=True, blank=True)
+    relation_with_worker = models.CharField(
+        max_length=50, null=True, blank=True)
     last_verification_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
 
@@ -1037,7 +1094,8 @@ class WorkforceEducation(HistoryModel):
     child_name_bn = models.CharField(max_length=255, null=True, blank=True)
     child_birth_date = models.DateField(null=True, blank=True)
     child_nid_no = models.CharField(max_length=30, null=True, blank=True)
-    child_birth_certificate_no = models.CharField(max_length=30, null=True, blank=True)
+    child_birth_certificate_no = models.CharField(
+        max_length=30, null=True, blank=True)
     study_class = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:
@@ -1063,8 +1121,10 @@ class WorkforceDiseases(HistoryModel):
 class WorkforceEmployeeBankingInfo(HistoryModel):
     name_bn = models.CharField(
         max_length=255, null=True, blank=True, db_comment='Translatable name field. May use any language')
-    name_en = models.CharField(max_length=255, null=True, blank=True, db_comment='English name field')
-    account_holder_name = models.CharField(max_length=255, null=True, blank=True)
+    name_en = models.CharField(
+        max_length=255, null=True, blank=True, db_comment='English name field')
+    account_holder_name = models.CharField(
+        max_length=255, null=True, blank=True)
     employee = models.ForeignKey(
         WorkforceEmployee,
         models.DO_NOTHING,
