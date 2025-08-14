@@ -509,3 +509,11 @@ class WorkforceEmployeeBankingInfoInputType(OpenIMISMutation.Input):
     amount = graphene.String(required=False)
     account_no = graphene.String(required=False)
     status = graphene.String()
+
+
+class WorkforceSignatureInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    related_user_id = graphene.String(required=True)
+    path = graphene.String(required=True)
+    url = graphene.String(required=True)
+    status = graphene.String()

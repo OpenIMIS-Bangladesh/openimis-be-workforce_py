@@ -157,6 +157,10 @@ class Query(graphene.ObjectType):
     workforce_missing_documents = GenericScalar(
         application_id=graphene.String(),
     )
+    workforce_signatures = OrderedDjangoFilterConnectionField(
+        WorkforceSignatureGQLType,
+        orderBy=graphene.List(of_type=graphene.String),
+    )
 
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
@@ -477,6 +481,10 @@ class Query(graphene.ObjectType):
     #         })
     #
     #     return result
+    def resolve_workforce_signatures(self, info, **kwargs):
+        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+            raise PermissionDenied(_("Unauthorized access"))
+        pass
 
 
 class Mutation(graphene.ObjectType):
@@ -563,3 +571,6 @@ class Mutation(graphene.ObjectType):
 
     create_workforce_employee_banking_info = CreateWorkforceEmployeeBankingInfoMutation.Field()
     update_workforce_employee_banking_info = UpdateWorkforceEmployeeBankingInfoMutation.Field()
+
+    create_workforce_signature = CreateWorkforceSignatureMutation.Field()
+    update_workforce_signature = UpdateWorkforceSignatureMutation.Field()
