@@ -3,6 +3,7 @@ from uuid import UUID
 
 import graphene
 import os
+import json
 from django.utils.translation import gettext as _
 import graphene_django_optimizer as gql_optimizer
 from core.schema import OrderedDjangoFilterConnectionField
@@ -369,112 +370,113 @@ class Query(graphene.ObjectType):
             raise PermissionDenied(_("Unauthorized access"))
         pass
 
-    def resolve_workforce_missing_documents(self, info, application_id):
+    # def resolve_workforce_missing_documents(self, info, application_id):
+    # This method is not functional
 
-        """
-        current distinct application_for in workforce_document_type table
-        - normal_death_institutional_on_work
-        - self_non_institutional
-        - normal_death_institutional
-        - dependent_institutional
-        - dependent
-        - disease
-        - self_institutional
-        - permanent_disability
-        - accidental_death
-        - normal_death
-        - self
-        - temporary_disability
-        - dependent_non_institutional
-
-        """
-        try:
-            app = WorkforceApplication.objects.get(id=application_id)
-        except WorkforceApplication.DoesNotExist:
-            return []
-
-        # Fetch all required documents based on org/app type
-        required_documents_qs = WorkforceDocumentType.objects.filter(
-            organization_type=app.organization_type,
-            application_type=app.application_type
-        )
-
-        # Get all submitted documents for this application
-        all_documents_qs = WorkforceDocument.objects.filter(
-            workforce_application_id=application_id
-        )
-
-        # Split submitted documents by applicant and dependents
-        applicant_docs = all_documents_qs.filter(holder_type='applicant', workforce_dependent_id__isnull=True)
-        dependent_docs = all_documents_qs.filter(holder_type='dependent', workforce_dependent_id__isnull=False)
-
-        # Get submitted document IDs for applicant
-        applicant_submitted_ids = set(applicant_docs.values_list('workforce_document_type_id', flat=True))
-
-        # EXCLUDE those application_for docs for applicant
-        exclude_application_for = [
-            'dependent', 'normal_death', 'accidental_death',
-            'dependent_non_institutional', 'dependent_institutional',
-            'normal_death_institutional', 'normal_death_institutional_on_work'
-        ]
-        applicant_required_qs = required_documents_qs.exclude(application_for__in=exclude_application_for)
-        applicant_required_ids = set(applicant_required_qs.values_list('id', flat=True))
-
-        # Calculate missing documents for applicant
-        applicant_missing_ids = applicant_required_ids - applicant_submitted_ids
-        applicant_missing_qs = WorkforceDocumentType.objects.filter(id__in=applicant_missing_ids).values(
-            'id', 'field_id', 'application_type', 'document_type',
-            'name_bn', 'name_en', 'application_for', 'document_type_no',
-            'organization_type', 'mandatory_for_applicant'
-        )
-
-        applicant_missing_docs = []
-        for doc in applicant_missing_qs:
-            doc = {k: str(v) if isinstance(v, uuid.UUID) else v for k, v in doc.items()}
-            applicant_missing_docs.append(doc)
-
-        result = [{
-            "id": str(app.workforce_employee_id),
-            "holder_type": "applicant",
-            "missing_documents": applicant_missing_docs
-        }]
-
-        # Documents for dependent
-        include_application_for = [
-            'dependent', 'normal_death', 'accidental_death',
-            'dependent_non_institutional', 'dependent_institutional',
-            'normal_death_institutional', 'normal_death_institutional_on_work'
-        ]
-        dependent_required_qs = required_documents_qs.filter(application_for__in=include_application_for)
-        dependent_required_ids = set(dependent_required_qs.values_list('id', flat=True))
-
-        # Process dependents
-        dependents = dependent_docs.values('workforce_dependent_id').distinct()
-
-        for dependent in dependents:
-            dep_id = dependent['workforce_dependent_id']
-            dep_docs = dependent_docs.filter(workforce_dependent_id=dep_id)
-            dep_submitted_ids = set(dep_docs.values_list('workforce_document_type_id', flat=True))
-
-            dep_missing_ids = dependent_required_ids - dep_submitted_ids
-            dep_missing_qs = WorkforceDocumentType.objects.filter(id__in=dep_missing_ids).values(
-                'id', 'field_id', 'application_type', 'document_type',
-                'name_bn', 'name_en', 'application_for', 'document_type_no',
-                'organization_type', 'mandatory_for_applicant'
-            )
-
-            dep_missing_docs = []
-            for doc in dep_missing_qs:
-                doc = {k: str(v) if isinstance(v, uuid.UUID) else v for k, v in doc.items()}
-                dep_missing_docs.append(doc)
-
-            result.append({
-                "id": str(dep_id),
-                "holder_type": "dependent",
-                "missing_documents": dep_missing_docs
-            })
-
-        return result
+        # """
+        # current distinct application_for in workforce_document_type table
+        # - normal_death_institutional_on_work
+        # - self_non_institutional
+        # - normal_death_institutional
+        # - dependent_institutional
+        # - dependent
+        # - disease
+        # - self_institutional
+        # - permanent_disability
+        # - accidental_death
+        # - normal_death
+        # - self
+        # - temporary_disability
+        # - dependent_non_institutional
+        #
+        # """
+        # try:
+        #     app = WorkforceApplication.objects.get(id=application_id)
+        # except WorkforceApplication.DoesNotExist:
+        #     return []
+        #
+        # # Fetch all required documents based on org/app type
+        # required_documents_qs = WorkforceDocumentType.objects.filter(
+        #     organization_type=app.organization_type,
+        #     application_type=app.application_type
+        # )
+        #
+        # # Get all submitted documents for this application
+        # all_documents_qs = WorkforceDocument.objects.filter(
+        #     workforce_application_id=application_id
+        # )
+    #
+    #     # Split submitted documents by applicant and dependents
+    #     applicant_docs = all_documents_qs.filter(holder_type='applicant', workforce_dependent_id__isnull=True)
+    #     dependent_docs = all_documents_qs.filter(holder_type='dependent', workforce_dependent_id__isnull=False)
+    #
+    #     # Get submitted document IDs for applicant
+    #     applicant_submitted_ids = set(applicant_docs.values_list('workforce_document_type_id', flat=True))
+    #
+    #     # EXCLUDE those application_for docs for applicant
+    #     exclude_application_for = [
+    #         'dependent', 'normal_death', 'accidental_death',
+    #         'dependent_non_institutional', 'dependent_institutional',
+    #         'normal_death_institutional', 'normal_death_institutional_on_work'
+    #     ]
+    #     applicant_required_qs = required_documents_qs.exclude(application_for__in=exclude_application_for)
+    #     applicant_required_ids = set(applicant_required_qs.values_list('id', flat=True))
+    #
+    #     # Calculate missing documents for applicant
+    #     applicant_missing_ids = applicant_required_ids - applicant_submitted_ids
+    #     applicant_missing_qs = WorkforceDocumentType.objects.filter(id__in=applicant_missing_ids).values(
+    #         'id', 'field_id', 'application_type', 'document_type',
+    #         'name_bn', 'name_en', 'application_for', 'document_type_no',
+    #         'organization_type', 'mandatory_for_applicant'
+    #     )
+    #
+    #     applicant_missing_docs = []
+    #     for doc in applicant_missing_qs:
+    #         doc = {k: str(v) if isinstance(v, uuid.UUID) else v for k, v in doc.items()}
+    #         applicant_missing_docs.append(doc)
+    #
+    #     result = [{
+    #         "id": str(app.workforce_employee_id),
+    #         "holder_type": "applicant",
+    #         "missing_documents": applicant_missing_docs
+    #     }]
+    #
+    #     # Documents for dependent
+    #     include_application_for = [
+    #         'dependent', 'normal_death', 'accidental_death',
+    #         'dependent_non_institutional', 'dependent_institutional',
+    #         'normal_death_institutional', 'normal_death_institutional_on_work'
+    #     ]
+    #     dependent_required_qs = required_documents_qs.filter(application_for__in=include_application_for)
+    #     dependent_required_ids = set(dependent_required_qs.values_list('id', flat=True))
+    #
+    #     # Process dependents
+    #     dependents = dependent_docs.values('workforce_dependent_id').distinct()
+    #
+    #     for dependent in dependents:
+    #         dep_id = dependent['workforce_dependent_id']
+    #         dep_docs = dependent_docs.filter(workforce_dependent_id=dep_id)
+    #         dep_submitted_ids = set(dep_docs.values_list('workforce_document_type_id', flat=True))
+    #
+    #         dep_missing_ids = dependent_required_ids - dep_submitted_ids
+    #         dep_missing_qs = WorkforceDocumentType.objects.filter(id__in=dep_missing_ids).values(
+    #             'id', 'field_id', 'application_type', 'document_type',
+    #             'name_bn', 'name_en', 'application_for', 'document_type_no',
+    #             'organization_type', 'mandatory_for_applicant'
+    #         )
+    #
+    #         dep_missing_docs = []
+    #         for doc in dep_missing_qs:
+    #             doc = {k: str(v) if isinstance(v, uuid.UUID) else v for k, v in doc.items()}
+    #             dep_missing_docs.append(doc)
+    #
+    #         result.append({
+    #             "id": str(dep_id),
+    #             "holder_type": "dependent",
+    #             "missing_documents": dep_missing_docs
+    #         })
+    #
+    #     return result
 
 
 class Mutation(graphene.ObjectType):
