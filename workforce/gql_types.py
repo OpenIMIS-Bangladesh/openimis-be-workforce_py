@@ -149,6 +149,34 @@ class WorkforceFactoryInputType(OpenIMISMutation.Input):
     workforce_representative_id = graphene.String()
 
 
+class WorkforceFactoryRegistrationInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    factory_id = graphene.String(required=False)
+    workforce_employer_id = graphene.UUID(required=False)
+    employer_id = graphene.String(required=False)
+    employer_id_lima = graphene.String(required=False)
+    name_bn = graphene.String(required=False)
+    name_en = graphene.String(required=False)
+    location_id = graphene.String(required=False)
+    address = graphene.String(required=False)
+    phone_number = graphene.String(required=False)
+    email = graphene.String(required=False)
+    website = graphene.String(required=False)
+    status = graphene.String(required=False)
+    association_type = graphene.String(required=False)
+    representative_type = graphene.String(required=True)
+    representative_name_bn = graphene.String(required=True)
+    representative_name_en = graphene.String(required=True)
+    representative_location_id = graphene.String(required=False)
+    representative_address = graphene.String(required=True)
+    representative_phone_number = graphene.String(required=True)
+    representative_email = graphene.String(required=True)
+    representative_nid = graphene.String(required=True)
+    representative_passport_no = graphene.String(required=False)
+    representative_birth_date = graphene.String(required=True)
+    representative_position = graphene.String(required=True)
+
+
 class WorkforceEmployeeInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
     employee_id = graphene.String(unique=True)

@@ -16,7 +16,7 @@ from .gql_types import (
     WorkforceApplicationInputType, WorkforceDocumentTypeInputType, WorkforceDocumentMapInputType,
     WorkforceUserInputType, WorkforceApplicationMovementInputType, WorkforceApplicationSummaryInputType,
     WorkforceApplicationSummaryMovementInputType, WorkforceGrantMoneyInputType, WorkforceDiseasesInputType,
-    WorkforceEducationInputType, WorkforceEmployeeBankingInfoInputType, WorkforceSignatureInputType
+    WorkforceEducationInputType, WorkforceEmployeeBankingInfoInputType, WorkforceSignatureInputType, WorkforceFactoryRegistrationInputType
 )
 from .services.workforce_organization_services import WorkforceOrganizationServices
 from .services.workforce_representative_services import WorkforceRepresentativeServices
@@ -48,6 +48,8 @@ from .services.workforce_diseases_services import WorkforceDiseasesServices
 from .services.workforce_education_services import WorkforceEducationServices
 from .services.workforce_employee_banking_info_services import WorkforceEmployeeBankingInfoServices
 from .services.workforce_signature_services import WorkforceSignatureServices
+from .services.workforce_factory_registration_services import WorkforceFactoryRegistrationServices
+from .services.workforce_factory_registration_services import WorkforceFactoryRegistrationServices
 
 
 mutation_module = "workforce"
@@ -72,9 +74,11 @@ def auth_permission_validation(failure_message, required_permission, call_type, 
         if not user.has_perms(required_permission):
             raise PermissionDenied(_("unauthorized"))
 
-        processed_data = {k: v for k, v in data.items() if k not in ["client_mutation_id", "client_mutation_label"]}
+        processed_data = {k: v for k, v in data.items() if k not in [
+            "client_mutation_id", "client_mutation_label"]}
         if data.get('client_mutation_id') and data.get('client_mutation_id') != '':
-            processed_data['json_ext'] = {'client_mutation_id': data.get('client_mutation_id')}
+            processed_data['json_ext'] = {
+                'client_mutation_id': data.get('client_mutation_id')}
 
         if call_type == 'create':
             return service_instance.create(processed_data)
@@ -93,9 +97,11 @@ def auth_permission_validation(failure_message, required_permission, call_type, 
 def no_auth_validation(failure_message, call_type, service_instance, data):
     try:
 
-        processed_data = {k: v for k, v in data.items() if k not in ["client_mutation_id", "client_mutation_label"]}
+        processed_data = {k: v for k, v in data.items() if k not in [
+            "client_mutation_id", "client_mutation_label"]}
         if data.get('client_mutation_id') and data.get('client_mutation_id') != '':
-            processed_data['json_ext'] = {'client_mutation_id': data.get('client_mutation_id')}
+            processed_data['json_ext'] = {
+                'client_mutation_id': data.get('client_mutation_id')}
 
         if call_type == 'create':
             return service_instance.create(processed_data)
@@ -372,7 +378,8 @@ class CreateWorkforceOrganizationEmployeeDesignationMutation(BaseHistoryModelCre
     def _mutate(cls, user, **data):
         failure_message = "workforce.mutation.failed_to_create_workforce_organization_employee_designation"
         required_permission = WorkforceConfig.gql_query_workforces_perms
-        service_instance = WorkforceOrganizationEmployeeDesignationServices(user)
+        service_instance = WorkforceOrganizationEmployeeDesignationServices(
+            user)
 
         result = auth_permission_validation(
             failure_message=failure_message,
@@ -397,7 +404,8 @@ class UpdateWorkforceOrganizationEmployeeDesignationMutation(BaseHistoryModelCre
     def _mutate(cls, user, **data):
         failure_message = "workforce.mutation.failed_to_update_workforce_organization_employee_designation"
         required_permission = WorkforceConfig.gql_query_workforces_perms
-        service_instance = WorkforceOrganizationEmployeeDesignationServices(user)
+        service_instance = WorkforceOrganizationEmployeeDesignationServices(
+            user)
 
         result = auth_permission_validation(
             failure_message=failure_message,
@@ -627,10 +635,12 @@ class CreateWorkforceEmployeeMutation(BaseHistoryModelCreateMutationMixin, BaseM
 
                 if created_obj:  # Ensure created_obj is not None or empty
                     # Extract values with default fallback if necessary
-                    employee_designation_service = WorkforceEmployeeDesignationServices(user)
+                    employee_designation_service = WorkforceEmployeeDesignationServices(
+                        user)
 
                     employee_designation_obj = {
-                        "workforce_employee_id": created_obj.get('id', None),  # Safely get 'id', default to None if missing
+                        # Safely get 'id', default to None if missing
+                        "workforce_employee_id": created_obj.get('id', None),
                         "workforce_company_id": workforce_employer_id,
                         "workforce_factory_id": workforce_factory_id,
                         "join_date": join_date,
@@ -639,7 +649,8 @@ class CreateWorkforceEmployeeMutation(BaseHistoryModelCreateMutationMixin, BaseM
                     }
 
                     # Proceed with creating the employee designation
-                    d_created_obj = employee_designation_service.create(employee_designation_obj)
+                    d_created_obj = employee_designation_service.create(
+                        employee_designation_obj)
 
         return result
 
@@ -1149,7 +1160,8 @@ class CreateWorkforceUserMutation(mixins.ResolveMixin, JSONWebTokenMutation):
         )
 
         if isinstance(result, list):
-            raise Exception(result[0]['message'] + ": " + result[0].get('detail', ''))
+            raise Exception(result[0]['message'] +
+                            ": " + result[0].get('detail', ''))
 
         return cls(internal_id=result.get('internal_id'))
 
@@ -1183,7 +1195,8 @@ class UpdateWorkforceUserMutation(mixins.ResolveMixin, JSONWebTokenMutation):
         )
 
         if isinstance(result, list):
-            raise Exception(result[0]['message'] + ": " + result[0].get('detail', ''))
+            raise Exception(result[0]['message'] +
+                            ": " + result[0].get('detail', ''))
 
         return cls(internal_id=result.get('internal_id'))
 
@@ -1221,7 +1234,8 @@ class CreateWorkforceOtpMutation(mixins.ResolveMixin, graphene.Mutation):
         )
 
         if isinstance(result, list):
-            raise Exception(result[0]['message'] + ": " + result[0].get('detail', ''))
+            raise Exception(result[0]['message'] +
+                            ": " + result[0].get('detail', ''))
 
         return result
 
@@ -1499,7 +1513,7 @@ class CreateWorkforceEducationMutation(BaseHistoryModelCreateMutationMixin, Base
         )
 
         return result
-    
+
 
 class UpdateWorkforceEducationMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
     _mutation_module = mutation_module
@@ -1624,3 +1638,58 @@ class UpdateWorkforceSignatureMutation(BaseHistoryModelCreateMutationMixin, Base
         )
 
         return result
+
+
+class CreateWorkforceFactoryRegistrationMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateWorkforceFactoryRegistrationMutation"
+
+    class Input(WorkforceFactoryRegistrationInputType):
+        pass
+
+    @classmethod
+    def mutate(cls, root, info, **data):
+        failure_message = "workforce.mutation.failed_to_create_workforce_factory_registration"
+        service_instance = WorkforceFactoryRegistrationServices()
+
+        # Unpack ClientIDMutation wrapper
+        payload = data.get('input') if 'input' in data else data
+
+        result = no_auth_validation(
+            failure_message=failure_message,
+            call_type='create',
+            service_instance=service_instance,
+            data=payload
+        )
+
+        return result
+
+
+class UpdateWorkforceFactoryRegistrationMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWorkforceFactoryRegistrationMutation"
+
+    class Input(WorkforceFactoryRegistrationInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        from workforce.models import WorkforceFactoryRegistration
+        failure_message = "workforce.mutation.failed_to_update_workforce_factory_registration"
+        try:
+            if isinstance(user, AnonymousUser) or not user.id:
+                raise ValidationError(_("mutation.authentication_required"))
+            obj = WorkforceFactoryRegistration.objects.filter(
+                id=data.get('id')).first()
+            if not obj:
+                raise ValidationError(_("Object does not exist"))
+            for k, v in data.items():
+                if k != 'id' and v is not None:
+                    setattr(obj, k, v)
+            obj.save(username=user.username)
+            return {"success": True, "data": {"id": str(obj.id)}}
+        except Exception as exc:
+            return [{
+                'message': _(failure_message),
+                'detail': str(exc)
+            }]

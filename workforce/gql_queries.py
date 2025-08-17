@@ -15,7 +15,7 @@ from .models import (
     WorkforceUser, WorkforceOtp, WorkforceApplicationMovement, WorkforceApplicationSummary,
     WorkforceApplicationSummaryMovement,
     WorkforceGrantMoney, WorkforceDiseases, WorkforceEducation, WorkforceEmployeeBankingInfo,
-    WorkforceSignature
+    WorkforceSignature, WorkforceFactoryRegistration
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -899,5 +899,36 @@ class WorkforceSignatureGQLType(DjangoObjectType):
             "path": ["exact"],
             "url": ["exact"],
             "status": ["exact"],
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceFactoryRegistrationGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceFactoryRegistration
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "factory_id":['exact'],
+            "name_bn": ['exact'],
+            "name_en": ['exact'],
+            "location": ['exact'],
+            "address": ['exact'],
+            "phone_number": ['exact'],
+            "email": ['exact'],
+            "website": ['exact'],
+            "status": ['exact'],
+            "association_type": ['exact'],
+            "representative_type": ['exact'],
+            "representative_name_bn": ['exact'],
+            "representative_name_en": ['exact'],
+            "representative_location": ['exact'],
+            "representative_address": ['exact'],
+            "representative_phone_number": ['exact'],
+            "representative_email": ['exact'],
+            "representative_nid": ['exact'],
+            "representative_passport_no": ['exact'],
+            "representative_birth_date": ['exact'],
+            "representative_position": ['exact'],
+            "approval_status": ['exact']
         }
         connection_class = ExtendedConnection

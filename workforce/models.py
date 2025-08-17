@@ -5,6 +5,7 @@ from django.utils import timezone
 from datetime import timedelta
 import secrets
 import uuid
+from datetime import datetime as py_datetime
 
 
 def generate_otp():
@@ -314,57 +315,6 @@ class WorkforceFactory(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_employer_factories'
-
-
-class WorkforceFactoryRegistration(HistoryModel):
-    workforce_employer = models.ForeignKey(
-        WorkforceEmployer,
-        models.DO_NOTHING,
-        blank=True,
-        null=True,
-    )
-    employer_id = models.CharField(max_length=255, null=True, blank=True)
-    employer_id_lima = models.CharField(max_length=255, null=True, blank=True)
-    name_bn = models.CharField(
-        max_length=255, null=False, db_comment='Translatable name field. May use any language')
-    name_en = models.CharField(max_length=255, db_comment='English name field')
-    location = models.ForeignKey(
-        Location,
-        models.DO_NOTHING,
-        blank=False,
-        null=False,
-        related_name="factory_location"
-    )
-    address = models.TextField(null=True, blank=True)
-    phone_number = models.CharField(max_length=20, null=True, blank=True)
-    email = models.CharField(max_length=255, null=True, blank=True)
-    website = models.CharField(max_length=200, null=True, blank=True)
-    status = models.CharField(max_length=30, null=True, blank=True)
-    is_same_company_representative = models.SmallIntegerField(default=0)
-    association_type = models.CharField(max_length=50, null=True, blank=True)
-    
-    representative_type = models.CharField(max_length=255)
-    representative_name_bn = models.CharField(
-        max_length=255, db_comment='Translatable name field. May use any language')
-    representative_name_en = models.CharField(max_length=255, db_comment='English name field')
-    representative_location = models.ForeignKey(
-        Location,
-        models.DO_NOTHING,
-        blank=False,
-        null=False,
-        related_name="representative_location"
-    )
-    representative_address = models.TextField(null=True, blank=True)
-    representative_phone_number = models.CharField(max_length=20, null=True, blank=True)
-    representative_email = models.CharField(max_length=255, null=True, blank=True)
-    representative_nid = models.CharField(max_length=30, null=True, blank=True)
-    representative_passport_no = models.CharField(max_length=30, null=True, blank=True)
-    representative_birth_date = models.DateField(null=True, blank=True)
-    representative_position = models.CharField(max_length=255, null=True, blank=True)
-    representative_status = models.CharField(max_length=30, null=True, blank=True)
-    class Meta:
-        managed = True
-        db_table = 'workforce_employer_registrable_factories'
 
 
 class WorkforceEmployee(HistoryModel):
@@ -1178,3 +1128,83 @@ class WorkforceSignature(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_signature'
+
+class WorkforceFactoryRegistration(models.Model):
+    id = models.UUIDField(primary_key=True, db_column="UUID", default=None, editable=False)
+    factory = models.ForeignKey(
+        WorkforceFactory,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+    )
+    workforce_employer = models.ForeignKey(
+        WorkforceEmployer,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+    )
+    employer_id = models.CharField(max_length=255, null=True, blank=True)
+    employer_id_lima = models.CharField(max_length=255, null=True, blank=True)
+    name_bn = models.CharField(
+        max_length=255, null=True, db_comment='Translatable name field. May use any language')
+    name_en = models.CharField(max_length=255, db_comment='English name field')
+    location = models.ForeignKey(
+        Location,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="factory_location"
+    )
+    address = models.TextField(null=True, blank=True)
+    phone_number = models.CharField(max_length=20, null=True, blank=True)
+    email = models.CharField(max_length=255, null=True, blank=True)
+    website = models.CharField(max_length=200, null=True, blank=True)
+    status = models.CharField(max_length=30, null=True, blank=True)
+    is_same_company_representative = models.SmallIntegerField(default=0)
+    association_type = models.CharField(max_length=50, null=True, blank=True)
+
+    # Representative (embedded) data
+    representative_type = models.CharField(max_length=255)
+    representative_name_bn = models.CharField(
+        max_length=255, db_comment='Translatable name field. May use any language')
+    representative_name_en = models.CharField(max_length=255, db_comment='English name field')
+    representative_location = models.ForeignKey(
+        Location,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="representative_location"
+    )
+    representative_address = models.TextField(null=True, blank=True)
+    representative_phone_number = models.CharField(max_length=20, null=True, blank=True)
+    representative_email = models.CharField(max_length=255, null=True, blank=True)
+    representative_nid = models.CharField(max_length=30, null=True, blank=True)
+    representative_passport_no = models.CharField(max_length=30, null=True, blank=True)
+    representative_birth_date = models.DateField(null=True, blank=True)
+    representative_position = models.CharField(max_length=255, null=True, blank=True)
+    representative_status = models.CharField(max_length=30, null=True, blank=True)
+
+    # New approval workflow fields
+    modified_by = models.ForeignKey(
+        InteractiveUser,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="factory_registration_modified"
+    )
+    approved_by = models.ForeignKey(
+        InteractiveUser,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="factory_registration_approved"
+    )
+    approval_status = models.CharField(max_length=30, null=True, blank=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    date_created = models.DateTimeField(db_column="DateCreated", null=True, default=py_datetime.now)
+    date_updated = models.DateTimeField(db_column="DateUpdated", null=True, default=py_datetime.now)
+
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_employer_registrable_factories'
