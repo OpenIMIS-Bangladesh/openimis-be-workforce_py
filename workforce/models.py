@@ -1208,3 +1208,21 @@ class WorkforceFactoryRegistration(models.Model):
     class Meta:
         managed = True
         db_table = 'workforce_employer_registrable_factories'
+
+
+class WorkforcePostoffice(models.Model):
+    w_code = models.ForeignKey(
+        Location,
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="w_code_postoffice",
+    )
+    post_code = models.CharField(max_length=512, null=True, blank=True)
+    post_office = models.CharField(max_length=512, null=True, blank=True)
+    name_en = models.CharField(max_length=512, null=True, blank=True)
+    status = models.CharField(max_length=30, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_postoffice'
