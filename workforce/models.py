@@ -355,7 +355,7 @@ class WorkforceEmployee(HistoryModel):
     spouse_name_en = models.CharField(max_length=255, null=True, blank=True)
     citizenship = models.CharField(max_length=50, default='Bangladeshi')
     privacy_law = models.CharField(max_length=255, null=True, blank=True)
-    marital_status = models.CharField(max_length=30, null=True, blank=True)
+    marital_status = models.CharField(max_length=512, null=True, blank=True)
     gender = models.CharField(max_length=30, null=True, blank=True)
     photo_path = models.CharField(max_length=255, null=True, blank=True)
     photo_date = models.DateField(null=True, blank=True)
