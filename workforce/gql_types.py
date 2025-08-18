@@ -545,3 +545,14 @@ class WorkforceSignatureInputType(OpenIMISMutation.Input):
     path = graphene.String(required=True)
     url = graphene.String(required=True)
     status = graphene.String()
+
+
+class WorkforcePostofficeInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    w_code = graphene.String(required=True)
+    post_code = graphene.String()
+    post_office = graphene.String()
+    name_en = graphene.String()
+    name_bn = graphene.String()
+    status = graphene.String()
+

@@ -355,7 +355,7 @@ class WorkforceEmployee(HistoryModel):
     spouse_name_en = models.CharField(max_length=255, null=True, blank=True)
     citizenship = models.CharField(max_length=50, default='Bangladeshi')
     privacy_law = models.CharField(max_length=255, null=True, blank=True)
-    marital_status = models.CharField(max_length=30, null=True, blank=True)
+    marital_status = models.CharField(max_length=512, null=True, blank=True)
     gender = models.CharField(max_length=30, null=True, blank=True)
     photo_path = models.CharField(max_length=255, null=True, blank=True)
     photo_date = models.DateField(null=True, blank=True)
@@ -1204,7 +1204,25 @@ class WorkforceFactoryRegistration(models.Model):
     date_created = models.DateTimeField(db_column="DateCreated", null=True, default=py_datetime.now)
     date_updated = models.DateTimeField(db_column="DateUpdated", null=True, default=py_datetime.now)
 
-
     class Meta:
         managed = True
         db_table = 'workforce_employer_registrable_factories'
+
+
+class WorkforcePostoffice(models.Model):
+    w_code = models.ForeignKey(
+        Location,
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="w_code_postoffice",
+    )
+    post_code = models.CharField(max_length=512, null=True, blank=True)
+    post_office = models.CharField(max_length=512, null=True, blank=True)
+    name_en = models.CharField(max_length=512, null=True, blank=True)
+    name_bn = models.CharField(max_length=512, null=True, blank=True)
+    status = models.CharField(max_length=30, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_postoffice'
