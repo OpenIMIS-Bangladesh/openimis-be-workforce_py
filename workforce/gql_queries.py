@@ -15,7 +15,7 @@ from .models import (
     WorkforceUser, WorkforceOtp, WorkforceApplicationMovement, WorkforceApplicationSummary,
     WorkforceApplicationSummaryMovement,
     WorkforceGrantMoney, WorkforceDiseases, WorkforceEducation, WorkforceEmployeeBankingInfo,
-    WorkforceSignature, WorkforceFactoryRegistration
+    WorkforceSignature, WorkforceFactoryRegistration, WorkforcePostoffice
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -908,7 +908,7 @@ class WorkforceFactoryRegistrationGQLType(DjangoObjectType):
         model = WorkforceFactoryRegistration
         interfaces = (graphene.relay.Node,)
         filter_fields = {
-            "factory_id":['exact'],
+            "factory_id": ['exact'],
             "name_bn": ['exact'],
             "name_en": ['exact'],
             "location": ['exact'],
@@ -932,3 +932,12 @@ class WorkforceFactoryRegistrationGQLType(DjangoObjectType):
             "approval_status": ['exact']
         }
         connection_class = ExtendedConnection
+
+
+class WorkforcePostofficeGQLType(graphene.ObjectType):
+    id = graphene.String()
+    w_code = graphene.String(required=True)
+    post_code = graphene.String()
+    post_office = graphene.String()
+    name_en = graphene.String()
+    status = graphene.String()

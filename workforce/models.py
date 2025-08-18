@@ -1204,7 +1204,6 @@ class WorkforceFactoryRegistration(models.Model):
     date_created = models.DateTimeField(db_column="DateCreated", null=True, default=py_datetime.now)
     date_updated = models.DateTimeField(db_column="DateUpdated", null=True, default=py_datetime.now)
 
-
     class Meta:
         managed = True
         db_table = 'workforce_employer_registrable_factories'

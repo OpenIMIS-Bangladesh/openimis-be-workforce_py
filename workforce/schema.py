@@ -165,6 +165,11 @@ class Query(graphene.ObjectType):
         WorkforceFactoryRegistrationGQLType,
         orderBy=graphene.List(of_type=graphene.String),
     )
+    workforce_postoffice = graphene.List(
+        WorkforcePostofficeGQLType,
+        orderBy=graphene.List(of_type=graphene.String),
+        w_code_id=graphene.String(required=False),
+    )
 
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
@@ -493,6 +498,28 @@ class Query(graphene.ObjectType):
     def resolve_workforce_factory_registrations(self, info, **kwargs):
         pass
 
+    def resolve_workforce_postoffice(self, info, orderBy=None, w_code_id=None, **kwargs):
+        qs = WorkforcePostoffice.objects.all()
+
+        if w_code_id:
+            qs = qs.filter(w_code_id=w_code_id)
+        if orderBy:
+            qs = qs.order_by(*orderBy)
+
+        objs = qs.values("id", "w_code", "post_code", "post_office", "name_en", "status")
+
+        return [
+            {
+                "id": str(obj["id"]) if obj.get("id") is not None else None,
+                "w_code": obj.get("w_code"),
+                "post_code": obj.get("post_code"),
+                "post_office": obj.get("post_office"),
+                "name_en": obj.get("name_en"),
+                "status": obj.get("status"),
+            }
+            for obj in objs
+        ]
+
 
 class Mutation(graphene.ObjectType):
     create_workforce_representative = CreateWorkforceRepresentativeMutation.Field()
@@ -584,3 +611,6 @@ class Mutation(graphene.ObjectType):
 
     create_workforce_signature = CreateWorkforceSignatureMutation.Field()
     update_workforce_signature = UpdateWorkforceSignatureMutation.Field()
+
+    # create_workforce_postoffice = CreateWorkforcePostofficeMutation.Field()
+    # update_workforce_postoffice = UpdateWorkforcePostofficeMutation.Field()
