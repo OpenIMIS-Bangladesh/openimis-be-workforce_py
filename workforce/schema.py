@@ -506,7 +506,7 @@ class Query(graphene.ObjectType):
         if orderBy:
             qs = qs.order_by(*orderBy)
 
-        objs = qs.values("id", "w_code", "post_code", "post_office", "name_en", "status")
+        objs = qs.values("id", "w_code", "post_code", "post_office", "name_en", "name_bn", "status")
 
         return [
             {
@@ -515,6 +515,7 @@ class Query(graphene.ObjectType):
                 "post_code": obj.get("post_code"),
                 "post_office": obj.get("post_office"),
                 "name_en": obj.get("name_en"),
+                "name_bn": obj.get("name_bn"),
                 "status": obj.get("status"),
             }
             for obj in objs
