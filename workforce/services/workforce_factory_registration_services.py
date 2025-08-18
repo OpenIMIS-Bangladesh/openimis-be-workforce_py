@@ -2,7 +2,9 @@ import logging
 import uuid
 from django.db.models import Q
 from django.utils.dateparse import parse_date
+from django.utils import timezone
 from workforce.models import WorkforceFactoryRegistration
+from core.models import InteractiveUser
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +40,9 @@ class WorkforceFactoryRegistrationServices:
     }
 
     DATE_FIELDS = {"representative_birth_date"}
+
+    def __init__(self, user=None):
+        self.user = user
 
     def get(self, **kwargs):
         filters = []
@@ -88,3 +93,30 @@ class WorkforceFactoryRegistrationServices:
             setattr(obj, k, v)
         obj.save()
         return {"success": True, "data": {"id": str(obj.id)}}
+
+    def approve(self, obj_data):
+        try:
+            data = self._normalize(obj_data)
+            obj_id = data.get('id') or data.get('uuid')
+            if not obj_id:
+                return [{"message": "Missing id for approval", "detail": "Provide 'id'"}]
+            obj = self.OBJECT_TYPE.objects.filter(id=obj_id).first()
+            if not obj:
+                return [{"message": "Object not found", "detail": str(obj_id)}]
+
+            approval_status = data.get("approval_status") or "approved"
+            obj.approval_status = approval_status
+
+            approved_by_id = data.get("approved_by")
+            approved_user = InteractiveUser.objects.filter(id=approved_by_id).first()
+            if approved_user:
+                obj.approved_by = approved_user
+
+            obj.approved_at = timezone.now()
+            obj.save()
+            
+            
+
+            return {"success": True, "data": {"id": str(obj.id)}}
+        except Exception as e:
+            return {"success": False, "error": str(e)}

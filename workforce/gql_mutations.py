@@ -16,7 +16,8 @@ from .gql_types import (
     WorkforceApplicationInputType, WorkforceDocumentTypeInputType, WorkforceDocumentMapInputType,
     WorkforceUserInputType, WorkforceApplicationMovementInputType, WorkforceApplicationSummaryInputType,
     WorkforceApplicationSummaryMovementInputType, WorkforceGrantMoneyInputType, WorkforceDiseasesInputType,
-    WorkforceEducationInputType, WorkforceEmployeeBankingInfoInputType, WorkforceSignatureInputType, WorkforceFactoryRegistrationInputType
+    WorkforceEducationInputType, WorkforceEmployeeBankingInfoInputType, WorkforceSignatureInputType, WorkforceFactoryRegistrationInputType,
+    WorkforceFactoryRegistrationApprovalInputType
 )
 from .services.workforce_organization_services import WorkforceOrganizationServices
 from .services.workforce_representative_services import WorkforceRepresentativeServices
@@ -86,6 +87,8 @@ def auth_permission_validation(failure_message, required_permission, call_type, 
             return service_instance.update(processed_data)
         if call_type == 'update_status':
             return service_instance.update_status(processed_data)
+        if call_type == 'approve':
+            return service_instance.approve(processed_data)
         return None
     except Exception as exc:
         return [{
@@ -1693,3 +1696,27 @@ class UpdateWorkforceFactoryRegistrationMutation(BaseHistoryModelCreateMutationM
                 'message': _(failure_message),
                 'detail': str(exc)
             }]
+
+class ApprovalWorkforceFactoryRegistrationMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "ApprovalWorkforceFactoryRegistrationMutation"
+
+    class Input(WorkforceFactoryRegistrationApprovalInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_approve_workforce_factory_registration"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = WorkforceFactoryRegistrationServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission="",
+            call_type='approve',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result

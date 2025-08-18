@@ -176,6 +176,10 @@ class WorkforceFactoryRegistrationInputType(OpenIMISMutation.Input):
     representative_birth_date = graphene.String(required=True)
     representative_position = graphene.String(required=True)
 
+class WorkforceFactoryRegistrationApprovalInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=True)
+    approval_status = graphene.String(required=True)
+    approved_by = graphene.String(required=True)
 
 class WorkforceEmployeeInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
