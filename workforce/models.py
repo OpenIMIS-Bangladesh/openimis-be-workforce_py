@@ -1220,6 +1220,7 @@ class WorkforcePostoffice(models.Model):
     post_code = models.CharField(max_length=512, null=True, blank=True)
     post_office = models.CharField(max_length=512, null=True, blank=True)
     name_en = models.CharField(max_length=512, null=True, blank=True)
+    name_bn = models.CharField(max_length=512, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:

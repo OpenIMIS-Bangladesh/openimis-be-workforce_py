@@ -553,5 +553,6 @@ class WorkforcePostofficeInputType(OpenIMISMutation.Input):
     post_code = graphene.String()
     post_office = graphene.String()
     name_en = graphene.String()
+    name_bn = graphene.String()
     status = graphene.String()
 

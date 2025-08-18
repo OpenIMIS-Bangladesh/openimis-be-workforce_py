@@ -940,4 +940,5 @@ class WorkforcePostofficeGQLType(graphene.ObjectType):
     post_code = graphene.String()
     post_office = graphene.String()
     name_en = graphene.String()
+    name_bn = graphene.String()
     status = graphene.String()
