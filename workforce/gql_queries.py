@@ -475,6 +475,7 @@ class WorkforceApplicationSummaryGQLType(DjangoObjectType):
             "name": ["exact"],
             "status": ["exact"],
             "organization_type": ["exact"],
+            "section_type": ["exact"],
             "year": ["exact"],
             "month": ["exact"],
         }
