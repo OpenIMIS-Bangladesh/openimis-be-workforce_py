@@ -3,8 +3,9 @@ import uuid
 from django.db.models import Q
 from django.utils.dateparse import parse_date
 from django.utils import timezone
-from workforce.models import WorkforceFactoryRegistration
+from workforce.models import WorkforceFactory, WorkforceFactoryRegistration
 from core.models import InteractiveUser
+from workforce.services.workforce_factory_services import WorkforceFactoryServices
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +50,8 @@ class WorkforceFactoryRegistrationServices:
         model = self.OBJECT_TYPE
         client_mutation_id = kwargs.get("client_mutation_id")
         if client_mutation_id:
-            filters.append(Q(json_ext__contains={"client_mutation_id": client_mutation_id}))
+            filters.append(
+                Q(json_ext__contains={"client_mutation_id": client_mutation_id}))
         return model.objects.filter(*filters, is_deleted=False).all()
 
     def _normalize(self, obj_data):
@@ -108,14 +110,42 @@ class WorkforceFactoryRegistrationServices:
             obj.approval_status = approval_status
 
             approved_by_id = data.get("approved_by")
-            approved_user = InteractiveUser.objects.filter(id=approved_by_id).first()
+            approved_user = InteractiveUser.objects.filter(
+                id=approved_by_id).first()
             if approved_user:
                 obj.approved_by = approved_user
 
             obj.approved_at = timezone.now()
             obj.save()
-            
-            
+
+            try:
+                if obj.factory_id is None:
+                    factory_id = uuid.uuid4() if obj.factory_id is None else obj.factory_id
+                    factory = {
+                        "id": str(factory_id),
+                        "name_en": obj.name_en,
+                        "name_bn": obj.name_bn,
+                        "address": obj.address,
+                        "location": obj.location,
+                        "phone_number": obj.phone_number,
+                        "email": obj.email,
+                        "website": obj.website,
+                        "association_type": obj.association_type,
+                        "user_created": self.user,
+                        "user_updated": self.user
+                    }
+
+                    factory_service = WorkforceFactoryServices(user=self.user)
+                    f = factory_service.create(factory)
+                    obj.factory_id = factory_id
+                    obj.save()
+                else:
+                    pass
+
+                # print(f"\033[92mFactory created with ID: {self.user}")
+
+            except Exception as e:
+                return {"success": False, "error": str(e)}
 
             return {"success": True, "data": {"id": str(obj.id)}}
         except Exception as e:
