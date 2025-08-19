@@ -6,6 +6,8 @@ import os
 import json
 from django.utils.translation import gettext as _
 import graphene_django_optimizer as gql_optimizer
+
+from core.models.user import UserRole
 from core.schema import OrderedDjangoFilterConnectionField
 from .gql_queries import *
 from .gql_mutations import *
@@ -13,6 +15,7 @@ from django.db.models import F
 from django.utils import timezone
 import requests
 from graphene.types.generic import GenericScalar
+from core.models.user import InteractiveUser
 
 
 class Query(graphene.ObjectType):
@@ -171,7 +174,11 @@ class Query(graphene.ObjectType):
         orderBy=graphene.List(of_type=graphene.String),
         w_code_id=graphene.String(required=False),
     )
-
+    workforce_user_role = graphene.List(
+        WorkforceUserRoleGQLType,
+        role_id_in=graphene.List(graphene.String, required=False),
+        orderBy=graphene.List(of_type=graphene.String),
+    )
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("unauthorized"))
@@ -522,6 +529,30 @@ class Query(graphene.ObjectType):
                 "status": obj.get("status"),
             }
             for obj in objs
+        ]
+
+    def resolve_workforce_user_role(self, info, role_id_in=None, orderBy=None, **kwargs):
+        qs = UserRole.objects.all()
+        if role_id_in:
+            qs = qs.filter(role_id__in=role_id_in)
+        if orderBy:
+            qs = qs.order_by(*orderBy)
+
+        rows = list(qs.values("id", "role_id", "user_id"))
+        user_ids = [r["user_id"] for r in rows]
+
+        iu_qs = InteractiveUser.objects.filter(id__in=user_ids).values("id", "last_name", "other_names")
+        iu_by_id = {u["id"]: u for u in iu_qs}
+
+        return [
+            WorkforceUserRoleGQLType(
+                id=r["id"],
+                role_id=r["role_id"],
+                user_id=r["user_id"],
+                last_name=iu_by_id.get(r["user_id"], {}).get("last_name"),
+                other_names=iu_by_id.get(r["user_id"], {}).get("other_names"),
+            )
+            for r in rows
         ]
 
 
