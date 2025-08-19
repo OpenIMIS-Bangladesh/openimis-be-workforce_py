@@ -6,6 +6,7 @@ from django.utils import timezone
 from workforce.models import WorkforceFactory, WorkforceFactoryRegistration
 from core.models import InteractiveUser
 from workforce.services.workforce_factory_services import WorkforceFactoryServices
+from workforce.services.workforce_employee_services import WorkforceEmployeeServices
 
 logger = logging.getLogger(__name__)
 
@@ -119,8 +120,8 @@ class WorkforceFactoryRegistrationServices:
             obj.save()
 
             try:
+                factory_id = uuid.uuid4() if obj.factory_id is None else obj.factory_id
                 if obj.factory_id is None:
-                    factory_id = uuid.uuid4() if obj.factory_id is None else obj.factory_id
                     factory = {
                         "id": str(factory_id),
                         "name_en": obj.name_en,
@@ -141,6 +142,29 @@ class WorkforceFactoryRegistrationServices:
                     obj.save()
                 else:
                     pass
+
+                factory_admin_id = uuid.uuid4()
+
+                representative_data = {
+                    "id": factory_admin_id,
+                    "first_name_en": obj.representative_name_en,
+                    "last_name_en": '',
+                    "first_name_bn": obj.representative_name_bn,
+                    "last_name_bn": '',
+                    "permanent_address": obj.representative_address,
+                    "present_address": obj.representative_address,
+                    "permanent_location": obj.representative_location,
+                    "present_location": obj.representative_location,
+                    "phone_number": obj.representative_phone_number,
+                    "email": obj.representative_email,
+                    "nid": obj.representative_nid,
+                    "birth_date": obj.representative_birth_date,
+                    "user_created": self.user,
+                    "user_updated": self.user
+                }
+
+                representative_service = WorkforceEmployeeServices(user=self.user)
+                representative_service.create(representative_data)
 
                 # print(f"\033[92mFactory created with ID: {self.user}")
 
