@@ -11,6 +11,7 @@ from core.models.user import UserRole
 from core.schema import OrderedDjangoFilterConnectionField
 from .gql_queries import *
 from .gql_mutations import *
+from .models import *
 from django.db.models import F
 from django.utils import timezone
 import requests
@@ -72,6 +73,7 @@ class Query(graphene.ObjectType):
     workforce_banks = OrderedDjangoFilterConnectionField(
         WorkforceBankGQLType,
         orderBy=graphene.List(of_type=graphene.String),
+        get_unique=graphene.String(required=False, description="Get unique bank names only")
     )
     workforce_employee_dependent = OrderedDjangoFilterConnectionField(
         WorkforceEmployeeDependentGQLType,
@@ -241,10 +243,18 @@ class Query(graphene.ObjectType):
         #     raise PermissionDenied(_("Unauthorized access"))
         return WorkforceDocument.objects.filter(is_deleted=False)
 
-    def resolve_workforce_banks(self, info, **kwargs):
-        # if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
-        #     raise PermissionDenied(_("Unauthorized access"))
-        pass
+    def resolve_workforce_banks(self, info, get_unique=None, **kwargs):
+        query = Bank.objects.filter(is_deleted=False)
+
+        for key, value in kwargs.items():
+            if hasattr(Bank, key) and value is not None:
+                query = query.filter(**{key: value})
+
+        # Apply unique filtering if requested
+        if get_unique == "true" or get_unique == "True":
+            query = query.distinct('district_name_en', 'district_name_bn')
+
+        return gql_optimizer.query(query, info)
     def resolve_workforce_employee_dependents(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("Unauthorized access"))
