@@ -353,7 +353,7 @@ class WorkforceEmployee(HistoryModel):
     mother_name_en = models.CharField(max_length=255, null=True, blank=True)
     spouse_name_bn = models.CharField(max_length=255, null=True, blank=True)
     spouse_name_en = models.CharField(max_length=255, null=True, blank=True)
-    citizenship = models.CharField(max_length=50, default='Bangladeshi')
+    citizenship = models.CharField(max_length=50, default='BD')
     privacy_law = models.CharField(max_length=255, null=True, blank=True)
     marital_status = models.CharField(max_length=512, null=True, blank=True)
     gender = models.CharField(max_length=30, null=True, blank=True)
@@ -504,6 +504,7 @@ class Bank(HistoryModel):
     branch_code = models.CharField(max_length=15, null=True, blank=True)
     district_code = models.CharField(max_length=15, null=True, blank=True)
     district_name_en = models.CharField(max_length=255, null=True, blank=True)
+    district_name_bn = models.CharField(max_length=255, null=True, blank=True)
     routing_number = models.CharField(max_length=15, null=True, blank=True)
     parent = models.ForeignKey(
         "Bank",

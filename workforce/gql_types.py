@@ -271,6 +271,7 @@ class WorkforceBankInputType(OpenIMISMutation.Input):
     branch_code = graphene.String()
     district_code = graphene.String()
     district_name_en = graphene.String()
+    district_name_bn = graphene.String()
     routing_number = graphene.String()
     parent_id = graphene.UUID()
     contact_number = graphene.String()
