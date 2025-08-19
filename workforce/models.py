@@ -938,6 +938,7 @@ class WorkforceApplicationSummary(HistoryModel):
     name = models.CharField(max_length=100, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
     organization_type = models.CharField(max_length=30, null=True, blank=True)
+    section_type = models.CharField(max_length=30, null=True, blank=True)
     year = models.IntegerField(null=True, blank=True)
     month = models.CharField(max_length=20, null=True, blank=True)
 

@@ -475,6 +475,7 @@ class WorkforceApplicationSummaryGQLType(DjangoObjectType):
             "name": ["exact"],
             "status": ["exact"],
             "organization_type": ["exact"],
+            "section_type": ["exact"],
             "year": ["exact"],
             "month": ["exact"],
         }
@@ -942,3 +943,11 @@ class WorkforcePostofficeGQLType(graphene.ObjectType):
     name_en = graphene.String()
     name_bn = graphene.String()
     status = graphene.String()
+
+
+class WorkforceUserRoleGQLType(graphene.ObjectType):
+    id = graphene.String()
+    role_id = graphene.String()
+    user_id = graphene.String()
+    last_name = graphene.String()
+    other_names = graphene.String()

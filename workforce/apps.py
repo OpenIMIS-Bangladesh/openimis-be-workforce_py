@@ -98,6 +98,9 @@ DEFAULT_CFG = {
     # WorkforceBKMEAAssociation (821xxx)
     "gql_workforce_bkmea_association_perms": ["821001"],
 
+     # WorkforceSectionAdminTwo (xxx)
+    "gql_workforce_section_admin_two_perms": ["821002"],
+
     "default_validations_disabled": False,
 }
 
@@ -198,6 +201,9 @@ class WorkforceConfig(AppConfig):
 
     # WorkforceBKMEAAssociation (821xxx)
     gql_workforce_bkmea_association_perms = []
+
+    # WorkforceSectionAdminTwo (xxx)
+    gql_workforce_section_admin_two_perms = []
 
     default_validations_disabled = None
 

@@ -461,6 +461,7 @@ class WorkforceApplicationSummaryInputType(OpenIMISMutation.Input):
     name = graphene.String()
     status = graphene.String()
     organization_type = graphene.String()
+    section_type = graphene.String()
     year = graphene.Int()
     month = graphene.String()
 
