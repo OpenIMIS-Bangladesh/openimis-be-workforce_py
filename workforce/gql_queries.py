@@ -19,6 +19,8 @@ from .models import (
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
+import django_filters
+from graphql_relay.node.node import from_global_id
 
 
 class WorkforceRepresentativeGQLType(DjangoObjectType):
@@ -484,6 +486,7 @@ class WorkforceApplicationSummaryGQLType(DjangoObjectType):
 
 class WorkforceApplicationGQLType(DjangoObjectType):
     workforce_employee = graphene.Field(lambda: WorkforceEmployeeGQLType)
+    workforce_application_movement = graphene.Field(lambda: WorkforceApplicationMovementGQLType)
 
     class Meta:
         model = WorkforceApplication
@@ -520,6 +523,9 @@ class WorkforceApplicationGQLType(DjangoObjectType):
 
         def resolve_workforce_employee(self, info):
             return self.workforce_employee
+
+        def resolve_workforce_application_movement(self, info):
+            return self.workforce_application_movement
 
 
 class WorkforceEmployeeDesignationGQLType(DjangoObjectType):
@@ -742,17 +748,30 @@ class WorkforceOtpGQLType(graphene.ObjectType):
     phone_number = graphene.String()
 
 
-class WorkforceApplicationMovementGQLType(DjangoObjectType):
+class WorkforceApplicationMovementFilter(django_filters.FilterSet):
+    application_to_id = django_filters.CharFilter(method="filter_application_to_id")
+
+    def filter_application_to_id(self, queryset, name, value):
+        if not value:
+            return queryset
+        v = value.strip()
+        if v.isdigit():
+            return queryset.filter(**{name: int(v)})
+        try:
+            _, dbid = from_global_id(v)
+            return queryset.filter(**{name: int(dbid)})
+        except Exception:
+            return queryset.none()
+
     class Meta:
         model = WorkforceApplicationMovement
-        interfaces = (graphene.relay.Node,)
-        filter_fields = {
+        fields = {
             "id": ["exact"],
             "application_id": ["exact"],
             "note": ["exact", "contains"],
             "action": ["exact", "contains"],
-            "to_employee_record_id": ["exact", ],
-            "from_employee_record_id": ["exact", ],
+            "to_employee_record_id": ["exact"],
+            "from_employee_record_id": ["exact"],
             "to_office_unit_organogram_id": ["exact"],
             "from_office_unit_organogram_id": ["exact"],
             "to_office_id": ["exact"],
@@ -783,6 +802,13 @@ class WorkforceApplicationMovementGQLType(DjangoObjectType):
             "revert_note": ["exact"],
             "status": ["exact", "icontains"],
         }
+
+
+class WorkforceApplicationMovementGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceApplicationMovement
+        interfaces = (graphene.relay.Node,)
+        filterset_class = WorkforceApplicationMovementFilter
         connection_class = ExtendedConnection
 
 
