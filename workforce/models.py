@@ -888,6 +888,20 @@ class WorkforceApplicationMovement(HistoryModel):
         null=True,
         related_name="from_office_unit",
     )
+    application_from = models.ForeignKey(
+        InteractiveUser,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="movement_application_from",
+    )
+    application_to = models.ForeignKey(
+        InteractiveUser,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="movement_application_to",
+    )
     is_current = models.BooleanField(null=True, blank=True)
     is_cc = models.BooleanField(null=True, blank=True)
     is_committee_head = models.BooleanField(null=True, blank=True)

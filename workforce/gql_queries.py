@@ -774,6 +774,8 @@ class WorkforceApplicationMovementGQLType(DjangoObjectType):
             "to_employee_unit_name_bng": ["exact", "contains"],
             "from_employee_unit_name_bng": ["exact", "contains"],
             "from_employee_username": ["exact", "contains"],
+            "application_from": ["exact"],
+            "application_to": ["exact"],
             "deadline_date": ["exact"],
             "is_reverted": ["exact"],
             "reverting_date": ["exact"],
