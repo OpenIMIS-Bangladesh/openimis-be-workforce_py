@@ -487,6 +487,7 @@ class WorkforceApplicationSummaryGQLType(DjangoObjectType):
 class WorkforceApplicationGQLType(DjangoObjectType):
     workforce_employee = graphene.Field(lambda: WorkforceEmployeeGQLType)
     workforce_application_movement = graphene.Field(lambda: WorkforceApplicationMovementGQLType)
+    workforce_application_movements = graphene.List(lambda: WorkforceApplicationMovementGQLType)
 
     class Meta:
         model = WorkforceApplication
@@ -524,8 +525,15 @@ class WorkforceApplicationGQLType(DjangoObjectType):
         def resolve_workforce_employee(self, info):
             return self.workforce_employee
 
-        def resolve_workforce_application_movement(self, info):
-            return self.workforce_application_movement
+        def resolve_workforce_application_movement(self, info, **kwargs):
+            return WorkforceApplicationMovement.objects.filter(
+                application_id=self.id, is_current=True
+            ).first()
+
+        def resolve_workforce_application_movements(self, info, **kwargs):
+            return WorkforceApplicationMovement.objects.filter(
+                application_id=self.id
+            ).order_by("-id")
 
 
 class WorkforceEmployeeDesignationGQLType(DjangoObjectType):
