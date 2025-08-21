@@ -385,6 +385,7 @@ class WorkforceDocumentTypeInputType(OpenIMISMutation.Input):
     name_en = graphene.String()
     workforce_disease = graphene.String()
     mandatory_for_applicant = graphene.Boolean()
+    form_step_no = graphene.String()
     status = graphene.String()
 
 
