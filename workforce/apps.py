@@ -101,6 +101,12 @@ DEFAULT_CFG = {
      # WorkforceSectionAdminTwo (xxx)
     "gql_workforce_section_admin_two_perms": ["821002"],
 
+     # WorkforceSectionOneAsstDirector (xxx)
+    "gql_workforce_section_one_deputy_assistant_director_perms": ["821003"],
+
+     # WorkforceSectionTwoAsstDirector (xxx)
+    "gql_workforce_section_two_deputy_assistant_director_perms": ["821004"],
+
     "default_validations_disabled": False,
 }
 
@@ -204,6 +210,12 @@ class WorkforceConfig(AppConfig):
 
     # WorkforceSectionAdminTwo (xxx)
     gql_workforce_section_admin_two_perms = []
+
+    # WorkforceSectionOneAsstDirector (xxx)
+    gql_workforce_section_one_deputy_assistant_director_perms = []
+
+    # WorkforceSectionTwoAsstDirector (xxx)
+    gql_workforce_section_two_deputy_assistant_director_perms = []
 
     default_validations_disabled = None
 
