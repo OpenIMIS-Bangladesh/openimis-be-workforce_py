@@ -519,21 +519,23 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "grant_amount": ["exact"],
             "submitted_by": ["exact"],
             "status": ["exact"],
+            # enable filtering by fields on WorkforceApplicationMovement via reverse FK
+            "application__application_to_id": ["exact"],
         }
         connection_class = ExtendedConnection
 
-        def resolve_workforce_employee(self, info):
-            return self.workforce_employee
+    def resolve_workforce_employee(self, info):
+        return self.workforce_employee
 
-        def resolve_workforce_application_movement(self, info, **kwargs):
-            return WorkforceApplicationMovement.objects.filter(
-                application_id=self.id, is_current=True
-            ).first()
+    def resolve_workforce_application_movement(self, info, **kwargs):
+        return WorkforceApplicationMovement.objects.filter(
+            application_id=self.id, is_current=True
+        ).first()
 
-        def resolve_workforce_application_movements(self, info, **kwargs):
-            return WorkforceApplicationMovement.objects.filter(
-                application_id=self.id
-            ).order_by("-id")
+    def resolve_workforce_application_movements(self, info, **kwargs):
+        return WorkforceApplicationMovement.objects.filter(
+            application_id=self.id
+        ).order_by("-id")
 
 
 class WorkforceEmployeeDesignationGQLType(DjangoObjectType):
