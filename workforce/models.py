@@ -1,5 +1,6 @@
 from django.db import models
 from core.models import HistoryModel, InteractiveUser
+from core.models.user import UserRole
 from location.models import Location
 from django.utils import timezone
 from datetime import timedelta
@@ -847,48 +848,6 @@ class WorkforceApplicationMovement(HistoryModel):
         null=True,
         related_name="from_employee_record",
     )
-    to_office_unit_organogram = models.ForeignKey(
-        WorkforceOrganizationUnitDesignation,
-        models.DO_NOTHING,
-        blank=True,
-        null=True,
-        related_name="to_office_unit_organogram",
-    )
-    from_office_unit_organogram = models.ForeignKey(
-        WorkforceOrganizationUnitDesignation,
-        models.DO_NOTHING,
-        blank=True,
-        null=True,
-        related_name="from_office_unit_organogram",
-    )
-    to_office = models.ForeignKey(
-        WorkforceOrganization,
-        models.DO_NOTHING,
-        blank=True,
-        null=True,
-        related_name="to_office",
-    )
-    from_office = models.ForeignKey(
-        WorkforceOrganization,
-        models.DO_NOTHING,
-        blank=True,
-        null=True,
-        related_name="from_office",
-    )
-    to_office_unit = models.ForeignKey(
-        WorkforceOrganizationUnit,
-        models.DO_NOTHING,
-        blank=True,
-        null=True,
-        related_name="to_office_unit",
-    )
-    from_office_unit = models.ForeignKey(
-        WorkforceOrganizationUnit,
-        models.DO_NOTHING,
-        blank=True,
-        null=True,
-        related_name="from_office_unit",
-    )
     application_from = models.ForeignKey(
         InteractiveUser,
         models.DO_NOTHING,
@@ -903,32 +862,6 @@ class WorkforceApplicationMovement(HistoryModel):
         null=True,
         related_name="movement_application_to",
     )
-    is_current = models.BooleanField(null=True, blank=True)
-    is_cc = models.BooleanField(null=True, blank=True)
-    is_committee_head = models.BooleanField(null=True, blank=True)
-    is_committee_member = models.BooleanField(null=True, blank=True)
-    to_employee_name_bng = models.CharField(
-        max_length=255, null=True, blank=True)
-    from_employee_name_bng = models.CharField(
-        max_length=255, null=True, blank=True)
-    to_employee_name_eng = models.CharField(
-        max_length=255, null=True, blank=True)
-    from_employee_name_eng = models.CharField(
-        max_length=255, null=True, blank=True)
-    to_employee_designation_bng = models.CharField(
-        max_length=255, null=True, blank=True)
-    from_employee_designation_bng = models.CharField(
-        max_length=255, null=True, blank=True)
-    to_office_name_bng = models.CharField(
-        max_length=255, null=True, blank=True)
-    from_office_name_bng = models.CharField(
-        max_length=255, null=True, blank=True)
-    to_employee_unit_name_bng = models.CharField(
-        max_length=255, null=True, blank=True)
-    from_employee_unit_name_bng = models.CharField(
-        max_length=255, null=True, blank=True)
-    from_employee_username = models.CharField(
-        max_length=255, null=True, blank=True)
     deadline_date = models.DateField(null=True, blank=True)
     is_reverted = models.BooleanField(null=True, blank=True)
     reverting_date = models.DateField(null=True, blank=True)
@@ -940,6 +873,34 @@ class WorkforceApplicationMovement(HistoryModel):
         related_name="reverted_by",
     )
     revert_note = models.TextField(null=True, blank=True)
+    from_office_designation = models.ForeignKey(
+        WorkforceOrganizationUnitDesignation,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="from_office_designation",
+    )
+    to_office_designation = models.ForeignKey(
+        WorkforceOrganizationUnitDesignation,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="to_office_designation",
+    )
+    from_role = models.ForeignKey(
+        UserRole,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="from_role",
+    )
+    to_role = models.ForeignKey(
+        UserRole,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="to_role",
+    )
     status = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:
