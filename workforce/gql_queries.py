@@ -518,6 +518,7 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "metadata": [],
             "grant_amount": ["exact"],
             "submitted_by": ["exact"],
+            "application_for": ["exact"],
             "status": ["exact"],
             # enable filtering by fields on WorkforceApplicationMovement via reverse FK
             "application__application_to_id": ["exact"],

@@ -368,6 +368,7 @@ class WorkforceApplicationInputType(OpenIMISMutation.Input):
     metadata = graphene.String()
     grant_amount = graphene.String()
     submitted_by = graphene.String()
+    application_for = graphene.String()
     status = graphene.String()
 
 
