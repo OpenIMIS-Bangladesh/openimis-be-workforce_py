@@ -707,7 +707,7 @@ class WorkforceDocumentTypeGQLType(DjangoObjectType):
             "document_type": ["exact"],
             "application_type": ["exact"],
             "organization_type": ["exact"],
-            "application_for": ["exact"],
+            "application_for": ["exact", "icontains"],
             "document_type_no": ["exact"],
             "document_count": ["exact"],
             "name_bn": ["exact", "contains"],
