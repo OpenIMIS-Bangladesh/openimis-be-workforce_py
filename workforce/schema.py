@@ -298,6 +298,8 @@ class Query(graphene.ObjectType):
     def resolve_workforce_document_types(self, info, application_for_in=None, document_type_in=None, **kwargs):
         service = WorkforceDocumentTypeServices(info.context.user)
         query = service.get(**kwargs)
+        query = query.filter(is_deleted=False)
+
         if application_for_in:
             query = query.filter(application_for__in=application_for_in)
         if document_type_in:
