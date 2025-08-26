@@ -99,7 +99,8 @@ class Query(graphene.ObjectType):
         association_type_in=graphene.List(graphene.String),
         application_type_in=graphene.List(graphene.String),
         submitted_by_in=graphene.List(graphene.String),
-        application_to=graphene.String(required=False)
+        application_to=graphene.String(required=False),
+        organization_type_in=graphene.List(graphene.String)
     )
     workforce_document_types = OrderedDjangoFilterConnectionField(
         WorkforceDocumentTypeGQLType,
@@ -136,7 +137,8 @@ class Query(graphene.ObjectType):
         client_mutation_id=graphene.String(),
         orderBy=graphene.List(of_type=graphene.String),
         status_in=graphene.List(graphene.String),
-        section_type_in=graphene.List(graphene.String)
+        section_type_in=graphene.List(graphene.String),
+        organization_type_in=graphene.List(graphene.String)
     )
     workforce_application_summary_movement = OrderedDjangoFilterConnectionField(
         WorkforceApplicationSummaryMovementGQLType,
@@ -273,7 +275,7 @@ class Query(graphene.ObjectType):
             raise PermissionDenied(_("Unauthorized access"))
         pass
     def resolve_workforce_application(self, info, status_in=None, association_type_in=None, application_type_in=None, submitted_by_in=None,
-                                      application_to=None, **kwargs):
+                                      application_to=None, organization_type_in=None, **kwargs):
         service = WorkforceApplicationServices(info.context.user)
         query = service.get(**kwargs)
         if status_in:
@@ -284,6 +286,8 @@ class Query(graphene.ObjectType):
             query = query.filter(application_type__in=application_type_in)
         if submitted_by_in:
             query = query.filter(submitted_by__in=submitted_by_in)
+        if organization_type_in:
+            query = query.filter(organization_type__in=organization_type_in)
 
         if application_to:
             try:
@@ -387,7 +391,7 @@ class Query(graphene.ObjectType):
         except Exception as e:
             return {"error": f"NID fetch error: {str(e)}"}
 
-    def resolve_workforce_application_summary(self, info, status_in=None, section_type_in=None, **kwargs):
+    def resolve_workforce_application_summary(self, info, status_in=None, section_type_in=None, organization_type_in=None, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("Unauthorized access"))
 
@@ -397,6 +401,8 @@ class Query(graphene.ObjectType):
             query = query.filter(status__in=status_in)
         if section_type_in:
             query = query.filter(section_type__in=section_type_in)
+        if organization_type_in:
+            query = query.filter(organization_type__in=organization_type_in)
         return gql_optimizer.query(query, info)
     def resolve_workforce_application_summary_movement(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
