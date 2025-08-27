@@ -113,6 +113,13 @@ DEFAULT_CFG = {
      # WorkforceBlwfApprover (xxx)
     "gql_workforce_blwf_approver_perms": ["821006"],
 
+     # WorkforceBlwfSectionAsstDirector (xxx)
+    "gql_workforce_blwf_section_deputy_assistant_director_perms": ["821007"],
+
+    # WorkforceBlwfChecker (812xxx)
+    "gql_workforce_blwf_checker_perms": ["812008"],
+
+
     "default_validations_disabled": False,
 }
 
@@ -228,6 +235,12 @@ class WorkforceConfig(AppConfig):
 
      # WorkforceBlwfApprover (xxx)
     gql_workforce_blwf_approver_perms = []
+
+     # WorkforceBlwf DeputyAsstDirector(xxx)
+    gql_workforce_blwf_section_deputy_assistant_director_perms = []
+
+     # WorkforceBlwfChecker (xxx)
+    gql_workforce_blwf_checker_perms = []
 
     default_validations_disabled = None
 
