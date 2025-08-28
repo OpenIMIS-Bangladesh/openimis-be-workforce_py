@@ -119,6 +119,9 @@ DEFAULT_CFG = {
     # WorkforceBlwfChecker (812xxx)
     "gql_workforce_blwf_checker_perms": ["812008"],
 
+    # WorkforceBlwfDirector (812xxx)
+    "gql_workforce_blwf_director_perms": ["812009"],
+
 
     "default_validations_disabled": False,
 }
@@ -241,6 +244,9 @@ class WorkforceConfig(AppConfig):
 
      # WorkforceBlwfChecker (xxx)
     gql_workforce_blwf_checker_perms = []
+
+     # WorkforceBlwfDirector (xxx)
+    gql_workforce_blwf_director_perms = []
 
     default_validations_disabled = None
 
