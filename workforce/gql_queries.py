@@ -762,6 +762,7 @@ class WorkforceOtpGQLType(graphene.ObjectType):
 
 class WorkforceApplicationMovementFilter(django_filters.FilterSet):
     application_to_id = django_filters.CharFilter(method="filter_application_to_id")
+    application_id = django_filters.CharFilter(method="filter_application_id")
 
     def filter_application_to_id(self, queryset, name, value):
         if not value:
@@ -774,6 +775,15 @@ class WorkforceApplicationMovementFilter(django_filters.FilterSet):
             return queryset.filter(**{name: int(dbid)})
         except Exception:
             return queryset.none()
+
+    def filter_application_id(self, queryset, name, value):
+        try:
+            _, real_id = from_global_id(value)
+            application_id = real_id
+        except Exception:
+            application_id = value
+
+        return queryset.filter(application_id=application_id)
 
     class Meta:
         model = WorkforceApplicationMovement
