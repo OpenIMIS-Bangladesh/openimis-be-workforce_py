@@ -998,3 +998,10 @@ class WorkforceUserRoleGQLType(graphene.ObjectType):
     user_id = graphene.String()
     last_name = graphene.String()
     other_names = graphene.String()
+
+
+class WorkforceApplicationMatrixGQLType(graphene.ObjectType):
+    application_count = graphene.String()
+    application_type = graphene.String()
+    approved_count = graphene.String()
+    rejected_count = graphene.String()

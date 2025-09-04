@@ -1,4 +1,5 @@
 import uuid
+from collections import defaultdict
 from uuid import UUID
 
 import graphene
@@ -6,6 +7,7 @@ import os
 import json
 from django.utils.translation import gettext as _
 import graphene_django_optimizer as gql_optimizer
+from tutorial.asgi import application
 
 from core.models.user import UserRole
 from core.schema import OrderedDjangoFilterConnectionField
@@ -183,6 +185,10 @@ class Query(graphene.ObjectType):
         WorkforceUserRoleGQLType,
         role_id_in=graphene.List(graphene.String, required=False),
         orderBy=graphene.List(of_type=graphene.String),
+    )
+    workforce_application_matrix = graphene.List(
+        WorkforceApplicationMatrixGQLType,
+        organization_type=graphene.String(required=False),
     )
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
@@ -583,6 +589,69 @@ class Query(graphene.ObjectType):
             )
             for r in rows
         ]
+
+    def resolve_workforce_application_matrix(self, info, organization_type=None, **kwargs):
+
+        category_map = {
+            "medical": {
+                "cf": ["medicalAssistance"],
+                "blwf": ["medicalDonation"],
+            },
+            "educational": {
+                "cf": ["scholarship"],
+                "blwf": ["educationGrant"],
+            },
+            "death": {
+                "cf": ["financialAssistance"],
+                "blwf": ["deadlyGrant"],
+            },
+            "maternityGrant": {
+                "cf": ["maternityGrant"],
+                "blwf": ["maternityGrant"],
+            },
+            "disabilityAssistance": {
+                "cf": ["disabilityAssistance"],
+                "blwf": [],
+            },
+        }
+
+        qs = WorkforceApplication.objects.all()
+
+        if organization_type:
+            qs = qs.filter(organization_type=organization_type)
+
+        reverse_map = {}
+        for category, org_map in category_map.items():
+            for org_type, app_types in org_map.items():
+                for app_type in app_types:
+                    reverse_map[(org_type, app_type)] = category
+
+        category_counts = {category: {"application_count": 0, "approved_count": 0, "rejected_count": 0}
+                           for category in category_map.keys()}
+
+        for app in qs.values("organization_type", "application_type", "status"):
+            category = reverse_map.get((app["organization_type"], app["application_type"]))
+            if not category:
+                continue
+
+            category_counts[category]["application_count"] += 1
+            if app["status"] == "approved":
+                category_counts[category]["approved_count"] += 1
+            elif app["status"] == "rejected":
+                category_counts[category]["rejected_count"] += 1
+
+        result = []
+        for category, counts in category_counts.items():
+            result.append(
+                WorkforceApplicationMatrixGQLType(
+                    application_type=category,
+                    application_count=str(counts["application_count"]),
+                    approved_count=str(counts["approved_count"]),
+                    rejected_count=str(counts["rejected_count"]),
+                )
+            )
+
+        return result
 
 
 class Mutation(graphene.ObjectType):
