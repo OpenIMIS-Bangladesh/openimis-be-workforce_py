@@ -189,6 +189,7 @@ class Query(graphene.ObjectType):
     workforce_application_matrix = graphene.List(
         WorkforceApplicationMatrixGQLType,
         organization_type=graphene.String(required=False),
+        last_months=graphene.String(required=False)
     )
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
@@ -590,8 +591,7 @@ class Query(graphene.ObjectType):
             for r in rows
         ]
 
-    def resolve_workforce_application_matrix(self, info, organization_type=None, **kwargs):
-
+    def resolve_workforce_application_matrix(self, info, organization_type=None, last_months=None, **kwargs):
         category_map = {
             "medical": {
                 "cf": ["medicalAssistance"],
@@ -620,14 +620,26 @@ class Query(graphene.ObjectType):
         if organization_type:
             qs = qs.filter(organization_type=organization_type)
 
+        # Filter by last N months
+        if last_months:
+            now = timezone.now()
+            start_date = now - timedelta(days=30 * int(last_months))
+            qs = qs.filter(date_created__gte=start_date)
+
+        # Reverse map for category lookup
         reverse_map = {}
         for category, org_map in category_map.items():
             for org_type, app_types in org_map.items():
                 for app_type in app_types:
                     reverse_map[(org_type, app_type)] = category
 
-        category_counts = {category: {"application_count": 0, "approved_count": 0, "rejected_count": 0}
-                           for category in category_map.keys()}
+        category_counts = {
+            category: {"application_count": 0, "approved_count": 0, "rejected_count": 0}
+            for category in category_map.keys()
+        }
+
+        # Summation across all categories
+        total_counts = {"application_count": 0, "approved_count": 0, "rejected_count": 0}
 
         for app in qs.values("organization_type", "application_type", "status"):
             category = reverse_map.get((app["organization_type"], app["application_type"]))
@@ -635,10 +647,14 @@ class Query(graphene.ObjectType):
                 continue
 
             category_counts[category]["application_count"] += 1
+            total_counts["application_count"] += 1
+
             if app["status"] == "approved":
                 category_counts[category]["approved_count"] += 1
+                total_counts["approved_count"] += 1
             elif app["status"] == "rejected":
                 category_counts[category]["rejected_count"] += 1
+                total_counts["rejected_count"] += 1
 
         result = []
         for category, counts in category_counts.items():
@@ -650,6 +666,15 @@ class Query(graphene.ObjectType):
                     rejected_count=str(counts["rejected_count"]),
                 )
             )
+
+        result.append(
+            WorkforceApplicationMatrixGQLType(
+                application_type="total",
+                application_count=str(total_counts["application_count"]),
+                approved_count=str(total_counts["approved_count"]),
+                rejected_count=str(total_counts["rejected_count"]),
+            )
+        )
 
         return result
 
