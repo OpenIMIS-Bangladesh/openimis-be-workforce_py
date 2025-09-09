@@ -6,7 +6,6 @@ import graphene
 import os
 import json
 from django.utils.translation import gettext as _
-import graphene_django_optimizer as gql_optimizer
 from tutorial.asgi import application
 
 from core.models.user import UserRole
@@ -19,7 +18,7 @@ from django.utils import timezone
 import requests
 from graphene.types.generic import GenericScalar
 from core.models.user import InteractiveUser
-
+import graphene_django_optimizer as gql_optimizer
 
 class Query(graphene.ObjectType):
     workforce_representatives = OrderedDjangoFilterConnectionField(
