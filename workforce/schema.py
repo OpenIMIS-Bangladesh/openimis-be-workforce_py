@@ -6,7 +6,6 @@ import graphene
 import os
 import json
 from django.utils.translation import gettext as _
-from tutorial.asgi import application
 
 from core.models.user import UserRole
 from core.schema import OrderedDjangoFilterConnectionField
