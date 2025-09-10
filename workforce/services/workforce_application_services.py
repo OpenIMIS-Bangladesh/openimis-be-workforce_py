@@ -59,7 +59,7 @@ class WorkforceApplicationServices(BaseService):
                         existing_applications = WorkforceApplication.objects.filter(
                             application_type="financialAssistance",
                             workforce_employee__nid=employee_nid
-                        )
+                        ).exclude(status="draft")
 
                         if existing_applications.exists():
                             raise ValidationError(
