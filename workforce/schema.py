@@ -1,5 +1,5 @@
 import uuid
-from collections import defaultdict
+from collections import defaultdict, Counter
 from uuid import UUID
 
 import graphene
@@ -188,6 +188,12 @@ class Query(graphene.ObjectType):
     )
     workforce_application_matrix = graphene.List(
         WorkforceApplicationMatrixGQLType,
+        organization_type=graphene.String(required=False),
+        last_months=graphene.String(required=False),
+        date_between=graphene.List(of_type=graphene.String, required=False)
+    )
+    workforce_genderwise_matrix = graphene.List(
+        WorkforceGenderwiseMatrixGQLType,
         organization_type=graphene.String(required=False),
         last_months=graphene.String(required=False),
         date_between=graphene.List(of_type=graphene.String, required=False)
@@ -692,6 +698,55 @@ class Query(graphene.ObjectType):
         )
 
         return result
+
+    def resolve_workforce_genderwise_matrix(self, info, organization_type=None, date_between=None, last_months=None, **kwargs):
+        qs = WorkforceApplication.objects.all()
+
+        if organization_type:
+            qs = qs.filter(organization_type=organization_type)
+
+        # Prevent both filters
+        if last_months and date_between:
+            raise GraphQLError("You can only filter by either 'lastMonths' or 'dateBetween', not both.")
+
+        # Last N months filter
+        if last_months:
+            now = timezone.now()
+            start_date = now - timedelta(days=30 * int(last_months))
+            qs = qs.filter(date_created__gte=start_date)
+
+        # Date between filter
+        if date_between and len(date_between) == 2:
+            try:
+                start_date = datetime.fromisoformat(date_between[0])
+                end_date = datetime.fromisoformat(date_between[1])
+            except ValueError:
+                raise GraphQLError(
+                    "Invalid date format in 'date_between'. Use ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS"
+                )
+            qs = qs.filter(date_created__range=(start_date, end_date))
+
+        employee_ids = qs.values_list("workforce_employee_id", flat=True).distinct()
+        applicants = WorkforceEmployee.objects.filter(id__in=employee_ids).values("gender").distinct()
+        applicant_counter = Counter([a["gender"] for a in applicants])
+        total_applicant_count = sum(applicant_counter.values())
+
+        dependents = WorkforceEmployeeDependent.objects.filter(
+            workforce_application_id__in=qs.values_list("id", flat=True)
+        ).values("gender")
+        dependent_counter = Counter([d["gender"] for d in dependents])
+        total_dependent_count = sum(dependent_counter.values())
+
+        return [
+            WorkforceGenderwiseMatrixGQLType(
+                total_applicant=str(total_applicant_count),
+                total_dependent=str(total_dependent_count),
+                male_applicant=str(applicant_counter.get("male", 0)),
+                female_applicant=str(applicant_counter.get("female", 0)),
+                male_dependent=str(dependent_counter.get("male", 0)),
+                female_dependent=str(dependent_counter.get("female", 0)),
+            )
+        ]
 
 
 class Mutation(graphene.ObjectType):

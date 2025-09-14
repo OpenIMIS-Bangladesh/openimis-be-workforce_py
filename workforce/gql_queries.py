@@ -1005,3 +1005,12 @@ class WorkforceApplicationMatrixGQLType(graphene.ObjectType):
     application_type = graphene.String()
     approved_count = graphene.String()
     rejected_count = graphene.String()
+
+
+class WorkforceGenderwiseMatrixGQLType(graphene.ObjectType):
+    total_applicant = graphene.String()
+    total_dependent = graphene.String()
+    male_applicant = graphene.String()
+    female_applicant = graphene.String()
+    male_dependent = graphene.String()
+    female_dependent = graphene.String()
