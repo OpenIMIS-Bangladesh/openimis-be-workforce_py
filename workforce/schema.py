@@ -14,10 +14,12 @@ from .gql_mutations import *
 from .models import *
 from django.db.models import F
 from django.utils import timezone
+from datetime import datetime
 import requests
 from graphene.types.generic import GenericScalar
 from core.models.user import InteractiveUser
 import graphene_django_optimizer as gql_optimizer
+from graphql import GraphQLError
 
 class Query(graphene.ObjectType):
     workforce_representatives = OrderedDjangoFilterConnectionField(
@@ -187,7 +189,8 @@ class Query(graphene.ObjectType):
     workforce_application_matrix = graphene.List(
         WorkforceApplicationMatrixGQLType,
         organization_type=graphene.String(required=False),
-        last_months=graphene.String(required=False)
+        last_months=graphene.String(required=False),
+        date_between=graphene.List(of_type=graphene.String, required=False)
     )
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
@@ -589,7 +592,7 @@ class Query(graphene.ObjectType):
             for r in rows
         ]
 
-    def resolve_workforce_application_matrix(self, info, organization_type=None, last_months=None, **kwargs):
+    def resolve_workforce_application_matrix(self, info, organization_type=None, date_between=None, last_months=None, **kwargs):
         category_map = {
             "medical": {
                 "cf": ["medicalAssistance"],
@@ -618,11 +621,25 @@ class Query(graphene.ObjectType):
         if organization_type:
             qs = qs.filter(organization_type=organization_type)
 
+        # Prevent using both filters at the same time
+        if last_months and date_between:
+            raise GraphQLError("You can only filter by either 'lastMonths' or 'dateBetween', not both.")
+
         # Filter by last N months
         if last_months:
             now = timezone.now()
             start_date = now - timedelta(days=30 * int(last_months))
             qs = qs.filter(date_created__gte=start_date)
+
+        # Filter between specific dates
+        if date_between and len(date_between) == 2:
+            try:
+                start_date = datetime.fromisoformat(date_between[0])
+                end_date = datetime.fromisoformat(date_between[1])
+            except ValueError:
+                raise GraphQLError(
+                    "Invalid date format in 'date_between'. Use ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS")
+            qs = qs.filter(date_created__range=(start_date, end_date))
 
         # Reverse map for category lookup
         reverse_map = {}
