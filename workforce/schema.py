@@ -20,6 +20,7 @@ from graphene.types.generic import GenericScalar
 from core.models.user import InteractiveUser
 import graphene_django_optimizer as gql_optimizer
 from graphql import GraphQLError
+from django.db.models import Count
 
 class Query(graphene.ObjectType):
     workforce_representatives = OrderedDjangoFilterConnectionField(
@@ -699,52 +700,79 @@ class Query(graphene.ObjectType):
 
         return result
 
-    def resolve_workforce_genderwise_matrix(self, info, organization_type=None, date_between=None, last_months=None, **kwargs):
+    def resolve_workforce_genderwise_matrix(self, info, organization_type=None, date_between=None, last_months=None,
+                                            **kwargs):
         qs = WorkforceApplication.objects.all()
 
         if organization_type:
             qs = qs.filter(organization_type=organization_type)
 
-        # Prevent both filters
         if last_months and date_between:
             raise GraphQLError("You can only filter by either 'lastMonths' or 'dateBetween', not both.")
 
-        # Last N months filter
         if last_months:
             now = timezone.now()
             start_date = now - timedelta(days=30 * int(last_months))
             qs = qs.filter(date_created__gte=start_date)
 
-        # Date between filter
         if date_between and len(date_between) == 2:
             try:
                 start_date = datetime.fromisoformat(date_between[0])
                 end_date = datetime.fromisoformat(date_between[1])
             except ValueError:
                 raise GraphQLError(
-                    "Invalid date format in 'date_between'. Use ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS"
-                )
+                    "Invalid date format in 'date_between'. Use ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS")
             qs = qs.filter(date_created__range=(start_date, end_date))
 
-        employee_ids = qs.values_list("workforce_employee_id", flat=True).distinct()
-        applicants = WorkforceEmployee.objects.filter(id__in=employee_ids).values("gender").distinct()
-        applicant_counter = Counter([a["gender"] for a in applicants])
-        total_applicant_count = sum(applicant_counter.values())
+        employee_ids = list(qs.values_list("workforce_employee_id", flat=True).distinct())
+        employee_ids = [eid for eid in employee_ids if eid is not None]
+        total_applicant_count = len(employee_ids)
 
-        dependents = WorkforceEmployeeDependent.objects.filter(
-            workforce_application_id__in=qs.values_list("id", flat=True)
-        ).values("gender")
-        dependent_counter = Counter([d["gender"] for d in dependents])
-        total_dependent_count = sum(dependent_counter.values())
+        applicant_gender_qs = (
+            WorkforceEmployee.objects
+            .filter(id__in=employee_ids)
+            .values("gender")
+            .annotate(cnt=Count("id"))
+        )
+
+        male_applicant = 0
+        female_applicant = 0
+        for row in applicant_gender_qs:
+            cnt = row["cnt"]
+            gender_val = (row["gender"] or "").strip().lower()
+            if gender_val.startswith("m"):
+                male_applicant += cnt
+            elif gender_val.startswith("f"):
+                female_applicant += cnt
+
+        app_ids = list(qs.values_list("id", flat=True).distinct())
+        dependent_gender_qs = (
+            WorkforceEmployeeDependent.objects
+            .filter(workforce_application_id__in=app_ids)
+            .values("gender")
+            .annotate(cnt=Count("id"))
+        )
+
+        male_dependent = 0
+        female_dependent = 0
+        total_dependent_count = 0
+        for row in dependent_gender_qs:
+            cnt = row["cnt"]
+            total_dependent_count += cnt
+            gender_val = (row["gender"] or "").strip().lower()
+            if gender_val.startswith("m"):
+                male_dependent += cnt
+            elif gender_val.startswith("f"):
+                female_dependent += cnt
 
         return [
             WorkforceGenderwiseMatrixGQLType(
                 total_applicant=str(total_applicant_count),
                 total_dependent=str(total_dependent_count),
-                male_applicant=str(applicant_counter.get("male", 0)),
-                female_applicant=str(applicant_counter.get("female", 0)),
-                male_dependent=str(dependent_counter.get("male", 0)),
-                female_dependent=str(dependent_counter.get("female", 0)),
+                male_applicant=str(male_applicant),
+                female_applicant=str(female_applicant),
+                male_dependent=str(male_dependent),
+                female_dependent=str(female_dependent),
             )
         ]
 
