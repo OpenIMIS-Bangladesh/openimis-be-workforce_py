@@ -122,6 +122,15 @@ DEFAULT_CFG = {
     # WorkforceBlwfDirector (812xxx)
     "gql_workforce_blwf_director_perms": ["812009"],
 
+    # WorkforceEisCoordinator (812xxx)
+    "gql_workforce_eis_coordinator_perms": ["813000"],
+
+    # WorkforceEisOfficer (812xxx)
+    "gql_workforce_eis_officer_perms": ["813002"],
+
+    # WorkforceEisAdvisor (812xxx)
+    "gql_workforce_eis_advisor_perms": ["813003"],
+
 
     "default_validations_disabled": False,
 }
@@ -247,6 +256,15 @@ class WorkforceConfig(AppConfig):
 
      # WorkforceBlwfDirector (xxx)
     gql_workforce_blwf_director_perms = []
+
+     # WorkforceEisCoordinator (xxx)
+    gql_workforce_eis_coordinator_perms = []
+
+     # WorkforceEisOfficer (xxx)
+    gql_workforce_eis_officer_perms = []
+
+     # WorkforceEisAdvisor (xxx)
+    gql_workforce_eis_advisor_perms = []
 
     default_validations_disabled = None
 
