@@ -79,16 +79,33 @@ class WorkforceApplicationServices(BaseService):
 
         # Save dependents data to workforce_employee_dependent table
         application = super().create(obj_data)
+
+        if organization_type == "cf" and application_type in ["disabilityAssistance", "financialAssistance"]:
+            # Clone obj_data for second application
+            new_data = obj_data.copy()
+            new_data["organization_type"] = "eis"
+            new_data.pop("id", None)
+
+            # Create the second application
+            application_eis = super().create(new_data)
+
+            # Get eis application instance
+            application_eis_id = application_eis.get("data", {}).get("id")
+            application_eis_instance = WorkforceApplication.objects.get(id=application_eis_id)
+        else:
+            application_eis_instance = None
+
         application_id = application.get("data", {}).get("id")
         application_instance = WorkforceApplication.objects.get(id=application_id)
+
         user_id = self.user.id
         dependents_data = obj_data.get("employee_dependent_info")
-        # dependents_data = clean_dependents_data(dependents_data)
 
         if dependents_data and dependents_data != "[{}]":
             try:
                 dependents = json.loads(dependents_data)
                 for dep in dependents:
+                    # Save for main application
                     dep_instance = WorkforceEmployeeDependent(
                         workforce_application=application_instance,
                         name_bn=dep.get("nameBn"),
@@ -110,6 +127,30 @@ class WorkforceApplicationServices(BaseService):
                         status="active"
                     )
                     dep_instance.save(username=self.user.username)
+
+                    # Save for eis application (if exists)
+                    if application_eis_instance:
+                        dep_instance_eis = WorkforceEmployeeDependent(
+                            workforce_application=application_eis_instance,
+                            name_bn=dep.get("nameBn"),
+                            name_en=dep.get("nameEn"),
+                            father_name_bn=dep.get("fatherNameBn"),
+                            father_name_en=dep.get("fatherNameEn"),
+                            mother_name_bn=dep.get("motherNameBn"),
+                            mother_name_en=dep.get("motherNameEn"),
+                            nid=dep.get("nid"),
+                            phone_number=dep.get("phoneNumber"),
+                            email=dep.get("email"),
+                            occupation=dep.get("occupation"),
+                            birth_certificate_no=dep.get("birthCertificateNo"),
+                            marital_status=dep.get("maritalStatus"),
+                            present_address=dep.get("presentAddress"),
+                            permanent_address=dep.get("permanentAddress"),
+                            user_created_id=user_id,
+                            user_updated_id=user_id,
+                            status="active"
+                        )
+                        dep_instance_eis.save(username=self.user.username)
 
             except Exception as e:
                 logger.error(f"Failed to save dependent: {e}")
@@ -121,6 +162,8 @@ class WorkforceApplicationServices(BaseService):
 
         application_id = obj_data.get("id")
         application_status = obj_data.get("status", [])
+        application_type = obj_data.get("application_type")
+        organization_type = obj_data.get("organization_type")
         user_id = self.user.id
 
         try:
@@ -128,23 +171,58 @@ class WorkforceApplicationServices(BaseService):
         except WorkforceApplication.DoesNotExist:
             raise ValidationError("Invalid application ID provided.")
 
+        # update eis application
+        application_eis_instance = None
+        if organization_type == "cf" and application_type in ["disabilityAssistance", "financialAssistance"]:
+            application_eis_instance = WorkforceApplication.objects.filter(
+                tracking_number=application_instance.tracking_number,
+                organization_type="eis"
+            ).first()
+
+            new_data = obj_data.copy()
+            new_data["organization_type"] = "eis"
+            new_data["id"] = application_eis_instance.id if application_eis_instance else None
+
+            if application_eis_instance:
+                # Update eis data
+                application_eis = super().update(new_data)
+                application_eis_id = application_eis.get("data", {}).get("id")
+                application_eis_instance = WorkforceApplication.objects.get(id=application_eis_id)
+            else:
+                raise ValidationError(
+                    "EIS application not found for this CF application."
+                )
+
+        # Handle dependents
         dependents_data = obj_data.get("employee_dependent_info", [])
 
-        if dependents_data:
+        if dependents_data and dependents_data != "[{}]":
             try:
+                # Remove old dependents + related banking info for CF application
                 existing_dependents = WorkforceEmployeeDependent.objects.filter(
                     workforce_application=application_instance
                 )
-
                 for dependent in existing_dependents:
                     WorkforceEmployeeBankingInfo.objects.filter(
                         dependant=dependent
                     ).delete()
-
                 existing_dependents.delete()
 
+                # Remove old dependents + related banking info for EIS application (if exists)
+                if application_eis_instance:
+                    existing_dependents_eis = WorkforceEmployeeDependent.objects.filter(
+                        workforce_application=application_eis_instance
+                    )
+                    for dependent in existing_dependents_eis:
+                        WorkforceEmployeeBankingInfo.objects.filter(
+                            dependant=dependent
+                        ).delete()
+                    existing_dependents_eis.delete()
+
+                # create dependent data
                 dependents = json.loads(dependents_data)
                 for dep in dependents:
+                    # CF application
                     dep_instance = WorkforceEmployeeDependent(
                         workforce_application=application_instance,
                         name_bn=dep.get("nameBn"),
@@ -167,51 +245,75 @@ class WorkforceApplicationServices(BaseService):
                     )
                     dep_instance.save(username=self.user.username)
 
+                    # EIS application
+                    if application_eis_instance:
+                        dep_instance_eis = WorkforceEmployeeDependent(
+                            workforce_application=application_eis_instance,
+                            name_bn=dep.get("nameBn"),
+                            name_en=dep.get("nameEn"),
+                            father_name_bn=dep.get("fatherNameBn"),
+                            father_name_en=dep.get("fatherNameEn"),
+                            mother_name_bn=dep.get("motherNameBn"),
+                            mother_name_en=dep.get("motherNameEn"),
+                            nid=dep.get("nid"),
+                            phone_number=dep.get("phoneNumber"),
+                            email=dep.get("email"),
+                            occupation=dep.get("occupation"),
+                            birth_certificate_no=dep.get("birthCertificateNo"),
+                            marital_status=dep.get("maritalStatus"),
+                            present_address=dep.get("presentAddress"),
+                            permanent_address=dep.get("permanentAddress"),
+                            user_created_id=user_id,
+                            user_updated_id=user_id,
+                            status="active"
+                        )
+                        dep_instance_eis.save(username=self.user.username)
+
             except Exception as e:
                 logger.error(f"Error while updating dependents: {e}")
                 raise ValidationError("Failed to update dependents.")
 
-            if application_status == "new":
-                application_instance = WorkforceApplication.objects.get(id=application_id)
-                employee_factory_id = application_instance.employee_factory_id
+        # Handle association_type + factory docs
+        if application_status == "new":
+            employee_factory_id = application_instance.employee_factory_id
 
-                factory = WorkforceFactory.objects.filter(id=employee_factory_id).first()
-                association_type = factory.association_type if factory else None
+            factory = WorkforceFactory.objects.filter(id=employee_factory_id).first()
+            association_type = factory.association_type if factory else None
 
-                if association_type:
-                    application_instance.association_type = association_type
-                    application_instance.save(
-                        username=self.user.username,
-                        update_fields=["association_type"]
+            if association_type:
+                application_instance.association_type = association_type
+                application_instance.save(
+                    username=self.user.username,
+                    update_fields=["association_type"]
+                )
+
+            if employee_factory_id:
+                factory_documents = WorkforceDocument.objects.filter(
+                    factory_id=employee_factory_id
+                )
+                for doc in factory_documents:
+                    holder_type = "dependent" if doc.workforce_dependent_id else "applicant"
+
+                    new_doc = WorkforceDocument(
+                        workforce_application=application_instance,
+                        holder=doc.holder,
+                        holder_type=holder_type,
+                        verifier=doc.verifier,
+                        approver=doc.approver,
+                        workforce_document_type=doc.workforce_document_type,
+                        workforce_dependent=doc.workforce_dependent,
+                        note=doc.note,
+                        document_type=doc.document_type,
+                        path=doc.path,
+                        url=doc.url,
+                        submission_date=doc.submission_date,
+                        verification_date=doc.verification_date,
+                        approval_date=doc.approval_date,
+                        remarks=doc.remarks,
+                        status=doc.status or "active",
+                        user_created_id=self.user.id,
+                        user_updated_id=self.user.id
                     )
-
-                if employee_factory_id:
-                    factory_documents = WorkforceDocument.objects.filter(
-                        factory_id=employee_factory_id
-                    )
-                    for doc in factory_documents:
-                        holder_type = "dependent" if doc.workforce_dependent_id else "applicant"
-
-                        new_doc = WorkforceDocument(
-                            workforce_application=application_instance,
-                            holder=doc.holder,
-                            holder_type=holder_type,
-                            verifier=doc.verifier,
-                            approver=doc.approver,
-                            workforce_document_type=doc.workforce_document_type,
-                            workforce_dependent=doc.workforce_dependent,
-                            note=doc.note,
-                            document_type=doc.document_type,
-                            path=doc.path,
-                            url=doc.url,
-                            submission_date=doc.submission_date,
-                            verification_date=doc.verification_date,
-                            approval_date=doc.approval_date,
-                            remarks=doc.remarks,
-                            status=doc.status or "active",
-                            user_created_id=self.user.id,
-                            user_updated_id=self.user.id
-                        )
-                        new_doc.save(username=self.user.username)
+                    new_doc.save(username=self.user.username)
 
         return application
