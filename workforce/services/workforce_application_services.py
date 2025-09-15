@@ -286,6 +286,12 @@ class WorkforceApplicationServices(BaseService):
                     username=self.user.username,
                     update_fields=["association_type"]
                 )
+            if application_eis_instance:
+                application_eis_instance.association_type = association_type
+                application_eis_instance.save(
+                    username=self.user.username,
+                    update_fields=["association_type"]
+                )
 
             if employee_factory_id:
                 factory_documents = WorkforceDocument.objects.filter(
