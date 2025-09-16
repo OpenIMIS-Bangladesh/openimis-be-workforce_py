@@ -21,6 +21,8 @@ from core.models.user import InteractiveUser
 import graphene_django_optimizer as gql_optimizer
 from graphql import GraphQLError
 from django.db.models import Count
+from django.db.models import Sum
+
 
 class Query(graphene.ObjectType):
     workforce_representatives = OrderedDjangoFilterConnectionField(
@@ -700,8 +702,7 @@ class Query(graphene.ObjectType):
 
         return result
 
-    def resolve_workforce_genderwise_matrix(self, info, organization_type=None, date_between=None, last_months=None,
-                                            **kwargs):
+    def resolve_workforce_genderwise_matrix(self, info, organization_type=None, date_between=None, last_months=None, **kwargs):
         qs = WorkforceApplication.objects.all()
 
         if organization_type:
@@ -765,6 +766,10 @@ class Query(graphene.ObjectType):
             elif gender_val.startswith("f"):
                 female_dependent += cnt
 
+        # Total benefit amount (grant_money)
+        amounts = qs.values_list("grant_amount", flat=True)
+        total_grant_money = sum(float(a) for a in amounts if a not in [None, ""])
+
         return [
             WorkforceGenderwiseMatrixGQLType(
                 total_applicant=str(total_applicant_count),
@@ -773,6 +778,7 @@ class Query(graphene.ObjectType):
                 female_applicant=str(female_applicant),
                 male_dependent=str(male_dependent),
                 female_dependent=str(female_dependent),
+                total_benefit_amount=str(total_grant_money),
             )
         ]
 
