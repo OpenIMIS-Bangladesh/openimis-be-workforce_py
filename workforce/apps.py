@@ -131,6 +131,9 @@ DEFAULT_CFG = {
     # WorkforceEisAdvisor (812xxx)
     "gql_workforce_eis_advisor_perms": ["813003"],
 
+    # WorkforceEisCommittee (812xxx)
+    "gql_workforce_eis_committee_perms": ["813004"],
+
 
     "default_validations_disabled": False,
 }
@@ -265,6 +268,9 @@ class WorkforceConfig(AppConfig):
 
      # WorkforceEisAdvisor (xxx)
     gql_workforce_eis_advisor_perms = []
+
+     # WorkforceEisCommittee (xxx)
+    gql_workforce_eis_committee_perms = []
 
     default_validations_disabled = None
 
