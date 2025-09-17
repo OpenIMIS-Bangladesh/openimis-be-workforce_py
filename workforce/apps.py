@@ -134,6 +134,9 @@ DEFAULT_CFG = {
     # WorkforceEisCommittee (812xxx)
     "gql_workforce_eis_committee_perms": ["813004"],
 
+    # WorkforceBlwfDoctor (812xxx)
+    "gql_workforce_blwf_doctor_perms": ["813005"],
+
 
     "default_validations_disabled": False,
 }
@@ -271,6 +274,9 @@ class WorkforceConfig(AppConfig):
 
      # WorkforceEisCommittee (xxx)
     gql_workforce_eis_committee_perms = []
+
+     # WorkforceBlwfDoctor (xxx)
+    gql_workforce_blwf_doctor_perms = []
 
     default_validations_disabled = None
 
