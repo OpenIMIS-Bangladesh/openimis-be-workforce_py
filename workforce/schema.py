@@ -679,10 +679,11 @@ class Query(graphene.ObjectType):
             category_counts[category]["application_count"] += 1
             total_counts["application_count"] += 1
 
-            if app["status"] == "approved":
+            if app["status"] in ("approved_by_dg", "approved_by_director"):
                 category_counts[category]["approved_count"] += 1
                 total_counts["approved_count"] += 1
-            elif app["status"] == "rejected":
+
+            elif app["status"] in ("rejected", "revert"):
                 category_counts[category]["rejected_count"] += 1
                 total_counts["rejected_count"] += 1
 
