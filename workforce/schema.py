@@ -669,7 +669,7 @@ class Query(graphene.ObjectType):
         }
 
         # Summation across all categories
-        total_counts = {"application_count": 0, "approved_count": 0, "rejected_count": 0}
+        # total_counts = {"application_count": 0, "approved_count": 0, "rejected_count": 0}
 
         for app in qs.values("organization_type", "application_type", "status"):
             category = reverse_map.get((app["organization_type"], app["application_type"]))
@@ -677,15 +677,15 @@ class Query(graphene.ObjectType):
                 continue
 
             category_counts[category]["application_count"] += 1
-            total_counts["application_count"] += 1
+            # total_counts["application_count"] += 1
 
             if app["status"] in ("approved_by_dg", "approved_by_director"):
                 category_counts[category]["approved_count"] += 1
-                total_counts["approved_count"] += 1
+                # total_counts["approved_count"] += 1
 
             elif app["status"] in ("rejected", "revert"):
                 category_counts[category]["rejected_count"] += 1
-                total_counts["rejected_count"] += 1
+                # total_counts["rejected_count"] += 1
 
         result = []
         for category, counts in category_counts.items():
@@ -698,14 +698,14 @@ class Query(graphene.ObjectType):
                 )
             )
 
-        result.append(
-            WorkforceApplicationMatrixGQLType(
-                application_type="total",
-                application_count=str(total_counts["application_count"]),
-                approved_count=str(total_counts["approved_count"]),
-                rejected_count=str(total_counts["rejected_count"]),
-            )
-        )
+        # result.append(
+        #     WorkforceApplicationMatrixGQLType(
+        #         application_type="total",
+        #         application_count=str(total_counts["application_count"]),
+        #         approved_count=str(total_counts["approved_count"]),
+        #         rejected_count=str(total_counts["rejected_count"]),
+        #     )
+        # )
 
         return result
 
