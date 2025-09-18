@@ -831,7 +831,7 @@ class Query(graphene.ObjectType):
         if (months_between and date_between) or (not months_between and not date_between):
             raise GraphQLError("Provide either 'months_between' or 'date_between', not both or none.")
 
-        # filter by last N months
+        months_list = []
         if months_between:
             try:
                 months_between = int(months_between)
@@ -839,10 +839,15 @@ class Query(graphene.ObjectType):
                 raise GraphQLError("'months_between' must be an integer string")
 
             now = timezone.now()
+            # generate last N months (including current)
+            for i in range(months_between):
+                month_date = (now.replace(day=1) - timedelta(days=30 * i))
+                months_list.append(month_date.month)
+            months_list = sorted(set(months_list))
+
             start_date = (now.replace(day=1) - timedelta(days=30 * (months_between - 1))).replace(day=1)
             qs = qs.filter(date_created__gte=start_date)
 
-        # filter by date range
         if date_between and len(date_between) == 2:
             try:
                 start_date = datetime.fromisoformat(date_between[0])
@@ -853,25 +858,26 @@ class Query(graphene.ObjectType):
                 )
             qs = qs.filter(date_created__range=(start_date, end_date))
 
+            # build months list from range
+            months_list = sorted(set(
+                (start_date + timedelta(days=i)).month
+                for i in range((end_date - start_date).days + 1)
+            ))
+
         # annotate by month
         apps = qs.values("organization_type", "application_type", "date_created__month")
 
         # group counts
-        monthly_data = {}
+        monthly_data = defaultdict(lambda: {cat: 0 for cat in category_map.keys()})
         for app in apps:
             month_num = app["date_created__month"]
             category = reverse_map.get((app["organization_type"], app["application_type"]))
             if not category:
                 continue
-
-            if month_num not in monthly_data:
-                monthly_data[month_num] = {cat: 0 for cat in category_map.keys()}
-                monthly_data[month_num]["month"] = month_num
-
             monthly_data[month_num][category] += 1
 
         result = []
-        for month_num in sorted(monthly_data.keys()):
+        for month_num in months_list:
             data = monthly_data[month_num]
             result.append(
                 WorkforceMonthwiseApplicationsGQLType(
