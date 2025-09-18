@@ -1015,3 +1015,12 @@ class WorkforceGenderwiseMatrixGQLType(graphene.ObjectType):
     male_dependent = graphene.String()
     total_benefit_amount = graphene.String()
     female_dependent = graphene.String()
+
+
+class WorkforceMonthwiseApplicationsGQLType(graphene.ObjectType):
+    month = graphene.String()
+    medical = graphene.String()
+    educational = graphene.String()
+    death = graphene.String()
+    maternityGrant = graphene.String()
+    disabilityAssistance = graphene.String()

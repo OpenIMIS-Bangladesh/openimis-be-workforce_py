@@ -201,6 +201,12 @@ class Query(graphene.ObjectType):
         last_months=graphene.String(required=False),
         date_between=graphene.List(of_type=graphene.String, required=False)
     )
+    workforce_monthwise_applications = graphene.List(
+        WorkforceMonthwiseApplicationsGQLType,
+        organization_type=graphene.String(required=False),
+        months_between=graphene.String(required=False),
+        date_between=graphene.List(of_type=graphene.String, required=False),
+    )
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("unauthorized"))
@@ -781,6 +787,103 @@ class Query(graphene.ObjectType):
                 total_benefit_amount=str(total_grant_money),
             )
         ]
+
+    def resolve_workforce_monthwise_applications(
+            self, info, organization_type=None, months_between=None, date_between=None, **kwargs
+    ):
+        category_map = {
+            "medical": {
+                "cf": ["medicalAssistance"],
+                "blwf": ["medicalDonation"],
+            },
+            "educational": {
+                "cf": ["scholarship"],
+                "blwf": ["educationGrant"],
+            },
+            "death": {
+                "cf": ["financialAssistance"],
+                "blwf": ["deadlyGrant"],
+            },
+            "maternityGrant": {
+                "cf": ["maternityGrant"],
+                "blwf": ["maternityGrant"],
+            },
+            "disabilityAssistance": {
+                "cf": ["disabilityAssistance"],
+                "blwf": [],
+            },
+        }
+
+        # reverse map for lookup
+        reverse_map = {}
+        for category, org_map in category_map.items():
+            for org_type, app_types in org_map.items():
+                for app_type in app_types:
+                    reverse_map[(org_type, app_type)] = category
+
+        qs = WorkforceApplication.objects.all()
+
+        if organization_type:
+            qs = qs.filter(organization_type=organization_type)
+
+        # ensure exactly one filter
+        if (months_between and date_between) or (not months_between and not date_between):
+            raise GraphQLError("Provide either 'months_between' or 'date_between', not both or none.")
+
+        # filter by last N months
+        if months_between:
+            try:
+                months_between = int(months_between)
+            except ValueError:
+                raise GraphQLError("'months_between' must be an integer string")
+
+            now = timezone.now()
+            start_date = (now.replace(day=1) - timedelta(days=30 * (months_between - 1))).replace(day=1)
+            qs = qs.filter(date_created__gte=start_date)
+
+        # filter by date range
+        if date_between and len(date_between) == 2:
+            try:
+                start_date = datetime.fromisoformat(date_between[0])
+                end_date = datetime.fromisoformat(date_between[1])
+            except ValueError:
+                raise GraphQLError(
+                    "Invalid date format in 'date_between'. Use ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS"
+                )
+            qs = qs.filter(date_created__range=(start_date, end_date))
+
+        # annotate by month
+        apps = qs.values("organization_type", "application_type", "date_created__month")
+
+        # group counts
+        monthly_data = {}
+        for app in apps:
+            month_num = app["date_created__month"]
+            category = reverse_map.get((app["organization_type"], app["application_type"]))
+            if not category:
+                continue
+
+            if month_num not in monthly_data:
+                monthly_data[month_num] = {cat: 0 for cat in category_map.keys()}
+                monthly_data[month_num]["month"] = month_num
+
+            monthly_data[month_num][category] += 1
+
+        result = []
+        for month_num in sorted(monthly_data.keys()):
+            data = monthly_data[month_num]
+            result.append(
+                WorkforceMonthwiseApplicationsGQLType(
+                    month=str(month_num),
+                    medical=str(data["medical"]),
+                    educational=str(data["educational"]),
+                    death=str(data["death"]),
+                    maternityGrant=str(data["maternityGrant"]),
+                    disabilityAssistance=str(data["disabilityAssistance"]),
+                )
+            )
+
+        return result
 
 
 class Mutation(graphene.ObjectType):
