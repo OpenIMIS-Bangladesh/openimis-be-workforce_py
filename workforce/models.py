@@ -733,6 +733,7 @@ class WorkforceApplication(HistoryModel):
     submitted_by = models.CharField(max_length=50, null=True, blank=True)
     application_for = models.CharField(max_length=50, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
+    institution_info = models.JSONField(null=True, blank=True)
 
     class Meta:
         managed = True
