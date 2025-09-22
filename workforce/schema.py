@@ -1,13 +1,11 @@
 import uuid
-from collections import defaultdict
+from collections import defaultdict, Counter
 from uuid import UUID
 
 import graphene
 import os
 import json
 from django.utils.translation import gettext as _
-import graphene_django_optimizer as gql_optimizer
-from tutorial.asgi import application
 
 from core.models.user import UserRole
 from core.schema import OrderedDjangoFilterConnectionField
@@ -16,9 +14,14 @@ from .gql_mutations import *
 from .models import *
 from django.db.models import F
 from django.utils import timezone
+from datetime import datetime
 import requests
 from graphene.types.generic import GenericScalar
 from core.models.user import InteractiveUser
+import graphene_django_optimizer as gql_optimizer
+from graphql import GraphQLError
+from django.db.models import Count
+from django.db.models import Sum
 
 
 class Query(graphene.ObjectType):
@@ -189,7 +192,20 @@ class Query(graphene.ObjectType):
     workforce_application_matrix = graphene.List(
         WorkforceApplicationMatrixGQLType,
         organization_type=graphene.String(required=False),
-        last_months=graphene.String(required=False)
+        last_months=graphene.String(required=False),
+        date_between=graphene.List(of_type=graphene.String, required=False)
+    )
+    workforce_genderwise_matrix = graphene.List(
+        WorkforceGenderwiseMatrixGQLType,
+        organization_type=graphene.String(required=False),
+        last_months=graphene.String(required=False),
+        date_between=graphene.List(of_type=graphene.String, required=False)
+    )
+    workforce_monthwise_applications = graphene.List(
+        WorkforceMonthwiseApplicationsGQLType,
+        organization_type=graphene.String(required=False),
+        months_between=graphene.String(required=False),
+        date_between=graphene.List(of_type=graphene.String, required=False),
     )
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
@@ -591,7 +607,7 @@ class Query(graphene.ObjectType):
             for r in rows
         ]
 
-    def resolve_workforce_application_matrix(self, info, organization_type=None, last_months=None, **kwargs):
+    def resolve_workforce_application_matrix(self, info, organization_type=None, date_between=None, last_months=None, **kwargs):
         category_map = {
             "medical": {
                 "cf": ["medicalAssistance"],
@@ -620,11 +636,25 @@ class Query(graphene.ObjectType):
         if organization_type:
             qs = qs.filter(organization_type=organization_type)
 
+        # Prevent using both filters at the same time
+        if last_months and date_between:
+            raise GraphQLError("You can only filter by either 'lastMonths' or 'dateBetween', not both.")
+
         # Filter by last N months
         if last_months:
             now = timezone.now()
             start_date = now - timedelta(days=30 * int(last_months))
             qs = qs.filter(date_created__gte=start_date)
+
+        # Filter between specific dates
+        if date_between and len(date_between) == 2:
+            try:
+                start_date = datetime.fromisoformat(date_between[0])
+                end_date = datetime.fromisoformat(date_between[1])
+            except ValueError:
+                raise GraphQLError(
+                    "Invalid date format in 'date_between'. Use ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS")
+            qs = qs.filter(date_created__range=(start_date, end_date))
 
         # Reverse map for category lookup
         reverse_map = {}
@@ -639,7 +669,7 @@ class Query(graphene.ObjectType):
         }
 
         # Summation across all categories
-        total_counts = {"application_count": 0, "approved_count": 0, "rejected_count": 0}
+        # total_counts = {"application_count": 0, "approved_count": 0, "rejected_count": 0}
 
         for app in qs.values("organization_type", "application_type", "status"):
             category = reverse_map.get((app["organization_type"], app["application_type"]))
@@ -647,14 +677,15 @@ class Query(graphene.ObjectType):
                 continue
 
             category_counts[category]["application_count"] += 1
-            total_counts["application_count"] += 1
+            # total_counts["application_count"] += 1
 
-            if app["status"] == "approved":
+            if app["status"] in ("approved_by_dg", "approved_by_director"):
                 category_counts[category]["approved_count"] += 1
-                total_counts["approved_count"] += 1
-            elif app["status"] == "rejected":
+                # total_counts["approved_count"] += 1
+
+            elif app["status"] in ("rejected", "revert"):
                 category_counts[category]["rejected_count"] += 1
-                total_counts["rejected_count"] += 1
+                # total_counts["rejected_count"] += 1
 
         result = []
         for category, counts in category_counts.items():
@@ -667,14 +698,197 @@ class Query(graphene.ObjectType):
                 )
             )
 
-        result.append(
-            WorkforceApplicationMatrixGQLType(
-                application_type="total",
-                application_count=str(total_counts["application_count"]),
-                approved_count=str(total_counts["approved_count"]),
-                rejected_count=str(total_counts["rejected_count"]),
-            )
+        # result.append(
+        #     WorkforceApplicationMatrixGQLType(
+        #         application_type="total",
+        #         application_count=str(total_counts["application_count"]),
+        #         approved_count=str(total_counts["approved_count"]),
+        #         rejected_count=str(total_counts["rejected_count"]),
+        #     )
+        # )
+
+        return result
+
+    def resolve_workforce_genderwise_matrix(self, info, organization_type=None, date_between=None, last_months=None, **kwargs):
+        qs = WorkforceApplication.objects.all()
+
+        if organization_type:
+            qs = qs.filter(organization_type=organization_type)
+
+        if last_months and date_between:
+            raise GraphQLError("You can only filter by either 'lastMonths' or 'dateBetween', not both.")
+
+        if last_months:
+            now = timezone.now()
+            start_date = now - timedelta(days=30 * int(last_months))
+            qs = qs.filter(date_created__gte=start_date)
+
+        if date_between and len(date_between) == 2:
+            try:
+                start_date = datetime.fromisoformat(date_between[0])
+                end_date = datetime.fromisoformat(date_between[1])
+            except ValueError:
+                raise GraphQLError(
+                    "Invalid date format in 'date_between'. Use ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS")
+            qs = qs.filter(date_created__range=(start_date, end_date))
+
+        employee_ids = list(qs.values_list("workforce_employee_id", flat=True).distinct())
+        employee_ids = [eid for eid in employee_ids if eid is not None]
+        total_applicant_count = len(employee_ids)
+
+        applicant_gender_qs = (
+            WorkforceEmployee.objects
+            .filter(id__in=employee_ids)
+            .values("gender")
+            .annotate(cnt=Count("id"))
         )
+
+        male_applicant = 0
+        female_applicant = 0
+        for row in applicant_gender_qs:
+            cnt = row["cnt"]
+            gender_val = (row["gender"] or "").strip().lower()
+            if gender_val.startswith("m"):
+                male_applicant += cnt
+            elif gender_val.startswith("f"):
+                female_applicant += cnt
+
+        app_ids = list(qs.values_list("id", flat=True).distinct())
+        dependent_gender_qs = (
+            WorkforceEmployeeDependent.objects
+            .filter(workforce_application_id__in=app_ids)
+            .values("gender")
+            .annotate(cnt=Count("id"))
+        )
+
+        male_dependent = 0
+        female_dependent = 0
+        total_dependent_count = 0
+        for row in dependent_gender_qs:
+            cnt = row["cnt"]
+            total_dependent_count += cnt
+            gender_val = (row["gender"] or "").strip().lower()
+            if gender_val.startswith("m"):
+                male_dependent += cnt
+            elif gender_val.startswith("f"):
+                female_dependent += cnt
+
+        # Total benefit amount (grant_money)
+        amounts = qs.values_list("grant_amount", flat=True)
+        total_grant_money = sum(float(a) for a in amounts if a not in [None, ""])
+
+        return [
+            WorkforceGenderwiseMatrixGQLType(
+                total_applicant=str(total_applicant_count),
+                total_dependent=str(total_dependent_count),
+                male_applicant=str(male_applicant),
+                female_applicant=str(female_applicant),
+                male_dependent=str(male_dependent),
+                female_dependent=str(female_dependent),
+                total_benefit_amount=str(total_grant_money),
+            )
+        ]
+
+    def resolve_workforce_monthwise_applications(
+            self, info, organization_type=None, months_between=None, date_between=None, **kwargs
+    ):
+        category_map = {
+            "medical": {
+                "cf": ["medicalAssistance"],
+                "blwf": ["medicalDonation"],
+            },
+            "educational": {
+                "cf": ["scholarship"],
+                "blwf": ["educationGrant"],
+            },
+            "death": {
+                "cf": ["financialAssistance"],
+                "blwf": ["deadlyGrant"],
+            },
+            "maternityGrant": {
+                "cf": ["maternityGrant"],
+                "blwf": ["maternityGrant"],
+            },
+            "disabilityAssistance": {
+                "cf": ["disabilityAssistance"],
+                "blwf": [],
+            },
+        }
+
+        # reverse map for lookup
+        reverse_map = {}
+        for category, org_map in category_map.items():
+            for org_type, app_types in org_map.items():
+                for app_type in app_types:
+                    reverse_map[(org_type, app_type)] = category
+
+        qs = WorkforceApplication.objects.all()
+
+        if organization_type:
+            qs = qs.filter(organization_type=organization_type)
+
+        # ensure exactly one filter
+        if (months_between and date_between) or (not months_between and not date_between):
+            raise GraphQLError("Provide either 'months_between' or 'date_between', not both or none.")
+
+        months_list = []
+        if months_between:
+            try:
+                months_between = int(months_between)
+            except ValueError:
+                raise GraphQLError("'months_between' must be an integer string")
+
+            now = timezone.now()
+            # generate last N months (including current)
+            for i in range(months_between):
+                month_date = (now.replace(day=1) - timedelta(days=30 * i))
+                months_list.append(month_date.month)
+            months_list = sorted(set(months_list))
+
+            start_date = (now.replace(day=1) - timedelta(days=30 * (months_between - 1))).replace(day=1)
+            qs = qs.filter(date_created__gte=start_date)
+
+        if date_between and len(date_between) == 2:
+            try:
+                start_date = datetime.fromisoformat(date_between[0])
+                end_date = datetime.fromisoformat(date_between[1])
+            except ValueError:
+                raise GraphQLError(
+                    "Invalid date format in 'date_between'. Use ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS"
+                )
+            qs = qs.filter(date_created__range=(start_date, end_date))
+
+            # build months list from range
+            months_list = sorted(set(
+                (start_date + timedelta(days=i)).month
+                for i in range((end_date - start_date).days + 1)
+            ))
+
+        # annotate by month
+        apps = qs.values("organization_type", "application_type", "date_created__month")
+
+        # group counts
+        monthly_data = defaultdict(lambda: {cat: 0 for cat in category_map.keys()})
+        for app in apps:
+            month_num = app["date_created__month"]
+            category = reverse_map.get((app["organization_type"], app["application_type"]))
+            if not category:
+                continue
+            monthly_data[month_num][category] += 1
+
+        result = []
+        for month_num in months_list:
+            data = monthly_data[month_num]
+            result.append(
+                WorkforceMonthwiseApplicationsGQLType(
+                    month=str(month_num),
+                    medical=str(data["medical"]),
+                    educational=str(data["educational"]),
+                    death=str(data["death"]),
+                    maternityGrant=str(data["maternityGrant"]),
+                    disabilityAssistance=str(data["disabilityAssistance"]),
+                )
+            )
 
         return result
 
