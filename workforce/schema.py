@@ -207,6 +207,14 @@ class Query(graphene.ObjectType):
         months_between=graphene.String(required=False),
         date_between=graphene.List(of_type=graphene.String, required=False),
     )
+    workforce_eis_calculation = graphene.Field(
+        WorkforceEISCalculationGQLType,
+        parameters=graphene.JSONString(required=False),
+        worker=graphene.JSONString(required=False),
+        dependents=graphene.JSONString(required=False),
+        number_of_dependents=graphene.String(required=False),
+    )
+
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("unauthorized"))
@@ -891,6 +899,57 @@ class Query(graphene.ObjectType):
             )
 
         return result
+
+    def resolve_workforce_eis_calculation(self, info, parameters=None, worker=None, dependents=None,
+                                          number_of_dependents=None):
+        try:
+            payload = {
+                "parameters": parameters,
+                "Worker": worker,
+                "Number of dependents": str(number_of_dependents),
+                "Dependents": dependents,
+            }
+
+            response = requests.post(os.environ.get("CALCULATION_API_URL"), json=payload, timeout=60)
+            response.raise_for_status()
+            result = response.json()
+
+            key_map = {
+                "PV factor": "pv_factor",
+                "PV Total pension": "pv_total_pension",
+                "PV Top-Up pension": "pv_topup_pension",
+                "Initial replacement rate": "initial_replacement_rate",
+                "Total initial monthly pension": "total_initial_monthly_pension",
+                "Top-up monthly pension": "topup_monthly_pension",
+            }
+
+            def map_keys(obj):
+                if isinstance(obj, dict):
+                    new_obj = {}
+                    for k, v in obj.items():
+                        new_key = key_map.get(k, k)
+                        if isinstance(v, (dict, list)):
+                            new_obj[new_key] = map_keys(v)
+                        elif v is None:
+                            new_obj[new_key] = "null"
+                        else:
+                            new_obj[new_key] = str(v)
+                    return new_obj
+                elif isinstance(obj, list):
+                    return [map_keys(i) for i in obj]
+                else:
+                    return str(obj)
+
+            result = map_keys(result)
+            return result
+
+        except requests.exceptions.RequestException as e:
+            return {
+                "status": "error",
+                "filename": None,
+                "data": {"results": [], "total": {}},
+                "error": str(e),
+            }
 
 
 class Mutation(graphene.ObjectType):

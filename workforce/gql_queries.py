@@ -1025,3 +1025,33 @@ class WorkforceMonthwiseApplicationsGQLType(graphene.ObjectType):
     death = graphene.String()
     maternityGrant = graphene.String()
     disabilityAssistance = graphene.String()
+
+
+class WorkforceEISResultType(graphene.ObjectType):
+    ID = graphene.String()
+    Relationship = graphene.String()
+    pv_factor = graphene.String(name="PV_factor")
+    pv_total_pension = graphene.String(name="PV_Total_pension")
+    pv_topup_pension = graphene.String(name="PV_TopUp_pension")
+    initial_replacement_rate = graphene.String(name="Initial_replacement_rate")
+    total_initial_monthly_pension = graphene.String(name="Total_initial_monthly_pension")
+    topup_monthly_pension = graphene.String(name="Topup_monthly_pension")
+
+
+class WorkforceEISTotalType(graphene.ObjectType):
+    pv_total_pension = graphene.String(name="PV_Total_pension")
+    pv_topup_pension = graphene.String(name="PV_TopUp_pension")
+    initial_replacement_rate = graphene.String(name="Initial_replacement_rate")
+    total_initial_monthly_pension = graphene.String(name="Total_initial_monthly_pension")
+    topup_monthly_pension = graphene.String(name="Topup_monthly_pension")
+
+
+class WorkforceEISDataType(graphene.ObjectType):
+    results = graphene.List(WorkforceEISResultType)
+    total = graphene.Field(WorkforceEISTotalType)
+
+
+class WorkforceEISCalculationGQLType(graphene.ObjectType):
+    status = graphene.String()
+    filename = graphene.String()
+    data = graphene.Field(WorkforceEISDataType)
