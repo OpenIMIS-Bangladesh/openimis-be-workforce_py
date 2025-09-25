@@ -483,6 +483,13 @@ class WorkforceDocument(HistoryModel):
         null=True,
         related_name="workforce_dependent"  # Unique related name
     )
+    application_summary = models.ForeignKey(
+        "WorkforceApplicationSummary",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="document_application_summary"
+    )
     note = models.CharField(max_length=1024, null=True, blank=True)
     document_type = models.CharField(max_length=512, null=False, blank=False)
     path = models.CharField(max_length=512, null=True, blank=True)
