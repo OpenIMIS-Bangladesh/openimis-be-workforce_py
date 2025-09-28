@@ -137,6 +137,9 @@ DEFAULT_CFG = {
     # WorkforceBlwfDoctor (812xxx)
     "gql_workforce_blwf_doctor_perms": ["813005"],
 
+    # WorkforceEisFinancial (812xxx)
+    "gql_workforce_eis_financial_officer_perms": ["813006"],
+
 
     "default_validations_disabled": False,
 }
@@ -277,6 +280,9 @@ class WorkforceConfig(AppConfig):
 
      # WorkforceBlwfDoctor (xxx)
     gql_workforce_blwf_doctor_perms = []
+
+     # WorkforceEisFinancialOfficer (xxx)
+    gql_workforce_eis_financial_officer_perms = []
 
     default_validations_disabled = None
 
