@@ -725,7 +725,8 @@ class Query(graphene.ObjectType):
 
         if organization_type:
             qs = qs.filter(organization_type=organization_type)
-
+        else:
+            qs = qs.exclude(organization_type="eis")
         if last_months and date_between:
             raise GraphQLError("You can only filter by either 'lastMonths' or 'dateBetween', not both.")
 
