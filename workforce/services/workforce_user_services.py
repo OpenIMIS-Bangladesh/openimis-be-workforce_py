@@ -22,14 +22,16 @@ class WorkforceUserServices():
 
     def create(self, obj_data):
         login_name = obj_data.get('nid') or obj_data.get('birth_certificate_no')
+        name_bn = obj_data.get('name_bn') or ""
+        first_name_en = obj_data.get('first_name_en') or ""
 
         if InteractiveUser.objects.filter(validity_to__isnull=True, login_name=login_name).exists():
             raise ValidationError(f"User with login name '{login_name}' already exists.")
 
         data = {
             "username": login_name,
-            "other_names": ' ',
-            "last_name": obj_data.get('last_name_en'),
+            "other_names": name_bn,
+            "last_name": first_name_en,
             "phone": obj_data.get('phone_number'),
             "email": '',
             "language": 'en',
