@@ -22,6 +22,9 @@ import graphene_django_optimizer as gql_optimizer
 from graphql import GraphQLError
 from django.db.models import Count
 from django.db.models import Sum
+from django.db.models import OuterRef, Subquery
+from django.utils.timezone import now, timedelta
+from workforce.models import WorkforceApplicationMovement
 
 
 class Query(graphene.ObjectType):
@@ -215,6 +218,11 @@ class Query(graphene.ObjectType):
         worker=graphene.JSONString(required=False),
         dependents=graphene.JSONString(required=False),
         number_of_dependents=graphene.String(required=False),
+    )
+    workforce_application_timewise_matrix = graphene.Field(
+        WorkforceApplicationTimewiseMatrixGQLType,
+        application_type=graphene.String(),
+        organization_type=graphene.String()
     )
 
     def resolve_workforce_representatives(self, info, **kwargs):
@@ -954,6 +962,112 @@ class Query(graphene.ObjectType):
                 "data": {"results": [], "total": {}},
                 "error": str(e),
             }
+
+    def resolve_workforce_application_timewise_matrix(self, info, application_type=None, organization_type=None,
+                                                      **kwargs):
+        # Filter applications
+        qs = WorkforceApplication.objects.exclude(
+            status__in=[
+                "approved_by_dg",
+                "approved_by_director",
+                "draft",
+                "revert",
+                "reject",
+            ]
+        )
+
+        if organization_type:
+            qs = qs.filter(organization_type=organization_type)
+
+        if application_type:
+            qs = qs.filter(application_type=application_type)
+
+        # Annotate latest movement date and application_to_id
+        latest_movement = WorkforceApplicationMovement.objects.filter(
+            application_id=OuterRef("id")
+        ).order_by("-date_created")
+
+        qs = qs.annotate(
+            last_date_created=Subquery(latest_movement.values("date_created")[:1]),
+            last_application_to_id=Subquery(latest_movement.values("application_to_id")[:1]),
+        )
+
+        # Calculate day-wise counts
+        day_wise_count = {"1": 0, "3": 0, "7": 0, "10": 0, "15": 0, "more_than_15": 0}
+        now_time = now()
+
+        for app in qs:
+            if not app.last_date_created:
+                continue
+            diff = (now_time - app.last_date_created).days
+            if diff < 1:
+                day_wise_count["1"] += 1
+            elif diff < 3:
+                day_wise_count["3"] += 1
+            elif diff < 7:
+                day_wise_count["7"] += 1
+            elif diff < 10:
+                day_wise_count["10"] += 1
+            elif diff < 15:
+                day_wise_count["15"] += 1
+            else:
+                day_wise_count["more_than_15"] += 1
+
+        # Role-wise count
+        user_ids = [app.last_application_to_id for app in qs if app.last_application_to_id]
+
+        role_wise_data = []
+
+        if user_ids:
+            # Map user ID → list of application IDs assigned to them
+            user_app_map = {}
+            for app in qs:
+                if app.last_application_to_id:
+                    user_app_map.setdefault(app.last_application_to_id, []).append(app.id)
+
+            # Fetch all users at once with their roles
+            users = InteractiveUser.objects.filter(id__in=user_app_map.keys()).prefetch_related('user_roles__role')
+
+            for user in users:
+                apps_for_user = user_app_map.get(user.id, [])
+                if not apps_for_user:
+                    continue
+
+                # Deduplicate role names
+                roles = user.user_roles.all()
+                role_names = list({r.role.name for r in roles}) if roles else ["No Role"]
+
+                # Append ONE entry per user
+                role_wise_data.append({
+                    "id": user.id,
+                    "last_name": user.last_name,
+                    "other_names": user.other_names,
+                    "role_names": role_names,
+                    "application_count": len(apps_for_user),
+                })
+
+        # Return GraphQL type
+        return WorkforceApplicationTimewiseMatrixGQLType(
+            total_application_count=qs.count(),
+            day_wise_count=DayWiseCountGQLType(
+                day1=day_wise_count["1"],
+                day3=day_wise_count["3"],
+                day7=day_wise_count["7"],
+                day10=day_wise_count["10"],
+                day15=day_wise_count["15"],
+                moreThan15=day_wise_count["more_than_15"],
+            ),
+            role_wise_count=[
+                RoleWiseCountGQLType(
+                    roleName=", ".join(item["role_names"]),
+                    userId=item["id"],
+                    lastName=item["last_name"],
+                    otherNames=item["other_names"],
+                    applicationCount=item["application_count"],
+                )
+                for item in role_wise_data
+            ]
+        )
 
 
 class Mutation(graphene.ObjectType):

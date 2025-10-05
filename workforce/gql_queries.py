@@ -1057,3 +1057,26 @@ class WorkforceEISCalculationGQLType(graphene.ObjectType):
     status = graphene.String()
     filename = graphene.String()
     data = graphene.Field(WorkforceEISDataType)
+
+
+class DayWiseCountGQLType(graphene.ObjectType):
+    day1 = graphene.Int()
+    day3 = graphene.Int()
+    day7 = graphene.Int()
+    day10 = graphene.Int()
+    day15 = graphene.Int()
+    moreThan15 = graphene.Int()
+
+
+class RoleWiseCountGQLType(graphene.ObjectType):
+    roleName = graphene.String()
+    userId = graphene.Int()
+    lastName = graphene.String()
+    otherNames = graphene.String()
+    applicationCount = graphene.Int()
+
+
+class WorkforceApplicationTimewiseMatrixGQLType(graphene.ObjectType):
+    total_application_count = graphene.Int()
+    day_wise_count = graphene.Field(DayWiseCountGQLType)
+    role_wise_count = graphene.List(RoleWiseCountGQLType)
