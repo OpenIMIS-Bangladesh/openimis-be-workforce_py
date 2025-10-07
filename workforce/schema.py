@@ -221,8 +221,9 @@ class Query(graphene.ObjectType):
     )
     workforce_application_timewise_matrix = graphene.Field(
         WorkforceApplicationTimewiseMatrixGQLType,
-        application_type=graphene.String(),
-        organization_type=graphene.String()
+        application_type_in=graphene.List(graphene.String, required=False),
+        organization_type=graphene.String(required=False),
+        day_count=graphene.String(required=False),
     )
 
     def resolve_workforce_representatives(self, info, **kwargs):
@@ -339,6 +340,15 @@ class Query(graphene.ObjectType):
             query = query.filter(application__application_from_id=application_from_id)
         if is_reverted:
             query = query.filter(application__is_reverted=is_reverted)
+
+        # latest_movement = WorkforceApplicationMovement.objects.filter(
+        #     application_id=OuterRef("id")
+        # ).order_by("-date_created")
+        #
+        # query = query.annotate(
+        #     last_movement_date_created=Subquery(latest_movement.values("date_created")[:1]),
+        #     last_movement_date_updated=Subquery(latest_movement.values("date_updated")[:1]),
+        # )
 
         return gql_optimizer.query(query, info)
     def resolve_workforce_document_types(self, info, application_for_in=None, document_type_in=None, **kwargs):
@@ -963,9 +973,8 @@ class Query(graphene.ObjectType):
                 "error": str(e),
             }
 
-    def resolve_workforce_application_timewise_matrix(self, info, application_type=None, organization_type=None,
-                                                      **kwargs):
-        # Filter applications
+    def resolve_workforce_application_timewise_matrix(self, info, application_type_in=None, organization_type=None,
+                                                      day_count=None, **kwargs):
         qs = WorkforceApplication.objects.exclude(
             status__in=[
                 "approved_by_dg",
@@ -979,10 +988,9 @@ class Query(graphene.ObjectType):
         if organization_type:
             qs = qs.filter(organization_type=organization_type)
 
-        if application_type:
-            qs = qs.filter(application_type=application_type)
+        if application_type_in:
+            qs = qs.filter(application_type__in=application_type_in)
 
-        # Annotate latest movement date and application_to_id
         latest_movement = WorkforceApplicationMovement.objects.filter(
             application_id=OuterRef("id")
         ).order_by("-date_created")
@@ -992,14 +1000,40 @@ class Query(graphene.ObjectType):
             last_application_to_id=Subquery(latest_movement.values("application_to_id")[:1]),
         )
 
-        # Calculate day-wise counts
+        if day_count:
+            now_time = now()
+
+            ranges = {
+                "1": (0, 1),
+                "3": (1, 3),
+                "7": (3, 7),
+                "10": (7, 10),
+                "15": (10, 15),
+                "15+": (15, None),
+            }
+
+            lower, upper = ranges.get(day_count, (None, None))
+
+            if lower is not None:
+                lower_time = now_time - timedelta(days=upper) if upper else None
+                upper_time = now_time - timedelta(days=lower)
+
+                if upper and lower_time:
+                    qs = qs.filter(last_date_created__lte=upper_time, last_date_created__gt=lower_time)
+                elif lower is not None and upper is None:
+                    qs = qs.filter(last_date_created__lte=now_time - timedelta(days=15))
+                else:
+                    qs = qs.filter(last_date_created__gte=now_time - timedelta(days=1))
+
         day_wise_count = {"1": 0, "3": 0, "7": 0, "10": 0, "15": 0, "more_than_15": 0}
         now_time = now()
 
         for app in qs:
             if not app.last_date_created:
                 continue
+
             diff = (now_time - app.last_date_created).days
+
             if diff < 1:
                 day_wise_count["1"] += 1
             elif diff < 3:
@@ -1013,31 +1047,25 @@ class Query(graphene.ObjectType):
             else:
                 day_wise_count["more_than_15"] += 1
 
-        # Role-wise count
         user_ids = [app.last_application_to_id for app in qs if app.last_application_to_id]
-
         role_wise_data = []
 
         if user_ids:
-            # Map user ID → list of application IDs assigned to them
             user_app_map = {}
             for app in qs:
                 if app.last_application_to_id:
                     user_app_map.setdefault(app.last_application_to_id, []).append(app.id)
 
-            # Fetch all users at once with their roles
-            users = InteractiveUser.objects.filter(id__in=user_app_map.keys()).prefetch_related('user_roles__role')
+            users = InteractiveUser.objects.filter(id__in=user_app_map.keys()).prefetch_related("user_roles__role")
 
             for user in users:
                 apps_for_user = user_app_map.get(user.id, [])
                 if not apps_for_user:
                     continue
 
-                # Deduplicate role names
                 roles = user.user_roles.all()
                 role_names = list({r.role.name for r in roles}) if roles else ["No Role"]
 
-                # Append ONE entry per user
                 role_wise_data.append({
                     "id": user.id,
                     "last_name": user.last_name,
@@ -1046,7 +1074,6 @@ class Query(graphene.ObjectType):
                     "application_count": len(apps_for_user),
                 })
 
-        # Return GraphQL type
         return WorkforceApplicationTimewiseMatrixGQLType(
             total_application_count=qs.count(),
             day_wise_count=DayWiseCountGQLType(
@@ -1066,7 +1093,7 @@ class Query(graphene.ObjectType):
                     applicationCount=item["application_count"],
                 )
                 for item in role_wise_data
-            ]
+            ],
         )
 
 
