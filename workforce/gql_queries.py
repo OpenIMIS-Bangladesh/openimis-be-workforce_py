@@ -490,8 +490,7 @@ class WorkforceApplicationGQLType(DjangoObjectType):
     workforce_employee = graphene.Field(lambda: WorkforceEmployeeGQLType)
     workforce_application_movement = graphene.Field(lambda: WorkforceApplicationMovementGQLType)
     workforce_application_movements = graphene.List(lambda: WorkforceApplicationMovementGQLType)
-    # last_movement_date_created = graphene.DateTime()
-    # last_movement_date_updated = graphene.DateTime()
+    last_movement_date = graphene.DateTime()
 
     class Meta:
         model = WorkforceApplication
@@ -543,6 +542,9 @@ class WorkforceApplicationGQLType(DjangoObjectType):
         return WorkforceApplicationMovement.objects.filter(
             application_id=self.id
         ).order_by("-id")
+
+    def resolve_last_movement_date(self, info):
+        return getattr(self, "lastMovementDate", None)
 
 
 class WorkforceEmployeeDesignationGQLType(DjangoObjectType):

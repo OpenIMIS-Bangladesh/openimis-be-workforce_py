@@ -341,6 +341,12 @@ class Query(graphene.ObjectType):
         if is_reverted:
             query = query.filter(application__is_reverted=is_reverted)
 
+        latest_movement_subquery = WorkforceApplicationMovement.objects.filter(
+            application_id=OuterRef('pk')
+        ).order_by('-date_created').values('date_created')[:1]
+
+        query = query.annotate(lastMovementDate=Subquery(latest_movement_subquery))
+
         return gql_optimizer.query(query, info)
 
     def resolve_workforce_document_types(self, info, application_for_in=None, document_type_in=None, **kwargs):
