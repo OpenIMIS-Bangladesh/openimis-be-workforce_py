@@ -185,6 +185,7 @@ class WorkforceEmployeeInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
     employee_id = graphene.String(unique=True)
     employee_id_lima = graphene.String()
+    workforce_factory_id = graphene.String()
     insurance_number = graphene.String(required=True, unique=True)
     employee_type = graphene.String()
     global_id = graphene.String()
