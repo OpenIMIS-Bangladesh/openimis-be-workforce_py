@@ -402,6 +402,7 @@ class WorkforceEmployeeGQLType(DjangoObjectType):
             "permanent_address": ["exact"],
             "phone_number": ["exact"],
             "email": ["exact"],
+            "related_user_id": ["exact"],
             "birth_date": ["exact"],
             "nid": ["exact"],
             "birth_certificate_no": ["exact"],
