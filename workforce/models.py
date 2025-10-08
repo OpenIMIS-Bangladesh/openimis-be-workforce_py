@@ -322,7 +322,13 @@ class WorkforceEmployee(HistoryModel):
     employee_id = models.CharField(
         max_length=255, null=True, blank=True, unique=True)
     employee_id_lima = models.CharField(max_length=255, null=True, blank=True)
-    workforce_factory_id = models.CharField(max_length=255, null=True, blank=True)
+    workforce_factory = models.ForeignKey(
+        WorkforceFactory,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_employee_factory",
+    )
     insurance_number = models.CharField(max_length=50, null=True, blank=True)
     employee_type = models.CharField(
         max_length=16, null=True, blank=True, db_comment="office/factory employee")
