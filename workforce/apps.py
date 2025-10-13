@@ -143,6 +143,9 @@ DEFAULT_CFG = {
      # WorkforceEisDoctor (812xxx)
     "gql_workforce_eis_doctor_perms": ["813007"],
 
+     # WorkforceBlwfDOL/DIFE (812xxx)
+    "gql_workforce_blwf_dol_dife_perms": ["813008"],
+
 
     "default_validations_disabled": False,
 }
@@ -289,6 +292,9 @@ class WorkforceConfig(AppConfig):
 
      # WorkforceEisDoctor (xxx)
     gql_workforce_eis_doctor_perms = []
+
+     # WorkforceBlwfDOL/DIFE (xxx)
+    gql_workforce_blwf_dol_dife_perms = []
 
     default_validations_disabled = None
 
