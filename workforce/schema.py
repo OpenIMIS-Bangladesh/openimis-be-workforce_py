@@ -316,10 +316,23 @@ class Query(graphene.ObjectType):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("Unauthorized access"))
         pass
-    def resolve_workforce_application(self, info, status_in=None, association_type_in=None, application_type_in=None, submitted_by_in=None,
-                                      application_to=None, application_from=None, organization_type_in=None, is_reverted=None, **kwargs):
+
+    def resolve_workforce_application(
+            self,
+            info,
+            status_in=None,
+            association_type_in=None,
+            application_type_in=None,
+            submitted_by_in=None,
+            application_to=None,
+            application_from=None,
+            organization_type_in=None,
+            is_reverted=None,
+            **kwargs
+    ):
         service = WorkforceApplicationServices(info.context.user)
         query = service.get(**kwargs)
+
         if status_in:
             query = query.filter(status__in=status_in)
         if association_type_in:
@@ -338,12 +351,41 @@ class Query(graphene.ObjectType):
         if application_from:
             application_from_id = application_from
             query = query.filter(application__application_from_id=application_from_id)
+
         if is_reverted:
             query = query.filter(application__is_reverted=is_reverted)
 
+        if application_to:
+            try:
+                app_to_id = int(application_to)
+            except ValueError:
+                app_to_id = None
+
+            if app_to_id:
+                latest_receive_subquery = WorkforceApplicationMovement.objects.filter(
+                    application_id=OuterRef("pk"),
+                    application_to_id=app_to_id,
+                ).order_by("-date_created").values("date_created")[:1]
+
+                query = query.annotate(applicationReceiveDate=Subquery(latest_receive_subquery))
+
+        if application_from:
+            try:
+                app_from_id = int(application_from)
+            except ValueError:
+                app_from_id = None
+
+            if app_from_id:
+                latest_forward_subquery = WorkforceApplicationMovement.objects.filter(
+                    application_id=OuterRef("pk"),
+                    application_from_id=app_from_id,
+                ).order_by("-date_created").values("date_created")[:1]
+
+                query = query.annotate(applicationForwardDate=Subquery(latest_forward_subquery))
+
         latest_movement_subquery = WorkforceApplicationMovement.objects.filter(
-            application_id=OuterRef('pk')
-        ).order_by('-date_created').values('date_created')[:1]
+            application_id=OuterRef("pk")
+        ).order_by("-date_created").values("date_created")[:1]
 
         query = query.annotate(lastMovementDate=Subquery(latest_movement_subquery))
 

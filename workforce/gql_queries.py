@@ -490,6 +490,8 @@ class WorkforceApplicationGQLType(DjangoObjectType):
     workforce_employee = graphene.Field(lambda: WorkforceEmployeeGQLType)
     workforce_application_movement = graphene.Field(lambda: WorkforceApplicationMovementGQLType)
     workforce_application_movements = graphene.List(lambda: WorkforceApplicationMovementGQLType)
+    application_receive_date = graphene.DateTime()
+    application_forward_date = graphene.DateTime()
     last_movement_date = graphene.DateTime()
 
     class Meta:
@@ -545,6 +547,12 @@ class WorkforceApplicationGQLType(DjangoObjectType):
 
     def resolve_last_movement_date(self, info):
         return getattr(self, "lastMovementDate", None)
+
+    def resolve_application_receive_date(self, info):
+        return getattr(self, "applicationReceiveDate", None)
+
+    def resolve_application_forward_date(self, info):
+        return getattr(self, "applicationForwardDate", None)
 
 
 class WorkforceEmployeeDesignationGQLType(DjangoObjectType):
