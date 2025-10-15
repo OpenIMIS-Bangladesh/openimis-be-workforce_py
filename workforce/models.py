@@ -748,6 +748,10 @@ class WorkforceApplication(HistoryModel):
     application_for = models.CharField(max_length=50, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
     institution_info = models.JSONField(null=True, blank=True)
+    last_base_salary = models.CharField(max_length=15, null=True, blank=True)
+    doctors_diagnosis = models.CharField(max_length=512, null=True, blank=True)
+    doctors_recommended_donation = models.CharField(max_length=15, null=True, blank=True)
+    doctors_flag = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:
         managed = True
