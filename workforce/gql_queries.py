@@ -529,6 +529,10 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             # enable filtering by fields on WorkforceApplicationMovement via reverse FK
             "application__application_to_id": ["exact"],
             "application__application_from_id": ["exact"],
+            "last_base_salary": ["exact"],
+            "doctors_diagnosis": ["exact"],
+            "doctors_recommended_donation": ["exact"],
+            "doctors_flag": ["exact"],
         }
         connection_class = ExtendedConnection
 
