@@ -3,6 +3,8 @@ from graphql_jwt.mutations import JSONWebTokenMutation, mixins
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils.translation import gettext as _
+
+from core.schema import OpenIMISMutation
 from .apps import WorkforceConfig
 import graphene
 from .gql_types import (
@@ -16,8 +18,9 @@ from .gql_types import (
     WorkforceApplicationInputType, WorkforceDocumentTypeInputType, WorkforceDocumentMapInputType,
     WorkforceUserInputType, WorkforceApplicationMovementInputType, WorkforceApplicationSummaryInputType,
     WorkforceApplicationSummaryMovementInputType, WorkforceGrantMoneyInputType, WorkforceDiseasesInputType,
-    WorkforceEducationInputType, WorkforceEmployeeBankingInfoInputType, WorkforceSignatureInputType, WorkforceFactoryRegistrationInputType,
-    WorkforceFactoryRegistrationApprovalInputType
+    WorkforceEducationInputType, WorkforceEmployeeBankingInfoInputType, WorkforceSignatureInputType,
+    WorkforceFactoryRegistrationInputType,
+    WorkforceFactoryRegistrationApprovalInputType, WorkforceApplicationBulkUpdateInputType
 )
 from .services.workforce_organization_services import WorkforceOrganizationServices
 from .services.workforce_representative_services import WorkforceRepresentativeServices
@@ -1293,6 +1296,60 @@ class UpdateWorkforceApplicationMovementMutation(BaseHistoryModelCreateMutationM
         return result
 
 
+class WorkforceApplicationBulkUpdateMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "WorkforceApplicationBulkUpdateMutation"
+
+    class Input(OpenIMISMutation.Input):
+        applications = graphene.List(WorkforceApplicationBulkUpdateInputType, required=True)
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_bulk_update_workforce_application"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = WorkforceApplicationServices(user)
+
+        try:
+            if isinstance(user, AnonymousUser) or not user.id:
+                raise ValidationError(_("mutation.authentication_required"))
+
+            if not user.has_perms(required_permission):
+                raise PermissionDenied(_("unauthorized"))
+
+            applications_data = data.get("applications", [])
+            if not applications_data:
+                raise ValidationError(_("No applications provided for bulk update."))
+
+            updated_objects = []
+            errors = []
+
+            for app_data in applications_data:
+                processed_data = {
+                    k: v for k, v in app_data.items()
+                    if k not in ["client_mutation_id", "client_mutation_label"]
+                }
+
+                try:
+                    updated_obj = service_instance.update(processed_data)
+                    updated_objects.append(updated_obj)
+                except Exception as exc:
+                    errors.append({
+                        "id": app_data.get("id"),
+                        "error": str(exc)
+                    })
+
+            if errors:
+                raise ValidationError(f"Some updates failed: {errors}")
+
+            return updated_objects
+
+        except Exception as exc:
+            return [{
+                "message": _(failure_message),
+                "detail": str(exc),
+            }]
+
+
 class CreateWorkforceApplicationSummaryMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
     _mutation_module = mutation_module
     _mutation_class = "CreateWorkforceApplicationSummaryMutation"
@@ -1696,6 +1753,7 @@ class UpdateWorkforceFactoryRegistrationMutation(BaseHistoryModelCreateMutationM
                 'message': _(failure_message),
                 'detail': str(exc)
             }]
+
 
 class ApprovalWorkforceFactoryRegistrationMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
     _mutation_module = mutation_module

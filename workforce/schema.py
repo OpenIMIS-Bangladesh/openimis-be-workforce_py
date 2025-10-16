@@ -1193,6 +1193,7 @@ class Mutation(graphene.ObjectType):
 
     create_workforce_application = CreateWorkforceApplicationMutation.Field()
     update_workforce_application = UpdateWorkforceApplicationMutation.Field()
+    workforce_application_bulk_update = WorkforceApplicationBulkUpdateMutation.Field()
 
     create_workforce_document_type = CreateWorkforceDocumentTypeMutation.Field()
     update_workforce_document_type = UpdateWorkforceDocumentTypeMutation.Field()
