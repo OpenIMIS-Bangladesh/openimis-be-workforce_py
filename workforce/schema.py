@@ -25,6 +25,8 @@ from django.db.models import Sum
 from django.db.models import OuterRef, Subquery
 from django.utils.timezone import now, timedelta
 from workforce.models import WorkforceApplicationMovement
+from workforce.models import WorkforceFactory
+from django.db.models import Q
 
 
 class Query(graphene.ObjectType):
@@ -226,6 +228,11 @@ class Query(graphene.ObjectType):
         day_count=graphene.String(required=False),
     )
 
+    workforce_employer_factories_public = graphene.Field(
+        WorkforceFactoryGQLType,
+        client_mutation_id=graphene.String(required=False),
+    )
+
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("unauthorized"))
@@ -279,6 +286,18 @@ class Query(graphene.ObjectType):
         service = WorkforceFactoryServices(info.context.user)
         query = service.get(**kwargs)
         return gql_optimizer.query(query, info)
+
+    def resolve_workforce_employer_factories_public(self, info, **kwargs):
+        model = WorkforceFactory
+        filters = Q(is_deleted=False)
+
+        client_mutation_id = kwargs.get("client_mutation_id")
+        if client_mutation_id:
+            filters &= Q(json_ext__contains={"client_mutation_id": client_mutation_id})
+
+        instance = model.objects.filter(filters).first()
+        return instance
+
     def resolve_workforce_employer_employees(self, info, **kwargs):
         # if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
         #     raise PermissionDenied(_("Unauthorized access"))

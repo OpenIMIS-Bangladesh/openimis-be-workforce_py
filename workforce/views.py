@@ -9,11 +9,13 @@ from .services.workforce_sms_services import send_sms
 from .models import WorkforceEmployee, generate_otp
 from core.models import InteractiveUser
 import os
+from rest_framework.permissions import AllowAny
 
 
 class FileUploadView(APIView):
     parser_classes = [MultiPartParser, FormParser]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def post(self, request):
         file = request.FILES.get('file')
