@@ -7,7 +7,6 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0031_alter_mutationlog_client_mutation_id'),
         ('workforce', '0198_historicalworkforceapplication_doctors_diagnosis_and_more'),
     ]
 
