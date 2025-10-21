@@ -54,6 +54,7 @@ from .services.workforce_employee_banking_info_services import WorkforceEmployee
 from .services.workforce_signature_services import WorkforceSignatureServices
 from .services.workforce_factory_registration_services import WorkforceFactoryRegistrationServices
 from .services.workforce_factory_registration_services import WorkforceFactoryRegistrationServices
+from .services.workforce_application_bulk_movement_services import WorkforceApplicationBulkMovementServices
 
 
 mutation_module = "workforce"
@@ -92,6 +93,8 @@ def auth_permission_validation(failure_message, required_permission, call_type, 
             return service_instance.update_status(processed_data)
         if call_type == 'approve':
             return service_instance.approve(processed_data)
+        if call_type == 'bulk_forward_to_doctors':
+            return service_instance.bulk_forward_to_doctors(processed_data)
         return None
     except Exception as exc:
         return [{
@@ -1305,49 +1308,35 @@ class WorkforceApplicationBulkUpdateMutation(BaseHistoryModelCreateMutationMixin
 
     @classmethod
     def _mutate(cls, user, **data):
-        failure_message = "workforce.mutation.failed_to_bulk_update_workforce_application"
-        required_permission = WorkforceConfig.gql_query_workforces_perms
-        service_instance = WorkforceApplicationServices(user)
+        applications_data = data.get("applications", [])
+        if not applications_data:
+            raise ValidationError("No applications provided for bulk update.")
 
-        try:
-            if isinstance(user, AnonymousUser) or not user.id:
-                raise ValidationError(_("mutation.authentication_required"))
+        bulk_status = applications_data[0].get("status")
+        app_ids = [app.get("id") for app in applications_data if app.get("id")]
+        results = []
 
-            if not user.has_perms(required_permission):
-                raise PermissionDenied(_("unauthorized"))
+        if bulk_status == "forward_to_doctor":
+            try:
+                from workforce.services.workforce_application_bulk_movement_services import (
+                    WorkforceApplicationBulkMovementServices,
+                )
+                service_instance = WorkforceApplicationBulkMovementServices(user)
+                summary = auth_permission_validation(
+                    failure_message="workforce.mutation.failed_to_bulk_forward",
+                    required_permission=None,
+                    call_type="bulk_forward_to_doctors",
+                    service_instance=service_instance,
+                    user=user,
+                    data={"application_ids": app_ids, "action": bulk_status, "requesting_user": user},
+                )
+                results.append({"bulk_forward_summary": summary})
+            except Exception as e:
+                raise ValidationError([f"Bulk forward failed: {e}"])
+        else:
+            raise ValidationError(f"Unsupported bulk action: {bulk_status}")
 
-            applications_data = data.get("applications", [])
-            if not applications_data:
-                raise ValidationError(_("No applications provided for bulk update."))
-
-            updated_objects = []
-            errors = []
-
-            for app_data in applications_data:
-                processed_data = {
-                    k: v for k, v in app_data.items()
-                    if k not in ["client_mutation_id", "client_mutation_label"]
-                }
-
-                try:
-                    updated_obj = service_instance.update(processed_data)
-                    updated_objects.append(updated_obj)
-                except Exception as exc:
-                    errors.append({
-                        "id": app_data.get("id"),
-                        "error": str(exc)
-                    })
-
-            if errors:
-                raise ValidationError(f"Some updates failed: {errors}")
-
-            return updated_objects
-
-        except Exception as exc:
-            return [{
-                "message": _(failure_message),
-                "detail": str(exc),
-            }]
+        return results
 
 
 class CreateWorkforceApplicationSummaryMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):

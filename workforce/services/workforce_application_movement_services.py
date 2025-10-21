@@ -13,4 +13,9 @@ class WorkforceApplicationMovementServices(BaseService):
         return super().create(obj_data)
 
     def update(self, obj_data):
+        status = obj_data.get("status")
+        if status == "forward_to_doctor":
+            print("=================?")
+            print("{condition met, ignoring....")
+            pass
         return super().update(obj_data)

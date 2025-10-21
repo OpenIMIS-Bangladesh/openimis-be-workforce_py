@@ -1,6 +1,6 @@
 from django.db import models
 from core.models import HistoryModel, InteractiveUser
-from core.models.user import UserRole
+from core.models.user import UserRole, Role
 from location.models import Location
 from django.utils import timezone
 from datetime import timedelta
@@ -908,14 +908,14 @@ class WorkforceApplicationMovement(HistoryModel):
         related_name="to_office_designation",
     )
     from_role = models.ForeignKey(
-        UserRole,
+        Role,
         models.DO_NOTHING,
         blank=True,
         null=True,
         related_name="from_role",
     )
     to_role = models.ForeignKey(
-        UserRole,
+        Role,
         models.DO_NOTHING,
         blank=True,
         null=True,
