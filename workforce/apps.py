@@ -146,6 +146,11 @@ DEFAULT_CFG = {
      # WorkforceBlwfDOL/DIFE (812xxx)
     "gql_workforce_blwf_dol_dife_perms": ["813008"],
 
+     # WorkforceBepzaAssociation (821xxx)
+    "gql_workforce_bepza_association_perms": ["813009"],
+
+     # WorkforceLfmeaAssociation (821xxx)
+    "gql_workforce_lfmeab_association_perms": ["814000"],
 
     "default_validations_disabled": False,
 }
@@ -295,6 +300,12 @@ class WorkforceConfig(AppConfig):
 
      # WorkforceBlwfDOL/DIFE (xxx)
     gql_workforce_blwf_dol_dife_perms = []
+
+     # WorkforceBepzaAssociation (xxx)
+    gql_workforce_bepza_association_perms = []
+
+     # WorkforceLfmeaAssociation (xxx)
+    gql_workforce_lfmeab_association_perms = []
 
     default_validations_disabled = None
 
