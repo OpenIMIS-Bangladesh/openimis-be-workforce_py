@@ -533,6 +533,7 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "doctors_diagnosis": ["exact"],
             "doctors_recommended_donation": ["exact"],
             "doctors_flag": ["exact"],
+            "doctors_flag_note": ["exact"],
         }
         connection_class = ExtendedConnection
 

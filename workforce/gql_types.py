@@ -376,6 +376,7 @@ class WorkforceApplicationInputType(OpenIMISMutation.Input):
     doctors_diagnosis = graphene.String()
     doctors_recommended_donation = graphene.String()
     doctors_flag = graphene.String()
+    doctors_flag_note = graphene.String()
     status = graphene.String()
 
 
