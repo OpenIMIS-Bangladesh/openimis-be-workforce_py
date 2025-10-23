@@ -19,7 +19,7 @@ _DOCTOR_APP_TYPES = {
 }
 
 _ORG_ROLE_MAP = {
-    "cf": "cf_doctor",
+    "cf": "doctor",
     "blwf": "blwf_doctor",
     "eis": "eis_doctor",
 }
