@@ -201,6 +201,7 @@ class WorkforceApplicationServices(BaseService):
             new_data = obj_data.copy()
             new_data["organization_type"] = "eis"
             new_data["status"] = "forward_to_eis_coordinator"
+            new_data["tracking_number"] = application_instance.tracking_number
             new_data.pop("id", None)
 
             # Create the second application
@@ -209,6 +210,100 @@ class WorkforceApplicationServices(BaseService):
             # Get eis application instance
             application_eis_id = application_eis.get("data", {}).get("id")
             application_eis_instance = WorkforceApplication.objects.get(id=application_eis_id)
+
+            # Auto move eis application
+            """
+            ********************************************
+                        Hot Fix Start
+            ********************************************
+            """
+            from django.apps import apps
+            from django.utils import timezone
+            from core.models import Role
+            import uuid
+            import re
+
+            WorkforceApplicationMovement = apps.get_model("workforce", "WorkforceApplicationMovement")
+            UserRole = apps.get_model("core", "UserRole")
+            User = apps.get_model("core", "User")
+
+            user_str = str(self.user)
+            match = re.search(r"\[([0-9a-fA-F-]{36})\]", user_str)
+            user_created_uuid = match.group(1) if match else None
+            core_user_obj = User.objects.get(id=user_created_uuid)
+            application_from = core_user_obj.i_user_id
+
+            action = "forward_to_eis_coordinator"
+            status = "forward_to_eis_coordinator"
+            role_name = "Eis Coordinator"
+
+            # Get the Role instance
+            try:
+                role_instance = Role.objects.get(name=role_name)
+            except Role.DoesNotExist:
+                raise ValidationError(f"Role '{role_name}' not found in core_role table.")
+
+            # Get the user(s) associated with that Role
+            eis_user_ids = list(
+                UserRole.objects.filter(role__name=role_name)
+                .values_list("user_id", flat=True)
+                .distinct()
+            )
+
+            if not eis_user_ids:
+                raise ValidationError(f"No users found for role '{role_name}'.")
+
+            # Since only one user should have this role, take the first
+            eis_coordinator = eis_user_ids[0]
+
+            # Validate the user instance
+            try:
+                user_instance = User.objects.get(id=user_created_uuid)
+            except User.DoesNotExist:
+                raise ValidationError(f"User with UUID {user_created_uuid} does not exist.")
+
+            now = timezone.now()
+
+            # Start from obj_data copy
+            movement_data = obj_data.copy()
+
+            # Remove known unwanted fields
+            for field in ["id", "grant_money_id", "grant_amount"]:
+                movement_data.pop(field, None)
+
+            # Keep only fields that exist in WorkforceApplicationMovement
+            movement_model_fields = {f.name for f in WorkforceApplicationMovement._meta.get_fields()}
+            movement_data = {k: v for k, v in movement_data.items() if k in movement_model_fields}
+
+            # Add/override with required movement fields
+            movement_data.update({
+                "id": uuid.uuid4(),
+                "is_deleted": False,
+                "json_ext": {},
+                "date_created": now,
+                "date_updated": now,
+                "version": 1,
+                "note": "আবেদন ইআইএস কোঅর্ডিনেটর শাখায় প্রেরণ করা হয়েছে",
+                "action": action,
+                "status": status,
+                "application_id": application_eis_instance.id,
+                "user_created": user_instance,
+                "user_updated": user_instance,
+                "application_from_id": application_from,
+                "application_to_id": eis_coordinator,
+                "to_role": role_instance,
+            })
+
+            # Create and save
+            movement = WorkforceApplicationMovement(**movement_data)
+
+            movement.save(username=core_user_obj.username)
+
+            """
+            ********************************************
+                            Hot Fix End
+            ********************************************
+            """
         else:
             application_eis_instance = None
 
@@ -292,86 +387,6 @@ class WorkforceApplicationServices(BaseService):
                 logger.error(f"Error while updating dependents: {e}")
                 raise ValidationError("Failed to update dependents.")
 
-        # Auto move eis application
-        """
-        ********************************************
-                    Hot Fix Start
-        ********************************************
-        """
-        from django.apps import apps
-        from django.utils import timezone
-        from core.models import Role
-        import uuid
-        import re
-
-        WorkforceApplicationMovement = apps.get_model("workforce", "WorkforceApplicationMovement")
-        UserRole = apps.get_model("core", "UserRole")
-        User = apps.get_model("core", "User")
-
-        user_str = str(self.user)
-        match = re.search(r"\[([0-9a-fA-F-]{36})\]", user_str)
-        user_created_uuid = match.group(1) if match else None
-        core_user_obj = User.objects.get(id=user_created_uuid)
-        application_from = core_user_obj.i_user_id
-
-        action = "forward_to_eis_coordinator"
-        status = "forward_to_eis_coordinator"
-        role_name = "Eis Coordinator"
-
-        # Get the Role instance
-        try:
-            role_instance = Role.objects.get(name=role_name)
-        except Role.DoesNotExist:
-            raise ValidationError(f"Role '{role_name}' not found in core_role table.")
-
-        # Get the user(s) associated with that Role
-        eis_user_ids = list(
-            UserRole.objects.filter(role__name=role_name)
-            .values_list("user_id", flat=True)
-            .distinct()
-        )
-
-        if not eis_user_ids:
-            raise ValidationError(f"No users found for role '{role_name}'.")
-
-        # Since only one user should have this role, take the first
-        eis_coordinator = eis_user_ids[0]
-
-        # Validate the user instance
-        try:
-            user_instance = User.objects.get(id=user_created_uuid)
-        except User.DoesNotExist:
-            raise ValidationError(f"User with UUID {user_created_uuid} does not exist.")
-
-        now = timezone.now()
-
-        # Create single movement
-        movement = WorkforceApplicationMovement(
-            id=uuid.uuid4(),
-            is_deleted=False,
-            json_ext={},
-            date_created=now,
-            date_updated=now,
-            version=1,
-            note="আবেদন ইআইএস কোঅর্ডিনেটর শাখায় প্রেরণ করা হয়েছে",
-            action=action,
-            status=status,
-            application_id=application_eis_instance,
-            user_created=user_instance,
-            user_updated=user_instance,
-            application_from_id=application_from,
-            application_to_id=eis_coordinator,
-            to_role=role_instance
-        )
-
-        movement.save()
-
-        """
-        ********************************************
-                        Hot Fix Start
-        ********************************************
-        """
-
         # Handle association_type + factory docs
         if application_status == "new":
             employee_factory_id = application_instance.employee_factory_id
@@ -417,7 +432,8 @@ class WorkforceApplicationServices(BaseService):
                         remarks=doc.remarks,
                         status=doc.status or "active",
                         user_created_id=self.user.id,
-                        user_updated_id=self.user.id
+                        user_updated_id=self.user.id,
+
                     )
                     new_doc.save(username=self.user.username)
 
