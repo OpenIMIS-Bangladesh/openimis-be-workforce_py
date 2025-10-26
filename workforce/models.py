@@ -1225,3 +1225,22 @@ class WorkforcePostoffice(models.Model):
     class Meta:
         managed = True
         db_table = 'workforce_postoffice'
+
+
+class WorkforceAssociation(HistoryModel):
+    office_name_bn = models.CharField(max_length=512, null=True, blank=True)
+    office_name_en = models.CharField(max_length=512, null=True, blank=True)
+    jurisdiction_locations = models.CharField(max_length=512, null=True, blank=True)
+    association_type = models.CharField(max_length=50, null=True, blank=True)
+    office_admin = models.ForeignKey(
+        WorkforceOrganizationEmployee,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="association_organization_employee",
+    )
+    status = models.CharField(max_length=30, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_association'
