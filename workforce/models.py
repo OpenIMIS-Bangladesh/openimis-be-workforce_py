@@ -147,14 +147,14 @@ class WorkforceOrganizationUnitDesignation(HistoryModel):
 
 class WorkforceOrganizationEmployee(HistoryModel):
     name_bn = models.CharField(
-        max_length=255, db_comment='Translatable name field. May use any language')
-    name_en = models.CharField(max_length=255, db_comment='English name field')
+        max_length=255, db_comment='Translatable name field. May use any language', null=True, blank=True)
+    name_en = models.CharField(max_length=255, db_comment='English name field', null=True, blank=True)
     gender = models.CharField(max_length=30, null=True, blank=True)
     location = models.ForeignKey(
         Location,
         models.DO_NOTHING,
-        blank=False,
-        null=False
+        blank=True,
+        null=True
     )
     address = models.TextField(null=True, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
