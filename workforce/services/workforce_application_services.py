@@ -8,7 +8,7 @@ from workforce.models import (
     WorkforceEmployeeBankingInfo, WorkforceDocument, WorkforceFactory
 )
 from django.db.models import Q
-
+from django.db import models
 logger = logging.getLogger(__name__)
 
 
@@ -160,52 +160,58 @@ class WorkforceApplicationServices(BaseService):
 
     def update(self, obj_data):
         application = super().update(obj_data)
-
+        application_status = obj_data.get("status")
         application_id = obj_data.get("id")
-        application_status = obj_data.get("status", [])
-        application_type = obj_data.get("application_type")
-        organization_type = obj_data.get("organization_type")
         status = obj_data.get("status")
         user_id = self.user.id
 
+        # Fetch the complete instance after update
         try:
             application_instance = WorkforceApplication.objects.get(id=application_id)
         except WorkforceApplication.DoesNotExist:
-            raise ValidationError("Invalid application ID provided.")
+            raise Exception(f"Application with id {application_id} not found")
 
-        # # create eis application
-        # application_eis_instance = None
-        # if organization_type == "cf" and application_type in ["disabilityAssistance", "financialAssistance"] and status == 'forward_to_cf_section':
-        #     application_eis_instance = WorkforceApplication.objects.filter(
-        #         tracking_number=application_instance.tracking_number,
-        #         organization_type="eis"
-        #     ).first()
-        #
-        #     new_data = obj_data.copy()
-        #     new_data["organization_type"] = "eis"
-        #     new_data["id"] = application_eis_instance.id if application_eis_instance else None
-        #
-        #     if application_eis_instance:
-        #         # Update eis data
-        #         application_eis = super().update(new_data)
-        #         application_eis_id = application_eis.get("data", {}).get("id")
-        #         application_eis_instance = WorkforceApplication.objects.get(id=application_eis_id)
-        #     else:
-        #         raise ValidationError(
-        #             "EIS application not found for this CF application."
-        #         )
+        organization_type = application_instance.organization_type
+        application_type = application_instance.application_type
 
-        # clone cf application for eis
-        if organization_type == "cf" and application_type in ["disabilityAssistance", "financialAssistance"] and status == 'forward_to_cf_section':
-            # Clone obj_data for second application
-            new_data = obj_data.copy()
-            new_data["organization_type"] = "eis"
-            new_data["status"] = "forward_to_eis_coordinator"
-            new_data["tracking_number"] = application_instance.tracking_number
-            new_data.pop("id", None)
+        # Condition for cloning to EIS
+        if (
+                organization_type == "cf"
+                and application_type in ["disabilityAssistance", "financialAssistance"]
+                and status == "forward_to_cf_section"
+        ):
+            print("==============> In Condition <==================================")
 
-            # Create the second application
-            application_eis = super().create(new_data)
+            # Build full data dict including FK IDs and JSON fields
+            existing_data = {}
+            for field in application_instance._meta.get_fields():
+                if isinstance(field, (models.ManyToOneRel, models.ManyToManyRel)):
+                    continue  # skip reverse relations
+
+                field_name = field.name
+
+                if field.is_relation:
+                    existing_data[f"{field_name}_id"] = getattr(application_instance, f"{field_name}_id", None)
+                else:
+                    existing_data[field_name] = getattr(application_instance, field_name)
+
+            # Remove primary key and other non-clone fields
+            existing_data.pop("id", None)
+            existing_data.pop("uuid", None)
+            existing_data.pop("validity_from", None)
+            existing_data.pop("validity_to", None)
+            existing_data.pop("association_type", None)
+            existing_data.pop("grant_amount", None)
+            existing_data.pop("grant_money_id", None)
+
+            # Override specific fields for the new clone
+            existing_data["version"] = 1
+            existing_data["organization_type"] = "eis"
+            existing_data["status"] = "forward_to_eis_coordinator"
+            existing_data["tracking_number"] = application_instance.tracking_number
+
+            # Create new application
+            application_eis = super().create(existing_data)
 
             # Get eis application instance
             application_eis_id = application_eis.get("data", {}).get("id")
