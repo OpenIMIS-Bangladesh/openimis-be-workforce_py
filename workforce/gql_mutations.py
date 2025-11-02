@@ -22,6 +22,7 @@ from .gql_types import (
     WorkforceFactoryRegistrationInputType,
     WorkforceFactoryRegistrationApprovalInputType, WorkforceApplicationBulkUpdateInputType
 )
+from .models import WorkforceEmployeeDependent
 from .services.workforce_organization_services import WorkforceOrganizationServices
 from .services.workforce_representative_services import WorkforceRepresentativeServices
 from .services.workforce_organization_unit_services import WorkforceOrganizationUnitServices
@@ -95,6 +96,8 @@ def auth_permission_validation(failure_message, required_permission, call_type, 
             return service_instance.approve(processed_data)
         if call_type == 'bulk_forward_to_doctors':
             return service_instance.bulk_forward_to_doctors(processed_data)
+        if call_type == 'update_eligibility':
+            return service_instance.update_eligibility(processed_data)
         return None
     except Exception as exc:
         return [{
@@ -1767,3 +1770,44 @@ class ApprovalWorkforceFactoryRegistrationMutation(BaseHistoryModelCreateMutatio
         )
 
         return result
+
+
+class UpdateWorkforceDependentEligibilityMutation(graphene.Mutation):
+    class Arguments:
+        workforce_application_id = graphene.String(required=True)
+
+    status = graphene.String()
+    data = graphene.Field(lambda: graphene.JSONString)
+    message = graphene.String()
+
+    @classmethod
+    def mutate(cls, root, info, workforce_application_id):
+        user = info.context.user if hasattr(info.context, 'user') else None
+        service_instance = WorkforceEmployeeDependentServices(user)
+        update_eligibility = service_instance.update_eligibility(workforce_application_id)
+        message= ""
+        if update_eligibility["status"]:
+            status = "success"
+            response_data = {
+                "id": str(workforce_application_id),
+                "user_id": str(user.id) if user else None
+            }
+            message = "Update Successfully"
+        else:
+            status = "error"
+            response_data = {
+                "id": str(workforce_application_id),
+                "user_id": str(user.id) if user else None
+            }
+            message = update_eligibility["error"]
+
+        return UpdateWorkforceDependentEligibilityMutation(
+            status=status,
+            data=response_data,
+            message=message
+        )
+
+
+
+
+

@@ -1200,6 +1200,7 @@ class Mutation(graphene.ObjectType):
 
     create_workforce_employee_dependent = CreateWorkforceEmployeeDependentMutation.Field()
     update_workforce_employee_dependent = UpdateWorkforceEmployeeDependentMutation.Field()
+    update_workforce_employee_dependent_eligibility = UpdateWorkforceDependentEligibilityMutation.Field()
 
     create_workforce_employee_designation = CreateWorkforceEmployeeDesignationMutation.Field()
     update_workforce_employee_designation = UpdateWorkforceEmployeeDesignationMutation.Field()

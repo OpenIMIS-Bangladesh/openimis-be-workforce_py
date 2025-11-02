@@ -582,10 +582,12 @@ class WorkforceEmployeeDependent(HistoryModel):
     life_status = models.CharField(max_length=30, null=True, blank=True)
     death_date = models.DateField(null=True, blank=True)
     disability_status = models.CharField(max_length=30, null=True, blank=True)
+    disability_type = models.TextField(null=True, blank=True)
     relation_with_worker = models.CharField(
         max_length=50, null=True, blank=True)
     last_verification_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
+    isEligible= models.BooleanField(default=False)
 
     class Meta:
         managed = True

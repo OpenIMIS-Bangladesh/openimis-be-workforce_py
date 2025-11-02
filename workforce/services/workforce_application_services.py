@@ -125,7 +125,10 @@ class WorkforceApplicationServices(BaseService):
                         permanent_address=dep.get("permanentAddress"),
                         user_created_id=user_id,
                         user_updated_id=user_id,
-                        status="active"
+                        status="active",
+                        relation_with_worker= dep.get("relationType"),
+                        disability_status= dep.get("isDisabled"),
+                        disability_type = dep.get("disabilityType") if "disabilityType" in dep else None
                     )
                     dep_instance.save(username=self.user.username)
 
@@ -361,7 +364,10 @@ class WorkforceApplicationServices(BaseService):
                         permanent_address=dep.get("permanentAddress"),
                         user_created_id=user_id,
                         user_updated_id=user_id,
-                        status="active"
+                        status="active",
+                        relation_with_worker = dep.get("relationType"),
+                        disability_status = dep.get("isDisabled"),
+                        disability_type = dep.get("disabilityType") if "disabilityType" in dep else None
                     )
                     dep_instance.save(username=self.user.username)
 
@@ -385,7 +391,10 @@ class WorkforceApplicationServices(BaseService):
                             permanent_address=dep.get("permanentAddress"),
                             user_created_id=user_id,
                             user_updated_id=user_id,
-                            status="active"
+                            status="active",
+                            relation_with_worker=dep.get("relationType"),
+                            disability_status=dep.get("isDisabled"),
+                            disability_type=dep.get("disabilityType") if "disabilityType" in dep else None
                         )
                         dep_instance_eis.save(username=self.user.username)
 
