@@ -195,6 +195,7 @@ class WorkforceOrganizationEmployeeGQLType(DjangoObjectType):
             "first_joining_date": ["exact"],
             "status": ["exact", "isnull"],
             "related_user": ["exact"],
+            "association_id": ["exact"],
             **prefix_filterset("location__", LocationGQLType._meta.filter_fields),
             **prefix_filterset("designations__",
                                WorkforceOrganizationEmployeeDesignationForEmployeeGQLType._meta.filter_fields),

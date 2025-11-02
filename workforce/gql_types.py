@@ -75,6 +75,7 @@ class WorkforceOrganizationEmployeeInputType(OpenIMISMutation.Input):
     first_joining_date = graphene.String()
     status = graphene.String()
     related_user_id = graphene.UUID(required=False)
+    association_id = graphene.UUID(required=False)
 
 
 class WorkforceOrganizationEmployeeDesignationInputType(OpenIMISMutation.Input):

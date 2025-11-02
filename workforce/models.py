@@ -172,6 +172,13 @@ class WorkforceOrganizationEmployee(HistoryModel):
         blank=False,
         null=False
     )
+    association = models.ForeignKey(
+        "WorkforceAssociation",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="organization_employee_association"
+    )
 
     class Meta:
         managed = True

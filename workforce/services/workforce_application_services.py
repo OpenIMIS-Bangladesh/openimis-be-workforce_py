@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned, ValidationError
 from core.services import BaseService
@@ -7,7 +8,14 @@ from workforce.models import (
     WorkforceApplication, WorkforceGrantMoney, WorkforceEmployee, WorkforceEmployeeDependent,
     WorkforceEmployeeBankingInfo, WorkforceDocument, WorkforceFactory
 )
+from workforce.models import WorkforceAssociation, WorkforceOrganizationEmployee
+from .helper_service import application_movement_to_dol_dife_admin
 from django.db.models import Q
+from django.apps import apps
+from django.utils import timezone
+from core.models import Role
+import uuid
+
 from django.db import models
 logger = logging.getLogger(__name__)
 
@@ -183,7 +191,6 @@ class WorkforceApplicationServices(BaseService):
                 and application_type in ["disabilityAssistance", "financialAssistance"]
                 and status == "forward_to_cf_section"
         ):
-            print("==============> In Condition <==================================")
 
             # Build full data dict including FK IDs and JSON fields
             existing_data = {}
@@ -226,11 +233,6 @@ class WorkforceApplicationServices(BaseService):
                         Hot Fix Start
             ********************************************
             """
-            from django.apps import apps
-            from django.utils import timezone
-            from core.models import Role
-            import uuid
-            import re
 
             WorkforceApplicationMovement = apps.get_model("workforce", "WorkforceApplicationMovement")
             UserRole = apps.get_model("core", "UserRole")
@@ -451,5 +453,48 @@ class WorkforceApplicationServices(BaseService):
 
                     )
                     new_doc.save(username=self.user.username)
+
+        if application_status == 'new' and organization_type == 'blwf':
+
+            application_id_for_movement = obj_data.get("id")
+            application_instance = WorkforceApplication.objects.get(id=application_id_for_movement)
+            employee = application_instance.workforce_employee
+            present_location = employee.present_location
+            applicant_location = None
+
+            if present_location:
+                location = present_location
+                while location:
+                    if location.type == 'D':  # Found a 'District'-type location
+                        applicant_location = location.id
+                        break
+                    location = location.parent
+
+            association = None
+            for assoc in WorkforceAssociation.objects.filter(association_type='dife'):
+                if assoc.jurisdiction_locations:
+                    # Split jurisdiction_locations string into list of IDs
+                    loc_ids = [loc_id.strip() for loc_id in assoc.jurisdiction_locations.split(',')]
+                    if str(applicant_location) in loc_ids:
+                        association = assoc
+                        break
+
+            if not association:
+                raise ValueError(f"No DIFE association found for location {applicant_location}")
+
+            emp_obj = WorkforceOrganizationEmployee.objects.filter(association_id=association.id).first()
+
+            if not emp_obj:
+                raise ValueError(f"No WorkforceOrganizationEmployee found for association_id={association.id}")
+
+            application_to = emp_obj.related_user_id
+            user_str = str(self.user)
+            status = 'new'
+            action = 'forward_to_dife_admin'
+            role_name = 'blwf_dol_dife'
+
+            application_movement_to_dol_dife_admin(
+                application_id_for_movement, status, action, role_name, user_str, application_to
+            )
 
         return application

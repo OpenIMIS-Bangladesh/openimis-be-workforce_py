@@ -9,6 +9,7 @@ from django.utils import timezone
 from core.models import Role
 from core.services import BaseService
 
+now = timezone.now()
 
 WorkforceApplication = apps.get_model("workforce", "WorkforceApplication")
 WorkforceApplicationMovement = apps.get_model("workforce", "WorkforceApplicationMovement")
@@ -39,23 +40,29 @@ def clean_dependents_data(dependents_data):
     return [dep for dep in dependents_data if is_valid_dependent(dep)]
 
 
-# def role_based_application_movement(application_id, action):
-#     now = timezone.now()
-#
-#     movement = WorkforceApplicationMovement(
-#         id=uuid.uuid4(),
-#         is_deleted=False,
-#         json_ext={},
-#         date_created=now,
-#         date_updated=now,
-#         version=1,
-#         note="আবেদন ডক্টরের কাছে প্রেরণ করা হয়েছে",
-#         action=action,
-#         status=action,
-#         application_id=uuid.UUID(str(application_id)),
-#         user_created=user_instance,
-#         user_updated=user_instance,
-#         application_from_id=application_from,
-#         application_to_id=doc_id,
-#         to_role=role_instance
-#     )
+def application_movement_to_dol_dife_admin(application_id, status, action, role_name, user_str, application_to):
+
+    match = re.search(r"\[([0-9a-fA-F-]{36})\]", user_str)
+    user_created_uuid = match.group(1) if match else None
+    user_instance = User.objects.get(id=user_created_uuid)
+    core_user_obj = User.objects.get(id=user_created_uuid)
+    application_from = core_user_obj.i_user_id
+    role_instance = Role.objects.get(name=role_name)
+
+    movement = WorkforceApplicationMovement(
+        id=uuid.uuid4(),
+        is_deleted=False,
+        json_ext={},
+        date_created=now,
+        date_updated=now,
+        note="",
+        action=action,
+        status=status,
+        application_id=uuid.UUID(str(application_id)),
+        user_created=user_instance,
+        user_updated=user_instance,
+        application_from_id=application_from,
+        application_to_id=application_to,
+        to_role=role_instance
+    )
+    movement.save(username=core_user_obj.username)
