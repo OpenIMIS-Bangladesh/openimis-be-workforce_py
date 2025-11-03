@@ -273,51 +273,54 @@ class WorkforceApplicationServices(BaseService):
 
         # ================================================================
         # 3. Handle association_type + factory docs
+        # Patch this part later as broad condition may cause documents to duplicate
         # ================================================================
-        if application_status == "new":
-            employee_factory_id = application_instance.employee_factory_id
-            factory = WorkforceFactory.objects.filter(id=employee_factory_id).first()
-            association_type = factory.association_type if factory else None
+        try:
+            if application_status == "new":
+                employee_factory_id = application_instance.employee_factory_id
+                factory = WorkforceFactory.objects.filter(id=employee_factory_id).first()
+                association_type = factory.association_type if factory else None
 
-            if association_type:
-                application_instance.association_type = association_type
-                application_instance.save(
-                    username=self.user.username,
-                    update_fields=["association_type"]
-                )
-                if application_eis_instance:
-                    application_eis_instance.association_type = association_type
-                    application_eis_instance.save(
+                if association_type:
+                    application_instance.association_type = association_type
+                    application_instance.save(
                         username=self.user.username,
                         update_fields=["association_type"]
                     )
+                    if application_eis_instance:
+                        application_eis_instance.association_type = association_type
+                        application_eis_instance.save(
+                            username=self.user.username,
+                            update_fields=["association_type"]
+                        )
 
-            # Copy factory documents
-            if employee_factory_id:
                 factory_documents = WorkforceDocument.objects.filter(factory_id=employee_factory_id)
-                for doc in factory_documents:
-                    holder_type = "dependent" if doc.workforce_dependent_id else "applicant"
-                    new_doc = WorkforceDocument(
-                        workforce_application=application_instance,
-                        holder=doc.holder,
-                        holder_type=holder_type,
-                        verifier=doc.verifier,
-                        approver=doc.approver,
-                        workforce_document_type=doc.workforce_document_type,
-                        workforce_dependent=doc.workforce_dependent,
-                        note=doc.note,
-                        document_type=doc.document_type,
-                        path=doc.path,
-                        url=doc.url,
-                        submission_date=doc.submission_date,
-                        verification_date=doc.verification_date,
-                        approval_date=doc.approval_date,
-                        remarks=doc.remarks,
-                        status=doc.status or "active",
-                        user_created_id=self.user.id,
-                        user_updated_id=self.user.id,
-                    )
-                    new_doc.save(username=self.user.username)
+                if factory_documents.exists():
+                    for doc in factory_documents:
+                        holder_type = "dependent" if doc.workforce_dependent_id else "applicant"
+                        new_doc = WorkforceDocument(
+                            workforce_application=application_instance,
+                            holder=doc.holder,
+                            holder_type=holder_type,
+                            verifier=doc.verifier,
+                            approver=doc.approver,
+                            workforce_document_type=doc.workforce_document_type,
+                            workforce_dependent=doc.workforce_dependent,
+                            note=doc.note,
+                            document_type=doc.document_type,
+                            path=doc.path,
+                            url=doc.url,
+                            submission_date=doc.submission_date,
+                            verification_date=doc.verification_date,
+                            approval_date=doc.approval_date,
+                            remarks=doc.remarks,
+                            status=doc.status or "active",
+                            user_created_id=self.user.id,
+                            user_updated_id=self.user.id,
+                        )
+                        new_doc.save(username=self.user.username)
+        except Exception as e:
+            logger.error(f"Error in Step 3 (association_type/factory docs): {e}")
 
         # ================================================================
         # 4. Handle BLWF new application movement to DIFE admin
@@ -362,6 +365,41 @@ class WorkforceApplicationServices(BaseService):
                 user_str=str(self.user),
                 application_to=application_to,
                 note=""
+            )
+
+        # ================================================================
+        # 5. Handle CF and EIS new application movement to Factory Admin
+        # ================================================================
+        if application_status == 'new' and organization_type in ['cf', 'eis']:
+            application_id_for_movement = obj_data.get("id")
+            application_instance = WorkforceApplication.objects.get(id=application_id_for_movement)
+
+            application_to = None
+            try:
+                if application_instance.employee_factory_id:
+                    factory = WorkforceFactory.objects.filter(id=application_instance.employee_factory_id).first()
+                    if factory and factory.workforce_representative_id:
+                        representative = factory.workforce_representative
+                        application_to = representative.related_user_id
+            except Exception as e:
+                logger.error(
+                    f"Failed to resolve Factory Representative for Application {application_id_for_movement}: {e}")
+                application_to = None
+
+            if not application_to:
+                raise ValueError(
+                    f"No Factory Representative (related_user_id) found for factory ID "
+                    f"{application_instance.employee_factory_id}"
+                )
+            # Create movement to Factory Admin
+            create_application_movement(
+                application_id=application_id_for_movement,
+                status='new',
+                action='forward_to_factory_admin',
+                role_name='Factory Admin',
+                user_str=str(self.user),
+                application_to=application_to,
+                note="আবেদন ফ্যাক্টরি অ্যাডমিন এর নিকট প্রেরণ করা হয়েছে"
             )
 
         return application
