@@ -2,13 +2,10 @@ import re
 import uuid
 import logging
 from django.apps import apps
-from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils import timezone
-
 from core.models import Role
-from core.services import BaseService
-
+logger = logging.getLogger(__name__)
 now = timezone.now()
 
 WorkforceApplication = apps.get_model("workforce", "WorkforceApplication")
@@ -19,17 +16,7 @@ User = apps.get_model("core", "User")
 
 def clean_dependents_data(dependents_data):
     """
-    Filters out completely empty items from dependents_data.
-
-    Considered invalid (and removed):
-        - Empty dicts: [{}]
-        - Non-dict types like [{""}], [{" "}]
-
-    Considered valid (and kept):
-        - Dicts with at least one key, even if value is empty (e.g., [{"name": ""}])
-
-    :param dependents_data: list of dependent objects
-    :return: cleaned list, or empty list if nothing valid
+    Filters out empty or invalid dependents from dependents_data.
     """
     if not isinstance(dependents_data, list):
         return []
@@ -40,29 +27,91 @@ def clean_dependents_data(dependents_data):
     return [dep for dep in dependents_data if is_valid_dependent(dep)]
 
 
-def application_movement_to_dol_dife_admin(application_id, status, action, role_name, user_str, application_to):
+def create_application_movement(
+    *,
+    application_id,
+    status,
+    action,
+    role_name,
+    user_str,
+    note="",
+    application_to=None
+):
+    """
+    Generic application movement creator.
 
-    match = re.search(r"\[([0-9a-fA-F-]{36})\]", user_str)
-    user_created_uuid = match.group(1) if match else None
-    user_instance = User.objects.get(id=user_created_uuid)
-    core_user_obj = User.objects.get(id=user_created_uuid)
-    application_from = core_user_obj.i_user_id
-    role_instance = Role.objects.get(name=role_name)
+    Parameters
+    ----------
+    application_id : UUID or str
+        ID of the WorkforceApplication
+    status : str
+        Status for the movement
+    action : str
+        Action for the movement
+    role_name : str
+        Target role name (must exist in Role)
+    user_str : str
+        Logged-in user string (to extract UUID)
+    note : str, optional
+        Movement note
+    application_to : UUID or int, optional
+        Target user ID (if None, will be auto-resolved from role)
 
-    movement = WorkforceApplicationMovement(
-        id=uuid.uuid4(),
-        is_deleted=False,
-        json_ext={},
-        date_created=now,
-        date_updated=now,
-        note="",
-        action=action,
-        status=status,
-        application_id=uuid.UUID(str(application_id)),
-        user_created=user_instance,
-        user_updated=user_instance,
-        application_from_id=application_from,
-        application_to_id=application_to,
-        to_role=role_instance
-    )
-    movement.save(username=core_user_obj.username)
+    Returns
+    -------
+    WorkforceApplicationMovement instance
+    """
+    try:
+        # Extract the logged-in user's UUID
+        match = re.search(r"\[([0-9a-fA-F-]{36})\]", user_str)
+        user_created_uuid = match.group(1) if match else None
+
+        if not user_created_uuid:
+            raise ValidationError("Cannot extract user UUID from user string.")
+
+        user_instance = User.objects.get(id=user_created_uuid)
+        core_user_obj = user_instance
+        application_from = core_user_obj.i_user_id
+
+        # Resolve role
+        try:
+            role_instance = Role.objects.get(name=role_name)
+        except Role.DoesNotExist:
+            raise ValidationError(f"Role '{role_name}' not found in core_role table.")
+
+        # If target user not provided, try to resolve automatically based on role.from
+        # Applicable for doctors and more
+        if not application_to:
+            user_ids = (
+                UserRole.objects.filter(role=role_instance)
+                .values_list("user_id", flat=True)
+                .distinct()
+            )
+            if not user_ids:
+                raise ValidationError(f"No users found for role '{role_name}'.")
+            application_to = user_ids[0]
+
+        # Create movement
+        movement = WorkforceApplicationMovement(
+            id=uuid.uuid4(),
+            is_deleted=False,
+            json_ext={},
+            date_created=now,
+            date_updated=now,
+            note=note or "",
+            action=action,
+            status=status,
+            application_id=uuid.UUID(str(application_id)),
+            user_created=user_instance,
+            user_updated=user_instance,
+            application_from_id=application_from,
+            application_to_id=application_to,
+            to_role=role_instance,
+        )
+        movement.save(username=core_user_obj.username)
+        logger.info(f"Movement created for application {application_id} -> {role_name}")
+        return movement
+
+    except Exception as e:
+        logger.error(f"Error while creating movement for {application_id}: {e}")
+        raise ValidationError(f"Failed to create movement: {str(e)}")
