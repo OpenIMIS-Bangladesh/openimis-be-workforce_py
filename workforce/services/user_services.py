@@ -7,7 +7,7 @@ from django.db.models import Q
 def create_interactive_user(last_name, other_names, login_name, role_id):
     user = InteractiveUser.objects.create(
         **{
-            "language_id": "en",
+            "language_id": "fr",
             "last_name": last_name,
             "other_names": other_names,
             "login_name": login_name,
