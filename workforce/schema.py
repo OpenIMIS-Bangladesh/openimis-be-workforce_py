@@ -235,7 +235,7 @@ class Query(graphene.ObjectType):
 
     workforce_interactive_user = graphene.Field(
         WorkforceInteractiveUserGQLType,
-        id=graphene.Int(required=True),
+        id=graphene.String(required=True),
         last_name=graphene.String(required=False),
         other_names=graphene.String(required=False),
         phone=graphene.String(required=False),

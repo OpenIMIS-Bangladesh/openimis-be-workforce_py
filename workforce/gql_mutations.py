@@ -1815,7 +1815,7 @@ class UpdateWorkforceDependentEligibilityMutation(graphene.Mutation):
 
 class UpdateWorkforceInteractiveUserMutation(graphene.Mutation):
     class Arguments:
-        id = graphene.Int(required=True)
+        id = graphene.String(required=True)
         last_name = graphene.String(required=False)
         other_names = graphene.String(required=False)
         phone = graphene.String(required=False)
@@ -1830,8 +1830,8 @@ class UpdateWorkforceInteractiveUserMutation(graphene.Mutation):
         service_instance = UpdateInteractiveUserServices()
         try:
             updated_user = service_instance.update(data)
-            return UpdateWorkforceInteractiveUserMutation(success=True, user=updated_user, errors=[])
+            return UpdateWorkforceInteractiveUserMutation(success=True, user=updated_user, errors=[], clientMutationId="", internalId="")
         except InteractiveUser.DoesNotExist:
-            return UpdateWorkforceInteractiveUserMutation(success=False, user=None, errors=["InteractiveUser not found"])
+            return UpdateWorkforceInteractiveUserMutation(success=False, user=None, errors=["InteractiveUser not found"], clientMutationId="", internalId="")
         except Exception as e:
-            return UpdateWorkforceInteractiveUserMutation(success=False, user=None, errors=[str(e)])
+            return UpdateWorkforceInteractiveUserMutation(success=False, user=None, errors=[str(e)], clientMutationId="", internalId="")
