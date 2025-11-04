@@ -593,3 +593,11 @@ class WorkforceApplicationBulkUpdateInputType(graphene.InputObjectType):
     submitted_by = graphene.String()
     application_for = graphene.String()
     status = graphene.String()
+
+
+class WorkforceInteractiveUserInputType(OpenIMISMutation.Input):
+    id = graphene.Int()
+    last_name = graphene.String()
+    other_names = graphene.String()
+    phone = graphene.String()
+    email_id = graphene.String()

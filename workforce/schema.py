@@ -233,6 +233,15 @@ class Query(graphene.ObjectType):
         client_mutation_id=graphene.String(required=False),
     )
 
+    workforce_interactive_user = graphene.Field(
+        WorkforceInteractiveUserGQLType,
+        id=graphene.Int(required=True),
+        last_name=graphene.String(required=False),
+        other_names=graphene.String(required=False),
+        phone=graphene.String(required=False),
+        email_id=graphene.String(required=False)
+    )
+
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("unauthorized"))
@@ -1155,6 +1164,12 @@ class Query(graphene.ObjectType):
             ],
         )
 
+    def resolve_workforce_interactive_user(self, info, id, last_name=None, other_names=None, phone=None, email_id=None):
+        try:
+            return InteractiveUser.objects.get(id=id)
+        except InteractiveUser.DoesNotExist:
+            return None
+
 
 class Mutation(graphene.ObjectType):
     create_workforce_representative = CreateWorkforceRepresentativeMutation.Field()
@@ -1249,6 +1264,8 @@ class Mutation(graphene.ObjectType):
 
     create_workforce_signature = CreateWorkforceSignatureMutation.Field()
     update_workforce_signature = UpdateWorkforceSignatureMutation.Field()
+
+    update_workforce_interactive_user = UpdateWorkforceInteractiveUserMutation.Field()
 
     # create_workforce_postoffice = CreateWorkforcePostofficeMutation.Field()
     # update_workforce_postoffice = UpdateWorkforcePostofficeMutation.Field()

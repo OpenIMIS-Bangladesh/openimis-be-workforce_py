@@ -4,6 +4,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils.translation import gettext as _
 
+from core.models import InteractiveUser
 from core.schema import OpenIMISMutation
 from .apps import WorkforceConfig
 import graphene
@@ -20,8 +21,10 @@ from .gql_types import (
     WorkforceApplicationSummaryMovementInputType, WorkforceGrantMoneyInputType, WorkforceDiseasesInputType,
     WorkforceEducationInputType, WorkforceEmployeeBankingInfoInputType, WorkforceSignatureInputType,
     WorkforceFactoryRegistrationInputType,
-    WorkforceFactoryRegistrationApprovalInputType, WorkforceApplicationBulkUpdateInputType
+    WorkforceFactoryRegistrationApprovalInputType, WorkforceApplicationBulkUpdateInputType,
+    WorkforceInteractiveUserInputType
 )
+
 from .models import WorkforceEmployeeDependent
 from .services.workforce_organization_services import WorkforceOrganizationServices
 from .services.workforce_representative_services import WorkforceRepresentativeServices
@@ -56,8 +59,10 @@ from .services.workforce_signature_services import WorkforceSignatureServices
 from .services.workforce_factory_registration_services import WorkforceFactoryRegistrationServices
 from .services.workforce_factory_registration_services import WorkforceFactoryRegistrationServices
 from .services.workforce_application_bulk_movement_services import WorkforceApplicationBulkMovementServices
-
-
+from .services.update_interactive_user_services import UpdateInteractiveUserServices
+from .gql_queries import (
+    WorkforceInteractiveUserGQLType
+)
 mutation_module = "workforce"
 
 
@@ -1808,6 +1813,25 @@ class UpdateWorkforceDependentEligibilityMutation(graphene.Mutation):
         )
 
 
+class UpdateWorkforceInteractiveUserMutation(graphene.Mutation):
+    class Arguments:
+        id = graphene.Int(required=True)
+        last_name = graphene.String(required=False)
+        other_names = graphene.String(required=False)
+        phone = graphene.String(required=False)
+        email_id = graphene.String(required=False)
 
+    success = graphene.Boolean()
+    user = graphene.Field(WorkforceInteractiveUserGQLType)
+    errors = graphene.List(graphene.String)
 
-
+    @classmethod
+    def mutate(cls, root, info, **data):
+        service_instance = UpdateInteractiveUserServices()
+        try:
+            updated_user = service_instance.update(data)
+            return UpdateWorkforceInteractiveUserMutation(success=True, user=updated_user, errors=[])
+        except InteractiveUser.DoesNotExist:
+            return UpdateWorkforceInteractiveUserMutation(success=False, user=None, errors=["InteractiveUser not found"])
+        except Exception as e:
+            return UpdateWorkforceInteractiveUserMutation(success=False, user=None, errors=[str(e)])

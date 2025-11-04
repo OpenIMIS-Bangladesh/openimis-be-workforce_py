@@ -1105,3 +1105,11 @@ class WorkforceApplicationTimewiseMatrixGQLType(graphene.ObjectType):
     total_application_count = graphene.Int()
     day_wise_count = graphene.Field(DayWiseCountGQLType)
     role_wise_count = graphene.List(RoleWiseCountGQLType)
+
+
+class WorkforceInteractiveUserGQLType(graphene.ObjectType):
+    id = graphene.Int()
+    last_name = graphene.String()
+    other_names = graphene.String()
+    phone = graphene.String()
+    email_id = graphene.String()
