@@ -539,7 +539,7 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "eis_calculated_amount": ["exact"],
             "eis_approved_amount": ["exact"],
             "eis_number_of_payment_months": ["exact"],
-            "deceased_worker_info": ["exact"],
+            "deceased_worker_info": [],
         }
         connection_class = ExtendedConnection
 
