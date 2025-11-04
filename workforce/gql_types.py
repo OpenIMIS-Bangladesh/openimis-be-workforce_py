@@ -596,7 +596,7 @@ class WorkforceApplicationBulkUpdateInputType(graphene.InputObjectType):
 
 
 class WorkforceInteractiveUserInputType(OpenIMISMutation.Input):
-    id = graphene.Int()
+    id = graphene.String()
     last_name = graphene.String()
     other_names = graphene.String()
     phone = graphene.String()
