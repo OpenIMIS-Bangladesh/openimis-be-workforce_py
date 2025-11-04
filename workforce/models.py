@@ -568,8 +568,27 @@ class WorkforceEmployeeDependent(HistoryModel):
     nid = models.CharField(max_length=30, null=True, blank=True)
     birth_certificate_no = models.CharField(
         max_length=30, null=True, blank=True)
-    percentage_of_cf_grant = models.CharField(
-        max_length=30, null=True, blank=True)
+    bank = models.ForeignKey(
+        Bank,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_banks",
+    )
+    bank_account_no = models.BigIntegerField(max_length=18, null=True, blank=True)
+    bank_account_holder_name = models.CharField(max_length=255, null=True, blank=True)
+    eis_payment_type = models.CharField(max_length=50, null=True, blank=True)
+    eis_calculated_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    eis_approved_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    eis_monthly_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    parent_dependent= models.ForeignKey(
+        "WorkforceEmployeeDependent",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="children",
+    )
+    percentage_of_cf_grant = models.CharField(max_length=30, null=True, blank=True)
     present_location = models.ForeignKey(
         Location,
         models.DO_NOTHING,
@@ -762,6 +781,10 @@ class WorkforceApplication(HistoryModel):
     doctors_recommended_donation = models.CharField(max_length=15, null=True, blank=True)
     doctors_flag = models.CharField(max_length=30, null=True, blank=True)
     doctors_flag_note = models.CharField(max_length=512, null=True, blank=True)
+    eis_payment_type= models.CharField(max_length=50, null=True, blank=True)
+    eis_calculated_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    eis_approved_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    eis_number_of_payment_months= models.IntegerField(null=True, blank=True)
 
     class Meta:
         managed = True
