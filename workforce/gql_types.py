@@ -378,6 +378,11 @@ class WorkforceApplicationInputType(OpenIMISMutation.Input):
     doctors_recommended_donation = graphene.String()
     doctors_flag = graphene.String()
     doctors_flag_note = graphene.String()
+    eis_payment_type = graphene.String()
+    eis_calculated_amount = graphene.String()
+    eis_approved_amount = graphene.String()
+    eis_number_of_payment_months = graphene.String()
+    deceased_worker_info = graphene.String()
     status = graphene.String()
 
 

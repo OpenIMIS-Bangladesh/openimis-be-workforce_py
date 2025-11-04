@@ -535,6 +535,11 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "doctors_recommended_donation": ["exact"],
             "doctors_flag": ["exact"],
             "doctors_flag_note": ["exact"],
+            "eis_payment_type": ["exact"],
+            "eis_calculated_amount": ["exact"],
+            "eis_approved_amount": ["exact"],
+            "eis_number_of_payment_months": ["exact"],
+            "deceased_worker_info": ["exact"],
         }
         connection_class = ExtendedConnection
 
