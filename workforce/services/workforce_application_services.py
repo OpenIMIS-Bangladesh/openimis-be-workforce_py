@@ -125,9 +125,16 @@ class WorkforceApplicationServices(BaseService):
         return application
 
     def update(self, obj_data):
+        application_id = obj_data.get("id")
+        # Fetch the complete instance before update
+        try:
+            application_instance_before_update = WorkforceApplication.objects.get(id=application_id)
+            status_before_update = application_instance_before_update.status
+        except WorkforceApplication.DoesNotExist:
+            raise Exception(f"Application with id {application_id} not found")
+
         application = super().update(obj_data)
         application_status = obj_data.get("status")
-        application_id = obj_data.get("id")
         status = obj_data.get("status")
         user_id = self.user.id
 
@@ -142,7 +149,7 @@ class WorkforceApplicationServices(BaseService):
 
         # Do following steps only if status is updated.
         # Application movement only occurs when statis is updated
-        if status != application_instance.status:
+        if status != status_before_update:
             # ================================================================
             # 1. Clone to EIS and create automatic movement
             # ================================================================
