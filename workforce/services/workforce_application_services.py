@@ -149,86 +149,112 @@ class WorkforceApplicationServices(BaseService):
 
         # Do following steps only if status is updated.
         # Application movement only occurs when statis is updated
-        if status != status_before_update:
-            # ================================================================
-            # 1. Clone to EIS and create automatic movement
-            # ================================================================
-            if (
-                    organization_type == "cf"
-                    and application_type in ["disabilityAssistance", "financialAssistance"]
-                    and status == "forward_to_cf_section"
-            ):
-                # Build full data dict including FK IDs and JSON fields
-                existing_data = {}
-                for field in application_instance._meta.get_fields():
-                    if isinstance(field, (models.ManyToOneRel, models.ManyToManyRel)):
-                        continue  # skip reverse relations
 
-                    field_name = field.name
+        # ================================================================
+        # 1. Clone to EIS and create automatic movement
+        # ================================================================
+        if (
+                organization_type == "cf"
+                and application_type in ["disabilityAssistance", "financialAssistance"]
+                and status == "forward_to_cf_section"
+        ):
+            # Build full data dict including FK IDs and JSON fields
+            existing_data = {}
+            for field in application_instance._meta.get_fields():
+                if isinstance(field, (models.ManyToOneRel, models.ManyToManyRel)):
+                    continue  # skip reverse relations
 
-                    if field.is_relation:
-                        existing_data[f"{field_name}_id"] = getattr(application_instance, f"{field_name}_id", None)
-                    else:
-                        existing_data[field_name] = getattr(application_instance, field_name)
+                field_name = field.name
 
-                # Remove primary key and other fields
-                for field_name in ["id", "uuid", "validity_from", "validity_to",
-                                   "association_type", "grant_amount", "grant_money_id"]:
-                    existing_data.pop(field_name, None)
+                if field.is_relation:
+                    existing_data[f"{field_name}_id"] = getattr(application_instance, f"{field_name}_id", None)
+                else:
+                    existing_data[field_name] = getattr(application_instance, field_name)
 
-                # Override specific fields for the new clone
-                existing_data["version"] = 1
-                existing_data["organization_type"] = "eis"
-                existing_data["status"] = "forward_to_eis_coordinator"
-                existing_data["tracking_number"] = application_instance.tracking_number
+            # Remove primary key and other fields
+            for field_name in ["id", "uuid", "validity_from", "validity_to",
+                               "association_type", "grant_amount", "grant_money_id"]:
+                existing_data.pop(field_name, None)
 
-                # Create new application
-                application_eis = super().create(existing_data)
+            # Override specific fields for the new clone
+            existing_data["version"] = 1
+            existing_data["organization_type"] = "eis"
+            existing_data["status"] = "forward_to_eis_coordinator"
+            existing_data["tracking_number"] = application_instance.tracking_number
 
-                # Get EIS application instance
-                application_eis_id = application_eis.get("data", {}).get("id")
-                application_eis_instance = WorkforceApplication.objects.get(id=application_eis_id)
+            # Create new application
+            application_eis = super().create(existing_data)
 
-                # Create automatic movement to EIS Coordinator
-                create_application_movement(
-                    application_id=application_eis_instance.id,
-                    status="forward_to_eis_coordinator",
-                    action="forward_to_eis_coordinator",
-                    role_name="Eis Coordinator",
-                    user_str=str(self.user),
-                    note="আবেদন ইআইএস কোঅর্ডিনেটর শাখায় প্রেরণ করা হয়েছে"
+            # Get EIS application instance
+            application_eis_id = application_eis.get("data", {}).get("id")
+            application_eis_instance = WorkforceApplication.objects.get(id=application_eis_id)
+
+            # Create automatic movement to EIS Coordinator
+            create_application_movement(
+                application_id=application_eis_instance.id,
+                status="forward_to_eis_coordinator",
+                action="forward_to_eis_coordinator",
+                role_name="Eis Coordinator",
+                user_str=str(self.user),
+                note="আবেদন ইআইএস কোঅর্ডিনেটর শাখায় প্রেরণ করা হয়েছে"
+            )
+        else:
+            application_eis_instance = None
+
+        # ================================================================
+        # 2. Handle dependents
+        # ================================================================
+        dependents_data = obj_data.get("employee_dependent_info", [])
+        if dependents_data and dependents_data != "[{}]":
+            try:
+                # Remove old dependents + related banking info for CF application
+                existing_dependents = WorkforceEmployeeDependent.objects.filter(
+                    workforce_application=application_instance
                 )
-            else:
-                application_eis_instance = None
+                for dependent in existing_dependents:
+                    WorkforceEmployeeBankingInfo.objects.filter(dependant=dependent).delete()
+                existing_dependents.delete()
 
-            # ================================================================
-            # 2. Handle dependents
-            # ================================================================
-            dependents_data = obj_data.get("employee_dependent_info", [])
-            if dependents_data and dependents_data != "[{}]":
-                try:
-                    # Remove old dependents + related banking info for CF application
-                    existing_dependents = WorkforceEmployeeDependent.objects.filter(
-                        workforce_application=application_instance
+                # Remove old dependents + related banking info for EIS (if exists)
+                if application_eis_instance:
+                    existing_dependents_eis = WorkforceEmployeeDependent.objects.filter(
+                        workforce_application=application_eis_instance
                     )
-                    for dependent in existing_dependents:
+                    for dependent in existing_dependents_eis:
                         WorkforceEmployeeBankingInfo.objects.filter(dependant=dependent).delete()
-                    existing_dependents.delete()
+                    existing_dependents_eis.delete()
 
-                    # Remove old dependents + related banking info for EIS (if exists)
+                # Create new dependent data
+                dependents = json.loads(dependents_data)
+                for dep in dependents:
+                    dep_instance = WorkforceEmployeeDependent(
+                        workforce_application=application_instance,
+                        name_bn=dep.get("nameBn"),
+                        name_en=dep.get("nameEn"),
+                        father_name_bn=dep.get("fatherNameBn"),
+                        father_name_en=dep.get("fatherNameEn"),
+                        mother_name_bn=dep.get("motherNameBn"),
+                        mother_name_en=dep.get("motherNameEn"),
+                        nid=dep.get("nid"),
+                        phone_number=dep.get("phoneNumber"),
+                        email=dep.get("email"),
+                        occupation=dep.get("occupation"),
+                        birth_certificate_no=dep.get("birthCertificateNo"),
+                        marital_status=dep.get("maritalStatus"),
+                        present_address=dep.get("presentAddress"),
+                        permanent_address=dep.get("permanentAddress"),
+                        user_created_id=user_id,
+                        user_updated_id=user_id,
+                        status="active",
+                        relation_with_worker=dep.get("relationType"),
+                        disability_status=dep.get("isDisabled"),
+                        disability_type=dep.get("disabilityType") if "disabilityType" in dep else None
+                    )
+                    dep_instance.save(username=self.user.username)
+
                     if application_eis_instance:
-                        existing_dependents_eis = WorkforceEmployeeDependent.objects.filter(
-                            workforce_application=application_eis_instance
-                        )
-                        for dependent in existing_dependents_eis:
-                            WorkforceEmployeeBankingInfo.objects.filter(dependant=dependent).delete()
-                        existing_dependents_eis.delete()
-
-                    # Create new dependent data
-                    dependents = json.loads(dependents_data)
-                    for dep in dependents:
-                        dep_instance = WorkforceEmployeeDependent(
-                            workforce_application=application_instance,
+                        dep_instance_eis = WorkforceEmployeeDependent(
+                            workforce_application=application_eis_instance,
                             name_bn=dep.get("nameBn"),
                             name_en=dep.get("nameEn"),
                             father_name_bn=dep.get("fatherNameBn"),
@@ -250,174 +276,149 @@ class WorkforceApplicationServices(BaseService):
                             disability_status=dep.get("isDisabled"),
                             disability_type=dep.get("disabilityType") if "disabilityType" in dep else None
                         )
-                        dep_instance.save(username=self.user.username)
+                        dep_instance_eis.save(username=self.user.username)
+            except Exception as e:
+                logger.error(f"Error while updating dependents: {e}")
+                raise ValidationError("Failed to update dependents.")
 
-                        if application_eis_instance:
-                            dep_instance_eis = WorkforceEmployeeDependent(
-                                workforce_application=application_eis_instance,
-                                name_bn=dep.get("nameBn"),
-                                name_en=dep.get("nameEn"),
-                                father_name_bn=dep.get("fatherNameBn"),
-                                father_name_en=dep.get("fatherNameEn"),
-                                mother_name_bn=dep.get("motherNameBn"),
-                                mother_name_en=dep.get("motherNameEn"),
-                                nid=dep.get("nid"),
-                                phone_number=dep.get("phoneNumber"),
-                                email=dep.get("email"),
-                                occupation=dep.get("occupation"),
-                                birth_certificate_no=dep.get("birthCertificateNo"),
-                                marital_status=dep.get("maritalStatus"),
-                                present_address=dep.get("presentAddress"),
-                                permanent_address=dep.get("permanentAddress"),
-                                user_created_id=user_id,
-                                user_updated_id=user_id,
-                                status="active",
-                                relation_with_worker=dep.get("relationType"),
-                                disability_status=dep.get("isDisabled"),
-                                disability_type=dep.get("disabilityType") if "disabilityType" in dep else None
-                            )
-                            dep_instance_eis.save(username=self.user.username)
-                except Exception as e:
-                    logger.error(f"Error while updating dependents: {e}")
-                    raise ValidationError("Failed to update dependents.")
+            if status != status_before_update:
+                # ================================================================
+                # 3. Handle association_type + factory docs
+                # Patch this part later as broad condition may cause documents to duplicate
+                # ================================================================
+                try:
+                    if application_status == "new":
+                        employee_factory_id = application_instance.employee_factory_id
+                        factory = WorkforceFactory.objects.filter(id=employee_factory_id).first()
+                        association_type = factory.association_type if factory else None
 
-            # ================================================================
-            # 3. Handle association_type + factory docs
-            # Patch this part later as broad condition may cause documents to duplicate
-            # ================================================================
-            try:
-                if application_status == "new":
-                    employee_factory_id = application_instance.employee_factory_id
-                    factory = WorkforceFactory.objects.filter(id=employee_factory_id).first()
-                    association_type = factory.association_type if factory else None
-
-                    if association_type:
-                        application_instance.association_type = association_type
-                        application_instance.save(
-                            username=self.user.username,
-                            update_fields=["association_type"]
-                        )
-                        if application_eis_instance:
-                            application_eis_instance.association_type = association_type
-                            application_eis_instance.save(
+                        if association_type:
+                            application_instance.association_type = association_type
+                            application_instance.save(
                                 username=self.user.username,
                                 update_fields=["association_type"]
                             )
-
-                    # Clone factory documents only if the application has no documents yet
-                    existing_app_docs = WorkforceDocument.objects.filter(workforce_application=application_instance)
-
-                    if not existing_app_docs.exists():
-                        factory_documents = WorkforceDocument.objects.filter(factory_id=employee_factory_id)
-                        if factory_documents.exists():
-                            for doc in factory_documents:
-                                holder_type = "dependent" if doc.workforce_dependent_id else "applicant"
-                                new_doc = WorkforceDocument(
-                                    workforce_application=application_instance,
-                                    holder=doc.holder,
-                                    holder_type=holder_type,
-                                    verifier=doc.verifier,
-                                    approver=doc.approver,
-                                    workforce_document_type=doc.workforce_document_type,
-                                    workforce_dependent=doc.workforce_dependent,
-                                    note=doc.note,
-                                    document_type=doc.document_type,
-                                    path=doc.path,
-                                    url=doc.url,
-                                    submission_date=doc.submission_date,
-                                    verification_date=doc.verification_date,
-                                    approval_date=doc.approval_date,
-                                    remarks=doc.remarks,
-                                    status=doc.status or "active",
-                                    user_created_id=self.user.id,
-                                    user_updated_id=self.user.id,
+                            if application_eis_instance:
+                                application_eis_instance.association_type = association_type
+                                application_eis_instance.save(
+                                    username=self.user.username,
+                                    update_fields=["association_type"]
                                 )
-                                new_doc.save(username=self.user.username)
-                    else:
-                        logger.info(
-                            f"Skipping factory document cloning for application {application_instance.id} — already has documents."
-                        )
-            except Exception as e:
-                logger.error(f"Error in Step 3 (association_type/factory docs): {e}")
 
-            # ================================================================
-            # 4. Handle BLWF new application movement to DIFE admin
-            # ================================================================
-            if application_status == 'new' and organization_type == 'blwf':
-                application_id_for_movement = obj_data.get("id")
-                employee = application_instance.workforce_employee
-                present_location = employee.present_location
-                applicant_location = None
+                        # Clone factory documents only if the application has no documents yet
+                        existing_app_docs = WorkforceDocument.objects.filter(workforce_application=application_instance)
 
-                if present_location:
-                    location = present_location
-                    while location:
-                        if location.type == 'D':
-                            applicant_location = location.id
-                            break
-                        location = location.parent
-
-                association = None
-                for assoc in WorkforceAssociation.objects.filter(association_type='dife'):
-                    if assoc.jurisdiction_locations:
-                        loc_ids = [loc_id.strip() for loc_id in assoc.jurisdiction_locations.split(',')]
-                        if str(applicant_location) in loc_ids:
-                            association = assoc
-                            break
-
-                if not association:
-                    raise ValueError(f"No DIFE association found for location {applicant_location}")
-
-                emp_obj = WorkforceOrganizationEmployee.objects.filter(association_id=association.id).first()
-                if not emp_obj:
-                    raise ValueError(f"No WorkforceOrganizationEmployee found for association_id={association.id}")
-
-                application_to = emp_obj.related_user_id
-
-                # Create movement to DIFE Admin
-                create_application_movement(
-                    application_id=application_id_for_movement,
-                    status='new',
-                    action='forward_to_dife_admin',
-                    role_name='blwf_dol_dife',
-                    user_str=str(self.user),
-                    application_to=application_to,
-                    note=""
-                )
-
-            # ================================================================
-            # 5. Handle CF and EIS new application movement to Factory Admin
-            # ================================================================
-            if application_status == 'new' and organization_type in ['cf', 'eis']:
-                application_id_for_movement = obj_data.get("id")
-                application_instance = WorkforceApplication.objects.get(id=application_id_for_movement)
-
-                application_to = None
-                try:
-                    if application_instance.employee_factory_id:
-                        factory = WorkforceFactory.objects.filter(id=application_instance.employee_factory_id).first()
-                        if factory and factory.workforce_representative_id:
-                            representative = factory.workforce_representative
-                            application_to = representative.related_user_id
+                        if not existing_app_docs.exists():
+                            factory_documents = WorkforceDocument.objects.filter(factory_id=employee_factory_id)
+                            if factory_documents.exists():
+                                for doc in factory_documents:
+                                    holder_type = "dependent" if doc.workforce_dependent_id else "applicant"
+                                    new_doc = WorkforceDocument(
+                                        workforce_application=application_instance,
+                                        holder=doc.holder,
+                                        holder_type=holder_type,
+                                        verifier=doc.verifier,
+                                        approver=doc.approver,
+                                        workforce_document_type=doc.workforce_document_type,
+                                        workforce_dependent=doc.workforce_dependent,
+                                        note=doc.note,
+                                        document_type=doc.document_type,
+                                        path=doc.path,
+                                        url=doc.url,
+                                        submission_date=doc.submission_date,
+                                        verification_date=doc.verification_date,
+                                        approval_date=doc.approval_date,
+                                        remarks=doc.remarks,
+                                        status=doc.status or "active",
+                                        user_created_id=self.user.id,
+                                        user_updated_id=self.user.id,
+                                    )
+                                    new_doc.save(username=self.user.username)
+                        else:
+                            logger.info(
+                                f"Skipping factory document cloning for application {application_instance.id} — already has documents."
+                            )
                 except Exception as e:
-                    logger.error(
-                        f"Failed to resolve Factory Representative for Application {application_id_for_movement}: {e}")
-                    application_to = None
+                    logger.error(f"Error in Step 3 (association_type/factory docs): {e}")
 
-                if not application_to:
-                    raise ValueError(
-                        f"No Factory Representative (related_user_id) found for factory ID "
-                        f"{application_instance.employee_factory_id}"
+                # ================================================================
+                # 4. Handle BLWF new application movement to DIFE admin
+                # ================================================================
+                if application_status == 'new' and organization_type == 'blwf':
+                    application_id_for_movement = obj_data.get("id")
+                    employee = application_instance.workforce_employee
+                    present_location = employee.present_location
+                    applicant_location = None
+
+                    if present_location:
+                        location = present_location
+                        while location:
+                            if location.type == 'D':
+                                applicant_location = location.id
+                                break
+                            location = location.parent
+
+                    association = None
+                    for assoc in WorkforceAssociation.objects.filter(association_type='dife'):
+                        if assoc.jurisdiction_locations:
+                            loc_ids = [loc_id.strip() for loc_id in assoc.jurisdiction_locations.split(',')]
+                            if str(applicant_location) in loc_ids:
+                                association = assoc
+                                break
+
+                    if not association:
+                        raise ValueError(f"No DIFE association found for location {applicant_location}")
+
+                    emp_obj = WorkforceOrganizationEmployee.objects.filter(association_id=association.id).first()
+                    if not emp_obj:
+                        raise ValueError(f"No WorkforceOrganizationEmployee found for association_id={association.id}")
+
+                    application_to = emp_obj.related_user_id
+
+                    # Create movement to DIFE Admin
+                    create_application_movement(
+                        application_id=application_id_for_movement,
+                        status='new',
+                        action='forward_to_dife_admin',
+                        role_name='blwf_dol_dife',
+                        user_str=str(self.user),
+                        application_to=application_to,
+                        note=""
                     )
-                # Create movement to Factory Admin
-                create_application_movement(
-                    application_id=application_id_for_movement,
-                    status='new',
-                    action='forward_to_factory_admin',
-                    role_name='Factory Admin',
-                    user_str=str(self.user),
-                    application_to=application_to,
-                    note="আবেদন ফ্যাক্টরি অ্যাডমিন এর নিকট প্রেরণ করা হয়েছে"
-                )
+
+                # ================================================================
+                # 5. Handle CF and EIS new application movement to Factory Admin
+                # ================================================================
+                if application_status == 'new' and organization_type in ['cf', 'eis']:
+                    application_id_for_movement = obj_data.get("id")
+                    application_instance = WorkforceApplication.objects.get(id=application_id_for_movement)
+
+                    application_to = None
+                    try:
+                        if application_instance.employee_factory_id:
+                            factory = WorkforceFactory.objects.filter(id=application_instance.employee_factory_id).first()
+                            if factory and factory.workforce_representative_id:
+                                representative = factory.workforce_representative
+                                application_to = representative.related_user_id
+                    except Exception as e:
+                        logger.error(
+                            f"Failed to resolve Factory Representative for Application {application_id_for_movement}: {e}")
+                        application_to = None
+
+                    if not application_to:
+                        raise ValueError(
+                            f"No Factory Representative (related_user_id) found for factory ID "
+                            f"{application_instance.employee_factory_id}"
+                        )
+                    # Create movement to Factory Admin
+                    create_application_movement(
+                        application_id=application_id_for_movement,
+                        status='new',
+                        action='forward_to_factory_admin',
+                        role_name='Factory Admin',
+                        user_str=str(self.user),
+                        application_to=application_to,
+                        note="আবেদন ফ্যাক্টরি অ্যাডমিন এর নিকট প্রেরণ করা হয়েছে"
+                    )
 
         return application
