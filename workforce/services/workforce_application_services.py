@@ -12,6 +12,9 @@ from .helper_service import create_application_movement
 from django.db.models import Q
 
 from django.db import models
+
+from .workforce_employee_dependent_services import WorkforceEmployeeDependentServices
+
 logger = logging.getLogger(__name__)
 
 
@@ -198,6 +201,7 @@ class WorkforceApplicationServices(BaseService):
                 user_str=str(self.user),
                 note="আবেদন ইআইএস কোঅর্ডিনেটর শাখায় প্রেরণ করা হয়েছে"
             )
+            WorkforceEmployeeDependentServices.calculate_eis_amount(application_eis_instance.id, existing_data['application_type'])
         else:
             application_eis_instance = None
 

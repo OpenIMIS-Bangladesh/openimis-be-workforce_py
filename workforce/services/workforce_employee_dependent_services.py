@@ -1,7 +1,7 @@
 import logging
 
 from core.services import BaseService
-from workforce.models import WorkforceEmployeeDependent
+from workforce.models import WorkforceEmployeeDependent, WorkforceApplication
 
 logger = logging.getLogger(__name__)
 
@@ -75,8 +75,45 @@ class WorkforceEmployeeDependentServices(BaseService):
                             eligible = True
 
                 # Finally save
-                dep_obj.isEligible = eligible
+                dep_obj.is_eligible = eligible
                 dep_obj.save(username=self.user.username)
             return {"status": True, "error": ""}
         except Exception as e:
             return {"status": False, "error": str(e)}
+
+
+
+    def calculate_eis_amount(self, workforce_application_id, application_type):
+        dependents = WorkforceEmployeeDependent.objects.filter(workforce_application_id=workforce_application_id)
+        #call vbatools api here to extract dependent's amounts.
+        vba_disability_amount= 35000
+        vba_death_mother= 35000
+        vba_death_father= 35000
+        vba_death_son= 35000
+        vba_death_daughter= 35000
+        vba_death_brother= 35000
+        vba_death_sister= 35000
+        vba_death_wife= 35000
+        vba_death_husband= 43000
+        vba_payment_type= "monthly"
+        vba_number_of_months= 48
+
+        if application_type == "disabilityAssistance":
+            workforce_application= WorkforceApplication.objects.get(id=workforce_application_id)
+            workforce_application.eis_payment_type= vba_payment_type
+            workforce_application.eis_calculated_amount= vba_disability_amount
+            workforce_application.eis_approved_amount= vba_disability_amount
+            workforce_application.eis_number_of_payment_months= vba_number_of_months
+        else:
+            for dependent in dependents:
+                if dependent.relation_with_worker=="workforce.relation.brother":
+                elif dependent.relation_with_worker=="workforce.relation.sister":
+                elif dependent.relation_with_worker=="workforce.relation.daughter":
+                elif dependent.relation_with_worker=="workforce.relation.husband":
+                elif dependent.relation_with_worker=="workforce.relation.wife":
+                elif dependent.relation_with_worker=="workforce.relation.grand_father":
+                elif dependent.relation_with_worker=="workforce.relation.grand_monther":
+                elif dependent.relation_with_worker=="workforce.relation.grand_son":
+                elif dependent.relation_with_worker=="workforce.relation.grand_daughter":
+                elif dependent.relation_with_worker=="workforce.relation.father":
+                elif dependent.relation_with_worker=="workforce.relation.son":

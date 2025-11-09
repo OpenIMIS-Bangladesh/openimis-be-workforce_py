@@ -613,7 +613,7 @@ class WorkforceEmployeeDependent(HistoryModel):
         max_length=50, null=True, blank=True)
     last_verification_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
-    isEligible= models.BooleanField(default=False)
+    is_eligible= models.BooleanField(default=False)
 
     class Meta:
         managed = True
@@ -1277,3 +1277,110 @@ class WorkforceAssociation(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_association'
+
+
+
+class WorkforceEisPaymentProcess(HistoryModel):
+    workforce_application = models.ForeignKey(
+        "WorkforceApplication",
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="workforce_payment_application",
+    )
+    workforce_application_summary = models.ForeignKey(
+        "WorkforceApplicationSummary",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_payment_application_summary",
+    )
+    workforce_employee_dependent = models.ForeignKey(
+        "WorkforceEmployeeDependent",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_payment_employee_dependent",
+    )
+    bank = models.ForeignKey(
+        Bank,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_payment_bank",
+    )
+
+    bank_account_no =  models.CharField(max_length=50, null=True, blank=True)
+    bank_account_holder_name = models.CharField(max_length=255, null=True, blank=True)
+
+    eis_payment_type = models.CharField(max_length=50, null=True, blank=True)
+    eis_calculated_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    eis_approved_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    eis_monthly_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    month_index = models.IntegerField(null=True, blank=True)
+    year = models.IntegerField(null=True, blank=True)
+    processing_date = models.DateField(null=True, blank=True)
+    processed_by = models.ForeignKey(
+        InteractiveUser,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_payment_processed_by",
+    )
+    is_disbursed = models.BooleanField(default=False)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_eis_payment_process'
+
+
+class WorkforceEisPaymentDisbursement(HistoryModel):
+    workforce_application = models.ForeignKey(
+        "WorkforceApplication",
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="workforce_payment_disbursement_application",
+    )
+    workforce_application_summary = models.ForeignKey(
+        "WorkforceApplicationSummary",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_payment_disbursement_application_summary",
+    )
+    workforce_employee_dependent = models.ForeignKey(
+        "WorkforceEmployeeDependent",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_payment_disbursement_employee_dependent",
+    )
+    bank = models.ForeignKey(
+        Bank,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_payment_disbursement_bank",
+    )
+
+    bank_account_no = models.CharField(max_length=50, null=True, blank=True)
+    bank_account_holder_name = models.CharField(max_length=255, null=True, blank=True)
+    eis_payment_type = models.CharField(max_length=50, null=True, blank=True)
+    eis_calculated_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    eis_approved_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    eis_monthly_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    month_index = models.IntegerField(null=True, blank=True)
+    year = models.IntegerField(null=True, blank=True)
+    disbursement_date = models.DateField(null=True, blank=True)
+    disbursed_by = models.ForeignKey(
+        InteractiveUser,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_payment_disbursed_by",
+    )
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_eis_payment_disbursements'
