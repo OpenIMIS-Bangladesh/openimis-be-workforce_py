@@ -281,65 +281,65 @@ class WorkforceApplicationServices(BaseService):
                 logger.error(f"Error while updating dependents: {e}")
                 raise ValidationError("Failed to update dependents.")
 
-        if status != status_before_update:
-            # ================================================================
-            # 3. Handle association_type + factory docs
-            # Patch this part later as broad condition may cause documents to duplicate
-            # ================================================================
-            try:
-                if application_status == "new":
-                    employee_factory_id = application_instance.employee_factory_id
-                    factory = WorkforceFactory.objects.filter(id=employee_factory_id).first()
-                    association_type = factory.association_type if factory else None
-
-                    if association_type:
-                        application_instance.association_type = association_type
-                        application_instance.save(
-                            username=self.user.username,
-                            update_fields=["association_type"]
-                        )
-                        if application_eis_instance:
-                            application_eis_instance.association_type = association_type
-                            application_eis_instance.save(
-                                username=self.user.username,
-                                update_fields=["association_type"]
-                            )
-
-                    # Clone factory documents only if the application has no documents yet
-                    existing_app_docs = WorkforceDocument.objects.filter(workforce_application=application_instance)
-
-                    if not existing_app_docs.exists():
-                        factory_documents = WorkforceDocument.objects.filter(factory_id=employee_factory_id)
-                        if factory_documents.exists():
-                            for doc in factory_documents:
-                                holder_type = "dependent" if doc.workforce_dependent_id else "applicant"
-                                new_doc = WorkforceDocument(
-                                    workforce_application=application_instance,
-                                    holder=doc.holder,
-                                    holder_type=holder_type,
-                                    verifier=doc.verifier,
-                                    approver=doc.approver,
-                                    workforce_document_type=doc.workforce_document_type,
-                                    workforce_dependent=doc.workforce_dependent,
-                                    note=doc.note,
-                                    document_type=doc.document_type,
-                                    path=doc.path,
-                                    url=doc.url,
-                                    submission_date=doc.submission_date,
-                                    verification_date=doc.verification_date,
-                                    approval_date=doc.approval_date,
-                                    remarks=doc.remarks,
-                                    status=doc.status or "active",
-                                    user_created_id=self.user.id,
-                                    user_updated_id=self.user.id,
-                                )
-                                new_doc.save(username=self.user.username)
-                    else:
-                        logger.info(
-                            f"Skipping factory document cloning for application {application_instance.id} — already has documents."
-                        )
-            except Exception as e:
-                logger.error(f"Error in Step 3 (association_type/factory docs): {e}")
+        # if status != status_before_update:
+        #     # ================================================================
+        #     # 3. Handle association_type + factory docs
+        #     # Patch this part later as broad condition may cause documents to duplicate
+        #     # ================================================================
+        #     try:
+        #         if application_status == "new":
+        #             employee_factory_id = application_instance.employee_factory_id
+        #             factory = WorkforceFactory.objects.filter(id=employee_factory_id).first()
+        #             association_type = factory.association_type if factory else None
+        #
+        #             if association_type:
+        #                 application_instance.association_type = association_type
+        #                 application_instance.save(
+        #                     username=self.user.username,
+        #                     update_fields=["association_type"]
+        #                 )
+        #                 if application_eis_instance:
+        #                     application_eis_instance.association_type = association_type
+        #                     application_eis_instance.save(
+        #                         username=self.user.username,
+        #                         update_fields=["association_type"]
+        #                     )
+        #
+        #             # Clone factory documents only if the application has no documents yet
+        #             existing_app_docs = WorkforceDocument.objects.filter(workforce_application=application_instance)
+        #
+        #             if not existing_app_docs.exists():
+        #                 factory_documents = WorkforceDocument.objects.filter(factory_id=employee_factory_id)
+        #                 if factory_documents.exists():
+        #                     for doc in factory_documents:
+        #                         holder_type = "dependent" if doc.workforce_dependent_id else "applicant"
+        #                         new_doc = WorkforceDocument(
+        #                             workforce_application=application_instance,
+        #                             holder=doc.holder,
+        #                             holder_type=holder_type,
+        #                             verifier=doc.verifier,
+        #                             approver=doc.approver,
+        #                             workforce_document_type=doc.workforce_document_type,
+        #                             workforce_dependent=doc.workforce_dependent,
+        #                             note=doc.note,
+        #                             document_type=doc.document_type,
+        #                             path=doc.path,
+        #                             url=doc.url,
+        #                             submission_date=doc.submission_date,
+        #                             verification_date=doc.verification_date,
+        #                             approval_date=doc.approval_date,
+        #                             remarks=doc.remarks,
+        #                             status=doc.status or "active",
+        #                             user_created_id=self.user.id,
+        #                             user_updated_id=self.user.id,
+        #                         )
+        #                         new_doc.save(username=self.user.username)
+        #             else:
+        #                 logger.info(
+        #                     f"Skipping factory document cloning for application {application_instance.id} — already has documents."
+        #                 )
+        #     except Exception as e:
+        #         logger.error(f"Error in Step 3 (association_type/factory docs): {e}")
 
         # ================================================================
         # 4. Handle BLWF new application movement to DIFE admin
