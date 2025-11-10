@@ -292,12 +292,14 @@ class WorkforceApplicationServices(BaseService):
         #             factory = WorkforceFactory.objects.filter(id=employee_factory_id).first()
         #             association_type = factory.association_type if factory else None
         #
+        #             # Set application association type
         #             if association_type:
         #                 application_instance.association_type = association_type
         #                 application_instance.save(
         #                     username=self.user.username,
         #                     update_fields=["association_type"]
         #                 )
+        #                 # Set application association type for eis application
         #                 if application_eis_instance:
         #                     application_eis_instance.association_type = association_type
         #                     application_eis_instance.save(
@@ -344,7 +346,7 @@ class WorkforceApplicationServices(BaseService):
         # ================================================================
         # 4. Handle BLWF new application movement to DIFE admin
         # ================================================================
-        if application_status == 'new' and organization_type == 'blwf':
+        if application_status == 'new' and organization_type == 'blwf' and application_status != status_before_update:
             application_id_for_movement = obj_data.get("id")
             employee = application_instance.workforce_employee
             present_location = employee.present_location
@@ -388,7 +390,7 @@ class WorkforceApplicationServices(BaseService):
         # ================================================================
         # 5. Handle CF and EIS new application movement to Factory Admin
         # ================================================================
-        if application_status == 'new' and organization_type in ['cf', 'eis']:
+        if application_status == 'new' and organization_type in ['cf', 'eis'] and application_status != status_before_update:
             application_id_for_movement = obj_data.get("id")
             application_instance = WorkforceApplication.objects.get(id=application_id_for_movement)
 
