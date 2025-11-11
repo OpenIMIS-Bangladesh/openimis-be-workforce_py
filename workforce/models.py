@@ -580,7 +580,10 @@ class WorkforceEmployeeDependent(HistoryModel):
     eis_payment_type = models.CharField(max_length=50, null=True, blank=True)
     eis_calculated_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     eis_approved_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    eis_initial_monthly_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     eis_monthly_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    pv_factor= models.DecimalField(max_digits=10, decimal_places=5, null=True, blank=True)
+    initial_replacement_rate= models.DecimalField(max_digits=10, decimal_places=5, null=True, blank=True)
     parent_dependent= models.ForeignKey(
         "WorkforceEmployeeDependent",
         models.DO_NOTHING,
@@ -784,7 +787,10 @@ class WorkforceApplication(HistoryModel):
     eis_payment_type = models.CharField(max_length=50, null=True, blank=True)
     eis_calculated_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     eis_approved_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
-    eis_number_of_payment_months = models.IntegerField(null=True, blank=True)
+    eis_initial_monthly_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    eis_monthly_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    pv_factor = models.DecimalField(max_digits=10, decimal_places=5, null=True, blank=True)
+    initial_replacement_rate = models.DecimalField(max_digits=10, decimal_places=5, null=True, blank=True)
     deceased_worker_info = models.JSONField(null=True, blank=True)
 
     class Meta:

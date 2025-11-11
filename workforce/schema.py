@@ -1267,5 +1267,6 @@ class Mutation(graphene.ObjectType):
 
     update_workforce_interactive_user = UpdateWorkforceInteractiveUserMutation.Field()
 
+    test_workforce_payment = TestWorkforcePaymentMutation.Field()
     # create_workforce_postoffice = CreateWorkforcePostofficeMutation.Field()
     # update_workforce_postoffice = UpdateWorkforcePostofficeMutation.Field()

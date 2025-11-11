@@ -1,0 +1,86 @@
+{
+    "status_code": 200,
+    "body": {
+        "status": "success",
+        "filename": "2023.EIS.000KUE.ods",
+        "data": {
+            "results": [
+                {
+                    "ID": 1,
+                    "Relationship": "Dependent father",
+                    "PV factor": 5.50370153606099,
+                    "PV Total pension": 1290706.06943088,
+                    "PV Top-Up pension": 1150996.25362932,
+                    "Initial replacement rate": 0.2,
+                    "Total initial monthly pension": 3908.6,
+                    "Top-up monthly pension": 3485.5216563127
+                },
+                {
+                    "ID": 2,
+                    "Relationship": "Mother",
+                    "PV factor": null,
+                    "PV Total pension": 0.0,
+                    "PV Top-Up pension": 0.0,
+                    "Initial replacement rate": null,
+                    "Total initial monthly pension": null,
+                    "Top-up monthly pension": 0.0
+                },
+                {
+                    "ID": "Parent(s)",
+                    "Relationship": null,
+                    "PV factor": 5.50370153606099,
+                    "PV Total pension": 1290706.06943088,
+                    "PV Top-Up pension": 1150996.25362932,
+                    "Initial replacement rate": 0.2,
+                    "Total initial monthly pension": 3908.6,
+                    "Top-up monthly pension": 3485.5216563127
+                },
+                {
+                    "ID": 3,
+                    "Relationship": "Dependent minor sister",
+                    "PV factor": 2.37505988737184,
+                    "PV Total pension": 556989.544546895,
+                    "PV Top-Up pension": 496699.36034845,
+                    "Initial replacement rate": 0.2,
+                    "Total initial monthly pension": 3908.6,
+                    "Top-up monthly pension": 3485.5216563127
+                }
+            ],
+            "total": {
+                "PV Total pension": 1847695.61397777,
+                "PV Top-Up pension": 1647695.61397777,
+                "Initial replacement rate": 0.4,
+                "Total initial monthly pension": 7817.2,
+                "Top-up monthly pension": 6971.04331262541
+            }
+        }
+    }
+}
+
+
+
+
+
+Widow
+Dependent widower
+Minor son
+Minor daughter
+Mother
+Dependent father
+Unmarried daughter
+Dependent widowed daughter
+Dependent minor brother
+Dependent minor sister
+Dependent unmarried sister
+Dependent widowed sister
+Dependent widowed daughter-in-law
+Dependent minor daugther of a deceased son
+Dependent minor daughter of a deceased daughter
+Dependent minor son of a deceased son
+Dependent minor son of a deceased daughter
+Dependent paternal grandmother
+Dependent paternal grandfather
+Dependent disabled son
+Dependent disabled daughter
+Dependent son born out of wedlock
+Dependent unmarried daughter born out of wedlock

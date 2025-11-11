@@ -1835,3 +1835,25 @@ class UpdateWorkforceInteractiveUserMutation(graphene.Mutation):
             return UpdateWorkforceInteractiveUserMutation(success=False, user=None, errors=["InteractiveUser not found"], clientMutationId="", internalId="")
         except Exception as e:
             return UpdateWorkforceInteractiveUserMutation(success=False, user=None, errors=[str(e)], clientMutationId="", internalId="")
+
+
+
+class TestWorkforcePaymentMutation(graphene.Mutation):
+    class Arguments:
+        workforce_application_id = graphene.String(required=True)
+
+    success = graphene.Boolean()
+    errors = graphene.List(graphene.String)
+
+    @classmethod
+    def mutate(cls, root, info, workforce_application_id):
+        from workforce.models import WorkforceApplication
+        workforce_application= WorkforceApplication.objects.get(id=workforce_application_id)
+        print(workforce_application)
+        try:
+            WorkforceEmployeeDependent.eis_calculated_amount(workforce_application_id, workforce_application.application_type)
+            return TestWorkforcePaymentMutation(success=True, errors=[], clientMutationId="", internalId="")
+        except InteractiveUser.DoesNotExist:
+            return TestWorkforcePaymentMutation(success=False, errors=["InteractiveUser not found"], clientMutationId="", internalId="")
+        except Exception as e:
+            return TestWorkforcePaymentMutation(success=False, errors=[str(e)], clientMutationId="", internalId="")

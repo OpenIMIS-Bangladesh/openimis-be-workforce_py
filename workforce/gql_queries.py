@@ -539,7 +539,10 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "eis_payment_type": ["exact"],
             "eis_calculated_amount": ["exact"],
             "eis_approved_amount": ["exact"],
-            "eis_number_of_payment_months": ["exact"],
+            "eis_initial_monthly_amount": ["exact"],
+            "eis_monthly_amount": ["exact"],
+            "pv_factor": ["exact"],
+            "initial_replacement_rate": ["exact"],
             "deceased_worker_info": [],
         }
         connection_class = ExtendedConnection
@@ -643,6 +646,9 @@ class WorkforceEmployeeDependentGQLType(DjangoObjectType):
             "eis_calculated_amount": ["exact"],
             "eis_approved_amount": ["exact"],
             "eis_monthly_amount": ["exact"],
+            "eis_initial_monthly_amount": ["exact"],
+            "pv_factor": ["exact"],
+            "initial_replacement_rate": ["exact"],
             "parent_dependent": ["exact"],
             "present_address": ["exact", "icontains"],
             "permanent_address": ["exact", "icontains"],
