@@ -202,6 +202,7 @@ class WorkforceApplicationServices(BaseService):
                 user_str=str(self.user),
                 note="আবেদন ইআইএস কোঅর্ডিনেটর শাখায় প্রেরণ করা হয়েছে"
             )
+
             WorkforceEmployeeDependentServices.calculate_eis_amount(application_eis_instance.id, existing_data['application_type'])
         else:
             application_eis_instance = None

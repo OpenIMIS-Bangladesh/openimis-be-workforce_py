@@ -1844,16 +1844,19 @@ class TestWorkforcePaymentMutation(graphene.Mutation):
 
     success = graphene.Boolean()
     errors = graphene.List(graphene.String)
+    client_mutation_id = graphene.String()
+    internal_id = graphene.String()
 
     @classmethod
-    def mutate(cls, root, info, workforce_application_id):
+    def mutate(cls, root, info, **data):
         from workforce.models import WorkforceApplication
-        workforce_application= WorkforceApplication.objects.get(id=workforce_application_id)
-        print(workforce_application)
+        user = info.context.user if hasattr(info.context, 'user') else None
+        workforce_application= WorkforceApplication.objects.get(id=data["workforce_application_id"])
         try:
-            WorkforceEmployeeDependent.eis_calculated_amount(workforce_application_id, workforce_application.application_type)
-            return TestWorkforcePaymentMutation(success=True, errors=[], clientMutationId="", internalId="")
+            service_instance = WorkforceEmployeeDependentServices(user)
+            service_instance.calculate_eis_amount(data["workforce_application_id"], workforce_application.application_type)
+            return TestWorkforcePaymentMutation(success=True, errors=[], client_mutation_id="", internal_id="")
         except InteractiveUser.DoesNotExist:
-            return TestWorkforcePaymentMutation(success=False, errors=["InteractiveUser not found"], clientMutationId="", internalId="")
+            return TestWorkforcePaymentMutation(success=False, errors=["Application not found"], client_mutation_id="", internal_id="")
         except Exception as e:
-            return TestWorkforcePaymentMutation(success=False, errors=[str(e)], clientMutationId="", internalId="")
+            return TestWorkforcePaymentMutation(success=False, errors=[str(e)], client_mutation_id="", internal_id="")
