@@ -1896,8 +1896,8 @@ class CreateWorkforceEisPaymentProcessMutation(graphene.Mutation):
                     eis_calculated_amount= workforce_application.eis_calculated_amount,
                     eis_approved_amount= workforce_application.eis_approved_amount,
                     eis_monthly_amount= workforce_application.eis_monthly_amount,
-                    month_index= data["month"] if data["month"] else now.month, #could be given from frontend, need to make sure
-                    year= data["year"] if data["year"] else now.year, #could be given from frontend, need to make sure
+                    month_index= data["month"] if "month" in data else now.month, #could be given from frontend, need to make sure
+                    year= data["year"] if "year" in data else now.year, #could be given from frontend, need to make sure
                     processing_date=date.today(),
                     # processed_by=interactive_user,
                     is_disbursed=False,
@@ -1919,8 +1919,8 @@ class CreateWorkforceEisPaymentProcessMutation(graphene.Mutation):
                         eis_calculated_amount=dep.eis_calculated_amount,
                         eis_approved_amount=dep.eis_approved_amount,
                         eis_monthly_amount=dep.eis_monthly_amount,
-                        month_index= data["month"] if data["month"] else now.month, #could be given from frontend, need to make sure
-                        year= data["year"] if data["year"] else now.year, #could be given from frontend, need to make sure
+                        month_index= data["month"] if "month" in data else now.month, #could be given from frontend, need to make sure
+                        year= data["year"] if "year" in data else now.year, #could be given from frontend, need to make sure
                         processing_date=date.today(),
                         # processed_by=user.id,
                         is_disbursed=False
