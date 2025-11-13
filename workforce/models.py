@@ -575,7 +575,7 @@ class WorkforceEmployeeDependent(HistoryModel):
         null=True,
         related_name="workforce_banks",
     )
-    bank_account_no = models.BigIntegerField(max_length=18, null=True, blank=True)
+    bank_account_no = models.CharField(max_length=50, null=True, blank=True)
     bank_account_holder_name = models.CharField(max_length=255, null=True, blank=True)
     eis_payment_type = models.CharField(max_length=50, null=True, blank=True)
     eis_calculated_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)

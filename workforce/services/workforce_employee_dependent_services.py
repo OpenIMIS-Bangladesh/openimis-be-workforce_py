@@ -216,7 +216,7 @@ class WorkforceEmployeeDependentServices(BaseService):
                 "ID": str(worker.id),
                 "Status": "Disabled" if application_type=="disabilityAssistance" else "Deceased",
                 # "Disability level": f"{workforce_application.disability_level}%" if application_type=="disabilityAssistance" else "",
-                "Disability level": "50%",
+                "Disability level": "50%", #right now this is hard coded. it needs to be taken from frontend
                 "Monthly earnings used for calculation": str(workforce_application.last_base_salary or 20000),
                 "Date of birth": worker.birth_date.strftime(
                     "%m/%d/%Y") if worker.birth_date else "10/16/1997",
