@@ -1,6 +1,6 @@
 from django.db import models
 from core.models import HistoryModel, InteractiveUser
-from core.models.user import UserRole, Role
+from core.models.user import Role
 from location.models import Location
 from django.utils import timezone
 from datetime import timedelta
@@ -552,22 +552,22 @@ class WorkforceEmployeeDependent(HistoryModel):
         null=True,
         related_name="workforce_employee_dependent_application",
     )
-    eis_insurance_no = models.CharField(max_length=50, null=True, blank=True)
-    name_bn = models.CharField(max_length=255, null=True, blank=True)
-    name_en = models.CharField(max_length=255, null=True, blank=True)
-    father_name_bn = models.CharField(max_length=255, null=True, blank=True)
-    father_name_en = models.CharField(max_length=255, null=True, blank=True)
-    mother_name_bn = models.CharField(max_length=255, null=True, blank=True)
-    mother_name_en = models.CharField(max_length=255, null=True, blank=True)
-    marital_status = models.CharField(max_length=30, null=True, blank=True)
-    gender = models.CharField(max_length=30, null=True, blank=True)
-    occupation = models.CharField(max_length=30, null=True, blank=True)
-    email = models.CharField(max_length=255, null=True, blank=True)
-    phone_number = models.CharField(null=True, blank=True, max_length=20)
+    eis_insurance_no = models.CharField(max_length=512, null=True, blank=True)
+    name_bn = models.CharField(max_length=512, null=True, blank=True)
+    name_en = models.CharField(max_length=512, null=True, blank=True)
+    father_name_bn = models.CharField(max_length=512, null=True, blank=True)
+    father_name_en = models.CharField(max_length=512, null=True, blank=True)
+    mother_name_bn = models.CharField(max_length=512, null=True, blank=True)
+    mother_name_en = models.CharField(max_length=512, null=True, blank=True)
+    marital_status = models.CharField(max_length=512, null=True, blank=True)
+    gender = models.CharField(max_length=512, null=True, blank=True)
+    occupation = models.CharField(max_length=512, null=True, blank=True)
+    email = models.CharField(max_length=512, null=True, blank=True)
+    phone_number = models.CharField(null=True, blank=True, max_length=512)
     birth_date = models.DateField(null=True, blank=True)
-    nid = models.CharField(max_length=30, null=True, blank=True)
+    nid = models.CharField(max_length=512, null=True, blank=True)
     birth_certificate_no = models.CharField(
-        max_length=30, null=True, blank=True)
+        max_length=512, null=True, blank=True)
     bank = models.ForeignKey(
         Bank,
         models.DO_NOTHING,
@@ -608,12 +608,12 @@ class WorkforceEmployeeDependent(HistoryModel):
     )
     present_address = models.TextField(null=True, blank=True)
     permanent_address = models.TextField(null=True, blank=True)
-    life_status = models.CharField(max_length=30, null=True, blank=True)
+    life_status = models.CharField(max_length=512, null=True, blank=True)
     death_date = models.DateField(null=True, blank=True)
-    disability_status = models.CharField(max_length=30, null=True, blank=True)
+    disability_status = models.CharField(max_length=512, null=True, blank=True)
     disability_type = models.TextField(null=True, blank=True)
     relation_with_worker = models.CharField(
-        max_length=50, null=True, blank=True)
+        max_length=512, null=True, blank=True)
     last_verification_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
     is_eligible= models.BooleanField(default=False)
@@ -1166,6 +1166,7 @@ class WorkforceSignature(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_signature'
+
 
 class WorkforceFactoryRegistration(models.Model):
     id = models.UUIDField(primary_key=True, db_column="UUID", default=None, editable=False)
