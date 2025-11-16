@@ -34,7 +34,7 @@ class WorkforceUserServices():
             "last_name": first_name_en,
             "phone": obj_data.get('phone_number'),
             "email": '',
-            "language": 'en',
+            "language": 'fr',
             "health_facility_id": 1,
             "password": obj_data.get('password'),
             "roles": obj_data.get("roles", []),

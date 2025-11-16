@@ -252,6 +252,24 @@ class WorkforceApplicationServices(BaseService):
                     )
                     dep_instance.save(username=self.user.username)
 
+                    attachments = dep.get("attachments")
+                    if attachments and attachments != "[{}]":
+
+                        for attr in attachments:
+                            files = attr.get("files", [])
+                            file_data = [
+                                {
+                                    "file_url": info.get("uploadInfo", {}).get("file_url"),
+                                    "file_path": info.get("uploadInfo", {}).get("file_path")
+                                }
+                                for info in files
+                            ]
+
+                            for item in file_data:
+                                document = WorkforceDocument.objects.get(path=item.get("file_path"), url=item.get("file_url"))
+                                document.workforce_dependent_id = dep_instance.id
+                                document.save(username=self.user.username)
+
                     if application_eis_instance:
                         dep_instance_eis = WorkforceEmployeeDependent(
                             workforce_application=application_eis_instance,
