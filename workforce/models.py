@@ -297,16 +297,35 @@ class WorkforceFactory(HistoryModel):
     )
     employer_id = models.CharField(max_length=255, null=True, blank=True)
     employer_id_lima = models.CharField(max_length=255, null=True, blank=True)
-    name_bn = models.CharField(
-        max_length=255, null=False, db_comment='Translatable name field. May use any language')
-    name_en = models.CharField(max_length=255, db_comment='English name field')
+    name_bn = models.TextField(null=False, db_comment='Translatable name field. May use any language')
+    name_en = models.TextField(db_comment='English name field')
+    group_name = models.TextField(null=True, blank=True)
+    license_type = models.CharField(max_length=200, null=True, blank=True)
     location = models.ForeignKey(
         Location,
         models.DO_NOTHING,
-        blank=False,
-        null=False
+        blank=True,
+        null=True,
+        related_name="location",
     )
+
+    office_location = models.ForeignKey(
+        Location,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="office_location",
+    )
+    future_date = models.DateField(null=True, blank=True)
+    date_of_eis_incorporation = models.DateField(null=True, blank=True)
+    date_of_factory_establishment = models.DateField(null=True, blank=True)
+    membership_no = models.CharField(max_length=200, null=True, blank=True)
+    business_sector = models.TextField(null=True, blank=True)
+    License_no = models.CharField(max_length=200, null=True, blank=True)
+    lima_registration_number = models.CharField(max_length=200, null=True, blank=True)
+    approximate_number_of_employee = models.CharField(max_length=200, null=True, blank=True)
     address = models.TextField(null=True, blank=True)
+    office_address = models.TextField(null=True, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     email = models.CharField(max_length=255, null=True, blank=True)
     website = models.CharField(max_length=200, null=True, blank=True)
