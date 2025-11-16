@@ -15,7 +15,8 @@ from .models import (
     WorkforceUser, WorkforceOtp, WorkforceApplicationMovement, WorkforceApplicationSummary,
     WorkforceApplicationSummaryMovement,
     WorkforceGrantMoney, WorkforceDiseases, WorkforceEducation, WorkforceEmployeeBankingInfo,
-    WorkforceSignature, WorkforceFactoryRegistration, WorkforcePostoffice
+    WorkforceSignature, WorkforceFactoryRegistration, WorkforcePostoffice, WorkforceEisPaymentDisbursement,
+    WorkforceEisPaymentProcess
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -538,7 +539,10 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "eis_payment_type": ["exact"],
             "eis_calculated_amount": ["exact"],
             "eis_approved_amount": ["exact"],
-            "eis_number_of_payment_months": ["exact"],
+            "eis_initial_monthly_amount": ["exact"],
+            "eis_monthly_amount": ["exact"],
+            "pv_factor": ["exact"],
+            "initial_replacement_rate": ["exact"],
             "deceased_worker_info": [],
         }
         connection_class = ExtendedConnection
@@ -635,15 +639,28 @@ class WorkforceEmployeeDependentGQLType(DjangoObjectType):
             "birth_date": ["exact"],
             "nid": ["exact"],
             "birth_certificate_no": ["exact"],
+            **prefix_filterset("bank__", WorkforceBankGQLType._meta.filter_fields),
+            "bank_account_no": ["exact"],
+            "bank_account_holder_name": ["exact", "icontains"],
+            "eis_payment_type": ["exact"],
+            "eis_calculated_amount": ["exact"],
+            "eis_approved_amount": ["exact"],
+            "eis_monthly_amount": ["exact"],
+            "eis_initial_monthly_amount": ["exact"],
+            "pv_factor": ["exact"],
+            "initial_replacement_rate": ["exact"],
+            "parent_dependent": ["exact"],
             "present_address": ["exact", "icontains"],
             "permanent_address": ["exact", "icontains"],
             "life_status": ["exact", "icontains"],
             "death_date": ["exact"],
             "disability_status": ["exact", "icontains"],
+            "disability_type": ["exact", "icontains"],
             "relation_with_worker": ["exact", "icontains"],
             "last_verification_date": ["exact"],
             "status": ["exact", "icontains"],
             "percentage_of_cf_grant": ["exact"],
+            "is_eligible": ["exact", "icontains"],
             **prefix_filterset("present_location__", LocationGQLType._meta.filter_fields),
             **prefix_filterset("permanent_location__", LocationGQLType._meta.filter_fields),
         }
@@ -1113,3 +1130,55 @@ class WorkforceInteractiveUserGQLType(graphene.ObjectType):
     other_names = graphene.String()
     phone = graphene.String()
     email_id = graphene.String()
+
+
+class WorkforceEisPaymentProcessGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceEisPaymentProcess
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            # **prefix_filterset("workforce_application__", WorkforceApplicationGQLType._meta.filter_fields),
+            # **prefix_filterset("workforce_application_summary__", WorkforceApplicationSummaryGQLType._meta.filter_fields),
+            # **prefix_filterset("workforce_employee_dependent__", WorkforceEmployeeDependentGQLType._meta.filter_fields),
+            # **prefix_filterset("workforce_bank__", WorkforceBankGQLType._meta.filter_fields),
+            "bank_account_no": ["exact"],
+            "bank_account_holder_name": ["exact"],
+            "eis_payment_type": ["exact"],
+            "eis_calculated_amount": ["exact"],
+            "eis_approved_amount": ["exact"],
+            "eis_monthly_amount": ["exact"],
+            "month_index": ["exact"],
+            "year": ["exact"],
+            "processing_date": ["exact"],
+            # **prefix_filterset("processed_by__", InteractiveUserGQLType._meta.filter_fields),
+            "is_disbursed": ["exact"],
+
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceEisPaymentDisbursementGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceEisPaymentDisbursement
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            # **prefix_filterset("workforce_application__", WorkforceApplicationGQLType._meta.filter_fields),
+            # **prefix_filterset("workforce_application_summary__", WorkforceApplicationSummaryGQLType._meta.filter_fields),
+            # **prefix_filterset("workforce_employee_dependent__", WorkforceEmployeeDependentGQLType._meta.filter_fields),
+            # **prefix_filterset("workforce_bank__", WorkforceBankGQLType._meta.filter_fields),
+            "bank_account_no": ["exact"],
+            "bank_account_holder_name": ["exact"],
+            "eis_payment_type": ["exact"],
+            "eis_calculated_amount": ["exact"],
+            "eis_approved_amount": ["exact"],
+            "eis_monthly_amount": ["exact"],
+            "month_index": ["exact"],
+            "year": ["exact"],
+            "disbursement_date": ["exact"],
+            # **prefix_filterset("disbursed_by__", InteractiveUserGQLType._meta.filter_fields),
+            "disbursed_by": ["exact"],
+
+        }
+        connection_class = ExtendedConnection
