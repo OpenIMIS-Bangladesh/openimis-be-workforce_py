@@ -578,13 +578,13 @@ class WorkforceEmployeeDependent(HistoryModel):
     bank_account_no = models.CharField(max_length=50, null=True, blank=True)
     bank_account_holder_name = models.CharField(max_length=255, null=True, blank=True)
     eis_payment_type = models.CharField(max_length=50, null=True, blank=True)
-    eis_calculated_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
-    eis_approved_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
-    eis_initial_monthly_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
-    eis_monthly_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
-    pv_factor= models.DecimalField(max_digits=10, decimal_places=5, null=True, blank=True)
-    initial_replacement_rate= models.DecimalField(max_digits=10, decimal_places=5, null=True, blank=True)
-    parent_dependent= models.ForeignKey(
+    eis_calculated_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    eis_approved_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    eis_initial_monthly_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    eis_monthly_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    pv_factor = models.DecimalField(max_digits=10, decimal_places=5, null=True, blank=True)
+    initial_replacement_rate = models.DecimalField(max_digits=10, decimal_places=5, null=True, blank=True)
+    parent_dependent = models.ForeignKey(
         "WorkforceEmployeeDependent",
         models.DO_NOTHING,
         blank=True,
@@ -616,7 +616,14 @@ class WorkforceEmployeeDependent(HistoryModel):
         max_length=512, null=True, blank=True)
     last_verification_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
-    is_eligible= models.BooleanField(default=False)
+    is_eligible = models.BooleanField(default=False)
+    banking_info = models.ForeignKey(
+        "WorkforceEmployeeBankingInfo",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="dependent_employee_banking_info",
+    )
 
     class Meta:
         managed = True
@@ -1144,6 +1151,10 @@ class WorkforceEmployeeBankingInfo(HistoryModel):
     type = models.CharField(max_length=255, null=True, blank=True)
     amount = models.CharField(max_length=20, null=True, blank=True)
     account_no = models.CharField(max_length=20, null=True, blank=True)
+    bank_account_type = models.CharField(max_length=64, null=True, blank=True)
+    nid = models.CharField(max_length=64, null=True, blank=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+    relation_with_dependent = models.CharField(max_length=64, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:
@@ -1286,7 +1297,6 @@ class WorkforceAssociation(HistoryModel):
         db_table = 'workforce_association'
 
 
-
 class WorkforceEisPaymentProcess(HistoryModel):
     workforce_application = models.ForeignKey(
         "WorkforceApplication",
@@ -1317,7 +1327,7 @@ class WorkforceEisPaymentProcess(HistoryModel):
         related_name="workforce_payment_bank",
     )
 
-    bank_account_no =  models.CharField(max_length=50, null=True, blank=True)
+    bank_account_no = models.CharField(max_length=50, null=True, blank=True)
     bank_account_holder_name = models.CharField(max_length=255, null=True, blank=True)
 
     eis_payment_type = models.CharField(max_length=50, null=True, blank=True)

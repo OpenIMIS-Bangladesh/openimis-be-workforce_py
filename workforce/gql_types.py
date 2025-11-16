@@ -322,6 +322,7 @@ class WorkforceEmployeeDependentInputType(OpenIMISMutation.Input):
     relation_with_worker = graphene.String(required=True)
     last_verification_date = graphene.String()
     percentage_of_cf_grant = graphene.String()
+    banking_info_id = graphene.String()
     status = graphene.String()
     is_eligible = graphene.Boolean()
 
@@ -560,6 +561,10 @@ class WorkforceEmployeeBankingInfoInputType(OpenIMISMutation.Input):
     type = graphene.String(required=False)
     amount = graphene.String(required=False)
     account_no = graphene.String(required=False)
+    bank_account_type = graphene.String(required=False)
+    nid = graphene.String(required=False)
+    date_of_birth = graphene.String(required=False)
+    relation_with_dependent = graphene.String(required=False)
     status = graphene.String()
 
 
