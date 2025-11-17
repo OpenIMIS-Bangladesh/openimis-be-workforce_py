@@ -26,7 +26,10 @@ class WorkforceUserServices():
         first_name_en = obj_data.get('first_name_en') or ""
 
         if InteractiveUser.objects.filter(validity_to__isnull=True, login_name=login_name).exists():
-            raise ValidationError(f"User with login name '{login_name}' already exists.")
+            raise ValidationError({
+                "error_code": "login_name already exists",
+                "message": f"User with login name '{login_name}' already exists."
+            })
 
         data = {
             "username": login_name,
