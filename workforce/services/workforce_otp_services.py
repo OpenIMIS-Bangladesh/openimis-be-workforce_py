@@ -19,14 +19,14 @@ class WorkforceOtpServices():
 
         if InteractiveUser.objects.filter(validity_to__isnull=True, login_name=login_name).exists():
             raise ValidationError({
-                "error": "login_name already exists",
+                "error": "login_name_already_exists	",
                 "code": 1001,
                 "message": f"User with login name '{login_name}' already exists."
             })
 
         if InteractiveUser.objects.filter(validity_to__isnull=True, phone=phone_number).exists():
             raise ValidationError({
-                "error": "phone_number already exists",
+                "error": "phone_number_already_exists",
                 "code": 1002,
                 "message": f"User with phone number '{phone_number}' already exists."
             })
