@@ -321,7 +321,7 @@ class WorkforceFactory(HistoryModel):
     date_of_factory_establishment = models.DateField(null=True, blank=True)
     membership_no = models.CharField(max_length=200, null=True, blank=True)
     business_sector = models.TextField(null=True, blank=True)
-    License_no = models.CharField(max_length=200, null=True, blank=True)
+    license_no = models.CharField(max_length=200, null=True, blank=True)
     lima_registration_number = models.CharField(max_length=200, null=True, blank=True)
     approximate_number_of_employee = models.CharField(max_length=200, null=True, blank=True)
     address = models.TextField(null=True, blank=True)
