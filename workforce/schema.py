@@ -242,6 +242,21 @@ class Query(graphene.ObjectType):
         email_id=graphene.String(required=False)
     )
 
+
+    workforce_eis_payment_process = graphene.List(
+        WorkforceEisPaymentProcessGQLType,
+        workforce_application_id=graphene.String(),
+        month=graphene.String(),
+        year=graphene.String(),
+    )
+
+    workforce_eis_payment_disbursement = graphene.List(
+        WorkforceEisPaymentDisbursementGQLType,
+        workforce_application_id=graphene.String(),
+        month=graphene.String(),
+        year=graphene.String(),
+    )
+
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("unauthorized"))
@@ -1168,6 +1183,34 @@ class Query(graphene.ObjectType):
         try:
             return InteractiveUser.objects.get(id=id)
         except InteractiveUser.DoesNotExist:
+            return None
+    
+    
+    def resolve_workforce_eis_payment_process(self, info, workforce_application_id=None, month=None, year=None):
+        try:
+            qs = WorkforceEisPaymentProcess.objects.all()
+            if workforce_application_id:
+                qs = qs.filter(workforce_application_id=workforce_application_id)
+            if month:
+                qs = qs.filter(month_index=month)
+            if year:
+                qs = qs.filter(year=year)
+            return qs
+        except WorkforceEisPaymentProcess.DoesNotExist:
+            return None
+
+
+    def resolve_workforce_eis_payment_disbursement(self, info, workforce_application_id=None, month=None, year=None):
+        try:
+            qs = WorkforceEisPaymentDisbursement.objects.all()
+            if workforce_application_id:
+                qs = qs.filter(workforce_application_id=workforce_application_id)
+            if month:
+                qs = qs.filter(month_index=month)
+            if year:
+                qs = qs.filter(year=year)
+            return qs
+        except WorkforceEisPaymentProcess.DoesNotExist:
             return None
 
 
