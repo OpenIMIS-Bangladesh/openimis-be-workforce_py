@@ -3,7 +3,7 @@ from graphql_jwt.mutations import JSONWebTokenMutation, mixins
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils.translation import gettext as _
-
+import base64
 from core.models import InteractiveUser
 from core.schema import OpenIMISMutation
 from .apps import WorkforceConfig
@@ -27,7 +27,7 @@ from .gql_types import (
     WorkforceInteractiveUserInputType
 )
 
-from .models import WorkforceEmployeeDependent
+from .models import Bank
 from .services.workforce_organization_services import WorkforceOrganizationServices
 from .services.workforce_representative_services import WorkforceRepresentativeServices
 from .services.workforce_organization_unit_services import WorkforceOrganizationUnitServices
@@ -1886,10 +1886,12 @@ class CreateWorkforceEisPaymentProcessMutation(graphene.Mutation):
             # interactive_user = InteractiveUser.objects.get(id=user.id) if user else None
             if workforce_application.application_type == "disabilityAssistance":
                 bank_info = json.loads(workforce_application.employee_bank_info)
+                bank_id = (base64.b64decode(bank_info[0]["bank"]["id"]).decode("utf-8")).split(":")[1]
+                bank_instance = Bank.objects.get(id=bank_id)
                 now = datetime.now()
                 payment_obj = WorkforceEisPaymentProcess(
                     workforce_application = workforce_application,
-                    # bank=some_bank_instance,
+                    bank=bank_instance,
                     bank_account_no = bank_info[0]["accountNumber"] ,
                     bank_account_holder_name= bank_info[0]["accountHolderName"],
                     eis_payment_type="monthly",
