@@ -636,6 +636,10 @@ class WorkforceEmployeeDependent(HistoryModel):
     last_verification_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
     is_eligible = models.BooleanField(default=False)
+    account_holder_type = models.CharField(max_length=50, null=True, blank=True)
+    account_holder_relation_with_dependent= models.CharField(max_length=100, null=True, blank=True)
+    account_holder_dob = models.DateField(null=True, blank=True)
+    account_holder_nid = models.CharField(max_length=50, null=True, blank=True)
     banking_info = models.ForeignKey(
         "WorkforceEmployeeBankingInfo",
         models.DO_NOTHING,
@@ -1175,6 +1179,14 @@ class WorkforceEmployeeBankingInfo(HistoryModel):
     date_of_birth = models.DateField(null=True, blank=True)
     relation_with_dependent = models.CharField(max_length=64, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
+    account_holder_type = models.CharField(max_length=64, null=True, blank=True)
+    parent_dependent = models.ForeignKey(
+        WorkforceEmployeeDependent,
+        on_delete=models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="employee_banking_parent_dependent",
+    )
 
     class Meta:
         managed = True
