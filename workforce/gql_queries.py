@@ -674,6 +674,10 @@ class WorkforceEmployeeDependentGQLType(DjangoObjectType):
             "percentage_of_cf_grant": ["exact"],
             "is_eligible": ["exact", "icontains"],
             "banking_info_id": ["exact"],
+            "account_holder_type": ["exact"],
+            "account_holder_relation_with_dependent": ["exact"],
+            "account_holder_dob": ["exact"],
+            "account_holder_nid": ["exact"],
             **prefix_filterset("present_location__", LocationGQLType._meta.filter_fields),
             **prefix_filterset("permanent_location__", LocationGQLType._meta.filter_fields),
         }
@@ -995,6 +999,8 @@ class WorkforceEmployeeBankingInfoGQLType(DjangoObjectType):
             "date_of_birth": ["exact", "icontains"],
             "relation_with_dependent": ["exact", "icontains"],
             "status": ["exact"],
+            "account_holder_type": ["exact"],
+            "parent_dependent_id": ["exact"]
         }
         connection_class = ExtendedConnection
 
