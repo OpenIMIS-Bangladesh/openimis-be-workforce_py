@@ -428,68 +428,70 @@ class WorkforceApplicationServices(BaseService):
         #     "medicalDonation",
         # }
 
-        all_bank_data = json.loads(obj_data.get("employee_bank_info", "[]"))
+        #=======DO NOT DELETE THE FOLLOWING COMMENTED BLOCK
 
-        if application_status == "new" and all_bank_data:
-            # if appli  cation_instance.application_type in has_dependent_application_types:
-            for bank_data in all_bank_data:
-                if bank_data.get("applicant_type") == "dependent":
-                    try:
-                        dependent_id = extract_uuid(bank_data.get("dependentId"))
-                        dependent = WorkforceEmployeeDependent.objects.get(id=dependent_id)
-                    except WorkforceEmployeeDependent.DoesNotExist:
-                        continue  # or raise
-
-                    holder_type = bank_data.get("accountHolderType")
-                    bank_id_decoded = extract_uuid(bank_data.get("branch", {}).get("id"))
-
-                    if holder_type == "select_from_another_dependent":
-                        try:
-                            parent_id = extract_uuid(bank_data.get("parentDependentId", {}).get("id"))
-                            parent = WorkforceEmployeeDependent.objects.get(id=parent_id)
-                        except:
-                            continue
-
-                        dependent.bank = parent.bank
-                        dependent.bank_account_no = parent.bank_account_no
-                        dependent.bank_account_holder_name = parent.bank_account_holder_name
-                        dependent.parent_dependent = parent
-
-                    else:
-                        try:
-                            dependent.bank = Bank.objects.get(id=bank_id_decoded)
-                        except:
-                            continue
-
-                        dependent.bank_account_no = bank_data.get("accountNumber")
-                        dependent.bank_account_holder_name = bank_data.get("accountHolderName")
-
-                        if holder_type == "other":
-                            dependent.account_holder_relation_with_dependent = bank_data.get(
-                                "relationshipWithAccountHolder")
-                            dependent.account_holder_dob = bank_data.get("otherAccountHolderDob")
-                            dependent.account_holder_nid = bank_data.get("otherAccountHolderNid")
-
-                    dependent.save(username=self.user.username)
-                else:
-                    bank_id_decoded = extract_uuid(bank_data.get("branch", {}).get("id"))
-                    bank = Bank.objects.get(id=bank_id_decoded)
-                    employee = WorkforceEmployee.objects.get(id= application_instance.workforce_employee)
-                    entry = WorkforceEmployeeBankingInfo(
-                        name_bn=employee.first_name_bn,
-                        name_en=employee.first_name_en,
-                        account_holder_name=bank_data.get("accountHolderName"),
-                        employee=employee,
-                        application=application_instance,
-                        bank=bank,
-                        type="applicant",
-                        amount="0",
-                        account_no=bank_data.get("accountNumber"),
-                        nid=employee.nid,
-                        date_of_birth=employee.birth_date,
-                        status="active"
-                    )
-                    entry.save(username=self.user.username)
+        # all_bank_data = json.loads(obj_data.get("employee_bank_info", "[]"))
+        #
+        # if application_status == "new" and all_bank_data:
+        #     # if appli  cation_instance.application_type in has_dependent_application_types:
+        #     for bank_data in all_bank_data:
+        #         if bank_data.get("applicant_type") == "dependent":
+        #             try:
+        #                 dependent_id = extract_uuid(bank_data.get("dependentId"))
+        #                 dependent = WorkforceEmployeeDependent.objects.get(id=dependent_id)
+        #             except WorkforceEmployeeDependent.DoesNotExist:
+        #                 continue  # or raise
+        #
+        #             holder_type = bank_data.get("accountHolderType")
+        #             bank_id_decoded = extract_uuid(bank_data.get("branch", {}).get("id"))
+        #
+        #             if holder_type == "select_from_another_dependent":
+        #                 try:
+        #                     parent_id = extract_uuid(bank_data.get("parentDependentId", {}).get("id"))
+        #                     parent = WorkforceEmployeeDependent.objects.get(id=parent_id)
+        #                 except:
+        #                     continue
+        #
+        #                 dependent.bank = parent.bank
+        #                 dependent.bank_account_no = parent.bank_account_no
+        #                 dependent.bank_account_holder_name = parent.bank_account_holder_name
+        #                 dependent.parent_dependent = parent
+        #
+        #             else:
+        #                 try:
+        #                     dependent.bank = Bank.objects.get(id=bank_id_decoded)
+        #                 except:
+        #                     continue
+        #
+        #                 dependent.bank_account_no = bank_data.get("accountNumber")
+        #                 dependent.bank_account_holder_name = bank_data.get("accountHolderName")
+        #
+        #                 if holder_type == "other":
+        #                     dependent.account_holder_relation_with_dependent = bank_data.get(
+        #                         "relationshipWithAccountHolder")
+        #                     dependent.account_holder_dob = bank_data.get("otherAccountHolderDob")
+        #                     dependent.account_holder_nid = bank_data.get("otherAccountHolderNid")
+        #
+        #             dependent.save(username=self.user.username)
+        #         else:
+        #             bank_id_decoded = extract_uuid(bank_data.get("branch", {}).get("id"))
+        #             bank = Bank.objects.get(id=bank_id_decoded)
+        #             employee = WorkforceEmployee.objects.get(id= application_instance.workforce_employee)
+        #             entry = WorkforceEmployeeBankingInfo(
+        #                 name_bn=employee.first_name_bn,
+        #                 name_en=employee.first_name_en,
+        #                 account_holder_name=bank_data.get("accountHolderName"),
+        #                 employee=employee,
+        #                 application=application_instance,
+        #                 bank=bank,
+        #                 type="applicant",
+        #                 amount="0",
+        #                 account_no=bank_data.get("accountNumber"),
+        #                 nid=employee.nid,
+        #                 date_of_birth=employee.birth_date,
+        #                 status="active"
+        #             )
+        #             entry.save(username=self.user.username)
 
 
         # ================================================================
