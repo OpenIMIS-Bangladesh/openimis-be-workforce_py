@@ -731,6 +731,7 @@ class Query(graphene.ObjectType):
             },
             "death": {
                 "cf": ["financialAssistance"],
+                "eis": ["financialAssistance"],
                 "blwf": ["deadlyGrant"],
             },
             "maternityGrant": {
@@ -739,6 +740,7 @@ class Query(graphene.ObjectType):
             },
             "disabilityAssistance": {
                 "cf": ["disabilityAssistance"],
+                "eis": ["disabilityAssistance"],
                 "blwf": [],
             },
         }
@@ -916,6 +918,7 @@ class Query(graphene.ObjectType):
             },
             "death": {
                 "cf": ["financialAssistance"],
+                "eis" : ["financialAssistance"],
                 "blwf": ["deadlyGrant"],
             },
             "maternityGrant": {
@@ -924,6 +927,7 @@ class Query(graphene.ObjectType):
             },
             "disabilityAssistance": {
                 "cf": ["disabilityAssistance"],
+                "eis": ["disabilityAssistance"],
                 "blwf": [],
             },
         }
