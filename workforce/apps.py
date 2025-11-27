@@ -152,6 +152,9 @@ DEFAULT_CFG = {
      # WorkforceLfmeaAssociation (821xxx)
     "gql_workforce_lfmeab_association_perms": ["814000"],
 
+     # WorkforceSecretary (821xxx)
+    "gql_workforce_secretary_perms": ["815000"],
+
     "default_validations_disabled": False,
 }
 
