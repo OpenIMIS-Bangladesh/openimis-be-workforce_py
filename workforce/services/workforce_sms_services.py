@@ -2,19 +2,19 @@ import requests
 import os
 
 
-def send_sms(messages):
-    return send_bulk_sms(messages)
+def send_sms(sms_to, message):
+    return send_bulk_sms(sms_to, message)
 
 
-def send_bulk_sms(messages):
-    url = os.environ.get("BULKSMS_API_URL")
-    api_key = os.environ.get("BULKSMS_API_KEY")
-    sender_id = os.environ.get("BULKSMS_SENDER_ID")
+def send_bulk_sms(sms_to, message):
+    url = os.environ.get("SMS_GW_URL")
 
     payload = {
-        "api_key": api_key,
-        "senderid": sender_id,
-        "messages": messages
+        "apikey": os.environ.get("SMS_GW_API_KEY"),
+        "secretkey": os.environ.get("SMS_GW_SECRET_KEY"),
+        "callerID": os.environ.get("SMS_GW_SENDER_ID"),
+        "toUser": sms_to,
+        "messageContent": message,
     }
 
     try:

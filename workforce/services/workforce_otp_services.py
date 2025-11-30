@@ -41,11 +41,8 @@ class WorkforceOtpServices():
             status=obj_data.get("status"),
         )
 
-        messages = [{
-            "to": otp_obj.phone_number,
-            "message": f"Your verification code is {otp_obj.otp}. This code will expire in 5 minutes. Please do not share this code with anyone"
-        }]
-        send_sms(messages)
+        message = f"Your verification code is {otp_obj.otp}. This code will expire in 5 minutes. Please do not share this code with anyone."
+        send_sms(sms_to=otp_obj.phone_number, message=message)
 
         return {"internal_id": otp_obj.id}
 
