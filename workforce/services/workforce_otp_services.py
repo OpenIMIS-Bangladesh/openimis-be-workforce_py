@@ -4,7 +4,7 @@ from django.db.models import Q
 from core.models import InteractiveUser
 from workforce.services.workforce_sms_services import send_sms
 from django.core.exceptions import ValidationError
-from workforce.models import WorkforceOtp
+from workforce.models import WorkforceOtp, WorkforceUser
 
 logger = logging.getLogger(__name__)
 
@@ -24,11 +24,25 @@ class WorkforceOtpServices():
                 "message": f"User with login name '{login_name}' already exists."
             })
 
+        if WorkforceUser.objects.filter(nid=nid).exists():
+            raise ValidationError({
+                "error": "duplicate_nid",
+                "code": 1003,
+                "message": f"Duplicate NID '{nid}' in workforce_user."
+            })
+
         if InteractiveUser.objects.filter(validity_to__isnull=True, phone=phone_number).exists():
             raise ValidationError({
                 "error": "phone_number_already_exists",
                 "code": 1002,
                 "message": f"User with phone number '{phone_number}' already exists."
+            })
+
+        if WorkforceUser.objects.filter(phone_number=phone_number).exists():
+            raise ValidationError({
+                "error": "duplicate_phone_number",
+                "code": 1004,
+                "message": f"Duplicate phone '{phone_number}' in workforce_user."
             })
 
         otp_obj = WorkforceOtp.objects.create(
