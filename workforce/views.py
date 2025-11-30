@@ -61,9 +61,10 @@ class SendOtpView(APIView):
 
             if employee is None:
                 return Response({'status': 'error', 'message': 'Invalid phone number', 'key': 'INVALID_PHONE_NUMBER'}, status=status.HTTP_400_BAD_REQUEST)
-
-            otp = generate_otp()
-            # otp = "12345"
+            if os.environ.get("TEST_LOGIN_OTP"):
+                otp = os.environ.get("TEST_LOGIN_OTP")
+            else:
+                otp = generate_otp()
             message = f"Your OTP is {otp}. This will expire in 5 minutes. Please do not share this code with anyone."
             send_sms(sms_to=employee.phone_number, message=message)
             user = InteractiveUser.objects.get(id=employee.related_user_id)

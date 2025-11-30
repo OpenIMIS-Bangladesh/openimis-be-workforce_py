@@ -16,6 +16,10 @@ class WorkforceOtpServices():
         login_name = obj_data.get('nid') or obj_data.get('birth_certificate_no')
         nid = obj_data.get("nid")
         phone_number = obj_data.get("phone_number")
+        if os.environ.get("TEST_SIGNUP_OTP"):
+            otp = os.environ.get("TEST_SIGNUP_OTP")
+        else:
+            otp=None
 
         if InteractiveUser.objects.filter(validity_to__isnull=True, login_name=login_name).exists():
             raise ValidationError({
@@ -45,19 +49,39 @@ class WorkforceOtpServices():
                 "message": f"Duplicate phone '{phone_number}' in workforce_user."
             })
 
-        otp_obj = WorkforceOtp.objects.create(
-            name_bn=obj_data.get("name_bn"),
-            first_name_en=obj_data.get("first_name_en"),
-            last_name_en=obj_data.get("last_name_en"),
-            nid=nid,
-            birth_certificate_no=obj_data.get("birth_certificate_no"),
-            phone_number=phone_number,
-            status=obj_data.get("status"),
-        )
+        if otp:
+            otp_obj = WorkforceOtp.objects.create(
+                name_bn=obj_data.get("name_bn"),
+                first_name_en=obj_data.get("first_name_en"),
+                last_name_en=obj_data.get("last_name_en"),
+                nid=nid,
+                birth_certificate_no=obj_data.get("birth_certificate_no"),
+                phone_number=phone_number,
+                otp=otp,
+                status=obj_data.get("status"),
+            )
+        else:
+            otp_obj = WorkforceOtp.objects.create(
+                name_bn=obj_data.get("name_bn"),
+                first_name_en=obj_data.get("first_name_en"),
+                last_name_en=obj_data.get("last_name_en"),
+                nid=nid,
+                birth_certificate_no=obj_data.get("birth_certificate_no"),
+                phone_number=phone_number,
+                status=obj_data.get("status"),
+            )
 
-        message = f"Your verification code is {otp_obj.otp}. This code will expire in 5 minutes. Please do not share this code with anyone."
-        send_sms(sms_to=otp_obj.phone_number, message=message)
+        otp_instance = WorkforceOtp.objects.get(id=otp_obj.id)
 
+        if otp_instance:
+            message = f"Your verification code is {otp_instance.otp}. This code will expire in 5 minutes. Please do not share this code with anyone."
+            send_sms(sms_to=otp_obj.phone_number, message=message)
+        else:
+            raise ValidationError({
+                "error": "failed_to_create_otp",
+                "code": 1005,
+                "message": f"OTP creation failed due to an unknown error"
+            })
         return {"internal_id": otp_obj.id}
 
     def get(self, **kwargs):

@@ -29,9 +29,10 @@ All API errors follow this JSON structure:
 
 ### Error Codes
 
-| Code | Error Key                   | Description                                                           |
-|------|-----------------------------|-----------------------------------------------------------------------|
-| 1001 | login_name_already_exists   | Thrown when creating a user with a duplicate login name.              |
-| 1002 | phone_number_already_exists | Thrown when creating a user with an existing phone number.            |
-| 1003 | duplicate_nid   | Thrown when creating a user with a duplicate nid, from workforce_user |
-| 1004 | duplicate_phone_number | Thrown when creating a user with an existing phone number,  from workforce_user           |
+| Code | Error Key                   | Description                                                                    |
+|------|-----------------------------|--------------------------------------------------------------------------------|
+| 1001 | login_name_already_exists   | Thrown when creating a user with a duplicate login name.                       |
+| 1002 | phone_number_already_exists | Thrown when creating a user with an existing phone number.                     |
+| 1003 | duplicate_nid   | Thrown when creating a user with a duplicate nid, from workforce_user          |
+| 1004 | duplicate_phone_number | Thrown when creating a user with an existing phone number,  from workforce_user |
+| 1005 | failed_to_create_otp | Thrown when OTP generation fails                                          |
