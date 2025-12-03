@@ -479,7 +479,13 @@ class WorkforceDocument(HistoryModel):
         null=True,
         related_name="workforce_document_application",
     )
-    holder = models.CharField(max_length=512, null=True, blank=True)
+    holder = models.ForeignKey(
+        InteractiveUser,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="document_owner"
+    )
     holder_type = models.CharField(max_length=512, null=True, blank=True)
     verifier = models.ForeignKey(
         InteractiveUser,

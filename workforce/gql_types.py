@@ -258,7 +258,7 @@ class WorkforceEmployeeDesignationInputType(OpenIMISMutation.Input):
 class WorkforceDocumentInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
     workforce_application_id = graphene.String()
-    holder = graphene.String()
+    holder_id = graphene.String()
     holder_type = graphene.String(required=True)
     verifier_id = graphene.String()
     approver_id = graphene.String()

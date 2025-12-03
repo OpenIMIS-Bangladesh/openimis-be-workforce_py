@@ -738,7 +738,7 @@ class WorkforceDocumentGQLType(DjangoObjectType):
         filter_fields = {
             "id": ["exact"],
             "workforce_application_id": ["exact"],
-            "holder": ["exact"],
+            "holder_id": ["exact"],
             "holder_type": ["exact", "icontains"],
             "verifier_id": ["exact"],
             "approver_id": ["exact"],
