@@ -1832,11 +1832,11 @@ class UpdateWorkforceInteractiveUserMutation(graphene.Mutation):
         service_instance = UpdateInteractiveUserServices()
         try:
             updated_user = service_instance.update(data)
-            return UpdateWorkforceInteractiveUserMutation(success=True, user=updated_user, errors=[], clientMutationId="", internalId="")
+            return UpdateWorkforceInteractiveUserMutation(success=True, user=updated_user, errors=[])
         except InteractiveUser.DoesNotExist:
-            return UpdateWorkforceInteractiveUserMutation(success=False, user=None, errors=["InteractiveUser not found"], clientMutationId="", internalId="")
+            return UpdateWorkforceInteractiveUserMutation(success=False, user=None, errors=["InteractiveUser not found"])
         except Exception as e:
-            return UpdateWorkforceInteractiveUserMutation(success=False, user=None, errors=[str(e)], clientMutationId="", internalId="")
+            return UpdateWorkforceInteractiveUserMutation(success=False, user=None, errors=[str(e)])
 
 
 
