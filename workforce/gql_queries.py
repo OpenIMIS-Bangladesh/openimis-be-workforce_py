@@ -521,6 +521,7 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "employee_children_info": [],
             "applicant_info": [],
             "institution_info": [],
+            "doctors_entry": [],
             "organization_id": ["exact"],
             "organization_type": ["exact"],
             "employee_employer_id": ["exact"],

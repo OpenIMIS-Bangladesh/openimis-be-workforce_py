@@ -387,6 +387,7 @@ class WorkforceApplicationInputType(OpenIMISMutation.Input):
     employee_children_info = graphene.String()
     applicant_info = graphene.String()
     institution_info = graphene.String()
+    doctors_entry = graphene.String()
     organization_id = graphene.String()
     organization_type = graphene.String()
     employee_employer_id = graphene.String()
