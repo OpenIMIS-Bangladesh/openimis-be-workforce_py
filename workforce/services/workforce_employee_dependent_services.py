@@ -242,7 +242,7 @@ class WorkforceEmployeeDependentServices(BaseService):
         # === API CALL ===
         vba_data = []
         try:
-            endpoint = "http://172.16.17.205:5000/calculate"
+            endpoint = os.environ.get("CALCULATION_API_URL")
             response = requests.post(endpoint, json=payload, timeout=30)
             if response.status_code == 200:
                 vba_response = response.json()
