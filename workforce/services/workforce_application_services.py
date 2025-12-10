@@ -216,7 +216,7 @@ class WorkforceApplicationServices(BaseService):
         # 2. Handle dependents
         # ================================================================
         dependents_data = obj_data.get("employee_dependent_info", [])
-        if dependents_data and dependents_data != "[{}]":
+        if dependents_data and dependents_data != "[{}]" and status == 'draft':
             try:
                 # Remove old dependents + related banking info for CF application
                 existing_dependents = WorkforceEmployeeDependent.objects.filter(
