@@ -646,6 +646,7 @@ class WorkforceEmployeeDependent(HistoryModel):
     account_holder_relation_with_dependent= models.CharField(max_length=100, null=True, blank=True)
     account_holder_dob = models.DateField(null=True, blank=True)
     account_holder_nid = models.CharField(max_length=50, null=True, blank=True)
+    dummy_field= models.CharField(max_length=50, null=True, blank=True)
     banking_info = models.ForeignKey(
         "WorkforceEmployeeBankingInfo",
         models.DO_NOTHING,

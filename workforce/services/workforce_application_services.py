@@ -481,11 +481,55 @@ class WorkforceApplicationServices(BaseService):
                             dependent.account_holder_dob = bank_data.get("otherAccountHolderDob")
                             dependent.account_holder_nid = bank_data.get("otherAccountHolderNid")
 
+                    dependent.account_holder_type = holder_type
+                    workforce_employee = WorkforceEmployee.objects.get(id=application_instance.workforce_employee.id)
+
+                    banking_info= WorkforceEmployeeBankingInfo.objects.filter(dependant= dependent).first()
+                    if banking_info:
+                        update_banking_info= WorkforceEmployeeBankingInfo.objects.get(id=banking_info.id)
+                        update_banking_info.dependant = dependent
+                        update_banking_info.type = "dependent"
+                        update_banking_info.employee = workforce_employee
+                        update_banking_info.name_bn = dependent.name_bn
+                        update_banking_info.name_en = dependent.name_en
+                        update_banking_info.application = application_instance
+                        update_banking_info.account_holder_name = dependent.bank_account_holder_name
+                        update_banking_info.account_no = dependent.bank_account_no
+                        update_banking_info.bank = dependent.bank
+                        update_banking_info.nid = (dependent.nid if dependent.nid else dependent.account_holder_nid),
+                        update_banking_info.date_of_birth = dependent.account_holder_dob
+                        update_banking_info.status = "active"
+                        update_banking_info.amount= ("1" if banking_info.amount=="0" or banking_info.amount==None else "0")
+                        update_banking_info.relation_with_dependent = dependent.account_holder_relation_with_dependent
+                        update_banking_info.nid = dependent.account_holder_nid
+                        update_banking_info.account_holder_type = holder_type
+                        update_banking_info.parent_dependent= (dependent.parent_dependent if dependent.parent_dependent else None)
+                        update_banking_info.save(username=self.user.username)
+                    else:
+                        banking_info= WorkforceEmployeeBankingInfo(
+                            dependant=dependent,
+                            type="dependent",
+                            employee=workforce_employee,
+                            name_bn=dependent.name_bn,
+                            name_en=dependent.name_en,
+                            application=application_instance,
+                            account_holder_name=dependent.bank_account_holder_name,
+                            account_no=dependent.bank_account_no,
+                            bank=dependent.bank,
+                            nid=(dependent.nid if dependent.nid else dependent.account_holder_nid),
+                            date_of_birth=dependent.account_holder_dob,
+                            status="active",
+                            relation_with_dependent=dependent.account_holder_relation_with_dependent,
+                            account_holder_type= holder_type,
+                            parent_dependent= (dependent.parent_dependent if dependent.parent_dependent else None)
+                        )
+                        banking_info.save(username=self.user.username)
+                    dependent.dummy_field = ("1" if dependent.dummy_field=="0" or dependent.dummy_field==None else "0")
                     dependent.save(username=self.user.username)
                 else:
                     bank_id_decoded = extract_uuid(bank_data.get("branch", {}).get("id"))
                     bank = Bank.objects.get(id=bank_id_decoded)
-                    employee = WorkforceEmployee.objects.get(id= application_instance.workforce_employee)
+                    employee = WorkforceEmployee.objects.get(id= application_instance.workforce_employee.id)
                     entry = WorkforceEmployeeBankingInfo(
                         name_bn=employee.first_name_bn,
                         name_en=employee.first_name_en,
