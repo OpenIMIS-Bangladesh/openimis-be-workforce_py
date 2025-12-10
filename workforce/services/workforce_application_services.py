@@ -280,7 +280,11 @@ class WorkforceApplicationServices(BaseService):
                             ]
 
                             for item in file_data:
-                                document = WorkforceDocument.objects.get(path=item.get("file_path"), url=item.get("file_url"))
+                                try:
+                                    document = WorkforceDocument.objects.get(path=item.get("file_path"), url=item.get("file_url"))
+                                except WorkforceDocument.DoesNotExist:
+                                    continue
+
                                 document.workforce_dependent_id = dep_instance.id
                                 document.save(username=self.user.username)
 
