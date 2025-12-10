@@ -253,6 +253,7 @@ class Query(graphene.ObjectType):
     workforce_eis_payment_disbursement = graphene.List(
         WorkforceEisPaymentDisbursementGQLType,
         workforce_application_id=graphene.String(),
+        workforce_application_id_in=graphene.List(of_type=graphene.String),
         month=graphene.String(),
         year=graphene.String(),
     )
@@ -1190,11 +1191,13 @@ class Query(graphene.ObjectType):
             return None
     
     
-    def resolve_workforce_eis_payment_process(self, info, workforce_application_id=None, month=None, year=None):
+    def resolve_workforce_eis_payment_process(self, info, workforce_application_id=None, workforce_application_id_in=None, month=None, year=None):
         try:
             qs = WorkforceEisPaymentProcess.objects.all()
             if workforce_application_id:
                 qs = qs.filter(workforce_application_id=workforce_application_id)
+            if workforce_application_id_in:
+                qs = qs.filter(workforce_application_id__in=workforce_application_id_in)
             if month:
                 qs = qs.filter(month_index=month)
             if year:
