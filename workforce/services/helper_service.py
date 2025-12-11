@@ -1,3 +1,4 @@
+import random
 import re
 import uuid
 import logging
@@ -5,6 +6,10 @@ from django.apps import apps
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from core.models import Role
+from datetime import datetime
+
+from ..models import WorkforceGrantMoney, WorkforceEisPaymentProcess
+
 logger = logging.getLogger(__name__)
 now = timezone.now()
 
@@ -28,14 +33,14 @@ def clean_dependents_data(dependents_data):
 
 
 def create_application_movement(
-    *,
-    application_id,
-    status,
-    action,
-    role_name,
-    user_str,
-    note="",
-    application_to=None
+        *,
+        application_id,
+        status,
+        action,
+        role_name,
+        user_str,
+        note="",
+        application_to=None
 ):
     """
     Generic application movement creator.
@@ -115,3 +120,60 @@ def create_application_movement(
     except Exception as e:
         logger.error(f"Error while creating movement for {application_id}: {e}")
         raise ValidationError(f"Failed to create movement: {str(e)}")
+
+
+def get_current_year():
+    return str(datetime.now().year)
+
+
+def generate_random_number(digit_count: int) -> int:
+    if digit_count <= 0:
+        raise ValueError("digit_count must be a positive integer")
+
+    # Smallest number with the given number of digits
+    start = 10**(digit_count - 1)
+    # Largest number with the given number of digits
+    end = (10**digit_count) - 1
+
+    return random.randint(start, end)
+
+
+def generate_beneficiary_id(association, accident_type, application_id=None, dependent_count=None):
+    while True:
+        eis_payment_process_instance = WorkforceEisPaymentProcess.objects.filter(
+            workforce_application_id=application_id
+        ).first()
+        if eis_payment_process_instance is None:
+            random_number = generate_random_number(5)
+        else:
+            beneficiary_id_existing = eis_payment_process_instance.beneficiary_id
+            random_number = beneficiary_id_existing.split(".")[-2]
+
+        if accident_type:
+            grant_money_instance = WorkforceGrantMoney.objects.filter(
+                organization_type="eis",
+                application_type=accident_type
+            ).first()
+            accident_type_no = str(grant_money_instance.application_type_no)
+        else:
+            accident_type_no = "00"
+
+        # Using dummy data for association.
+        # Patch this part after building association numbering mechanism.
+        if association is None:
+            association = "00"
+        elif association == "BGMEA":
+            association = "01"
+        elif association == "BEPZA":
+            association = "02"
+
+        if dependent_count is None:
+            beneficiary_id = f"EIS.{get_current_year()}.{association}.{accident_type_no}.{random_number}"
+        else:
+            beneficiary_id = f"EIS.{get_current_year()}.{association}.{accident_type_no}.{random_number}.{dependent_count}"
+
+        # Check for duplicate
+        if not WorkforceEisPaymentProcess.objects.filter(beneficiary_id=beneficiary_id).exists():
+            break
+
+    return beneficiary_id

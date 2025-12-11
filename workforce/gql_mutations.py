@@ -65,6 +65,7 @@ from .services.update_interactive_user_services import UpdateInteractiveUserServ
 from .gql_queries import (
     WorkforceInteractiveUserGQLType
 )
+from .services.helper_service import generate_beneficiary_id
 mutation_module = "workforce"
 
 
@@ -1883,6 +1884,8 @@ class CreateWorkforceEisPaymentProcessMutation(graphene.Mutation):
             ).exists():
                 return TestWorkforcePaymentMutation(success=True, errors=["Disbursement already exists"])
             workforce_application = WorkforceApplication.objects.get(id=data["workforce_application_id"])
+            association = workforce_application.association_type
+            accident_type = workforce_application.application_type
             # interactive_user = InteractiveUser.objects.get(id=user.id) if user else None
             if workforce_application.application_type == "disabilityAssistance":
                 bank_info = json.loads(workforce_application.employee_bank_info)
@@ -1902,16 +1905,20 @@ class CreateWorkforceEisPaymentProcessMutation(graphene.Mutation):
                     year= data["year"] if "year" in data else now.year, #could be given from frontend, need to make sure
                     processing_date=date.today(),
                     # processed_by=interactive_user,
+                    beneficiary_id=generate_beneficiary_id(association, accident_type, workforce_application.id),
                     is_disbursed=False,
                     # username=user.username
                 )
                 payment_obj.save(username= user.username)
 
             else:
-                dependents= WorkforceEmployeeDependent.objects.filter(workforce_application_id=data["workforce_application_id"])
+                dependents=WorkforceEmployeeDependent.objects.filter(workforce_application_id=data["workforce_application_id"])
+                dependent_count=0
+                beneficiary_id_of_employee=""
                 for dep in dependents:
                     # bank_info = json.loads(workforce_application.employee_bank_info)
                     now = datetime.now()
+                    dependent_count = dependent_count+1
                     payment_obj = WorkforceEisPaymentProcess(
                         workforce_application=workforce_application,
                         # bank=some_bank_instance,
@@ -1925,6 +1932,7 @@ class CreateWorkforceEisPaymentProcessMutation(graphene.Mutation):
                         year= data["year"] if "year" in data else now.year, #could be given from frontend, need to make sure
                         processing_date=date.today(),
                         # processed_by=user.id,
+                        beneficiary_id=generate_beneficiary_id(association, accident_type, workforce_application.id, str(dependent_count)),
                         is_disbursed=False
                     )
                     payment_obj.save(username= user.username)
