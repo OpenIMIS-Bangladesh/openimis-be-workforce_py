@@ -286,6 +286,7 @@ class WorkforceApplicationServices(BaseService):
                                     continue
 
                                 document.workforce_dependent_id = dep_instance.id
+                                document.workforce_application_id = application_id
                                 document.save(username=self.user.username)
 
                     if application_eis_instance:
