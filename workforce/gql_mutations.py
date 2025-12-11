@@ -1886,7 +1886,7 @@ class CreateWorkforceEisPaymentProcessMutation(graphene.Mutation):
             # interactive_user = InteractiveUser.objects.get(id=user.id) if user else None
             if workforce_application.application_type == "disabilityAssistance":
                 bank_info = json.loads(workforce_application.employee_bank_info)
-                bank_id = (base64.b64decode(bank_info[0]["bank"]["id"]).decode("utf-8")).split(":")[1]
+                bank_id = (base64.b64decode(bank_info[0]["branch"]["id"]).decode("utf-8")).split(":")[1]  # Taking branch id instead of bank id for proper reference
                 bank_instance = Bank.objects.get(id=bank_id)
                 now = datetime.now()
                 payment_obj = WorkforceEisPaymentProcess(
