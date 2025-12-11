@@ -1157,15 +1157,14 @@ class WorkforceInteractiveUserGQLType(graphene.ObjectType):
 
 
 class WorkforceEisPaymentProcessGQLType(DjangoObjectType):
+    workforce_employee_dependent = graphene.List(WorkforceEmployeeDependentGQLType)
+
     class Meta:
         model = WorkforceEisPaymentProcess
         interfaces = (graphene.relay.Node,)
+        connection_class = ExtendedConnection
         filter_fields = {
             "id": ["exact"],
-            # **prefix_filterset("workforce_application__", WorkforceApplicationGQLType._meta.filter_fields),
-            # **prefix_filterset("workforce_application_summary__", WorkforceApplicationSummaryGQLType._meta.filter_fields),
-            # **prefix_filterset("workforce_employee_dependent__", WorkforceEmployeeDependentGQLType._meta.filter_fields),
-            # **prefix_filterset("workforce_bank__", WorkforceBankGQLType._meta.filter_fields),
             "workforce_application_id": ["exact"],
             "bank_account_no": ["exact"],
             "bank_account_holder_name": ["exact"],
@@ -1176,11 +1175,14 @@ class WorkforceEisPaymentProcessGQLType(DjangoObjectType):
             "month_index": ["exact"],
             "year": ["exact"],
             "processing_date": ["exact"],
-            # **prefix_filterset("processed_by__", InteractiveUserGQLType._meta.filter_fields),
             "is_disbursed": ["exact"],
-
         }
-        connection_class = ExtendedConnection
+
+    def resolve_workforce_employee_dependent(self, info):
+        return WorkforceEmployeeDependent.objects.filter(
+            workforce_application_id=self.workforce_application_id
+        )
+
 
 
 class WorkforceEisPaymentDisbursementGQLType(DjangoObjectType):

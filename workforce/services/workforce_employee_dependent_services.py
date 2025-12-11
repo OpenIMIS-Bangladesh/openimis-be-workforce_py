@@ -201,8 +201,11 @@ class WorkforceEmployeeDependentServices(BaseService):
 
         # metadata_json= workforce_application.metadata
         # metadata= json.loads(metadata_json)
-        doctor_data= json.loads(workforce_application.doctors_entry) if workforce_application.doctor_data else None
-        disability_percentage= doctor_data.get("disabilityPerSchedule") if doctor_data else "0"
+        doctor_data = json.loads(workforce_application.doctors_entry) if workforce_application.doctors_entry else None
+        if doctor_data:
+            disability_percentage = doctor_data.get("disabilityPerSchedule")
+        else:
+            disability_percentage = "0"
         payload = {
             "parameters": {
                 "Interest rate": "8.1%",
