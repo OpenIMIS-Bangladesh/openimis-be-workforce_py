@@ -1384,6 +1384,7 @@ class WorkforceEisPaymentProcess(HistoryModel):
         related_name="workforce_payment_processed_by",
     )
     is_disbursed = models.BooleanField(default=False)
+    beneficiary_id = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         managed = True
