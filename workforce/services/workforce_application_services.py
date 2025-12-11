@@ -11,7 +11,7 @@ from workforce.models import (
 from workforce.models import WorkforceAssociation, WorkforceOrganizationEmployee
 from .helper_service import create_application_movement
 from django.db.models import Q
-
+from location.models import Location
 from django.db import models
 
 from .workforce_employee_dependent_services import WorkforceEmployeeDependentServices
@@ -240,6 +240,12 @@ class WorkforceApplicationServices(BaseService):
                 # Create new dependent data
                 dependents = json.loads(dependents_data)
                 for dep in dependents:
+
+                    present_location_instance = Location.objects.get(
+                        id=extract_uuid(dep.get("presentLocation", {}).get("id")))
+                    permanent_location_instance = Location.objects.get(
+                        id=extract_uuid(dep.get("permanentLocation", {}).get("id")))
+
                     dep_instance = WorkforceEmployeeDependent(
                         workforce_application=application_instance,
                         name_bn=dep.get("nameBn"),
@@ -257,6 +263,8 @@ class WorkforceApplicationServices(BaseService):
                         marital_status=dep.get("maritalStatus"),
                         present_address=dep.get("presentAddress"),
                         permanent_address=dep.get("permanentAddress"),
+                        present_location=present_location_instance,
+                        permanent_location=permanent_location_instance,
                         user_created_id=user_id,
                         user_updated_id=user_id,
                         status="active",
