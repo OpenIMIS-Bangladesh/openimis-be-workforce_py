@@ -201,6 +201,8 @@ class WorkforceEmployeeDependentServices(BaseService):
 
         # metadata_json= workforce_application.metadata
         # metadata= json.loads(metadata_json)
+        doctor_data= json.loads(workforce_application.doctors_entry) if workforce_application.doctor_data else None
+        disability_percentage= doctor_data.get("disabilityPerSchedule") if doctor_data else "0"
         payload = {
             "parameters": {
                 "Interest rate": "8.1%",
@@ -215,8 +217,7 @@ class WorkforceEmployeeDependentServices(BaseService):
                 "Name": worker.first_name_en,
                 "ID": str(worker.id),
                 "Status": "Disabled" if application_type=="disabilityAssistance" else "Deceased",
-                # "Disability level": f"{workforce_application.disability_level}%" if application_type=="disabilityAssistance" else "",
-                "Disability level": "50%", #right now this is hard coded. it needs to be taken from frontend
+                "Disability level": disability_percentage+"%",
                 "Monthly earnings used for calculation": str(workforce_application.last_base_salary or 20000),
                 "Date of birth": worker.birth_date.strftime(
                     "%m/%d/%Y") if worker.birth_date else "10/16/1997",
