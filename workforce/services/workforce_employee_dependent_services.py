@@ -238,6 +238,7 @@ class WorkforceEmployeeDependentServices(BaseService):
                 "ID": str(worker.id),
                 "Status": "Disabled" if application_type=="disabilityAssistance" else "Deceased",
                 "Disability level": disability_percentage+("" if "%" in disability_percentage else "%"),
+                # "Disability level": "50%",
                 "Monthly earnings used for calculation": str(salary_parameter),
                 "Date of birth": worker.birth_date.strftime(
                     "%m/%d/%Y") if worker.birth_date else "10/16/1997",
