@@ -212,7 +212,10 @@ class WorkforceEmployeeDependentServices(BaseService):
         if doctor_data:
             disability_percentage = doctor_data.get("disabilityPerSchedule")
         else:
-            disability_percentage = "0"
+            if application_type == "financialAssistance":
+                disability_percentage = "100"
+            else:
+                disability_percentage = "0"
 
         last_base_salary = float(workforce_application.last_base_salary) if workforce_application.last_base_salary else 0
         factory= WorkforceFactory.objects.get(id= workforce_application.employee_factory.id)
