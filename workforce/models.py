@@ -332,6 +332,7 @@ class WorkforceFactory(HistoryModel):
     status = models.CharField(max_length=30, null=True, blank=True)
     is_same_company_representative = models.SmallIntegerField(default=0)
     association_type = models.CharField(max_length=50, null=True, blank=True)
+    minimum_salary = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     workforce_representative = models.ForeignKey(
         WorkforceRepresentative,
         models.DO_NOTHING,
@@ -1330,6 +1331,7 @@ class WorkforceAssociation(HistoryModel):
         related_name="association_organization_employee",
     )
     status = models.CharField(max_length=30, null=True, blank=True)
+    minimum_salary = models.DecimalField(max_digits=25, decimal_places=4, null=True, blank=True)
 
     class Meta:
         managed = True

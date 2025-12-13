@@ -3,13 +3,20 @@ import json
 from core.services import BaseService
 from pamqp.decode import double
 
-from workforce.models import WorkforceEmployeeDependent, WorkforceApplication, WorkforceEmployee
+from workforce.models import WorkforceEmployeeDependent, WorkforceApplication, WorkforceEmployee, WorkforceFactory
 from datetime import datetime, timezone, date
 import requests
 import json
 import os
 
 logger = logging.getLogger(__name__)
+
+
+def safe_float(value, default=0.0):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
 
 
 class WorkforceEmployeeDependentServices(BaseService):
@@ -206,6 +213,16 @@ class WorkforceEmployeeDependentServices(BaseService):
             disability_percentage = doctor_data.get("disabilityPerSchedule")
         else:
             disability_percentage = "0"
+
+        last_base_salary = float(workforce_application.last_base_salary) if workforce_application.last_base_salary else 0
+        factory= WorkforceFactory.objects.get(id= workforce_application.employee_factory.id)
+        minimum_salary= factory.minimum_salary
+        maximum_salary= minimum_salary*4
+        if last_base_salary <= maximum_salary:
+            salary_parameter= last_base_salary
+        else:
+            salary_parameter= maximum_salary
+
         payload = {
             "parameters": {
                 "Interest rate": "8.1%",
@@ -220,8 +237,8 @@ class WorkforceEmployeeDependentServices(BaseService):
                 "Name": worker.first_name_en,
                 "ID": str(worker.id),
                 "Status": "Disabled" if application_type=="disabilityAssistance" else "Deceased",
-                "Disability level": disability_percentage+"%",
-                "Monthly earnings used for calculation": str(workforce_application.last_base_salary or 20000),
+                "Disability level": disability_percentage+("" if "%" in disability_percentage else "%"),
+                "Monthly earnings used for calculation": str(salary_parameter),
                 "Date of birth": worker.birth_date.strftime(
                     "%m/%d/%Y") if worker.birth_date else "10/16/1997",
                 "Age at calculation date": str(worker_age or 26),
@@ -291,12 +308,12 @@ class WorkforceEmployeeDependentServices(BaseService):
                             if rel== "Mother" or rel =="Dependent father":
                                 for parent_data in vba_data:
                                     if parent_data["ID"] == "Parent(s)":
-                                        dep_obj.eis_calculated_amount = parent_data["PV Total pension"]/2
-                                        dep_obj.eis_approved_amount = parent_data["PV Top-Up pension"]/2
-                                        dep_obj.pv_factor = parent_data["PV factor"]
-                                        dep_obj.initial_replacement_rate = parent_data["Initial replacement rate"]/2
-                                        dep_obj.eis_initial_monthly_amount = parent_data["Total initial monthly pension"]/2
-                                        dep_obj.eis_monthly_amount = parent_data["Top-up monthly pension"]/2
+                                        dep_obj.eis_calculated_amount = safe_float(parent_data["PV Total pension"])/2
+                                        dep_obj.eis_approved_amount = safe_float(parent_data["PV Top-Up pension"])/2
+                                        dep_obj.pv_factor = safe_float(parent_data["PV factor"])
+                                        dep_obj.initial_replacement_rate = safe_float(parent_data["Initial replacement rate"])/2
+                                        dep_obj.eis_initial_monthly_amount = safe_float(parent_data["Total initial monthly pension"])/2
+                                        dep_obj.eis_monthly_amount = safe_float(parent_data["Top-up monthly pension"])/2
                                         dep_obj.is_eligible = True
                                         dep_obj.save(username=self.user.username)
                             else:
