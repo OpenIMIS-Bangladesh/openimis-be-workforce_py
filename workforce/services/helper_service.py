@@ -8,7 +8,7 @@ from django.utils import timezone
 from core.models import Role
 from datetime import datetime
 
-from ..models import WorkforceGrantMoney, WorkforceEisPaymentProcess
+from ..models import WorkforceGrantMoney, WorkforceEisPaymentProcess, WorkforceFactory
 
 logger = logging.getLogger(__name__)
 now = timezone.now()
@@ -177,3 +177,33 @@ def generate_beneficiary_id(association, accident_type, application_id=None, dep
             break
 
     return beneficiary_id
+
+
+def cf_and_eis_application_movement_to_factory_admin(self, application_instance, application_id_for_movement):
+    application_to = None
+    try:
+        if application_instance.employee_factory_id:
+            factory = WorkforceFactory.objects.filter(id=application_instance.employee_factory_id).first()
+            if factory and factory.workforce_representative_id:
+                representative = factory.workforce_representative
+                application_to = representative.related_user_id
+    except Exception as e:
+        logger.error(
+            f"Failed to resolve Factory Representative for Application {application_id_for_movement}: {e}")
+        application_to = None
+
+    if not application_to:
+        raise ValueError(
+            f"No Factory Representative (related_user_id) found for factory ID "
+            f"{application_instance.employee_factory_id}"
+        )
+    # Create movement to Factory Admin
+    create_application_movement(
+        application_id=application_id_for_movement,
+        status='new',
+        action='forward_to_factory_admin',
+        role_name='Factory Admin',
+        user_str=str(self.user),
+        application_to=application_to,
+        note="আবেদন ফ্যাক্টরি অ্যাডমিন এর নিকট প্রেরণ করা হয়েছে"
+    )
