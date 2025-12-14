@@ -574,7 +574,7 @@ class WorkforceEmployeeBankingInfoInputType(OpenIMISMutation.Input):
     employee_id = graphene.String(required=False)
     application_id = graphene.String(required=False)
     dependant_id = graphene.String(required=False)
-    bank_id = graphene.String(required=False)
+    branch_id = graphene.String(required=False)
     type = graphene.String(required=False)
     amount = graphene.String(required=False)
     account_no = graphene.String(required=False)

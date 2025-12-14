@@ -991,7 +991,7 @@ class WorkforceEmployeeBankingInfoGQLType(DjangoObjectType):
             "employee_id": ["exact"],
             "application_id": ["exact"],
             "dependant_id": ["exact"],
-            "bank_id": ["exact"],
+            "branch_id": ["exact"],
             "type": ["exact", "icontains"],
             "amount": ["exact", "icontains"],
             "account_no": ["exact", "icontains"],

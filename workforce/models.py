@@ -1173,7 +1173,7 @@ class WorkforceEmployeeBankingInfo(HistoryModel):
         null=True,
         related_name="employee_banking_dependents",
     )
-    bank = models.ForeignKey(
+    branch = models.ForeignKey(
         Bank,
         models.DO_NOTHING,
         blank=False,
