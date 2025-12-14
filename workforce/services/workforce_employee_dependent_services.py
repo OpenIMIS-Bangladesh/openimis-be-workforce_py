@@ -268,6 +268,7 @@ class WorkforceEmployeeDependentServices(BaseService):
 
         # === API CALL ===
         vba_data = []
+        print(payload)
         try:
             endpoint = os.environ.get("CALCULATION_API_URL")
             response = requests.post(endpoint, json=payload, timeout=30)
