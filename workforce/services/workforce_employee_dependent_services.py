@@ -53,8 +53,6 @@ class WorkforceEmployeeDependentServices(BaseService):
         if relation == "workforce.relation.brother":
             if age < 18:
                 return "Dependent minor brother"
-            else:
-                return "Dependent brother"
 
         elif relation == "workforce.relation.sister":
             if age < 18:
@@ -63,8 +61,6 @@ class WorkforceEmployeeDependentServices(BaseService):
                 return "Dependent unmarried sister"
             elif marital == "workforce.marital_status.widowed":
                 return "Dependent widowed sister"
-            else:
-                return "Dependent unmarried sister"
 
         elif relation == "workforce.relation.daughter":
             if disability == "yes":
@@ -75,16 +71,12 @@ class WorkforceEmployeeDependentServices(BaseService):
                 return "Dependent widowed daughter"
             elif age < 18:
                 return "Minor daughter"
-            else:
-                return "Unmarried daughter"
 
         elif relation == "workforce.relation.son":
             if disability == "yes":
                 return "Dependent disabled son"
             elif age < 18:
                 return "Minor son"
-            else:
-                return "Disabled son"
 
         elif relation == "workforce.relation.husband":
             return "Dependent widower"
@@ -207,6 +199,12 @@ class WorkforceEmployeeDependentServices(BaseService):
 
     def calculate_eis_amount(self, workforce_application_id, application_type):
         dependents = WorkforceEmployeeDependent.objects.filter(workforce_application_id=workforce_application_id)
+        dependents = list(dependents)  # evaluate queryset once
+        dependents = [
+            dep for dep in dependents
+            if self.get_relation_for_api(dep)
+        ]
+
         workforce_application= WorkforceApplication.objects.get(id= workforce_application_id)
         worker= WorkforceEmployee.objects.get(id= workforce_application.workforce_employee_id)
 
@@ -276,7 +274,6 @@ class WorkforceEmployeeDependentServices(BaseService):
 
         # === API CALL ===
         vba_data = []
-        print(payload)
         try:
             endpoint = os.environ.get("CALCULATION_API_URL")
             response = requests.post(endpoint, json=payload, timeout=30)
@@ -351,8 +348,6 @@ class WorkforceEmployeeDependentServices(BaseService):
                 if relation == "workforce.relation.brother":
                     if age < 18:
                         set_vba_data(dep_obj, "Dependent minor brother")
-                    else:
-                        set_vba_data(dep_obj, "Dependent minor brother")
 
                 elif relation == "workforce.relation.sister":
                     if age < 18:
@@ -361,8 +356,6 @@ class WorkforceEmployeeDependentServices(BaseService):
                         set_vba_data(dep_obj, "Dependent unmarried sister")
                     elif marital == "workforce.marital_status.widowed":
                         set_vba_data(dep_obj, "Dependent widowed sister")
-                    else:
-                        set_vba_data(dep_obj, "Dependent unmarried sister")
 
                 elif relation == "workforce.relation.daughter":
                     if disability == "yes":
@@ -373,17 +366,12 @@ class WorkforceEmployeeDependentServices(BaseService):
                         set_vba_data(dep_obj, "Dependent widowed daughter")
                     elif age < 18:
                         set_vba_data(dep_obj, "Minor daughter")
-                    else:
-                        set_vba_data(dep_obj, "Unmarried daughter")
 
                 elif relation == "workforce.relation.son":
                     if disability == "yes":
                         set_vba_data(dep_obj, "Dependent disabled son")
                     elif age < 18:
                         set_vba_data(dep_obj, "Minor son")
-                    else:
-                        set_vba_data(dep_obj, "Minor son")
-
 
                 elif relation == "workforce.relation.husband":
                     set_vba_data(dep_obj, "Dependent widower")
