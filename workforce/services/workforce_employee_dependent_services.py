@@ -344,7 +344,7 @@ class WorkforceEmployeeDependentServices(BaseService):
                     if age < 18:
                         set_vba_data(dep_obj, "Dependent minor brother")
                     else:
-                        set_vba_data(dep_obj, "Dependent brother")
+                        set_vba_data(dep_obj, "Dependent minor brother")
 
                 elif relation == "workforce.relation.sister":
                     if age < 18:
@@ -374,7 +374,7 @@ class WorkforceEmployeeDependentServices(BaseService):
                     elif age < 18:
                         set_vba_data(dep_obj, "Minor son")
                     else:
-                        set_vba_data(dep_obj, "Dependent son")
+                        set_vba_data(dep_obj, "Minor son")
 
 
                 elif relation == "workforce.relation.husband":
