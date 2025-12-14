@@ -255,16 +255,16 @@ class WorkforceEmployeeDependentServices(BaseService):
         # Loop over dependents
         dep_key=1
         for dep in dependents:
-
             payload["Dependents"].append({
                 "Name": dep.name_en or dep.name_bn or "",
                 # "ID": str(dep.id),
-                "ID": str(dep_key++),
+                "ID": str(dep_key),
                 "Date of birth": dep.birth_date.strftime("%m/%d/%Y") if dep.birth_date else "11/02/1996",
                 "Age at calculation date": str(self.calculate_age(dep.birth_date)) if dep.birth_date else "30",
                 "Sex": self.get_gender_by_relation_for_api(dep.relation_with_worker) or "Female",
                 "Relationship": self.get_relation_for_api(dep) or ""
             })
+            dep_key= dep_key+1
 
         # === API CALL ===
         vba_data = []
