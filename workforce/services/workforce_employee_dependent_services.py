@@ -343,6 +343,8 @@ class WorkforceEmployeeDependentServices(BaseService):
                 if relation == "workforce.relation.brother":
                     if age < 18:
                         set_vba_data(dep_obj, "Dependent minor brother")
+                    else:
+                        set_vba_data(dep_obj, "Dependent brother")
 
                 elif relation == "workforce.relation.sister":
                     if age < 18:
@@ -351,6 +353,8 @@ class WorkforceEmployeeDependentServices(BaseService):
                         set_vba_data(dep_obj, "Dependent unmarried sister")
                     elif marital == "workforce.marital_status.widowed":
                         set_vba_data(dep_obj, "Dependent widowed sister")
+                    else:
+                        set_vba_data(dep_obj, "Dependent unmarried sister")
 
                 elif relation == "workforce.relation.daughter":
                     if disability == "yes":
@@ -361,12 +365,17 @@ class WorkforceEmployeeDependentServices(BaseService):
                         set_vba_data(dep_obj, "Dependent widowed daughter")
                     elif age < 18:
                         set_vba_data(dep_obj, "Minor daughter")
+                    else:
+                        set_vba_data(dep_obj, "Unmarried daughter")
 
                 elif relation == "workforce.relation.son":
                     if disability == "yes":
                         set_vba_data(dep_obj, "Dependent disabled son")
                     elif age < 18:
                         set_vba_data(dep_obj, "Minor son")
+                    else:
+                        set_vba_data(dep_obj, "Dependent son")
+
 
                 elif relation == "workforce.relation.husband":
                     set_vba_data(dep_obj, "Dependent widower")
