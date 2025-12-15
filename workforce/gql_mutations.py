@@ -1931,6 +1931,7 @@ class CreateWorkforceEisPaymentProcessMutation(graphene.Mutation):
                         month_index= data["month"] if "month" in data else now.month, #could be given from frontend, need to make sure
                         year= data["year"] if "year" in data else now.year, #could be given from frontend, need to make sure
                         processing_date=date.today(),
+                        workforce_employee_dependent_id=dep.id,
                         # processed_by=user.id,
                         beneficiary_id=generate_beneficiary_id(association, accident_type, workforce_application.id, str(dependent_count)),
                         is_disbursed=False

@@ -1179,10 +1179,9 @@ class WorkforceEisPaymentProcessGQLType(DjangoObjectType):
         }
 
     def resolve_workforce_employee_dependent(self, info):
-        return WorkforceEmployeeDependent.objects.filter(
-            workforce_application_id=self.workforce_application_id
-        )
-
+        if self.workforce_employee_dependent:
+            return [self.workforce_employee_dependent]
+        return []
 
 
 class WorkforceEisPaymentDisbursementGQLType(DjangoObjectType):
