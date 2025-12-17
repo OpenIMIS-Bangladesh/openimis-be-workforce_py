@@ -234,7 +234,7 @@ class WorkforceApplicationServices(BaseService):
                     )
                     for dependent in existing_dependents_eis:
                         WorkforceEmployeeBankingInfo.objects.filter(dependant=dependent).delete()
-                        # WorkforceDocument.objects.filter(workforce_dependent=dependent).delete()
+                        WorkforceDocument.objects.filter(workforce_dependent=dependent).delete()
                     existing_dependents_eis.delete()
 
                 # Create new dependent data
