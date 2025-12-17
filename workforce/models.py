@@ -530,6 +530,13 @@ class WorkforceDocument(HistoryModel):
         null=True,
         related_name="document_application_summary"
     )
+    workforce_employee_banking_info = models.ForeignKey(
+        "WorkforceEmployeeBankingInfo",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="employee_banking_info_for_documents"
+    )
     note = models.CharField(max_length=1024, null=True, blank=True)
     document_type = models.CharField(max_length=512, null=False, blank=False)
     path = models.CharField(max_length=512, null=True, blank=True)
@@ -644,10 +651,10 @@ class WorkforceEmployeeDependent(HistoryModel):
     status = models.CharField(max_length=30, null=True, blank=True)
     is_eligible = models.BooleanField(default=False)
     account_holder_type = models.CharField(max_length=50, null=True, blank=True)
-    account_holder_relation_with_dependent= models.CharField(max_length=100, null=True, blank=True)
+    account_holder_relation_with_dependent = models.CharField(max_length=100, null=True, blank=True)
     account_holder_dob = models.DateField(null=True, blank=True)
     account_holder_nid = models.CharField(max_length=50, null=True, blank=True)
-    dummy_field= models.CharField(max_length=50, null=True, blank=True)
+    dummy_field = models.CharField(max_length=50, null=True, blank=True)
     banking_info = models.ForeignKey(
         "WorkforceEmployeeBankingInfo",
         models.DO_NOTHING,

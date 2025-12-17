@@ -1,9 +1,5 @@
 import graphene
-from django_filters import Filter
-from django_filters import CharFilter
 from graphene_django import DjangoObjectType
-from django.contrib.postgres.fields import JSONField
-from django.db.models import FileField
 
 from core.gql_queries import InteractiveUserGQLType
 from .models import (
@@ -12,10 +8,10 @@ from .models import (
     WorkforceEmployer, WorkforceOffice, WorkforceFactory, WorkforceEmployee, WorkforceOrganizationEmployeeDesignation,
     WorkforceDocument, Bank, WorkforceEmployeeDependent, WorkforceEmployeeDesignation, WorkforceEmployeeAccident,
     WorkforceEmployeeAccountInfo, WorkforceApplication, WorkforceDocumentType, WorkforceDocumentMap,
-    WorkforceUser, WorkforceOtp, WorkforceApplicationMovement, WorkforceApplicationSummary,
+    WorkforceUser, WorkforceApplicationMovement, WorkforceApplicationSummary,
     WorkforceApplicationSummaryMovement,
     WorkforceGrantMoney, WorkforceDiseases, WorkforceEducation, WorkforceEmployeeBankingInfo,
-    WorkforceSignature, WorkforceFactoryRegistration, WorkforcePostoffice, WorkforceEisPaymentDisbursement,
+    WorkforceSignature, WorkforceFactoryRegistration, WorkforceEisPaymentDisbursement,
     WorkforceEisPaymentProcess
 )
 from core import prefix_filterset, ExtendedConnection
@@ -745,6 +741,7 @@ class WorkforceDocumentGQLType(DjangoObjectType):
             "approver_id": ["exact"],
             "factory_id": ["exact"],
             "application_summary_id": ["exact"],
+            "workforce_employee_banking_info": ["exact"],
             "workforce_document_type_id": ["exact"],
             "workforce_dependent_id": ["exact"],
             "note": ["exact", "icontains"],

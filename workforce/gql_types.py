@@ -143,7 +143,7 @@ class WorkforceFactoryInputType(OpenIMISMutation.Input):
     license_type = graphene.String()
     location_id = graphene.String(required=True)
     office_location_id = graphene.String(required=True)
-    future_date= graphene.String()
+    future_date = graphene.String()
     date_of_eis_incorporation = graphene.String()
     date_of_factory_establishment = graphene.String()
     membership_no = graphene.String()
@@ -189,10 +189,12 @@ class WorkforceFactoryRegistrationInputType(OpenIMISMutation.Input):
     representative_birth_date = graphene.String(required=True)
     representative_position = graphene.String(required=True)
 
+
 class WorkforceFactoryRegistrationApprovalInputType(OpenIMISMutation.Input):
     id = graphene.String(required=True)
     approval_status = graphene.String(required=True)
     approved_by = graphene.String(required=True)
+
 
 class WorkforceEmployeeInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
@@ -266,6 +268,7 @@ class WorkforceDocumentInputType(OpenIMISMutation.Input):
     workforce_document_type_id = graphene.String()
     workforce_dependent_id = graphene.String()
     application_summary_id = graphene.String()
+    workforce_employee_banking_info_id = graphene.String()
     note = graphene.String()
     document_type = graphene.String()
     path = graphene.String(required=False)
@@ -316,13 +319,13 @@ class WorkforceEmployeeDependentInputType(OpenIMISMutation.Input):
     bank_account_no = graphene.String()
     bank_account_holder_name = graphene.String()
     eis_payment_type = graphene.String()
-    eis_calculated_amount= graphene.String()
-    eis_approved_amount= graphene.String()
-    eis_initial_monthly_amount= graphene.String()
-    eis_monthly_amount= graphene.String()
-    pv_factor= graphene.String()
-    initial_replacement_rate= graphene.String()
-    parent_dependent= graphene.String()
+    eis_calculated_amount = graphene.String()
+    eis_approved_amount = graphene.String()
+    eis_initial_monthly_amount = graphene.String()
+    eis_monthly_amount = graphene.String()
+    pv_factor = graphene.String()
+    initial_replacement_rate = graphene.String()
+    parent_dependent = graphene.String()
     present_location_id = graphene.String()
     permanent_location_id = graphene.String()
     present_address = graphene.String()
@@ -341,7 +344,6 @@ class WorkforceEmployeeDependentInputType(OpenIMISMutation.Input):
     account_holder_relation_with_dependent = graphene.String()
     account_holder_dob = graphene.String()
     account_holder_nid = graphene.String()
-
 
 
 class WorkforceEmployeeAccidentInputType(OpenIMISMutation.Input):
@@ -647,8 +649,8 @@ class WorkforceInteractiveUserInputType(OpenIMISMutation.Input):
 class WorkforceEisPaymentProcessInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
     workforce_application = graphene.String()
-    workforce_application_summary= graphene.String()
-    workforce_employee_dependent  = graphene.String()
+    workforce_application_summary = graphene.String()
+    workforce_employee_dependent = graphene.String()
     bank = graphene.String()
     bank_account_no = graphene.String()
     bank_account_holder_name = graphene.String()
@@ -662,11 +664,12 @@ class WorkforceEisPaymentProcessInputType(OpenIMISMutation.Input):
     processed_by = graphene.String()
     is_disbursed = graphene.Boolean()
 
+
 class WorkforceEisPaymentDisbursementInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
     workforce_application = graphene.String()
-    workforce_application_summary= graphene.String()
-    workforce_employee_dependent  = graphene.String()
+    workforce_application_summary = graphene.String()
+    workforce_employee_dependent = graphene.String()
     bank = graphene.String()
     bank_account_no = graphene.String()
     bank_account_holder_name = graphene.String()

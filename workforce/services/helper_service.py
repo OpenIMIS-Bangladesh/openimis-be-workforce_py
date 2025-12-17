@@ -8,7 +8,7 @@ from django.utils import timezone
 from core.models import Role
 from datetime import datetime
 
-from ..models import WorkforceGrantMoney, WorkforceEisPaymentProcess, WorkforceFactory
+from ..models import WorkforceGrantMoney, WorkforceEisPaymentProcess, WorkforceFactory, WorkforceDocument
 
 logger = logging.getLogger(__name__)
 now = timezone.now()
@@ -207,3 +207,8 @@ def cf_and_eis_application_movement_to_factory_admin(self, application_instance,
         application_to=application_to,
         note="আবেদন ফ্যাক্টরি অ্যাডমিন এর নিকট প্রেরণ করা হয়েছে"
     )
+
+
+# def relate_document_with_banking_info(dependent_id):
+#     document_instance = WorkforceDocument.objects.file()
+#     pass
