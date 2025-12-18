@@ -59,7 +59,7 @@ class WorkforceApplicationServices(BaseService):
                 tracking_number = f"{year_suffix}{application_type_no}{application_count_str}"
                 obj_data["tracking_number"] = tracking_number
 
-                # Restrict to 1 application per NID for financialAssistance
+                # Restrict to 1 application per NID for financialAssistance of CF and EIS individually
                 if application_type == "financialAssistance":
                     try:
                         workforce_employee = WorkforceEmployee.objects.get(
@@ -67,15 +67,28 @@ class WorkforceApplicationServices(BaseService):
                         )
                         employee_nid = workforce_employee.nid
 
-                        existing_applications = WorkforceApplication.objects.filter(
-                            application_type="financialAssistance",
-                            workforce_employee__nid=employee_nid
-                        ).exclude(status="draft")
+                        if organization_type == "cf":
+                            existing_applications_cf = WorkforceApplication.objects.filter(
+                                application_type="financialAssistance",
+                                workforce_employee__nid=employee_nid,
+                                organization_type="cf"
+                            ).exclude(status="draft")
 
-                        if existing_applications.exists():
-                            raise ValidationError(
-                                "An application for financial assistance already exists for this NID."
-                            )
+                            if existing_applications_cf.exists():
+                                raise ValidationError(
+                                    "An application for financial assistance from cf already exists for this NID."
+                                )
+                        if organization_type == "eis":
+                            existing_applications_eis = WorkforceApplication.objects.filter(
+                                application_type="financialAssistance",
+                                workforce_employee__nid=employee_nid,
+                                organization_type="eis"
+                            ).exclude(status="draft")
+
+                            if existing_applications_eis.exists():
+                                raise ValidationError(
+                                    "An application for financial assistance from eis already exists for this NID."
+                                )
 
                     except ObjectDoesNotExist:
                         logger.warning("No matching WorkforceEmployee found for given ID.")
