@@ -1877,69 +1877,19 @@ class CreateWorkforceEisPaymentProcessMutation(graphene.Mutation):
         from workforce.models import WorkforceApplication
         from workforce.models import WorkforceEisPaymentProcess
         from workforce.models import WorkforceEmployeeDependent
+        from workforce.services.workforce_eis_payment_services import WorkforceEisPaymentServices
         try:
+            workforce_application_id= data["workforce_application_id"]
             user = info.context.user if hasattr(info.context, 'user') else None
             if WorkforceEisPaymentProcess.objects.filter(
                     workforce_application_id=data["workforce_application_id"]
             ).exists():
-                return TestWorkforcePaymentMutation(success=True, errors=["Disbursement already exists"])
+                return cls(success=True, errors=["Disbursement already exists"])
             workforce_application = WorkforceApplication.objects.get(id=data["workforce_application_id"])
-            association = workforce_application.association_type
-            accident_type = workforce_application.application_type
-            # interactive_user = InteractiveUser.objects.get(id=user.id) if user else None
-            if workforce_application.application_type == "disabilityAssistance":
-                bank_info = json.loads(workforce_application.employee_bank_info)
-                bank_id = (base64.b64decode(bank_info[0]["branch"]["id"]).decode("utf-8")).split(":")[1]  # Taking branch id instead of bank id for proper reference
-                bank_instance = Bank.objects.get(id=bank_id)
-                now = datetime.now()
-                payment_obj = WorkforceEisPaymentProcess(
-                    workforce_application = workforce_application,
-                    bank=bank_instance,
-                    bank_account_no = bank_info[0]["accountNumber"] ,
-                    bank_account_holder_name= bank_info[0]["accountHolderName"],
-                    eis_payment_type="monthly",
-                    eis_calculated_amount= workforce_application.eis_calculated_amount,
-                    eis_approved_amount= workforce_application.eis_approved_amount,
-                    eis_monthly_amount= workforce_application.eis_monthly_amount,
-                    month_index= data["month"] if "month" in data else now.month, #could be given from frontend, need to make sure
-                    year= data["year"] if "year" in data else now.year, #could be given from frontend, need to make sure
-                    processing_date=date.today(),
-                    # processed_by=interactive_user,
-                    beneficiary_id=generate_beneficiary_id(association, accident_type, workforce_application.id),
-                    is_disbursed=False,
-                    # username=user.username
-                )
-                payment_obj.save(username= user.username)
-
-            else:
-                dependents=WorkforceEmployeeDependent.objects.filter(workforce_application_id=data["workforce_application_id"])
-                dependent_count=0
-                beneficiary_id_of_employee=""
-                for dep in dependents:
-                    # bank_info = json.loads(workforce_application.employee_bank_info)
-                    now = datetime.now()
-                    dependent_count = dependent_count+1
-                    payment_obj = WorkforceEisPaymentProcess(
-                        workforce_application=workforce_application,
-                        # bank=some_bank_instance,
-                        bank_account_no= dep.bank_account_no,
-                        bank_account_holder_name= dep.bank_account_holder_name,
-                        eis_payment_type="monthly",
-                        eis_calculated_amount=dep.eis_calculated_amount,
-                        eis_approved_amount=dep.eis_approved_amount,
-                        eis_monthly_amount=dep.eis_monthly_amount,
-                        month_index= data["month"] if "month" in data else now.month, #could be given from frontend, need to make sure
-                        year= data["year"] if "year" in data else now.year, #could be given from frontend, need to make sure
-                        processing_date=date.today(),
-                        workforce_employee_dependent_id=dep.id,
-                        # processed_by=user.id,
-                        beneficiary_id=generate_beneficiary_id(association, accident_type, workforce_application.id, str(dependent_count)),
-                        is_disbursed=False
-                    )
-                    payment_obj.save(username= user.username)
-            return TestWorkforcePaymentMutation(success=True, errors=[])
+            WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id)
+            return cls(success=True, errors=[])
         except Exception as e:
-            return TestWorkforcePaymentMutation(success=False, errors=[str(e)])
+            return cls(success=False, errors=[str(e)])
 
 
 class CreateWorkforceEisPaymentDisbursementMutation(graphene.Mutation):
@@ -1960,7 +1910,7 @@ class CreateWorkforceEisPaymentDisbursementMutation(graphene.Mutation):
             if WorkforceEisPaymentDisbursement.objects.filter(
                     workforce_application_id=data["workforce_application_id"]
             ).exists():
-                return TestWorkforcePaymentMutation(success=True, errors=["Disbursement already exists"])
+                return cls(success=True, errors=["Disbursement already exists"])
             payment_processes= WorkforceEisPaymentProcess.objects.filter(workforce_application_id=data["workforce_application_id"])
             for process in payment_processes:
                 now = datetime.now()
@@ -1983,7 +1933,7 @@ class CreateWorkforceEisPaymentDisbursementMutation(graphene.Mutation):
                 payment_process = WorkforceEisPaymentProcess.objects.get(id=process.id)
                 payment_process.is_disbursed = True
                 payment_process.save(username= user.username)
-            return TestWorkforcePaymentMutation(success=True, errors=[])
+            return cls(success=True, errors=[])
         except Exception as e:
-            return TestWorkforcePaymentMutation(success=False, errors=[str(e)])
+            return cls(success=False, errors=[str(e)])
 

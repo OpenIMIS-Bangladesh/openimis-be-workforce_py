@@ -276,7 +276,7 @@ class WorkforceEmployeeDependentServices(BaseService):
         vba_data = []
         try:
             endpoint = os.environ.get("CALCULATION_API_URL")
-            response = requests.post(endpoint, json=payload, timeout=30)
+            response = requests.post(endpoint, json=payload, timeout=360)
             if response.status_code == 200:
                 vba_response = response.json()
                 if application_type=='disabilityAssistance':
@@ -329,12 +329,12 @@ class WorkforceEmployeeDependentServices(BaseService):
                                         dep_obj.is_eligible = True
                                         dep_obj.save(username=self.user.username)
                             else:
-                                dep_obj.eis_calculated_amount = data["PV Total pension"]
-                                dep_obj.eis_approved_amount = data["PV Top-Up pension"]
-                                dep_obj.pv_factor = data["PV factor"]
-                                dep_obj.initial_replacement_rate = data["Initial replacement rate"]
-                                dep_obj.eis_initial_monthly_amount = data["Total initial monthly pension"]
-                                dep_obj.eis_monthly_amount = data["Top-up monthly pension"]
+                                dep_obj.eis_calculated_amount = safe_float(data["PV Total pension"])
+                                dep_obj.eis_approved_amount = safe_float(data["PV Top-Up pension"])
+                                dep_obj.pv_factor = safe_float(data["PV factor"])
+                                dep_obj.initial_replacement_rate = safe_float(data["Initial replacement rate"])
+                                dep_obj.eis_initial_monthly_amount = safe_float(data["Total initial monthly pension"])
+                                dep_obj.eis_monthly_amount =safe_float(data["Top-up monthly pension"])
                                 dep_obj.is_eligible = True
                                 dep_obj.save(username=self.user.username)
                             return True
