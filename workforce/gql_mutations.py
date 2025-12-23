@@ -24,7 +24,7 @@ from .gql_types import (
     WorkforceEducationInputType, WorkforceEmployeeBankingInfoInputType, WorkforceSignatureInputType,
     WorkforceFactoryRegistrationInputType,
     WorkforceFactoryRegistrationApprovalInputType, WorkforceApplicationBulkUpdateInputType,
-    WorkforceInteractiveUserInputType
+    WorkforceInteractiveUserInputType, WorkforceAllAssociationInputType
 )
 
 from .models import Bank
@@ -1937,3 +1937,52 @@ class CreateWorkforceEisPaymentDisbursementMutation(graphene.Mutation):
         except Exception as e:
             return cls(success=False, errors=[str(e)])
 
+
+class CreateWorkforceAllAssociationMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateWorkforceAllAssociationMutation"
+
+    class Input(WorkforceAllAssociationInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_create_workforce_all_association"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = WorkforceSignatureServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission="",
+            call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class UpdateWorkforceAllAssociationMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWorkforceAllAssociationMutation"
+
+    class Input(WorkforceAllAssociationInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_update_workforce_all_association"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = WorkforceSignatureServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission="",
+            call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
