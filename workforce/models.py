@@ -346,6 +346,13 @@ class WorkforceFactory(HistoryModel):
         blank=True,
         null=True,
     )
+    all_association = models.ForeignKey(
+        "WorkforceAllAssociation",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="factory_all_association"
+    )
 
     class Meta:
         managed = True

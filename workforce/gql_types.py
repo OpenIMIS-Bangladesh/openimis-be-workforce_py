@@ -159,6 +159,7 @@ class WorkforceFactoryInputType(OpenIMISMutation.Input):
     website = graphene.String()
     status = graphene.String()
     association_type = graphene.String()
+    all_association_id = graphene.String()
     is_same_company_representative = graphene.String()
     workforce_representative_id = graphene.String()
 
