@@ -12,7 +12,7 @@ from .models import (
     WorkforceApplicationSummaryMovement,
     WorkforceGrantMoney, WorkforceDiseases, WorkforceEducation, WorkforceEmployeeBankingInfo,
     WorkforceSignature, WorkforceFactoryRegistration, WorkforceEisPaymentDisbursement,
-    WorkforceEisPaymentProcess
+    WorkforceEisPaymentProcess, WorkforceAllAssociation
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -193,6 +193,7 @@ class WorkforceOrganizationEmployeeGQLType(DjangoObjectType):
             "status": ["exact", "isnull"],
             "related_user": ["exact"],
             "association_id": ["exact"],
+            "all_association_id": ["exact"],
             **prefix_filterset("location__", LocationGQLType._meta.filter_fields),
             **prefix_filterset("designations__",
                                WorkforceOrganizationEmployeeDesignationForEmployeeGQLType._meta.filter_fields),
@@ -1206,3 +1207,24 @@ class WorkforceEisPaymentDisbursementGQLType(DjangoObjectType):
 
         }
         connection_class = ExtendedConnection
+
+
+class WorkforceAllAssociationGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceAllAssociation
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "name_bn": ["exact", "icontains"],
+            "name_en": ["exact", "icontains"],
+            "address": ["exact", "icontains"],
+            "email": ["exact", "icontains"],
+            "phone": ["exact", "icontains"],
+            "short_name_bn": ["exact", "icontains"],
+            "short_name_en": ["exact", "icontains"],
+            "web_address": ["exact", "icontains"],
+            "status": ["exact", "icontains"],
+            "minimum_salary": ["exact", "icontains"],
+        }
+        connection_class = ExtendedConnection
+

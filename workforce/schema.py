@@ -259,6 +259,11 @@ class Query(graphene.ObjectType):
         year=graphene.String(),
     )
 
+    workforce_all_association = graphene.Field(
+        WorkforceAllAssociationGQLType,
+        client_mutation_id=graphene.String(required=False),
+    )
+
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("unauthorized"))
@@ -1223,6 +1228,10 @@ class Query(graphene.ObjectType):
         except WorkforceEisPaymentProcess.DoesNotExist:
             return None
 
+    def resolve_workforce_all_association(self, info, **kwargs):
+        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+            raise PermissionDenied(_("Unauthorized access"))
+        pass
 
 class Mutation(graphene.ObjectType):
     create_workforce_representative = CreateWorkforceRepresentativeMutation.Field()
@@ -1326,3 +1335,6 @@ class Mutation(graphene.ObjectType):
     test_workforce_payment = TestWorkforcePaymentMutation.Field()
     # create_workforce_postoffice = CreateWorkforcePostofficeMutation.Field()
     # update_workforce_postoffice = UpdateWorkforcePostofficeMutation.Field()
+
+    create_workforce_all_association = CreateWorkforceAllAssociationMutation.Field()
+    update_workforce_all_association = UpdateWorkforceAllAssociationMutation.Field()

@@ -76,6 +76,7 @@ class WorkforceOrganizationEmployeeInputType(OpenIMISMutation.Input):
     status = graphene.String()
     related_user_id = graphene.UUID(required=False)
     association_id = graphene.UUID(required=False)
+    all_association_id = graphene.UUID(required=False)
 
 
 class WorkforceOrganizationEmployeeDesignationInputType(OpenIMISMutation.Input):
@@ -681,3 +682,17 @@ class WorkforceEisPaymentDisbursementInputType(OpenIMISMutation.Input):
     year = graphene.String()
     disbursement_date = graphene.String()
     disbursed_by = graphene.String()
+
+
+class WorkforceAllAssociationInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    name_bn = graphene.String()
+    name_en = graphene.String()
+    address = graphene.String()
+    email = graphene.String()
+    phone = graphene.String()
+    short_name_bn = graphene.String()
+    short_name_en = graphene.String()
+    web_address = graphene.String()
+    status = graphene.String()
+    minimum_salary = graphene.String()
