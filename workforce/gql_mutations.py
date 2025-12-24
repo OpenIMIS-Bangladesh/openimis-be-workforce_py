@@ -63,6 +63,7 @@ from .services.workforce_factory_registration_services import WorkforceFactoryRe
 from .services.workforce_factory_registration_services import WorkforceFactoryRegistrationServices
 from .services.workforce_application_bulk_movement_services import WorkforceApplicationBulkMovementServices
 from .services.update_interactive_user_services import UpdateInteractiveUserServices
+from .services.workforce_all_association_services import WorkforceAllAssociationServices
 from .gql_queries import (
     WorkforceInteractiveUserGQLType
 )
@@ -1950,7 +1951,7 @@ class CreateWorkforceAllAssociationMutation(BaseHistoryModelCreateMutationMixin,
     def _mutate(cls, user, **data):
         failure_message = "workforce.mutation.failed_to_create_workforce_all_association"
         required_permission = WorkforceConfig.gql_query_workforces_perms
-        service_instance = WorkforceSignatureServices(user)
+        service_instance = WorkforceAllAssociationServices(user)
 
         result = auth_permission_validation(
             failure_message=failure_message,
@@ -1975,7 +1976,7 @@ class UpdateWorkforceAllAssociationMutation(BaseHistoryModelCreateMutationMixin,
     def _mutate(cls, user, **data):
         failure_message = "workforce.mutation.failed_to_update_workforce_all_association"
         required_permission = WorkforceConfig.gql_query_workforces_perms
-        service_instance = WorkforceSignatureServices(user)
+        service_instance = WorkforceAllAssociationServices(user)
 
         result = auth_permission_validation(
             failure_message=failure_message,
@@ -1987,6 +1988,7 @@ class UpdateWorkforceAllAssociationMutation(BaseHistoryModelCreateMutationMixin,
         )
 
         return result
+
 
 class CreateWorkforceOtherCompensationInfoMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
     _mutation_module = mutation_module
