@@ -674,6 +674,7 @@ class WorkforceEmployeeDependentGQLType(DjangoObjectType):
             "is_eligible": ["exact", "icontains"],
             "banking_info_id": ["exact"],
             "account_holder_type": ["exact"],
+            "attachments": [],
             "account_holder_relation_with_dependent": ["exact"],
             "account_holder_dob": ["exact"],
             "account_holder_nid": ["exact"],

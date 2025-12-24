@@ -344,6 +344,7 @@ class WorkforceEmployeeDependentInputType(OpenIMISMutation.Input):
     is_eligible = graphene.Boolean()
     account_holder_type = graphene.String()
     account_holder_relation_with_dependent = graphene.String()
+    attachments = graphene.String()
     account_holder_dob = graphene.String()
     account_holder_nid = graphene.String()
 
