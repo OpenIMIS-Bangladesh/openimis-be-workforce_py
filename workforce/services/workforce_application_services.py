@@ -254,6 +254,7 @@ class WorkforceApplicationServices(BaseService):
                 dependents = json.loads(dependents_data)
                 for dep in dependents:
 
+                    attachments = dep.get("attachments")
                     present_location_instance = Location.objects.get(
                         id=extract_uuid(dep.get("presentLocation", {}).get("id")))
                     permanent_location_instance = Location.objects.get(
@@ -281,13 +282,13 @@ class WorkforceApplicationServices(BaseService):
                         user_created_id=user_id,
                         user_updated_id=user_id,
                         status="active",
+                        attachments=attachments,
                         relation_with_worker=dep.get("relationType"),
                         disability_status=dep.get("isDisabled"),
                         disability_type=dep.get("disabilityType") if "disabilityType" in dep else None
                     )
                     dep_instance.save(username=self.user.username)
 
-                    attachments = dep.get("attachments")
                     if attachments and attachments != "[{}]":
 
                         for attr in attachments:
@@ -331,6 +332,7 @@ class WorkforceApplicationServices(BaseService):
                             user_created_id=user_id,
                             user_updated_id=user_id,
                             status="active",
+                            attachments=attachments,
                             relation_with_worker=dep.get("relationType"),
                             disability_status=dep.get("isDisabled"),
                             disability_type=dep.get("disabilityType") if "disabilityType" in dep else None
