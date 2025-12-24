@@ -1241,15 +1241,13 @@ class Query(graphene.ObjectType):
             raise PermissionDenied(_("Unauthorized access"))
         pass
 
-    def resolve_workforce_other_compensation_info(self, info, workforce_application_id=None):
+    def resolve_workforce_other_compensation_info(self, info, workforce_application_id=None, **kwargs):
         try:
-            qs = WorkforceOtherCompensationInfo.objects.all()
             if workforce_application_id:
-                qs = qs.filter(workforce_application_id=workforce_application_id)
-            return qs
+                qs = WorkforceOtherCompensationInfo.objects.filter(workforce_application_id=workforce_application_id)
+                return qs
         except WorkforceOtherCompensationInfo.DoesNotExist:
             return None
-
 
 
 class Mutation(graphene.ObjectType):
