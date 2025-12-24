@@ -258,6 +258,7 @@ class WorkforceFactoryForEmployerGQLType(DjangoObjectType):
             "website": ["exact", "icontains"],
             "status": ["exact", "isnull"],
             "workforce_representative": ["exact"],
+            "all_association_id": ["exact"],
             "is_same_company_representative": ["exact"],
         }
         connection_class = ExtendedConnection
