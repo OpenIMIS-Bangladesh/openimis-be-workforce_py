@@ -1359,3 +1359,7 @@ class Mutation(graphene.ObjectType):
     create_workforce_other_compensation_info = CreateWorkforceOtherCompensationInfoMutation.Field()
     update_workforce_other_compensation_info = UpdateWorkforceOtherCompensationInfoMutation.Field()
 
+
+    update_workforce_eis_payment_process_payment_type = UpdateWorkforceEisPaymentProcessPaymentTypeMutation.Field()
+    update_workforce_eis_payment_process_approval = UpdateWorkforceEisPaymentProcessApprovalMutation.Field()
+

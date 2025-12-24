@@ -3,7 +3,8 @@ import json
 from core.services import BaseService
 from pamqp.decode import double
 
-from workforce.models import WorkforceEmployeeDependent, WorkforceApplication, WorkforceEmployee, WorkforceFactory
+from workforce.models import WorkforceEmployeeDependent, WorkforceApplication, WorkforceEmployee, WorkforceFactory, \
+    WorkforceAllAssociation
 from datetime import datetime, timezone, date
 import requests
 import json
@@ -225,7 +226,8 @@ class WorkforceEmployeeDependentServices(BaseService):
 
         last_base_salary = float(workforce_application.last_base_salary) if workforce_application.last_base_salary else 0
         factory= WorkforceFactory.objects.get(id= workforce_application.employee_factory.id)
-        minimum_salary= factory.minimum_salary
+        association= WorkforceAllAssociation.objects.get(id= factory.all_association_id)
+        minimum_salary= association.minimum_salary or 0
         maximum_salary= minimum_salary*4
         if last_base_salary <= maximum_salary:
             salary_parameter= last_base_salary
