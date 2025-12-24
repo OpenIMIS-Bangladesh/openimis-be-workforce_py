@@ -264,6 +264,12 @@ class Query(graphene.ObjectType):
         client_mutation_id=graphene.String(required=False),
     )
 
+    workforce_other_compensation_info = graphene.List(
+        WorkforceOtherCompensationInfoGQLType,
+        client_mutation_id=graphene.String(required=False),
+        workforce_application_id=graphene.String(required=False)
+    )
+
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("unauthorized"))
@@ -1235,6 +1241,17 @@ class Query(graphene.ObjectType):
             raise PermissionDenied(_("Unauthorized access"))
         pass
 
+    def resolve_workforce_other_compensation_info(self, info, workforce_application_id=None):
+        try:
+            qs = WorkforceOtherCompensationInfo.objects.all()
+            if workforce_application_id:
+                qs = qs.filter(workforce_application_id=workforce_application_id)
+            return qs
+        except WorkforceOtherCompensationInfo.DoesNotExist:
+            return None
+
+
+
 class Mutation(graphene.ObjectType):
     create_workforce_representative = CreateWorkforceRepresentativeMutation.Field()
     update_workforce_representative = UpdateWorkforceRepresentativeMutation.Field()
@@ -1340,3 +1357,7 @@ class Mutation(graphene.ObjectType):
 
     create_workforce_all_association = CreateWorkforceAllAssociationMutation.Field()
     update_workforce_all_association = UpdateWorkforceAllAssociationMutation.Field()
+
+    create_workforce_other_compensation_info = CreateWorkforceOtherCompensationInfoMutation.Field()
+    update_workforce_other_compensation_info = UpdateWorkforceOtherCompensationInfoMutation.Field()
+

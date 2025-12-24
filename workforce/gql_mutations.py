@@ -24,11 +24,12 @@ from .gql_types import (
     WorkforceEducationInputType, WorkforceEmployeeBankingInfoInputType, WorkforceSignatureInputType,
     WorkforceFactoryRegistrationInputType,
     WorkforceFactoryRegistrationApprovalInputType, WorkforceApplicationBulkUpdateInputType,
-    WorkforceInteractiveUserInputType, WorkforceAllAssociationInputType
+    WorkforceInteractiveUserInputType, WorkforceAllAssociationInputType, WorkforceOtherCompensationInfoInputType
 )
 
 from .models import Bank
 from .services.workforce_organization_services import WorkforceOrganizationServices
+from .services.workforce_other_compensation_info_services import WorkforceOtherCompensationInfoServices
 from .services.workforce_representative_services import WorkforceRepresentativeServices
 from .services.workforce_organization_unit_services import WorkforceOrganizationUnitServices
 from .services.workforce_organization_unit_designation_services import WorkforceOrganizationUnitDesignationServices
@@ -1980,6 +1981,55 @@ class UpdateWorkforceAllAssociationMutation(BaseHistoryModelCreateMutationMixin,
             failure_message=failure_message,
             required_permission="",
             call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+class CreateWorkforceOtherCompensationInfoMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateWorkforceOtherCompensationInfoMutation"
+
+    class Input(WorkforceOtherCompensationInfoInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_create_workforce_other_compensation_info"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = WorkforceOtherCompensationInfoServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission="",
+            call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class UpdateWorkforceOtherCompensationInfoMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWorkforceOtherCompensationInfoMutation"
+
+    class Input(WorkforceOtherCompensationInfoInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_update_workforce_other_compensation_info"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = WorkforceOtherCompensationInfoServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission="",
+            call_type='update',
             service_instance=service_instance,
             user=user,
             data=data

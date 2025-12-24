@@ -1487,3 +1487,25 @@ class WorkforceAllAssociation(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_all_association'
+
+
+class WorkforceOtherCompensationInfo(HistoryModel):
+    workforce_application = models.ForeignKey(
+        "WorkforceApplication",
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="workforce_application_other_compensation_info",
+    )
+    entry_by = models.CharField(max_length=50, null=True, blank=True, db_comment="factory, officer")
+    date_of_compensation = models.DateField(null=True, blank=True)
+    amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    status_of_payment = models.CharField(max_length=30, null=True, blank=True, db_comment="paid, unpaid")
+    is_eis_benefit_adjustment_eligible = models.BooleanField(default=False, db_comment="for entry_by officer only")
+    remarks = models.TextField(null=True, blank=True, db_comment="for entry_by officer only")
+    payment_type= models.CharField(max_length=50, null=True, blank=True, db_comment="monthly, yearly, one time, installment")
+
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_other_compensation_info'

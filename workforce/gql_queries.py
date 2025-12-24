@@ -12,7 +12,7 @@ from .models import (
     WorkforceApplicationSummaryMovement,
     WorkforceGrantMoney, WorkforceDiseases, WorkforceEducation, WorkforceEmployeeBankingInfo,
     WorkforceSignature, WorkforceFactoryRegistration, WorkforceEisPaymentDisbursement,
-    WorkforceEisPaymentProcess, WorkforceAllAssociation
+    WorkforceEisPaymentProcess, WorkforceAllAssociation, WorkforceOtherCompensationInfo
 )
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
@@ -1230,3 +1230,19 @@ class WorkforceAllAssociationGQLType(DjangoObjectType):
         }
         connection_class = ExtendedConnection
 
+
+class WorkforceOtherCompensationInfoGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceOtherCompensationInfo
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "entry_by": ["exact", "icontains"],
+            "date_of_compensation": ["exact", "icontains"],
+            "amount": ["exact", "icontains"],
+            "status_of_payment": ["exact", "icontains"],
+            "is_eis_benefit_adjustment_eligible": [],
+            "remarks": ["exact", "icontains"],
+            "payment_type": ["exact", "icontains"],
+        }
+        connection_class = ExtendedConnection

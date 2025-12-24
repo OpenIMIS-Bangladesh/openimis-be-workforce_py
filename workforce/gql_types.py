@@ -698,3 +698,14 @@ class WorkforceAllAssociationInputType(OpenIMISMutation.Input):
     web_address = graphene.String()
     status = graphene.String()
     minimum_salary = graphene.String()
+
+
+class WorkforceOtherCompensationInfoInputType(OpenIMISMutation.Input):
+    workforce_application_id = graphene.String(required=False)
+    entry_by = graphene.String(required=False)
+    date_of_compensation = graphene.String(required=False)
+    amount = graphene.String(required=False)
+    status_of_payment = graphene.String(required=False)
+    is_eis_benefit_adjustment_eligible = graphene.Boolean(required=False)
+    remarks = graphene.String(required=False)
+    payment_type = graphene.String(required=False)
