@@ -1884,7 +1884,7 @@ class CreateWorkforceEisPaymentProcessMutation(graphene.Mutation):
             if WorkforceEisPaymentProcess.objects.filter(
                     workforce_application_id=data["workforce_application_id"]
             ).exists():
-                return cls(success=True, errors=["Disbursement already exists"])
+                return cls(success=False, errors=["Disbursement already exists"])
             workforce_application = WorkforceApplication.objects.get(id=data["workforce_application_id"])
             WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id)
             return cls(success=True, errors=[])

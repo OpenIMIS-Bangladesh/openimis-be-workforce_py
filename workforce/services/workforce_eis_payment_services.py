@@ -83,6 +83,7 @@ class WorkforceEisPaymentServices(BaseService):
                         eis_payment_type="monthly",
                         eis_calculated_amount=workforce_application.eis_calculated_amount,
                         eis_approved_amount=approved_amount,
+                        eis_initial_replacement_rate=workforce_application.initial_replacement_rate,
                         eis_initial_monthly_amount=workforce_application.eis_initial_monthly_amount,
                         eis_monthly_amount=monthly_amount,
                         month_index=current_date.month,
@@ -103,6 +104,7 @@ class WorkforceEisPaymentServices(BaseService):
                         eis_payment_type="monthly",
                         eis_calculated_amount=workforce_application.eis_calculated_amount,
                         eis_approved_amount=approved_amount,
+                        eis_initial_replacement_rate=workforce_application.initial_replacement_rate,
                         eis_initial_monthly_amount=workforce_application.eis_initial_monthly_amount,
                         eis_monthly_amount=remaining_amount,  # last partial payment
                         month_index=current_date.month,
@@ -125,6 +127,8 @@ class WorkforceEisPaymentServices(BaseService):
             dependent_count=0
             beneficiary_id_of_employee=""
             for dep in dependents:
+                if WorkforceEisPaymentProcess.objects.filter(workforce_employee_dependent= dep).exists():
+                    continue;
                 if dep.is_eligible==True and dep.eis_approved_amount>0:
                     bank_instance= Bank.objects.get(id= dep.bank_id)
                     now = datetime.now()
@@ -151,9 +155,11 @@ class WorkforceEisPaymentServices(BaseService):
                             eis_payment_type="monthly",
                             eis_calculated_amount=dep.eis_calculated_amount,
                             eis_approved_amount=approved_amount,
+                            eis_initial_replacement_rate = dep.initial_replacement_rate,
                             eis_initial_monthly_amount=dep.eis_initial_monthly_amount,
                             eis_monthly_amount=monthly_amount,
                             month_index=current_date.month,
+                            workforce_employee_dependent=dep,
                             year=current_date.year,
                             processing_date=date.today(),
                             beneficiary_id=beneficiary_id,
@@ -171,9 +177,11 @@ class WorkforceEisPaymentServices(BaseService):
                             eis_payment_type="monthly",
                             eis_calculated_amount=dep.eis_calculated_amount,
                             eis_approved_amount=approved_amount,
+                            eis_initial_replacement_rate=dep.initial_replacement_rate,
                             eis_initial_monthly_amount=dep.eis_initial_monthly_amount,
                             eis_monthly_amount=remaining_amount,  # last partial payment
                             month_index=current_date.month,
+                            workforce_employee_dependent=dep,
                             year=current_date.year,
                             processing_date=date.today(),
                             beneficiary_id=beneficiary_id,

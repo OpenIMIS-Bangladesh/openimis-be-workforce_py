@@ -1388,6 +1388,7 @@ class WorkforceEisPaymentProcess(HistoryModel):
     eis_payment_type = models.CharField(max_length=50, null=True, blank=True)
     eis_calculated_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     eis_approved_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    eis_initial_replacement_rate= models.FloatField(null=True, blank=True)
     eis_initial_monthly_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     eis_monthly_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     month_index = models.IntegerField(null=True, blank=True)
@@ -1401,6 +1402,7 @@ class WorkforceEisPaymentProcess(HistoryModel):
         related_name="workforce_payment_processed_by",
     )
     is_disbursed = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=False)
     beneficiary_id = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
@@ -1443,6 +1445,7 @@ class WorkforceEisPaymentDisbursement(HistoryModel):
     eis_payment_type = models.CharField(max_length=50, null=True, blank=True)
     eis_calculated_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     eis_approved_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    eis_initial_replacement_rate= models.FloatField(null=True, blank=True)
     eis_initial_monthly_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     eis_monthly_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     month_index = models.IntegerField(null=True, blank=True)

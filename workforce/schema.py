@@ -1208,6 +1208,8 @@ class Query(graphene.ObjectType):
                 qs = qs.filter(month_index=month)
             if year:
                 qs = qs.filter(year=year)
+            qs = qs.distinct('workforce_application_id', 'workforce_employee_dependent_id')
+
             return qs
         except WorkforceEisPaymentProcess.DoesNotExist:
             return None

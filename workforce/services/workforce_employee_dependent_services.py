@@ -328,6 +328,17 @@ class WorkforceEmployeeDependentServices(BaseService):
                                         dep_obj.eis_monthly_amount = safe_float(parent_data["Top-up monthly pension"])/2
                                         dep_obj.is_eligible = True
                                         dep_obj.save(username=self.user.username)
+                            elif rel== "Widow" or rel =="Dependent widower":
+                                for wife_data in vba_data:
+                                    if wife_data["ID"] == "Spouse(s) and Orphan(s)":
+                                        dep_obj.eis_calculated_amount = safe_float(wife_data["PV Total pension"])
+                                        dep_obj.eis_approved_amount = safe_float(wife_data["PV Top-Up pension"])
+                                        dep_obj.pv_factor = safe_float(wife_data["PV factor"])
+                                        dep_obj.initial_replacement_rate = safe_float(wife_data["Initial replacement rate"])
+                                        dep_obj.eis_initial_monthly_amount = safe_float(wife_data["Total initial monthly pension"])
+                                        dep_obj.eis_monthly_amount = safe_float(wife_data["Top-up monthly pension"])
+                                        dep_obj.is_eligible = True
+                                        dep_obj.save(username=self.user.username)
                             else:
                                 dep_obj.eis_calculated_amount = safe_float(data["PV Total pension"])
                                 dep_obj.eis_approved_amount = safe_float(data["PV Top-Up pension"])
