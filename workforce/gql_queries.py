@@ -1176,6 +1176,7 @@ class WorkforceEisPaymentProcessGQLType(DjangoObjectType):
             "year": ["exact"],
             "processing_date": ["exact"],
             "is_disbursed": ["exact"],
+            "approved": ["exact"],
         }
 
     def resolve_workforce_employee_dependent(self, info):

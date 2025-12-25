@@ -1410,7 +1410,7 @@ class WorkforceEisPaymentProcess(HistoryModel):
         related_name="workforce_payment_processed_by",
     )
     is_disbursed = models.BooleanField(default=False)
-    is_approved = models.BooleanField(default=False)
+    approved = models.CharField(max_length=10, null=True, blank=True)
     beneficiary_id = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:

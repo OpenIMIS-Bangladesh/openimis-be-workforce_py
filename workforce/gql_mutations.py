@@ -2065,18 +2065,17 @@ class UpdateWorkforceEisPaymentProcessPaymentTypeMutation(graphene.Mutation):
 class UpdateWorkforceEisPaymentProcessApprovalMutation(graphene.Mutation):
     class Arguments:
         beneficiary_id = graphene.String(required=True)
-        is_approved = graphene.Boolean(required=True)
+        approved = graphene.String(required=True)
 
     success = graphene.Boolean()
     errors = graphene.List(graphene.String)
 
     @classmethod
     def mutate(cls, root, info, **data):
-        from workforce.models import WorkforceApplication
         from workforce.models import WorkforceEisPaymentProcess
         try:
             user = info.context.user if hasattr(info.context, 'user') else None
-            payment_processes = WorkforceEisPaymentProcess.objects.filter(beneficiary_id= data["beneficiary_id"]).update(is_approved=data["is_approved"])
+            WorkforceEisPaymentProcess.objects.filter(beneficiary_id= data["beneficiary_id"]).update(approved=data["approved"])
             return cls(success=True, errors=[])
         except Exception as e:
             return cls(success=False, errors=[str(e)])
