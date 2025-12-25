@@ -259,12 +259,12 @@ class Query(graphene.ObjectType):
         year=graphene.String(),
     )
 
-    workforce_all_association = graphene.Field(
+    workforce_all_association = OrderedDjangoFilterConnectionField(
         WorkforceAllAssociationGQLType,
         client_mutation_id=graphene.String(required=False),
     )
 
-    workforce_other_compensation_info = graphene.List(
+    workforce_other_compensation_info = OrderedDjangoFilterConnectionField(
         WorkforceOtherCompensationInfoGQLType,
         client_mutation_id=graphene.String(required=False),
         workforce_application_id=graphene.String(required=False)
