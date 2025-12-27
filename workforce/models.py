@@ -1497,7 +1497,9 @@ class WorkforceOtherCompensationInfo(HistoryModel):
         null=False,
         related_name="workforce_application_other_compensation_info",
     )
+
     entry_by = models.CharField(max_length=50, null=True, blank=True, db_comment="factory, officer")
+    received_from_organization = models.TextField(null=True, blank=True)
     date_of_compensation = models.DateField(null=True, blank=True)
     amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     status_of_payment = models.CharField(max_length=30, null=True, blank=True, db_comment="paid, unpaid")

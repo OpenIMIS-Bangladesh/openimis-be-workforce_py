@@ -703,6 +703,7 @@ class WorkforceAllAssociationInputType(OpenIMISMutation.Input):
 class WorkforceOtherCompensationInfoInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
     workforce_application_id = graphene.String(required=False)
+    received_from_organization = graphene.String(required=False)
     entry_by = graphene.String(required=False)
     date_of_compensation = graphene.String(required=False)
     amount = graphene.String(required=False)
