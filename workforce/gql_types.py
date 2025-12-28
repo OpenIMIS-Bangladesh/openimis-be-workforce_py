@@ -708,6 +708,6 @@ class WorkforceOtherCompensationInfoInputType(OpenIMISMutation.Input):
     date_of_compensation = graphene.String(required=False)
     amount = graphene.String(required=False)
     status_of_payment = graphene.String(required=False)
-    is_eis_benefit_adjustment_eligible = graphene.Boolean(required=False)
+    is_eis_benefit_adjustment_eligible = graphene.String(required=False)
     remarks = graphene.String(required=False)
     payment_type = graphene.String(required=False)

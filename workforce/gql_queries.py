@@ -1244,7 +1244,7 @@ class WorkforceOtherCompensationInfoGQLType(DjangoObjectType):
             "date_of_compensation": ["exact", "icontains"],
             "amount": ["exact", "icontains"],
             "status_of_payment": ["exact", "icontains"],
-            "is_eis_benefit_adjustment_eligible": [],
+            "is_eis_benefit_adjustment_eligible": ["exact"],
             "remarks": ["exact", "icontains"],
             "payment_type": ["exact", "icontains"],
         }

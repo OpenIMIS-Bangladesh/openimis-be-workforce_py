@@ -2,11 +2,12 @@ import logging
 from core.services import BaseService
 
 from workforce.models import WorkforceEmployeeDependent, WorkforceApplication, WorkforceEmployee, WorkforceFactory, \
-    WorkforceAllAssociation
+    WorkforceAllAssociation, WorkforceOtherCompensationInfo
 from datetime import datetime, timezone, date
 import requests
 import json
 import os
+from django.db.models import Sum
 
 logger = logging.getLogger(__name__)
 
@@ -229,6 +230,14 @@ class WorkforceEmployeeDependentServices(BaseService):
         else:
             salary_parameter = maximum_salary
 
+        total_other_payment = (
+                                  WorkforceOtherCompensationInfo.objects
+                                  .filter(
+                                      workforce_application_id=workforce_application_id,
+                                      is_eis_benefit_adjustment_eligible="Yes"
+                                  )
+                                  .aggregate(total=Sum('amount'))
+                              )['total'] or 0
         payload = {
             "parameters": {
                 "Interest rate": "8.1%",
@@ -237,7 +246,7 @@ class WorkforceEmployeeDependentServices(BaseService):
                     "%m/%d/%Y") if workforce_application.date_created else "08/08/2024",
                 "Date of calculation": workforce_application.date_created.strftime(
                     "%m/%d/%Y") if workforce_application.date_created else "08/26/2024",
-                "Payment from Central Fund": "200000"
+                "Payment from Central Fund": total_other_payment
             },
             "Worker": {
                 "Name": worker.first_name_en,
