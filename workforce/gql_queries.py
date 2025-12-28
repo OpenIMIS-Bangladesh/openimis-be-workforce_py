@@ -1238,7 +1238,7 @@ class WorkforceOtherCompensationInfoGQLType(DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         filter_fields = {
             "id": ["exact"],
-            "workforce_application_id": ["exact", "icontains"],
+            # "workforce_application_id": ["exact"],
             "received_from_organization": ["exact", "icontains"],
             "entry_by": ["exact", "icontains"],
             "date_of_compensation": ["exact", "icontains"],
