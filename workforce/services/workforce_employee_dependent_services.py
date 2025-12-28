@@ -1,7 +1,5 @@
 import logging
-import json
 from core.services import BaseService
-from pamqp.decode import double
 
 from workforce.models import WorkforceEmployeeDependent, WorkforceApplication, WorkforceEmployee, WorkforceFactory, \
     WorkforceAllAssociation
@@ -23,7 +21,6 @@ def safe_float(value, default=0.0):
 class WorkforceEmployeeDependentServices(BaseService):
     OBJECT_TYPE = WorkforceEmployeeDependent
 
-
     def create(self, obj_data):
         return super().create(obj_data)
 
@@ -31,20 +28,19 @@ class WorkforceEmployeeDependentServices(BaseService):
         return super().update(obj_data)
 
     def get_gender_by_relation(self, relation_with_worker):
-        if relation_with_worker=="workforce.relation.father" or relation_with_worker=="workforce.relation.son" or relation_with_worker=="workforce.relation.husband" or relation_with_worker=="workforce.relation.brother" or relation_with_worker=="workforce.relation.grand_father" or relation_with_worker=="workforce.relation.grand_son":
+        if relation_with_worker == "workforce.relation.father" or relation_with_worker == "workforce.relation.son" or relation_with_worker == "workforce.relation.husband" or relation_with_worker == "workforce.relation.brother" or relation_with_worker == "workforce.relation.grand_father" or relation_with_worker == "workforce.relation.grand_son":
             return "male"
         else:
             return "female"
 
     def get_gender_by_relation_for_api(self, relation_with_worker):
-        if relation_with_worker=="workforce.relation.father" or relation_with_worker=="workforce.relation.son" or relation_with_worker=="workforce.relation.husband" or relation_with_worker=="workforce.relation.brother" or relation_with_worker=="workforce.relation.grand_father" or relation_with_worker=="workforce.relation.grand_son":
+        if relation_with_worker == "workforce.relation.father" or relation_with_worker == "workforce.relation.son" or relation_with_worker == "workforce.relation.husband" or relation_with_worker == "workforce.relation.brother" or relation_with_worker == "workforce.relation.grand_father" or relation_with_worker == "workforce.relation.grand_son":
             return "Male"
         else:
             return "Female"
 
     def get_relation_for_api(self, dep_obj):
         age = self.calculate_age(dep_obj.birth_date)
-
 
         relation = dep_obj.relation_with_worker
         marital = dep_obj.marital_status
@@ -137,11 +133,9 @@ class WorkforceEmployeeDependentServices(BaseService):
         age = now.year - dob.year - ((now.month, now.day) < (dob.month, dob.day))
         return age
 
-
-
     def update_eligibility(self, workforce_application_id):
         try:
-            dependents= WorkforceEmployeeDependent.objects.filter(workforce_application_id=workforce_application_id)
+            dependents = WorkforceEmployeeDependent.objects.filter(workforce_application_id=workforce_application_id)
             for dependent in dependents:
                 dep_obj = WorkforceEmployeeDependent.objects.get(id=dependent.id)
                 relation = dep_obj.relation_with_worker
@@ -176,7 +170,7 @@ class WorkforceEmployeeDependentServices(BaseService):
 
                     elif relation in ["workforce.relation.son", "workforce.relation.brother"]:
                         # Son/Brother: check if physically challenged, then alive
-                        if dep_obj.disability_status=="yes":
+                        if dep_obj.disability_status == "yes":
                             if dep_obj.life_status == "alive":
                                 eligible = True
                             else:
@@ -206,9 +200,8 @@ class WorkforceEmployeeDependentServices(BaseService):
             if self.get_relation_for_api(dep)
         ]
 
-        workforce_application= WorkforceApplication.objects.get(id= workforce_application_id)
-        worker= WorkforceEmployee.objects.get(id= workforce_application.workforce_employee_id)
-
+        workforce_application = WorkforceApplication.objects.get(id=workforce_application_id)
+        worker = WorkforceEmployee.objects.get(id=workforce_application.workforce_employee_id)
 
         # Calculate age
         worker_age = self.calculate_age(worker.birth_date)
@@ -224,15 +217,17 @@ class WorkforceEmployeeDependentServices(BaseService):
             else:
                 disability_percentage = "0"
 
-        last_base_salary = float(workforce_application.last_base_salary) if workforce_application.last_base_salary else 0
-        factory= WorkforceFactory.objects.get(id= workforce_application.employee_factory.id)
-        association= WorkforceAllAssociation.objects.get(id= factory.all_association_id)
-        minimum_salary= association.minimum_salary or 0
-        maximum_salary= minimum_salary*4
+        last_base_salary = float(
+            workforce_application.last_base_salary) if workforce_application.last_base_salary else 0
+        factory = WorkforceFactory.objects.get(id=workforce_application.employee_factory.id)
+        # association= WorkforceAllAssociation.objects.get(id= factory.all_association_id)
+        # minimum_salary= association.minimum_salary or 0
+        minimum_salary = 12500
+        maximum_salary = minimum_salary * 4
         if last_base_salary <= maximum_salary:
-            salary_parameter= last_base_salary
+            salary_parameter = last_base_salary
         else:
-            salary_parameter= maximum_salary
+            salary_parameter = maximum_salary
 
         payload = {
             "parameters": {
@@ -247,21 +242,21 @@ class WorkforceEmployeeDependentServices(BaseService):
             "Worker": {
                 "Name": worker.first_name_en,
                 "ID": str(worker.id),
-                "Status": "Disabled" if application_type=="disabilityAssistance" else "Deceased",
-                "Disability level": disability_percentage+("" if "%" in disability_percentage else "%"),
+                "Status": "Disabled" if application_type == "disabilityAssistance" else "Deceased",
+                "Disability level": disability_percentage + ("" if "%" in disability_percentage else "%"),
                 # "Disability level": "50%",
                 "Monthly earnings used for calculation": str(salary_parameter),
                 "Date of birth": worker.birth_date.strftime(
                     "%m/%d/%Y") if worker.birth_date else "10/16/1997",
                 "Age at calculation date": str(worker_age or 26),
-                "Sex": "Male" if worker.gender=="workforce.gender.male" or worker.gender=="M" else "Female"
+                "Sex": "Male" if worker.gender == "workforce.gender.male" or worker.gender == "M" else "Female"
             },
             "Number of dependents": str(len(dependents)),
             "Dependents": []
         }
 
         # Loop over dependents
-        dep_key=1
+        dep_key = 1
         for dep in dependents:
             payload["Dependents"].append({
                 "Name": dep.name_en or dep.name_bn or "",
@@ -272,7 +267,7 @@ class WorkforceEmployeeDependentServices(BaseService):
                 "Sex": self.get_gender_by_relation_for_api(dep.relation_with_worker) or "Female",
                 "Relationship": self.get_relation_for_api(dep) or ""
             })
-            dep_key= dep_key+1
+            dep_key = dep_key + 1
 
         # === API CALL ===
         vba_data = []
@@ -281,7 +276,7 @@ class WorkforceEmployeeDependentServices(BaseService):
             response = requests.post(endpoint, json=payload, timeout=360)
             if response.status_code == 200:
                 vba_response = response.json()
-                if application_type=='disabilityAssistance':
+                if application_type == 'disabilityAssistance':
                     vba_data = vba_response["data"]["results"][0]
                     worker_pv_factor = vba_data.get("PV factor")
                     worker_calculated_amount = vba_data.get("PV Total pension")
@@ -313,31 +308,36 @@ class WorkforceEmployeeDependentServices(BaseService):
         if application_type == "financialAssistance":
             for dependent in dependents:
                 dep_obj = WorkforceEmployeeDependent.objects.get(id=dependent.id)
-                age= self.calculate_age(dep_obj.birth_date)
+                age = self.calculate_age(dep_obj.birth_date)
 
                 # Helper to assign VBA data to dependent
                 def set_vba_data(dep_obj, rel):
                     for data in vba_data:
                         if data["Relationship"] == rel:
-                            if rel== "Mother" or rel =="Dependent father":
+                            if rel == "Mother" or rel == "Dependent father":
                                 for parent_data in vba_data:
                                     if parent_data["ID"] == "Parent(s)":
-                                        dep_obj.eis_calculated_amount = safe_float(parent_data["PV Total pension"])/2
-                                        dep_obj.eis_approved_amount = safe_float(parent_data["PV Top-Up pension"])/2
+                                        dep_obj.eis_calculated_amount = safe_float(parent_data["PV Total pension"]) / 2
+                                        dep_obj.eis_approved_amount = safe_float(parent_data["PV Top-Up pension"]) / 2
                                         dep_obj.pv_factor = safe_float(parent_data["PV factor"])
-                                        dep_obj.initial_replacement_rate = safe_float(parent_data["Initial replacement rate"])/2
-                                        dep_obj.eis_initial_monthly_amount = safe_float(parent_data["Total initial monthly pension"])/2
-                                        dep_obj.eis_monthly_amount = safe_float(parent_data["Top-up monthly pension"])/2
+                                        dep_obj.initial_replacement_rate = safe_float(
+                                            parent_data["Initial replacement rate"]) / 2
+                                        dep_obj.eis_initial_monthly_amount = safe_float(
+                                            parent_data["Total initial monthly pension"]) / 2
+                                        dep_obj.eis_monthly_amount = safe_float(
+                                            parent_data["Top-up monthly pension"]) / 2
                                         dep_obj.is_eligible = True
                                         dep_obj.save(username=self.user.username)
-                            elif rel== "Widow" or rel =="Dependent widower":
+                            elif rel == "Widow" or rel == "Dependent widower":
                                 for wife_data in vba_data:
                                     if wife_data["ID"] == "Spouse(s) and Orphan(s)":
                                         dep_obj.eis_calculated_amount = safe_float(wife_data["PV Total pension"])
                                         dep_obj.eis_approved_amount = safe_float(wife_data["PV Top-Up pension"])
                                         dep_obj.pv_factor = safe_float(wife_data["PV factor"])
-                                        dep_obj.initial_replacement_rate = safe_float(wife_data["Initial replacement rate"])
-                                        dep_obj.eis_initial_monthly_amount = safe_float(wife_data["Total initial monthly pension"])
+                                        dep_obj.initial_replacement_rate = safe_float(
+                                            wife_data["Initial replacement rate"])
+                                        dep_obj.eis_initial_monthly_amount = safe_float(
+                                            wife_data["Total initial monthly pension"])
                                         dep_obj.eis_monthly_amount = safe_float(wife_data["Top-up monthly pension"])
                                         dep_obj.is_eligible = True
                                         dep_obj.save(username=self.user.username)
@@ -347,7 +347,7 @@ class WorkforceEmployeeDependentServices(BaseService):
                                 dep_obj.pv_factor = safe_float(data["PV factor"])
                                 dep_obj.initial_replacement_rate = safe_float(data["Initial replacement rate"])
                                 dep_obj.eis_initial_monthly_amount = safe_float(data["Total initial monthly pension"])
-                                dep_obj.eis_monthly_amount =safe_float(data["Top-up monthly pension"])
+                                dep_obj.eis_monthly_amount = safe_float(data["Top-up monthly pension"])
                                 dep_obj.is_eligible = True
                                 dep_obj.save(username=self.user.username)
                             return True
