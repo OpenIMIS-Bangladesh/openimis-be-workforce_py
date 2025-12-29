@@ -256,6 +256,7 @@ class WorkforceApplicationServices(BaseService):
                 dependents = json.loads(dependents_data)
                 for dep in dependents:
 
+                    eligibility_status = dep.get("isEligible", False)
                     attachments = dep.get("attachments")
                     present_location_instance = Location.objects.get(
                         id=extract_uuid(dep.get("presentLocation", {}).get("id")))
@@ -287,7 +288,8 @@ class WorkforceApplicationServices(BaseService):
                         attachments=attachments,
                         relation_with_worker=dep.get("relationType"),
                         disability_status=dep.get("isDisabled"),
-                        disability_type=dep.get("disabilityType") if "disabilityType" in dep else None
+                        disability_type=dep.get("disabilityType") if "disabilityType" in dep else None,
+                        is_eligible=eligibility_status
                     )
                     dep_instance.save(username=self.user.username)
 
@@ -338,7 +340,8 @@ class WorkforceApplicationServices(BaseService):
                             attachments=attachments,
                             relation_with_worker=dep.get("relationType"),
                             disability_status=dep.get("isDisabled"),
-                            disability_type=dep.get("disabilityType") if "disabilityType" in dep else None
+                            disability_type=dep.get("disabilityType") if "disabilityType" in dep else None,
+                            is_eligible=eligibility_status
                         )
                         dep_instance_eis.save(username=self.user.username)
             except Exception as e:
@@ -588,19 +591,3 @@ class WorkforceApplicationServices(BaseService):
             application_id_for_movement = obj_data.get("id")
             application_instance = WorkforceApplication.objects.get(id=application_id_for_movement)
             cf_and_eis_application_movement_to_factory_admin(self, application_instance, application_id_for_movement)
-
-        # ================================================================
-        # 6. Set isEligible boolean data in workforce_employee_dependent from dependents_data
-        # ================================================================
-        if dependents_data and dependents_data != "[{}]":
-            dependents_data = json.loads(dependents_data)
-
-            for dep in dependents_data:
-                try:
-                    eligibility_status = dep.get("isEligible", "").lower() == 'true'
-
-                    dependent_instance = WorkforceEmployeeDependent.objects.get(id=extract_uuid(dep.get("id")))
-                    dependent_instance.isEligible = eligibility_status
-                    dependent_instance.save(username=self.user.username)
-                except Exception as e:
-                    print(e)
