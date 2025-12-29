@@ -599,8 +599,8 @@ class WorkforceApplicationServices(BaseService):
                 try:
                     eligibility_status = dep.get("isEligible", "").lower() == 'true'
 
-                    dependent_instance = WorkforceEmployeeDependent.objects.get(id=dep.get("id"))
+                    dependent_instance = WorkforceEmployeeDependent.objects.get(id=extract_uuid(dep.get("id")))
                     dependent_instance.isEligible = eligibility_status
                     dependent_instance.save(username=self.user.username)
-                except ObjectDoesNotExist:
-                    continue
+                except Exception as e:
+                    print(e)
