@@ -127,8 +127,10 @@ class WorkforceEisPaymentServices(BaseService):
             dependent_count=0
             beneficiary_id_of_employee=""
             for dep in dependents:
+                if dep.bank_id==None:
+                    continue
                 if WorkforceEisPaymentProcess.objects.filter(workforce_employee_dependent= dep).exists():
-                    continue;
+                    continue
                 if dep.is_eligible==True and dep.eis_approved_amount>0:
                     bank_instance= Bank.objects.get(id= dep.bank_id)
                     now = datetime.now()
