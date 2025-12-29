@@ -198,7 +198,7 @@ class WorkforceEmployeeDependentServices(BaseService):
         dependents = list(dependents)  # evaluate queryset once
         dependents = [
             dep for dep in dependents
-            if self.get_relation_for_api(dep)
+            if self.get_relation_for_api(dep) and dep.bank_id is not None
         ]
 
         workforce_application = WorkforceApplication.objects.get(id=workforce_application_id)
