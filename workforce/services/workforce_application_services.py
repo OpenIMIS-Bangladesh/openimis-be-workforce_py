@@ -23,6 +23,7 @@ def extract_uuid(encoded_str):
     decoded = base64.b64decode(encoded_str).decode()
     return decoded.split(":")[1]
 
+
 class WorkforceApplicationServices(BaseService):
     OBJECT_TYPE = WorkforceApplication
 
@@ -135,9 +136,9 @@ class WorkforceApplicationServices(BaseService):
                         user_created_id=user_id,
                         user_updated_id=user_id,
                         status="active",
-                        relation_with_worker= dep.get("relationType"),
-                        disability_status= dep.get("isDisabled"),
-                        disability_type = dep.get("disabilityType") if "disabilityType" in dep else None
+                        relation_with_worker=dep.get("relationType"),
+                        disability_status=dep.get("isDisabled"),
+                        disability_type=dep.get("disabilityType") if "disabilityType" in dep else None
                     )
                     dep_instance.save(username=self.user.username)
 
@@ -221,7 +222,8 @@ class WorkforceApplicationServices(BaseService):
                 note="আবেদন ইআইএস কোঅর্ডিনেটর শাখায় প্রেরণ করা হয়েছে"
             )
 
-            WorkforceEmployeeDependentServices.calculate_eis_amount(application_eis_instance.id, existing_data['application_type'])
+            WorkforceEmployeeDependentServices.calculate_eis_amount(application_eis_instance.id,
+                                                                    existing_data['application_type'])
         else:
             application_eis_instance = None
 
@@ -273,7 +275,7 @@ class WorkforceApplicationServices(BaseService):
                         email=dep.get("email"),
                         occupation=dep.get("occupation"),
                         birth_certificate_no=dep.get("birthCertificateNo"),
-                        birth_date= dep.get("birthDate"),
+                        birth_date=dep.get("birthDate"),
                         marital_status=dep.get("maritalStatus"),
                         present_address=dep.get("presentAddress"),
                         permanent_address=dep.get("permanentAddress"),
@@ -303,7 +305,8 @@ class WorkforceApplicationServices(BaseService):
 
                             for item in file_data:
                                 try:
-                                    document = WorkforceDocument.objects.get(path=item.get("file_path"), url=item.get("file_url"))
+                                    document = WorkforceDocument.objects.get(path=item.get("file_path"),
+                                                                             url=item.get("file_url"))
                                 except WorkforceDocument.DoesNotExist:
                                     continue
 
@@ -512,9 +515,9 @@ class WorkforceApplicationServices(BaseService):
                     dependent.account_holder_type = holder_type
                     workforce_employee = WorkforceEmployee.objects.get(id=application_instance.workforce_employee.id)
 
-                    banking_info= WorkforceEmployeeBankingInfo.objects.filter(dependant= dependent).first()
+                    banking_info = WorkforceEmployeeBankingInfo.objects.filter(dependant=dependent).first()
                     if banking_info:
-                        update_banking_info= WorkforceEmployeeBankingInfo.objects.get(id=banking_info.id)
+                        update_banking_info = WorkforceEmployeeBankingInfo.objects.get(id=banking_info.id)
                         update_banking_info.dependant = dependent
                         update_banking_info.type = "dependent"
                         update_banking_info.employee = workforce_employee
@@ -527,14 +530,16 @@ class WorkforceApplicationServices(BaseService):
                         update_banking_info.nid = (dependent.nid if dependent.nid else dependent.account_holder_nid),
                         update_banking_info.date_of_birth = dependent.account_holder_dob
                         update_banking_info.status = "active"
-                        update_banking_info.amount= ("1" if banking_info.amount=="0" or banking_info.amount==None else "0")
+                        update_banking_info.amount = (
+                            "1" if banking_info.amount == "0" or banking_info.amount == None else "0")
                         update_banking_info.relation_with_dependent = dependent.account_holder_relation_with_dependent
                         update_banking_info.nid = dependent.account_holder_nid
                         update_banking_info.account_holder_type = holder_type
-                        update_banking_info.parent_dependent= (dependent.parent_dependent if dependent.parent_dependent else None)
+                        update_banking_info.parent_dependent = (
+                            dependent.parent_dependent if dependent.parent_dependent else None)
                         update_banking_info.save(username=self.user.username)
                     else:
-                        banking_info= WorkforceEmployeeBankingInfo(
+                        banking_info = WorkforceEmployeeBankingInfo(
                             dependant=dependent,
                             type="dependent",
                             employee=workforce_employee,
@@ -548,16 +553,17 @@ class WorkforceApplicationServices(BaseService):
                             date_of_birth=dependent.account_holder_dob,
                             status="active",
                             relation_with_dependent=dependent.account_holder_relation_with_dependent,
-                            account_holder_type= holder_type,
-                            parent_dependent= (dependent.parent_dependent if dependent.parent_dependent else None)
+                            account_holder_type=holder_type,
+                            parent_dependent=(dependent.parent_dependent if dependent.parent_dependent else None)
                         )
                         banking_info.save(username=self.user.username)
-                    dependent.dummy_field = ("1" if dependent.dummy_field=="0" or dependent.dummy_field==None else "0")
+                    dependent.dummy_field = (
+                        "1" if dependent.dummy_field == "0" or dependent.dummy_field == None else "0")
                     dependent.save(username=self.user.username)
                 else:
                     bank_id_decoded = extract_uuid(bank_data.get("branch", {}).get("id"))
                     bank = Bank.objects.get(id=bank_id_decoded)
-                    employee = WorkforceEmployee.objects.get(id= application_instance.workforce_employee.id)
+                    employee = WorkforceEmployee.objects.get(id=application_instance.workforce_employee.id)
                     entry = WorkforceEmployeeBankingInfo(
                         name_bn=employee.first_name_bn,
                         name_en=employee.first_name_en,
@@ -577,7 +583,24 @@ class WorkforceApplicationServices(BaseService):
         # ================================================================
         # 5. Handle CF and EIS new application movement to Factory Admin
         # ================================================================
-        if application_status == 'new' and organization_type in ['cf', 'eis'] and application_status != status_before_update:
+        if application_status == 'new' and organization_type in ['cf',
+                                                                 'eis'] and application_status != status_before_update:
             application_id_for_movement = obj_data.get("id")
             application_instance = WorkforceApplication.objects.get(id=application_id_for_movement)
             cf_and_eis_application_movement_to_factory_admin(self, application_instance, application_id_for_movement)
+
+        # ================================================================
+        # 6. Set isEligible boolean data in workforce_employee_dependent from dependents_data
+        # ================================================================
+        if dependents_data and dependents_data != "[{}]":
+            dependents_data = json.loads(dependents_data)
+
+            for dep in dependents_data:
+                try:
+                    eligibility_status = dep.get("isEligible", "").lower() == 'true'
+
+                    dependent_instance = WorkforceEmployeeDependent.objects.get(id=dep.get("id"))
+                    dependent_instance.isEligible = eligibility_status
+                    dependent_instance.save(username=self.user.username)
+                except ObjectDoesNotExist:
+                    continue
