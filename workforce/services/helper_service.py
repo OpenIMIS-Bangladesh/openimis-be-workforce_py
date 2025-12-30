@@ -1,3 +1,4 @@
+import base64
 import random
 import re
 import uuid
@@ -207,6 +208,13 @@ def cf_and_eis_application_movement_to_factory_admin(self, application_instance,
         application_to=application_to,
         note="আবেদন ফ্যাক্টরি অ্যাডমিন এর নিকট প্রেরণ করা হয়েছে"
     )
+
+
+def dependent_uuid_to_base64(uuid_str: str) -> str:
+    static_prefix = "WorkforceEmployeeDependentGQLType:"
+    combined = f"{static_prefix}{uuid_str}"
+    encoded = base64.b64encode(combined.encode("utf-8")).decode("utf-8")
+    return encoded
 
 
 # def relate_document_with_banking_info(dependent_id):
