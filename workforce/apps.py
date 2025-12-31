@@ -155,6 +155,9 @@ DEFAULT_CFG = {
      # WorkforceSecretary (821xxx)
     "gql_workforce_secretary_perms": ["815000"],
 
+     # WorkforceEisAssociationCommittee (812xxx)
+    "gql_workforce_eis_association_committee_perms": ["816000"],
+
     "default_validations_disabled": False,
 }
 
@@ -309,6 +312,9 @@ class WorkforceConfig(AppConfig):
 
      # WorkforceLfmeaAssociation (xxx)
     gql_workforce_lfmeab_association_perms = []
+
+     # WorkforceAssociationCommitte (xxx)
+    gql_workforce_eis_association_committee_perms = []
 
     default_validations_disabled = None
 
