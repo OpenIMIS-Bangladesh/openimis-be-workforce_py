@@ -221,9 +221,9 @@ class WorkforceEmployeeDependentServices(BaseService):
         last_base_salary = float(
             workforce_application.last_base_salary) if workforce_application.last_base_salary else 0
         factory = WorkforceFactory.objects.get(id=workforce_application.employee_factory.id)
-        # association= WorkforceAllAssociation.objects.get(id= factory.all_association_id)
-        # minimum_salary= association.minimum_salary or 0
-        minimum_salary = 12500
+        association= WorkforceAllAssociation.objects.get(id= factory.all_association_id)
+        minimum_salary= association.minimum_salary or 0
+        # minimum_salary = 12500
         maximum_salary = minimum_salary * 4
         if last_base_salary <= maximum_salary:
             salary_parameter = last_base_salary
@@ -337,17 +337,15 @@ class WorkforceEmployeeDependentServices(BaseService):
                                             parent_data["Top-up monthly pension"]) / 2
                                         dep_obj.is_eligible = True
                                         dep_obj.save(username=self.user.username)
-                            elif rel == "Widow" or rel == "Dependent widower":
-                                for wife_data in vba_data:
-                                    if wife_data["ID"] == "Spouse(s) and Orphan(s)":
-                                        dep_obj.eis_calculated_amount = safe_float(wife_data["PV Total pension"])
-                                        dep_obj.eis_approved_amount = safe_float(wife_data["PV Top-Up pension"])
-                                        dep_obj.pv_factor = safe_float(wife_data["PV factor"])
-                                        dep_obj.initial_replacement_rate = safe_float(
-                                            wife_data["Initial replacement rate"])
-                                        dep_obj.eis_initial_monthly_amount = safe_float(
-                                            wife_data["Total initial monthly pension"])
-                                        dep_obj.eis_monthly_amount = safe_float(wife_data["Top-up monthly pension"])
+                            elif rel == "Widow" or rel == "Dependent widower" or rel == "Minor daughter" or rel == "Minor son":
+                                for wife_children_data in vba_data:
+                                    if wife_children_data["ID"] == "Spouse(s) and Orphan(s)":
+                                        dep_obj.initial_replacement_rate = safe_float(data["Initial replacement rate"])
+                                        dep_obj.eis_calculated_amount = safe_float(wife_children_data["PV Total pension"]) * safe_float(data["Initial replacement rate"])
+                                        dep_obj.eis_approved_amount = safe_float(wife_children_data["PV Top-Up pension"]) * safe_float(data["Initial replacement rate"])
+                                        dep_obj.pv_factor = safe_float(wife_children_data["PV factor"])
+                                        dep_obj.eis_initial_monthly_amount = safe_float(data["Total initial monthly pension"])
+                                        dep_obj.eis_monthly_amount = safe_float(data["Top-up monthly pension"])
                                         dep_obj.is_eligible = True
                                         dep_obj.save(username=self.user.username)
                             else:
