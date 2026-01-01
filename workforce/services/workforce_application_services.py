@@ -231,7 +231,7 @@ class WorkforceApplicationServices(BaseService):
 
         # if dependents_data and dependents_data != "[{}]":
         try:
-            if application_status == "draft":
+            if application_status == "draft" or application_status == "new":
                 # Remove old dependents + related banking info for CF application
                 existing_dependents = WorkforceEmployeeDependent.objects.filter(
                     workforce_application=application_instance
