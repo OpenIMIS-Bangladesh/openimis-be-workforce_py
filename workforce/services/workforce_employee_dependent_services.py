@@ -50,6 +50,8 @@ class WorkforceEmployeeDependentServices(BaseService):
         if relation == "workforce.relation.brother":
             if age < 18:
                 return "Dependent minor brother"
+            else:
+                return None
 
         elif relation == "workforce.relation.sister":
             if age < 18:
@@ -58,6 +60,8 @@ class WorkforceEmployeeDependentServices(BaseService):
                 return "Dependent unmarried sister"
             elif marital == "workforce.marital_status.widowed":
                 return "Dependent widowed sister"
+            else:
+                return None
 
         elif relation == "workforce.relation.daughter":
             if disability == "yes":
@@ -68,12 +72,16 @@ class WorkforceEmployeeDependentServices(BaseService):
                 return "Unmarried daughter"
             elif marital == "workforce.marital_status.widowed":
                 return "Dependent widowed daughter"
+            else:
+                return None
 
         elif relation == "workforce.relation.son":
             if disability == "yes":
                 return "Dependent disabled son"
             elif age < 18:
                 return "Minor son"
+            else:
+                return None
 
         elif relation == "workforce.relation.husband":
             return "Dependent widower"
@@ -96,22 +104,32 @@ class WorkforceEmployeeDependentServices(BaseService):
         elif relation == "workforce.relation.grand_son":
             if age < 18:
                 return "Dependent minor son of a deceased son"
+            else:
+                return None
 
         elif relation == "workforce.relation.grand_daughter":
             if age < 18:
                 return "Dependent minor daughter of a deceased son"
+            else:
+                return None
 
         elif relation == "workforce.relation.grand_son_from_daughter":
             if age < 18:
                 return "Dependent minor son of a deceased daughter"
+            else:
+                return None
 
         elif relation == "workforce.relation.grand_daughter_from_daughter":
             if age < 18:
                 return "Dependent minor daughter of a deceased daughter"
+            else:
+                return None
 
         elif relation == "workforce.relation.daughter_in_law":
             if marital == "workforce.marital_status.widowed":
                 return "Dependent widowed daughter-in-law"
+            else:
+                return None
 
         elif relation == "workforce.relation.illegitimate_son":
             return "Dependent son born out of wedlock"
@@ -119,7 +137,8 @@ class WorkforceEmployeeDependentServices(BaseService):
         elif relation == "workforce.relation.illegitimate_daughter":
             if marital == "workforce.marital_status.unmarried":
                 return "Dependent unmarried daughter born out of wedlock"
-
+            else:
+                return None
         return None
 
     def calculate_age(self, birth_date):
