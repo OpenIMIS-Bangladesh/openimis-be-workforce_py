@@ -4,19 +4,16 @@ import base64
 from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned, ValidationError
 from core.services import BaseService
-from rx.linq.observable.blocking.first import first
 
 from workforce.models import (
     WorkforceApplication, WorkforceGrantMoney, WorkforceEmployee, WorkforceEmployeeDependent,
-    WorkforceEmployeeBankingInfo, WorkforceDocument, WorkforceFactory, Bank
+    WorkforceEmployeeBankingInfo, WorkforceDocument, Bank
 )
 from workforce.models import WorkforceAssociation, WorkforceOrganizationEmployee
-from .helper_service import create_application_movement, cf_and_eis_application_movement_to_factory_admin, dependent_uuid_to_base64
+from .helper_service import create_application_movement, cf_and_eis_application_movement_to_factory_admin
 from django.db.models import Q
 from location.models import Location
 from django.db import models
-
-from .workforce_employee_dependent_services import WorkforceEmployeeDependentServices
 
 logger = logging.getLogger(__name__)
 
@@ -269,10 +266,11 @@ class WorkforceApplicationServices(BaseService):
 
                 if dependents_data and dependents_data != "[{}]":
                     for dep in dependents:
-                        dependent_id= dep.get("id")
+                        dependent_id = dep.get("id")
                         if dependent_id is not None:
-                            dep_instance= WorkforceEmployeeDependent.objects.get(id=extract_uuid(dep.get("id")))
-                        else: dep_instance = None
+                            dep_instance = WorkforceEmployeeDependent.objects.get(id=extract_uuid(dep.get("id")))
+                        else:
+                            dep_instance = None
                         eligibility_status = dep.get("isEligible", False)
                         present_location_instance = Location.objects.get(
                             id=extract_uuid(dep.get("presentLocation", {}).get("id")))
@@ -387,8 +385,8 @@ class WorkforceApplicationServices(BaseService):
                     for bank_data in all_bank_data:
                         if bank_data.get("applicant_type") == "dependent":
                             try:
-                                dependent_id_decoded= extract_uuid(bank_data.get("dependentId"))
-                                dependent_nid= bank_data.get("dependentNid")
+                                dependent_id_decoded = extract_uuid(bank_data.get("dependentId"))
+                                dependent_nid = bank_data.get("dependentNid")
                                 # dependent = WorkforceEmployeeDependent.objects.get(id=dependent_id_decoded)
                                 dependent = WorkforceEmployeeDependent.objects.filter(workforce_application=application_instance, nid=dependent_nid).first()
                             except WorkforceEmployeeDependent.DoesNotExist:
@@ -401,10 +399,10 @@ class WorkforceApplicationServices(BaseService):
                             if holder_type == "select_from_another_dependent":
                                 try:
                                     parent_id = bank_data.get("parentDependentId", {}).get("id")
-                                    parent_nid= None
+                                    parent_nid = None
                                     for parent_data in all_bank_data:
                                         if parent_data.get("dependentId") == parent_id:
-                                            parent_nid= parent_data.get("dependentNid")
+                                            parent_nid = parent_data.get("dependentNid")
                                     parent = WorkforceEmployeeDependent.objects.filter(workforce_application=application_instance, nid=parent_nid).first()
                                 except Exception as e:
                                     logger.error(
@@ -550,127 +548,6 @@ class WorkforceApplicationServices(BaseService):
                 application_to=application_to,
                 note=""
             )
-
-        # all_bank_data_unsorted = json.loads(obj_data.get("employee_bank_info", "[]")) or []
-        #
-        # # Check if all_bank_data_unsorted returns valid dict
-        # if any(all_bank_data_unsorted):
-        #     # Sort dict objects based on accountHolderType
-        #     # if accountHolderType is select_from_another_dependent, move to end
-        #     all_bank_data = sorted(
-        #         all_bank_data_unsorted,
-        #         key=lambda x: 1 if x.get("accountHolderType") == "select_from_another_dependent" else 0
-        #     )
-        #
-        # if application_status == "new" and all_bank_data:
-        #     # if application_instance.application_type in has_dependent_application_types:
-        #     for bank_data in all_bank_data:
-        #         if bank_data.get("applicant_type") == "dependent":
-        #             try:
-        #                 dependent_id = extract_uuid(bank_data.get("dependentId"))
-        #                 dependent = WorkforceEmployeeDependent.objects.get(id=dependent_id)
-        #             except WorkforceEmployeeDependent.DoesNotExist:
-        #                 continue
-        #
-        #             holder_type = bank_data.get("accountHolderType")
-        #             if holder_type != "select_from_another_dependent" and holder_type != "other":
-        #                 bank_id_decoded = extract_uuid(bank_data.get("branch", {}).get("id"))
-        #
-        #             if holder_type == "select_from_another_dependent":
-        #                 try:
-        #                     parent_id = extract_uuid(bank_data.get("parentDependentId", {}).get("id"))
-        #                     parent = WorkforceEmployeeDependent.objects.get(id=parent_id)
-        #                 except Exception as e:
-        #                     logger.error(
-        #                         f"Unknown error: {e}")
-        #
-        #                 dependent.bank = parent.bank
-        #                 dependent.bank_account_no = parent.bank_account_no
-        #                 dependent.bank_account_holder_name = parent.bank_account_holder_name
-        #                 dependent.parent_dependent = parent
-        #
-        #             else:
-        #                 try:
-        #                     dependent.bank = Bank.objects.get(id=bank_id_decoded)
-        #                 except:
-        #                     continue
-        #
-        #                 dependent.bank_account_no = bank_data.get("accountNumber")
-        #                 dependent.bank_account_holder_name = bank_data.get("accountHolderName")
-        #
-        #                 if holder_type == "other":
-        #                     dependent.account_holder_relation_with_dependent = bank_data.get(
-        #                         "relationshipWithAccountHolder")
-        #                     dependent.account_holder_dob = bank_data.get("otherAccountHolderDob")
-        #                     dependent.account_holder_nid = bank_data.get("otherAccountHolderNid")
-        #
-        #             dependent.account_holder_type = holder_type
-        #             workforce_employee = WorkforceEmployee.objects.get(id=application_instance.workforce_employee.id)
-        #
-        #             banking_info = WorkforceEmployeeBankingInfo.objects.filter(dependant=dependent).first()
-        #             if banking_info:
-        #                 update_banking_info = WorkforceEmployeeBankingInfo.objects.get(id=banking_info.id)
-        #                 update_banking_info.dependant = dependent
-        #                 update_banking_info.type = "dependent"
-        #                 update_banking_info.employee = workforce_employee
-        #                 update_banking_info.name_bn = dependent.name_bn
-        #                 update_banking_info.name_en = dependent.name_en
-        #                 update_banking_info.application = application_instance
-        #                 update_banking_info.account_holder_name = dependent.bank_account_holder_name
-        #                 update_banking_info.account_no = dependent.bank_account_no
-        #                 update_banking_info.branch = dependent.bank
-        #                 update_banking_info.nid = (dependent.nid if dependent.nid else dependent.account_holder_nid),
-        #                 update_banking_info.date_of_birth = dependent.account_holder_dob
-        #                 update_banking_info.status = "active"
-        #                 update_banking_info.amount = (
-        #                     "1" if banking_info.amount == "0" or banking_info.amount == None else "0")
-        #                 update_banking_info.relation_with_dependent = dependent.account_holder_relation_with_dependent
-        #                 update_banking_info.nid = dependent.account_holder_nid
-        #                 update_banking_info.account_holder_type = holder_type
-        #                 update_banking_info.parent_dependent = (
-        #                     dependent.parent_dependent if dependent.parent_dependent else None)
-        #                 update_banking_info.save(username=self.user.username)
-        #             else:
-        #                 banking_info = WorkforceEmployeeBankingInfo(
-        #                     # dependant=dependent,
-        #                     type="dependent",
-        #                     employee=workforce_employee,
-        #                     name_bn=dependent.name_bn,
-        #                     name_en=dependent.name_en,
-        #                     application=application_instance,
-        #                     account_holder_name=dependent.bank_account_holder_name,
-        #                     account_no=dependent.bank_account_no,
-        #                     branch=dependent.bank,
-        #                     nid=(dependent.nid if dependent.nid else dependent.account_holder_nid),
-        #                     date_of_birth=dependent.account_holder_dob,
-        #                     status="active",
-        #                     relation_with_dependent=dependent.account_holder_relation_with_dependent,
-        #                     account_holder_type=holder_type,
-        #                     parent_dependent=(dependent.parent_dependent if dependent.parent_dependent else None)
-        #                 )
-        #                 banking_info.save(username=self.user.username)
-        #             dependent.dummy_field = (
-        #                 "1" if dependent.dummy_field == "0" or dependent.dummy_field == None else "0")
-        #             dependent.save(username=self.user.username)
-        #         else:
-        #             bank_id_decoded = extract_uuid(bank_data.get("branch", {}).get("id"))
-        #             bank = Bank.objects.get(id=bank_id_decoded)
-        #             employee = WorkforceEmployee.objects.get(id=application_instance.workforce_employee.id)
-        #             entry = WorkforceEmployeeBankingInfo(
-        #                 name_bn=employee.first_name_bn,
-        #                 name_en=employee.first_name_en,
-        #                 account_holder_name=bank_data.get("accountHolderName"),
-        #                 employee=employee,
-        #                 application=application_instance,
-        #                 branch=bank,
-        #                 type="applicant",
-        #                 amount="0",
-        #                 account_no=bank_data.get("accountNumber"),
-        #                 nid=employee.nid,
-        #                 date_of_birth=employee.birth_date,
-        #                 status="active"
-        #             )
-        #             entry.save(username=self.user.username)
 
         # ================================================================
         # 5. Handle CF and EIS new application movement to Factory Admin
