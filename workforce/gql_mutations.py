@@ -1832,11 +1832,12 @@ class CreateWorkforceEisPaymentProcessMutation(graphene.Mutation):
         try:
             workforce_application_id= data["workforce_application_id"]
             user = info.context.user if hasattr(info.context, 'user') else None
-            if WorkforceEisPaymentProcess.objects.filter(
-                    workforce_application_id=data["workforce_application_id"]
-            ).exists():
-                return cls(success=False, errors=["Disbursement already exists"])
             workforce_application = WorkforceApplication.objects.get(id=data["workforce_application_id"])
+            if workforce_application.application_type == "disabilityAssistance":
+                if WorkforceEisPaymentProcess.objects.filter(
+                        workforce_application_id=data["workforce_application_id"]
+                ).exists():
+                    return cls(success=False, errors=["Disbursement already exists"])
             if workforce_application.application_type == "financialAssistance":
                 service = WorkforceEmployeeDependentServices(user)
                 service.calculate_eis_amount(
