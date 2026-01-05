@@ -57,8 +57,8 @@ class WorkforceEisPaymentServices(BaseService):
             start_date = datetime.strptime(startdate, "%Y-%m-%d").date() \
                 if isinstance(startdate, str) else startdate
 
-            approved_amount = float(workforce_application.eis_approved_amount)
-            monthly_amount = float(workforce_application.eis_monthly_amount)
+            approved_amount = float(workforce_application.eis_approved_amount) if workforce_application.eis_approved_amount is not None else 0
+            monthly_amount = float(workforce_application.eis_monthly_amount) if workforce_application.eis_monthly_amount is not None else 1
 
             # ---------- CALCULATE MONTHS ----------
             full_months = floor(approved_amount / monthly_amount)
@@ -73,7 +73,7 @@ class WorkforceEisPaymentServices(BaseService):
             # ---------- SAVE FULL MONTH PAYMENTS ----------
             if WorkforceEisPaymentProcess.objects.filter(workforce_application=workforce_application).exists():
                 return False
-            else:
+            if approved_amount>0:
                 for i in range(full_months):
                     payment_obj= WorkforceEisPaymentProcess(
                         workforce_application=workforce_application,
@@ -114,24 +114,23 @@ class WorkforceEisPaymentServices(BaseService):
                         is_disbursed=False
                     )
                     payment_obj.save(username= user.username)
-
+            return None
         else:
             accident_info_json = json.loads(workforce_application.employee_accident_info) if workforce_application.employee_accident_info else None
-            if accident_info_json == None:
+            if accident_info_json is None:
                 return False
 
             startdate = accident_info_json.get("dateOfDeath") if accident_info_json.get("dateOfDeath") else None
-            start_date = datetime.strptime(startdate, "%Y-%m-%d").date() \
-                if isinstance(startdate, str) else startdate
+            start_date = datetime.strptime(startdate, "%Y-%m-%d").date() if isinstance(startdate, str) else startdate
             dependents=WorkforceEmployeeDependent.objects.filter(workforce_application= workforce_application)
             dependent_count=0
             beneficiary_id_of_employee=""
             for dep in dependents:
-                if dep.bank_id==None:
+                if dep.bank_id is None:
                     continue
                 if WorkforceEisPaymentProcess.objects.filter(workforce_employee_dependent= dep).exists():
                     continue
-                if dep.is_eligible==True and dep.eis_approved_amount>0:
+                if dep.is_eligible and dep.eis_approved_amount is not None and dep.eis_approved_amount > 0:
                     bank_instance= Bank.objects.get(id= dep.bank_id)
                     now = datetime.now()
                     dependent_count = dependent_count+1
@@ -190,3 +189,5 @@ class WorkforceEisPaymentServices(BaseService):
                             is_disbursed=False
                         )
                         payment_obj.save(username= user.username)
+                else:
+                    continue

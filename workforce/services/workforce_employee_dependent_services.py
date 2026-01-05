@@ -216,7 +216,10 @@ class WorkforceEmployeeDependentServices(BaseService):
 
                 # Finally save7
                 dep_obj.is_eligible = eligible
-                dep_obj.save(username=self.user.username)
+                try:
+                    dep_obj.save(username=self.user.username)
+                except Exception as e:
+                    continue
             return {"status": True, "error": ""}
         except Exception as e:
             return {"status": False, "error": str(e)}
@@ -364,7 +367,10 @@ class WorkforceEmployeeDependentServices(BaseService):
                                         dep_obj.eis_monthly_amount = safe_float(
                                             parent_data["Top-up monthly pension"]) / 2
                                         dep_obj.is_eligible = True
-                                        dep_obj.save(username=self.user.username)
+                                        try:
+                                            dep_obj.save(username=self.user.username)
+                                        except Exception as e:
+                                            continue
                             elif (
                                     rel == "Widow" or
                                     rel == "Dependent widower" or
@@ -386,7 +392,10 @@ class WorkforceEmployeeDependentServices(BaseService):
                                         dep_obj.eis_initial_monthly_amount = safe_float(data["Total initial monthly pension"])
                                         dep_obj.eis_monthly_amount = safe_float(data["Top-up monthly pension"])
                                         dep_obj.is_eligible = True
-                                        dep_obj.save(username=self.user.username)
+                                        try:
+                                            dep_obj.save(username=self.user.username)
+                                        except Exception as e:
+                                            continue
                             else:
                                 dep_obj.eis_calculated_amount = safe_float(data["PV Total pension"])
                                 dep_obj.eis_approved_amount = safe_float(data["PV Top-Up pension"])
@@ -395,7 +404,10 @@ class WorkforceEmployeeDependentServices(BaseService):
                                 dep_obj.eis_initial_monthly_amount = safe_float(data["Total initial monthly pension"])
                                 dep_obj.eis_monthly_amount = safe_float(data["Top-up monthly pension"])
                                 dep_obj.is_eligible = True
-                                dep_obj.save(username=self.user.username)
+                                try:
+                                    dep_obj.save(username=self.user.username)
+                                except Exception as e:
+                                    continue
                             return True
                     return False
 
@@ -409,7 +421,10 @@ class WorkforceEmployeeDependentServices(BaseService):
                         set_vba_data(dep_obj, "Dependent minor brother")
                     else:
                         dep_obj.is_eligible = False
-                        dep_obj.save(username=self.user.username)
+                        try:
+                            dep_obj.save(username=self.user.username)
+                        except Exception as e:
+                            continue
 
                 elif relation == "workforce.relation.sister":
                     if age < 18:
@@ -420,7 +435,10 @@ class WorkforceEmployeeDependentServices(BaseService):
                         set_vba_data(dep_obj, "Dependent widowed sister")
                     else:
                         dep_obj.is_eligible = False
-                        dep_obj.save(username=self.user.username)
+                        try:
+                            dep_obj.save(username=self.user.username)
+                        except Exception as e:
+                            continue
 
                 elif relation == "workforce.relation.daughter":
                     if disability == "yes":
@@ -433,7 +451,10 @@ class WorkforceEmployeeDependentServices(BaseService):
                         set_vba_data(dep_obj, "Dependent widowed daughter")
                     else:
                         dep_obj.is_eligible = False
-                        dep_obj.save(username=self.user.username)
+                        try:
+                            dep_obj.save(username=self.user.username)
+                        except Exception as e:
+                            continue
 
                 elif relation == "workforce.relation.son":
                     if disability == "yes":
@@ -442,7 +463,10 @@ class WorkforceEmployeeDependentServices(BaseService):
                         set_vba_data(dep_obj, "Minor son")
                     else:
                         dep_obj.is_eligible = False
-                        dep_obj.save(username=self.user.username)
+                        try:
+                            dep_obj.save(username=self.user.username)
+                        except Exception as e:
+                            continue
 
                 elif relation == "workforce.relation.husband":
                     set_vba_data(dep_obj, "Dependent widower")
@@ -467,21 +491,30 @@ class WorkforceEmployeeDependentServices(BaseService):
                         set_vba_data(dep_obj, "Dependent minor son of a deceased son")
                     else:
                         dep_obj.is_eligible = False
-                        dep_obj.save(username=self.user.username)
+                        try:
+                            dep_obj.save(username=self.user.username)
+                        except Exception as e:
+                            continue
 
                 elif relation == "workforce.relation.grand_daughter":
                     if age < 18:
                         set_vba_data(dep_obj, "Dependent minor daughter of a deceased son")
                     else:
                         dep_obj.is_eligible = False
-                        dep_obj.save(username=self.user.username)
+                        try:
+                            dep_obj.save(username=self.user.username)
+                        except Exception as e:
+                            continue
 
                 elif relation == "workforce.relation.daughter_in_law":
                     if marital == "workforce.marital_status.widowed":
                         set_vba_data(dep_obj, "Dependent widowed daughter-in-law")
                     else:
                         dep_obj.is_eligible = False
-                        dep_obj.save(username=self.user.username)
+                        try:
+                            dep_obj.save(username=self.user.username)
+                        except Exception as e:
+                            continue
 
                 elif relation == "workforce.relation.illegitimate_son":
                     set_vba_data(dep_obj, "Dependent son born out of wedlock")
@@ -491,9 +524,15 @@ class WorkforceEmployeeDependentServices(BaseService):
                         set_vba_data(dep_obj, "Dependent unmarried daughter born out of wedlock")
                     else:
                         dep_obj.is_eligible = False
-                        dep_obj.save(username=self.user.username)
+                        try:
+                            dep_obj.save(username=self.user.username)
+                        except Exception as e:
+                            continue
 
                 else:
                     dep_obj.is_eligible = False
-                    dep_obj.save(username=self.user.username)
+                    try:
+                        dep_obj.save(username=self.user.username)
+                    except Exception as e:
+                        continue
 
