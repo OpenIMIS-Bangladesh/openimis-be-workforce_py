@@ -257,9 +257,11 @@ class Query(graphene.ObjectType):
         workforce_application_id=graphene.String(required=False)
     )
 
-    workforce_signature = graphene.Field(
+    workforce_signatures = graphene.Field(
         graphene.List(GenericScalar),
-        related_users=graphene.NonNull(graphene.List(graphene.NonNull(graphene.String))),
+        related_users=graphene.NonNull(
+            graphene.List(graphene.NonNull(graphene.String))
+        ),
     )
 
     def resolve_workforce_representatives(self, info, **kwargs):
@@ -1117,9 +1119,66 @@ class Query(graphene.ObjectType):
         except WorkforceOtherCompensationInfo.DoesNotExist:
             return None
 
-    def resolve_workforce_signature(self, info, related_users):
+    def resolve_workforce_signatures(self, info, related_users):
+        users_qs = InteractiveUser.objects.filter(id__in=related_users)
+        users_map = {str(u.id): u for u in users_qs}
 
-        return related_users
+        role_ids = {
+            u.role_id for u in users_qs if u.role_id is not None
+        }
+        roles_map = {
+            r.id: r.name
+            for r in Role.objects.filter(id__in=role_ids)
+        }
+
+        docs_qs = (
+            WorkforceDocument.objects
+            .filter(holder_id__in=related_users)
+            .order_by("-date_created")
+        )
+
+        latest_docs_map = {}
+        for doc in docs_qs:
+            holder_key = str(doc.holder_id)
+            if holder_key not in latest_docs_map:
+                latest_docs_map[holder_key] = doc
+
+        results = []
+
+        for user_id in related_users:
+            user = users_map.get(user_id)
+
+            if not user:
+                results.append({
+                    "user_id": user_id,
+                    "error": "User not found",
+                })
+                continue
+
+            doc = latest_docs_map.get(user_id)
+
+            results.append({
+                "user_id": user_id,
+                "last_name": user.last_name,
+                "other_names": user.other_names,
+                "role": {
+                    "id": user.role_id,
+                    "name": roles_map.get(user.role_id),
+                },
+                "workforce_document": (
+                    {
+                        "id": str(doc.id),
+                        "url": doc.url,
+                        "path": doc.path,
+                        "document_type": doc.document_type,
+                        "holder_type": doc.holder_type,
+                        "status": doc.status,
+                    }
+                    if doc else None
+                ),
+            })
+
+        return results
 
 
 class Mutation(graphene.ObjectType):
