@@ -11,7 +11,7 @@ from .models import (
     WorkforceUser, WorkforceApplicationMovement, WorkforceApplicationSummary,
     WorkforceApplicationSummaryMovement,
     WorkforceGrantMoney, WorkforceDiseases, WorkforceEducation, WorkforceEmployeeBankingInfo,
-    WorkforceSignature, WorkforceFactoryRegistration, WorkforceEisPaymentDisbursement,
+    WorkforceFactoryRegistration, WorkforceEisPaymentDisbursement,
     WorkforceEisPaymentProcess, WorkforceAllAssociation, WorkforceOtherCompensationInfo
 )
 from core import prefix_filterset, ExtendedConnection
@@ -1002,20 +1002,6 @@ class WorkforceEmployeeBankingInfoGQLType(DjangoObjectType):
             "status": ["exact"],
             "account_holder_type": ["exact"],
             "parent_dependent_id": ["exact"]
-        }
-        connection_class = ExtendedConnection
-
-
-class WorkforceSignatureGQLType(DjangoObjectType):
-    class Meta:
-        model = WorkforceSignature
-        interfaces = (graphene.relay.Node,)
-        filter_fields = {
-            "id": ["exact"],
-            "related_user_id": ["exact"],
-            "path": ["exact"],
-            "url": ["exact"],
-            "status": ["exact"],
         }
         connection_class = ExtendedConnection
 

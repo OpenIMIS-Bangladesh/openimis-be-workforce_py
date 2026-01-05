@@ -1224,23 +1224,6 @@ class WorkforceEmployeeBankingInfo(HistoryModel):
         db_table = 'workforce_employee_banking_info'
 
 
-class WorkforceSignature(HistoryModel):
-    related_user = models.ForeignKey(
-        InteractiveUser,
-        models.DO_NOTHING,
-        blank=False,
-        null=False,
-        related_name="signature_related_user",
-    )
-    path = models.CharField(max_length=512, null=False, blank=False)
-    url = models.CharField(max_length=512, null=False, blank=False)
-    status = models.CharField(max_length=30, null=True, blank=True)
-
-    class Meta:
-        managed = True
-        db_table = 'workforce_signature'
-
-
 class WorkforceFactoryRegistration(models.Model):
     id = models.UUIDField(primary_key=True, db_column="UUID", default=None, editable=False)
     factory = models.ForeignKey(

@@ -592,14 +592,6 @@ class WorkforceEmployeeBankingInfoInputType(OpenIMISMutation.Input):
     parent_dependent_id = graphene.String()
 
 
-class WorkforceSignatureInputType(OpenIMISMutation.Input):
-    id = graphene.String(required=False)
-    related_user_id = graphene.String(required=True)
-    path = graphene.String(required=True)
-    url = graphene.String(required=True)
-    status = graphene.String()
-
-
 class WorkforcePostofficeInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
     w_code = graphene.String(required=True)
