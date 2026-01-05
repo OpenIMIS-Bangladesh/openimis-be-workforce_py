@@ -1,4 +1,6 @@
 import logging
+from xmlrpc.client import DateTime
+
 from core.services import BaseService
 
 from workforce.models import WorkforceEmployeeDependent, WorkforceApplication, WorkforceEmployee, WorkforceFactory, \
@@ -240,17 +242,33 @@ class WorkforceEmployeeDependentServices(BaseService):
 
         # metadata_json= workforce_application.metadata
         # metadata= json.loads(metadata_json)
-        doctor_data = json.loads(workforce_application.doctors_entry) if workforce_application.doctors_entry else None
-        if doctor_data:
-            disability_percentage = doctor_data.get("disabilityPerSchedule")
+        calculation_start_date= ""
+        if workforce_application.application_type == "disabilityAssistance":
+            doctor_json = json.loads(workforce_application.doctors_entry) if workforce_application.doctors_entry else None
+            if doctor_json is None:
+                return False
+            disability_percentage = doctor_json.get("disabilityPerSchedule")
+            accident_info_json = json.loads(
+                workforce_application.employee_accident_info) if workforce_application.employee_accident_info else None
+            if accident_info_json is None:
+                return False
+
+            calculation_start_date = accident_info_json.get("dateOfRejoining") if accident_info_json.get("dateOfRejoining") else doctor_json.get("dateOfAssessment")
+            calculation_start_date = datetime.strptime(calculation_start_date, "%Y-%m-%d").date() if isinstance(calculation_start_date, str) else calculation_start_date
         else:
+            accident_info_json = json.loads(
+                workforce_application.employee_accident_info) if workforce_application.employee_accident_info else None
+            if accident_info_json is None:
+                return False
+            calculation_start_date = accident_info_json.get("dateOfDeath") if accident_info_json.get("dateOfDeath") else None
+            calculation_start_date = datetime.strptime(calculation_start_date, "%Y-%m-%d").date() if isinstance(calculation_start_date, str) else calculation_start_date
             if application_type == "financialAssistance":
                 disability_percentage = "100"
             else:
                 disability_percentage = "0"
 
-        last_base_salary = float(
-            workforce_application.last_base_salary) if workforce_application.last_base_salary else 0
+
+        last_base_salary = float(workforce_application.last_base_salary) if workforce_application.last_base_salary else 0
         factory = WorkforceFactory.objects.get(id=workforce_application.employee_factory.id)
         association= WorkforceAllAssociation.objects.get(id= factory.all_association_id)
         minimum_salary= association.minimum_salary or 0
@@ -273,10 +291,8 @@ class WorkforceEmployeeDependentServices(BaseService):
             "parameters": {
                 "Interest rate": "8.1%",
                 "Indexation rate": "6%",
-                "Date of accident": workforce_application.date_created.strftime(
-                    "%m/%d/%Y") if workforce_application.date_created else "08/08/2024",
-                "Date of calculation": workforce_application.date_created.strftime(
-                    "%m/%d/%Y") if workforce_application.date_created else "08/26/2024",
+                "Date of accident": calculation_start_date.strftime("%m/%d/%Y") if calculation_start_date else "08/08/2024",
+                "Date of calculation": datetime.now(timezone.utc).strftime("%m/%d/%Y"),
                 "Payment from Central Fund": total_other_payment
             },
             "Worker": {
@@ -286,8 +302,7 @@ class WorkforceEmployeeDependentServices(BaseService):
                 "Disability level": disability_percentage + ("" if "%" in disability_percentage else "%"),
                 # "Disability level": "50%",
                 "Monthly earnings used for calculation": str(salary_parameter),
-                "Date of birth": worker.birth_date.strftime(
-                    "%m/%d/%Y") if worker.birth_date else "10/16/1997",
+                "Date of birth": worker.birth_date.strftime("%m/%d/%Y") if worker.birth_date else "10/16/1997",
                 "Age at calculation date": str(worker_age or 26),
                 "Sex": "Male" if worker.gender == "workforce.gender.male" or worker.gender == "M" else "Female"
             },

@@ -1827,6 +1827,7 @@ class CreateWorkforceEisPaymentProcessMutation(graphene.Mutation):
     def mutate(cls, root, info, **data):
         from workforce.models import WorkforceApplication
         from workforce.models import WorkforceEisPaymentProcess
+        from workforce.models import WorkforceEmployeeDependent
         from workforce.services.workforce_employee_dependent_services import WorkforceEmployeeDependentServices
         from workforce.services.workforce_eis_payment_services import WorkforceEisPaymentServices
         try:
@@ -1839,11 +1840,17 @@ class CreateWorkforceEisPaymentProcessMutation(graphene.Mutation):
                 ).exists():
                     return cls(success=False, errors=["Disbursement already exists"])
             if workforce_application.application_type == "financialAssistance":
-                service = WorkforceEmployeeDependentServices(user)
-                service.calculate_eis_amount(
-                    data["workforce_application_id"],
-                    workforce_application.application_type
-                )
+                if WorkforceEmployeeDependent.objects.filter(
+                        workforce_application_id=data["workforce_application_id"], eis_approved_amount__isnull=False
+                ).exists():
+                    WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id)
+                else:
+                    service = WorkforceEmployeeDependentServices(user)
+                    service.calculate_eis_amount(
+                        data["workforce_application_id"],
+                        workforce_application.application_type
+                    )
+                    WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id)
             WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id)
             return cls(success=True, errors=[])
         except Exception as e:

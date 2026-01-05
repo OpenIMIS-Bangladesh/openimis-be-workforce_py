@@ -46,16 +46,15 @@ class WorkforceEisPaymentServices(BaseService):
             )
             bank_instance = Bank.objects.get(id=bank_id)
             doctor_json = json.loads(workforce_application.doctors_entry) if workforce_application.doctors_entry else None
-            if doctor_json == None:
+            if doctor_json is None:
                 return False
 
             accident_info_json = json.loads(workforce_application.employee_accident_info) if workforce_application.employee_accident_info else None
-            if accident_info_json == None:
+            if accident_info_json is None:
                 return False
 
             startdate = accident_info_json.get("dateOfRejoining") if accident_info_json.get("dateOfRejoining") else doctor_json.get("dateOfAssessment")
-            start_date = datetime.strptime(startdate, "%Y-%m-%d").date() \
-                if isinstance(startdate, str) else startdate
+            start_date = datetime.strptime(startdate, "%Y-%m-%d").date() if isinstance(startdate, str) else startdate
 
             approved_amount = float(workforce_application.eis_approved_amount) if workforce_application.eis_approved_amount is not None else 0
             monthly_amount = float(workforce_application.eis_monthly_amount) if workforce_application.eis_monthly_amount is not None else 1
