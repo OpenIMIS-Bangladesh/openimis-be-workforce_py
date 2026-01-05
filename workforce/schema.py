@@ -257,6 +257,11 @@ class Query(graphene.ObjectType):
         workforce_application_id=graphene.String(required=False)
     )
 
+    workforce_signature = graphene.Field(
+        graphene.List(GenericScalar),
+        related_users=graphene.NonNull(graphene.List(graphene.NonNull(graphene.String))),
+    )
+
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("unauthorized"))
@@ -1111,6 +1116,10 @@ class Query(graphene.ObjectType):
                 return qs
         except WorkforceOtherCompensationInfo.DoesNotExist:
             return None
+
+    def resolve_workforce_signature(self, info, related_users):
+
+        return related_users
 
 
 class Mutation(graphene.ObjectType):
