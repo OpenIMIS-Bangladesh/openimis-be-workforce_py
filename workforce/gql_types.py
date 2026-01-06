@@ -347,6 +347,7 @@ class WorkforceEmployeeDependentInputType(OpenIMISMutation.Input):
     attachments = graphene.String()
     account_holder_dob = graphene.String()
     account_holder_nid = graphene.String()
+    remarks = graphene.String()
 
 
 class WorkforceEmployeeAccidentInputType(OpenIMISMutation.Input):

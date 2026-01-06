@@ -678,6 +678,7 @@ class WorkforceEmployeeDependentGQLType(DjangoObjectType):
             "account_holder_relation_with_dependent": ["exact"],
             "account_holder_dob": ["exact"],
             "account_holder_nid": ["exact"],
+            "remarks": ["exact", "icontains"],
             **prefix_filterset("present_location__", LocationGQLType._meta.filter_fields),
             **prefix_filterset("permanent_location__", LocationGQLType._meta.filter_fields),
         }
