@@ -391,7 +391,7 @@ class WorkforceApplicationServices(BaseService):
                         key=lambda x: 1 if x.get("accountHolderType") == "select_from_another_dependent" else 0
                     )
 
-                if application_status == "new" and all_bank_data:
+                if application_status in ["new", "verified", "forward_for_verification", "approved_by_doctor"] and all_bank_data:
                     # if application_instance.application_type in has_dependent_application_types:
                     for bank_data in all_bank_data:
                         if bank_data.get("applicant_type") == "dependent":
