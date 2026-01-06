@@ -677,6 +677,7 @@ class WorkforceEmployeeDependent(HistoryModel):
         null=True,
         related_name="dependent_employee_banking_info",
     )
+    remarks = models.TextField(null=True, blank=True)
 
     class Meta:
         managed = True

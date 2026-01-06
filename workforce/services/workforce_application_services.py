@@ -274,6 +274,7 @@ class WorkforceApplicationServices(BaseService):
                             dep_instance= WorkforceEmployeeDependent.objects.get(id=extract_uuid(dep.get("id")))
                         else: dep_instance = None
                         eligibility_status = dep.get("isEligible", False)
+                        remarks = dep.get("remarks", None)
                         present_location_instance = Location.objects.get(
                             id=extract_uuid(dep.get("presentLocation", {}).get("id")))
                         permanent_location_instance = Location.objects.get(
@@ -308,6 +309,7 @@ class WorkforceApplicationServices(BaseService):
                             dep_instance.disability_type = dep.get(
                                 "disabilityType") if "disabilityType" in dep else None
                             dep_instance.is_eligible = eligibility_status
+                            dep_instance.remarks = remarks
                             dep_instance.dummy_field = ("1" if dep_instance.dummy_field == "0" or dep_instance.dummy_field is None else "0")
                             try:
                                 dep_instance.save(user=self.user)
@@ -340,7 +342,8 @@ class WorkforceApplicationServices(BaseService):
                                 relation_with_worker=dep.get("relationType"),
                                 disability_status=dep.get("isDisabled"),
                                 disability_type=dep.get("disabilityType") if "disabilityType" in dep else None,
-                                is_eligible=eligibility_status
+                                is_eligible=eligibility_status,
+                                remarks = remarks
                             )
                             dep_instance.save(username=self.user.username)
                         if attachments and attachments != "[{}]":

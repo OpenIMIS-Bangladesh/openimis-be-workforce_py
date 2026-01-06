@@ -73,46 +73,64 @@ class WorkforceEisPaymentServices(BaseService):
             if WorkforceEisPaymentProcess.objects.filter(workforce_application=workforce_application).exists():
                 return False
             if approved_amount>0:
-                for i in range(full_months):
-                    payment_obj= WorkforceEisPaymentProcess(
-                        workforce_application=workforce_application,
-                        bank=bank_instance,
-                        bank_account_no=bank_info[0]["accountNumber"],
-                        bank_account_holder_name=bank_info[0]["accountHolderName"],
-                        eis_payment_type="monthly",
-                        eis_calculated_amount=workforce_application.eis_calculated_amount,
-                        eis_approved_amount=approved_amount,
-                        eis_initial_replacement_rate=workforce_application.initial_replacement_rate,
-                        eis_initial_monthly_amount=workforce_application.eis_initial_monthly_amount,
-                        eis_monthly_amount=monthly_amount,
-                        month_index=current_date.month,
-                        year=current_date.year,
-                        processing_date=date.today(),
-                        beneficiary_id=beneficiary_id,
-                        is_disbursed=False
-                    )
-                    payment_obj.save(username= user.username)
-                    current_date += relativedelta(months=1)
-                # ---------- HANDLE REMAINING AMOUNT ----------
-                if remaining_amount > 0:
-                    payment_obj= WorkforceEisPaymentProcess(
-                        workforce_application=workforce_application,
-                        bank=bank_instance,
-                        bank_account_no=bank_info[0]["accountNumber"],
-                        bank_account_holder_name=bank_info[0]["accountHolderName"],
-                        eis_payment_type="monthly",
-                        eis_calculated_amount=workforce_application.eis_calculated_amount,
-                        eis_approved_amount=approved_amount,
-                        eis_initial_replacement_rate=workforce_application.initial_replacement_rate,
-                        eis_initial_monthly_amount=workforce_application.eis_initial_monthly_amount,
-                        eis_monthly_amount=remaining_amount,  # last partial payment
-                        month_index=current_date.month,
-                        year=current_date.year,
-                        processing_date=date.today(),
-                        beneficiary_id=beneficiary_id,
-                        is_disbursed=False
-                    )
-                    payment_obj.save(username= user.username)
+                payment_obj = WorkforceEisPaymentProcess(
+                    workforce_application=workforce_application,
+                    bank=bank_instance,
+                    bank_account_no=bank_info[0]["accountNumber"],
+                    bank_account_holder_name=bank_info[0]["accountHolderName"],
+                    eis_payment_type="monthly",
+                    eis_calculated_amount=workforce_application.eis_calculated_amount,
+                    eis_approved_amount=approved_amount,
+                    eis_initial_replacement_rate=workforce_application.initial_replacement_rate,
+                    eis_initial_monthly_amount=workforce_application.eis_initial_monthly_amount,
+                    eis_monthly_amount=monthly_amount,
+                    month_index=current_date.month,
+                    year=current_date.year,
+                    processing_date=date.today(),
+                    beneficiary_id=beneficiary_id,
+                    is_disbursed=False
+                )
+                payment_obj.save(username=user.username)
+                # for i in range(full_months):
+                #     payment_obj= WorkforceEisPaymentProcess(
+                #         workforce_application=workforce_application,
+                #         bank=bank_instance,
+                #         bank_account_no=bank_info[0]["accountNumber"],
+                #         bank_account_holder_name=bank_info[0]["accountHolderName"],
+                #         eis_payment_type="monthly",
+                #         eis_calculated_amount=workforce_application.eis_calculated_amount,
+                #         eis_approved_amount=approved_amount,
+                #         eis_initial_replacement_rate=workforce_application.initial_replacement_rate,
+                #         eis_initial_monthly_amount=workforce_application.eis_initial_monthly_amount,
+                #         eis_monthly_amount=monthly_amount,
+                #         month_index=current_date.month,
+                #         year=current_date.year,
+                #         processing_date=date.today(),
+                #         beneficiary_id=beneficiary_id,
+                #         is_disbursed=False
+                #     )
+                #     payment_obj.save(username= user.username)
+                #     current_date += relativedelta(months=1)
+                # # ---------- HANDLE REMAINING AMOUNT ----------
+                # if remaining_amount > 0:
+                #     payment_obj= WorkforceEisPaymentProcess(
+                #         workforce_application=workforce_application,
+                #         bank=bank_instance,
+                #         bank_account_no=bank_info[0]["accountNumber"],
+                #         bank_account_holder_name=bank_info[0]["accountHolderName"],
+                #         eis_payment_type="monthly",
+                #         eis_calculated_amount=workforce_application.eis_calculated_amount,
+                #         eis_approved_amount=approved_amount,
+                #         eis_initial_replacement_rate=workforce_application.initial_replacement_rate,
+                #         eis_initial_monthly_amount=workforce_application.eis_initial_monthly_amount,
+                #         eis_monthly_amount=remaining_amount,  # last partial payment
+                #         month_index=current_date.month,
+                #         year=current_date.year,
+                #         processing_date=date.today(),
+                #         beneficiary_id=beneficiary_id,
+                #         is_disbursed=False
+                #     )
+                #     payment_obj.save(username= user.username)
             return None
         else:
             accident_info_json = json.loads(workforce_application.employee_accident_info) if workforce_application.employee_accident_info else None
@@ -145,48 +163,68 @@ class WorkforceEisPaymentServices(BaseService):
                     remaining_amount = round(approved_amount - paid_amount, 2)
 
                     current_date = start_date
+                    payment_obj = WorkforceEisPaymentProcess(
+                        workforce_application=workforce_application,
+                        bank=bank_instance,
+                        bank_account_no=dep.bank_account_no,
+                        bank_account_holder_name=dep.bank_account_holder_name,
+                        eis_payment_type="monthly",
+                        eis_calculated_amount=dep.eis_calculated_amount,
+                        eis_approved_amount=approved_amount,
+                        eis_initial_replacement_rate=dep.initial_replacement_rate,
+                        eis_initial_monthly_amount=dep.eis_initial_monthly_amount,
+                        eis_monthly_amount=monthly_amount,
+                        month_index=current_date.month,
+                        workforce_employee_dependent=dep,
+                        year=current_date.year,
+                        processing_date=date.today(),
+                        beneficiary_id=beneficiary_id,
+                        is_disbursed=False
+                    )
+                    payment_obj.save(username=user.username)
 
-                    for i in range(full_months):
-                        payment_obj= WorkforceEisPaymentProcess(
-                            workforce_application=workforce_application,
-                            bank=bank_instance,
-                            bank_account_no=dep.bank_account_no,
-                            bank_account_holder_name=dep.bank_account_holder_name,
-                            eis_payment_type="monthly",
-                            eis_calculated_amount=dep.eis_calculated_amount,
-                            eis_approved_amount=approved_amount,
-                            eis_initial_replacement_rate = dep.initial_replacement_rate,
-                            eis_initial_monthly_amount=dep.eis_initial_monthly_amount,
-                            eis_monthly_amount=monthly_amount,
-                            month_index=current_date.month,
-                            workforce_employee_dependent=dep,
-                            year=current_date.year,
-                            processing_date=date.today(),
-                            beneficiary_id=beneficiary_id,
-                            is_disbursed=False
-                        )
-                        payment_obj.save(username= user.username)
-                        current_date += relativedelta(months=1)
-                    # ---------- HANDLE REMAINING AMOUNT ----------
-                    if remaining_amount > 0:
-                        payment_obj= WorkforceEisPaymentProcess(
-                            workforce_application=workforce_application,
-                            bank=bank_instance,
-                            bank_account_no=dep.bank_account_no,
-                            bank_account_holder_name=dep.bank_account_holder_name,
-                            eis_payment_type="monthly",
-                            eis_calculated_amount=dep.eis_calculated_amount,
-                            eis_approved_amount=approved_amount,
-                            eis_initial_replacement_rate=dep.initial_replacement_rate,
-                            eis_initial_monthly_amount=dep.eis_initial_monthly_amount,
-                            eis_monthly_amount=remaining_amount,  # last partial payment
-                            month_index=current_date.month,
-                            workforce_employee_dependent=dep,
-                            year=current_date.year,
-                            processing_date=date.today(),
-                            beneficiary_id=beneficiary_id,
-                            is_disbursed=False
-                        )
-                        payment_obj.save(username= user.username)
+                    # for i in range(full_months):
+                    #     payment_obj= WorkforceEisPaymentProcess(
+                    #         workforce_application=workforce_application,
+                    #         bank=bank_instance,
+                    #         bank_account_no=dep.bank_account_no,
+                    #         bank_account_holder_name=dep.bank_account_holder_name,
+                    #         eis_payment_type="monthly",
+                    #         eis_calculated_amount=dep.eis_calculated_amount,
+                    #         eis_approved_amount=approved_amount,
+                    #         eis_initial_replacement_rate = dep.initial_replacement_rate,
+                    #         eis_initial_monthly_amount=dep.eis_initial_monthly_amount,
+                    #         eis_monthly_amount=monthly_amount,
+                    #         month_index=current_date.month,
+                    #         workforce_employee_dependent=dep,
+                    #         year=current_date.year,
+                    #         processing_date=date.today(),
+                    #         beneficiary_id=beneficiary_id,
+                    #         is_disbursed=False
+                    #     )
+                    #     payment_obj.save(username= user.username)
+                    #     current_date += relativedelta(months=1)
+                    # # ---------- HANDLE REMAINING AMOUNT ----------
+                    # if remaining_amount > 0:
+                    #     payment_obj= WorkforceEisPaymentProcess(
+                    #         workforce_application=workforce_application,
+                    #         bank=bank_instance,
+                    #         bank_account_no=dep.bank_account_no,
+                    #         bank_account_holder_name=dep.bank_account_holder_name,
+                    #         eis_payment_type="monthly",
+                    #         eis_calculated_amount=dep.eis_calculated_amount,
+                    #         eis_approved_amount=approved_amount,
+                    #         eis_initial_replacement_rate=dep.initial_replacement_rate,
+                    #         eis_initial_monthly_amount=dep.eis_initial_monthly_amount,
+                    #         eis_monthly_amount=remaining_amount,  # last partial payment
+                    #         month_index=current_date.month,
+                    #         workforce_employee_dependent=dep,
+                    #         year=current_date.year,
+                    #         processing_date=date.today(),
+                    #         beneficiary_id=beneficiary_id,
+                    #         is_disbursed=False
+                    #     )
+                    #     payment_obj.save(username= user.username)
+                    #
                 else:
                     continue
