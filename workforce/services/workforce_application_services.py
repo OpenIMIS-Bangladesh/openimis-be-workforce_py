@@ -373,25 +373,28 @@ class WorkforceApplicationServices(BaseService):
                                         continue
 
 
+            except Exception as e:
+                logger.error(f"Error while updating dependents: {e}")
+                raise ValidationError("Failed to update dependents.")
 
 
-                #######################################################################
-                ##################### Set dependents bank data ########################
-                #######################################################################
+        #######################################################################
+        ##################### Set dependents or applicant bank data ########################
+        #######################################################################
 
-                all_bank_data_unsorted = json.loads(obj_data.get("employee_bank_info", "[]")) or []
-                # all_bank_data_unsorted = json.loads(WorkforceApplication.objects.get(id=application_id).employee_bank_info) or []
+        all_bank_data_unsorted = json.loads(obj_data.get("employee_bank_info", "[]")) or []
+        # all_bank_data_unsorted = json.loads(WorkforceApplication.objects.get(id=application_id).employee_bank_info) or []
 
-                # Check if all_bank_data_unsorted returns valid dict
-                if any(all_bank_data_unsorted):
-                    # Sort dict objects based on accountHolderType
-                    # if accountHolderType is select_from_another_dependent, move to end
-                    all_bank_data = sorted(
-                        all_bank_data_unsorted,
-                        key=lambda x: 1 if x.get("accountHolderType") == "select_from_another_dependent" else 0
-                    )
+        # Check if all_bank_data_unsorted returns valid dict
+        if any(all_bank_data_unsorted):
+            # Sort dict objects based on accountHolderType
+            # if accountHolderType is select_from_another_dependent, move to end
+            all_bank_data = sorted(
+                all_bank_data_unsorted,
+                key=lambda x: 1 if x.get("accountHolderType") == "select_from_another_dependent" else 0
+            )
 
-                if application_status in ["new", "verified", "forward_for_verification", "approved_by_doctor"] and all_bank_data:
+        if application_status in ["new", "verified", "forward_for_verification", "approved_by_doctor"] and all_bank_data:
                     # if application_instance.application_type in has_dependent_application_types:
                     for bank_data in all_bank_data:
                         if bank_data.get("applicant_type") == "dependent":
@@ -519,9 +522,6 @@ class WorkforceApplicationServices(BaseService):
                             )
                             entry.save(username=self.user.username)
 
-            except Exception as e:
-                logger.error(f"Error while updating dependents: {e}")
-                raise ValidationError("Failed to update dependents.")
 
         # ================================================================
         # 4. Handle BLWF new application movement to DIFE admin
