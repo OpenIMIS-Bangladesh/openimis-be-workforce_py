@@ -397,9 +397,10 @@ class WorkforceApplicationServices(BaseService):
         if application_status in ["new", "verified", "forward_for_verification", "approved_by_doctor"] and all_bank_data:
                     # if application_instance.application_type in has_dependent_application_types:
                     for bank_data in all_bank_data:
+                        bank_info_id= None;
                         if bank_data.get("applicant_type") == "dependent":
                             try:
-                                dependent_id_decoded= extract_uuid(bank_data.get("dependentId"))
+                                # dependent_id_decoded= extract_uuid(bank_data.get("dependentId"))
                                 dependent_nid= bank_data.get("dependentNid")
                                 # dependent = WorkforceEmployeeDependent.objects.get(id=dependent_id_decoded)
                                 dependent = WorkforceEmployeeDependent.objects.filter(workforce_application=application_instance, nid=dependent_nid).first()
@@ -474,8 +475,10 @@ class WorkforceApplicationServices(BaseService):
                                     dependent.parent_dependent if dependent.parent_dependent else None)
                                 try:
                                     update_banking_info.save(username=self.user.username)
+                                    bank_info_id= update_banking_info.id
                                 except Exception as e:
                                     continue
+
                             else:
                                 banking_info = WorkforceEmployeeBankingInfo(
                                     # dependant=dependent,
@@ -496,10 +499,34 @@ class WorkforceApplicationServices(BaseService):
                                         dependent.parent_dependent if dependent.parent_dependent else None)
                                 )
                                 banking_info.save(username=self.user.username)
+                                bank_info_id= banking_info.id
                             # dependent.dummy_field = (
                             #     "1" if dependent.dummy_field == "0" or dependent.dummy_field is None else "0")
                             try:
                                 dependent.save(username=self.user.username)
+                                attachments = bank_data.get("attachments", [])
+                                if attachments and attachments != "[{}]":
+                                    for attr in attachments:
+                                        files = attr.get("files", [])
+                                        file_data = [
+                                            {
+                                                "file_url": info.get("uploadInfo", {}).get("file_url"),
+                                                "file_path": info.get("uploadInfo", {}).get("file_path")
+                                            }
+                                            for info in files
+                                        ]
+                                        for item in file_data:
+                                            try:
+                                                document = WorkforceDocument.objects.get(path=item.get("file_path"),
+                                                                                         url=item.get("file_url"))
+                                            except WorkforceDocument.DoesNotExist:
+                                                continue
+                                            try:
+                                                document.workforce_employee_banking_info_id = bank_info_id
+                                                document.workforce_application_id = application_id
+                                                document.save(username=self.user.username)
+                                            except Exception as e:
+                                                continue
                             except Exception as e:
                                 continue
                         else:
@@ -521,6 +548,30 @@ class WorkforceApplicationServices(BaseService):
                                 status="active"
                             )
                             entry.save(username=self.user.username)
+                            bank_info_id= entry.id
+                            attachments = bank_data.get("attachments", [])
+                            if attachments and attachments != "[{}]":
+                                for attr in attachments:
+                                    files = attr.get("files", [])
+                                    file_data = [
+                                        {
+                                            "file_url": info.get("uploadInfo", {}).get("file_url"),
+                                            "file_path": info.get("uploadInfo", {}).get("file_path")
+                                        }
+                                        for info in files
+                                    ]
+                                    for item in file_data:
+                                        try:
+                                            document = WorkforceDocument.objects.get(path=item.get("file_path"),
+                                                                                     url=item.get("file_url"))
+                                        except WorkforceDocument.DoesNotExist:
+                                            continue
+                                        try:
+                                            document.workforce_employee_banking_info_id = bank_info_id
+                                            document.workforce_application_id = application_id
+                                            document.save(username=self.user.username)
+                                        except Exception as e:
+                                            continue
 
 
         # ================================================================
