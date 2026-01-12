@@ -1123,13 +1123,13 @@ class Query(graphene.ObjectType):
         users_qs = InteractiveUser.objects.filter(id__in=related_users)
         users_map = {str(u.id): u for u in users_qs}
 
-        role_ids = {
-            u.role_id for u in users_qs if u.role_id is not None
-        }
-        roles_map = {
-            r.id: r.name
-            for r in Role.objects.filter(id__in=role_ids)
-        }
+        # role_ids = {
+        #     u.role_id for u in users_qs if u.role_id is not None
+        # }
+        # roles_map = {
+        #     r.id: r.name
+        #     for r in Role.objects.filter(id__in=role_ids)
+        # }
 
         docs_qs = (
             WorkforceDocument.objects
@@ -1156,14 +1156,17 @@ class Query(graphene.ObjectType):
                 continue
 
             doc = latest_docs_map.get(user_id)
-
+            user_role= UserRole.objects.filter(user_id=user_id).first() or None
+            role_detail= Role.objects.get(id=user_role.role_id)
             results.append({
                 "user_id": user_id,
                 "last_name": user.last_name,
                 "other_names": user.other_names,
                 "role": {
-                    "id": user.role_id,
-                    "name": roles_map.get(user.role_id),
+                    # "id": user.role_id,
+                    # "name": roles_map.
+                    "id": user_role.role_id,
+                    "name": role_detail.name,
                 },
                 "workforce_document": (
                     {
