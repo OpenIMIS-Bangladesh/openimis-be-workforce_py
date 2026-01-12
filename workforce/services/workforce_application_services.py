@@ -306,6 +306,7 @@ class WorkforceApplicationServices(BaseService):
                             dep_instance.attachments = attachments
                             dep_instance.relation_with_worker = dep.get("relationType")
                             dep_instance.disability_status = dep.get("isDisabled")
+                            dep_instance.percentage_of_cf_grant = dep.get("percentage_of_grant", None);
                             dep_instance.disability_type = dep.get(
                                 "disabilityType") if "disabilityType" in dep else None
                             dep_instance.is_eligible = eligibility_status
@@ -335,6 +336,7 @@ class WorkforceApplicationServices(BaseService):
                                 permanent_address=dep.get("permanentAddress"),
                                 present_location=present_location_instance,
                                 permanent_location=permanent_location_instance,
+                                percentage_of_cf_grant= dep.get("percentage_of_grant", None),
                                 user_created_id=user_id,
                                 user_updated_id=user_id,
                                 status="active",
