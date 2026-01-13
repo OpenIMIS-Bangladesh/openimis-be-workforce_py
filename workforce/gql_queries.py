@@ -365,6 +365,8 @@ class WorkforceFactoryGQLType(DjangoObjectType):
             "workforce_representative_id": ["exact"],
             "association_type": ["exact"],
             "is_same_company_representative": ["exact"],
+            "registration_date": ["exact"],
+            "registration_expiry_date": ["exact"]
         }
         connection_class = ExtendedConnection
 
@@ -1235,6 +1237,7 @@ class WorkforceAllAssociationGQLType(DjangoObjectType):
             "web_address": ["exact", "icontains"],
             "status": ["exact", "icontains"],
             "minimum_salary": ["exact", "icontains"],
+            "start_date": ["exact", "icontains"]
         }
         connection_class = ExtendedConnection
 

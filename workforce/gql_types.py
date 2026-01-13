@@ -162,6 +162,8 @@ class WorkforceFactoryInputType(OpenIMISMutation.Input):
     all_association_id = graphene.String()
     is_same_company_representative = graphene.String()
     workforce_representative_id = graphene.String()
+    registration_date= graphene.String()
+    registration_expiry_date= graphene.String()
 
 
 class WorkforceFactoryRegistrationInputType(OpenIMISMutation.Input):
@@ -711,6 +713,7 @@ class WorkforceAllAssociationInputType(OpenIMISMutation.Input):
     web_address = graphene.String()
     status = graphene.String()
     minimum_salary = graphene.String()
+    start_date= graphene.String()
 
 
 class WorkforceOtherCompensationInfoInputType(OpenIMISMutation.Input):
