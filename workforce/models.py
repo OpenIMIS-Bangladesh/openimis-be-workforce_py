@@ -1405,9 +1405,9 @@ class WorkforceEisPaymentProcess(HistoryModel):
     eis_initial_replacement_rate= models.FloatField(null=True, blank=True)
     eis_initial_monthly_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     eis_monthly_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
-    # increment_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
-    # decrement_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
-    # total_adjustment_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    increment_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    decrement_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    total_adjustment_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     month_index = models.IntegerField(null=True, blank=True)
     year = models.IntegerField(null=True, blank=True)
     processing_date = models.DateField(null=True, blank=True)
@@ -1421,80 +1421,83 @@ class WorkforceEisPaymentProcess(HistoryModel):
     is_disbursed = models.BooleanField(default=False)
     approved = models.CharField(max_length=10, null=True, blank=True)
     beneficiary_id = models.CharField(max_length=50, null=True, blank=True)
-    # is_dead = models.BooleanField(default=False)
-    # remarried = models.BooleanField(default=False)
-    # remarriage_date = models.DateField(null=True, blank=True)
-    # status = models.CharField(default="active", max_length=50, null=True, blank=True)
-    # beneficiary_status = models.CharField(max_length=25, db_comment="hold, closed, eligible", default="eligible")
-    # last_live_check_date = models.DateField(null=True, blank=True)
+    status = models.CharField(default="active", max_length=50, null=True, blank=True)
+    beneficiary_status = models.CharField(max_length=25, db_comment="hold, closed, eligible", default="eligible")
+    closing_reason= models.CharField(max_length=50, db_comment="Remarried, Died", null=True, blank=True)
+    closing_remarks= models.TextField(null=True, blank=True)
+    hold_reason= models.CharField(max_length=50, null=True, blank=True, db_comment="live_check, others")
+    hold_remarks= models.TextField(null=True, blank=True)
+    remarriage_or_death_date= models.DateField(null=True, blank=True)
+    last_live_check_date = models.DateField(null=True, blank=True)
+    live_check_remarks= models.TextField(null=True, blank=True)
 
     class Meta:
         managed = True
         db_table = 'workforce_eis_payment_process'
 
 
-# class WorkforceEisPaymentDisbursementStage(HistoryModel):
-#     workforce_application = models.ForeignKey(
-#         "WorkforceApplication",
-#         models.DO_NOTHING,
-#         blank=False,
-#         null=False,
-#         related_name="workforce_payment_stage_application",
-#     )
-#     workforce_application_summary = models.ForeignKey(
-#         "WorkforceApplicationSummary",
-#         models.DO_NOTHING,
-#         blank=True,
-#         null=True,
-#         related_name="workforce_payment_stage_application_summary",
-#     )
-#     workforce_employee_dependent = models.ForeignKey(
-#         "WorkforceEmployeeDependent",
-#         models.DO_NOTHING,
-#         blank=True,
-#         null=True,
-#         related_name="workforce_payment_stage_employee_dependent",
-#     )
-#     bank = models.ForeignKey(
-#         Bank,
-#         models.DO_NOTHING,
-#         blank=True,
-#         null=True,
-#         related_name="workforce_payment_stage_bank",
-#     )
-#
-#     bank_account_no = models.CharField(max_length=50, null=True, blank=True)
-#     bank_account_holder_name = models.CharField(max_length=255, null=True, blank=True)
-#
-#     eis_payment_type = models.CharField(max_length=50, null=True, blank=True)
-#     eis_calculated_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
-#     eis_approved_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
-#     eis_initial_replacement_rate= models.FloatField(null=True, blank=True)
-#     eis_initial_monthly_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
-#     eis_monthly_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
-#     increment_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
-#     decrement_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
-#     total_adjustment_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
-#     month_index = models.IntegerField(null=True, blank=True)
-#     year = models.IntegerField(null=True, blank=True)
-#     processing_date = models.DateField(null=True, blank=True)
-#     processed_by = models.ForeignKey(
-#         InteractiveUser,
-#         models.DO_NOTHING,
-#         blank=True,
-#         null=True,
-#         related_name="workforce_payment_stage_processed_by",
-#     )
-#     is_disbursed = models.BooleanField(default=False)
-#     is_confirmed = models.BooleanField(default=False)
-#     approved = models.CharField(max_length=10, null=True, blank=True)
-#     beneficiary_id = models.CharField(max_length=50, null=True, blank=True)
-#
-#     class Meta:
-#         managed = True
-#         db_table = 'workforce_eis_payment_disbursement_stage'
-#
-#
+class WorkforceEisPaymentDisbursementStage(HistoryModel):
+    workforce_application = models.ForeignKey(
+        "WorkforceApplication",
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="workforce_payment_stage_application",
+    )
+    workforce_application_summary = models.ForeignKey(
+        "WorkforceApplicationSummary",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_payment_stage_application_summary",
+    )
+    workforce_employee_dependent = models.ForeignKey(
+        "WorkforceEmployeeDependent",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_payment_stage_employee_dependent",
+    )
+    bank = models.ForeignKey(
+        Bank,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_payment_stage_bank",
+    )
+
+    bank_account_no = models.CharField(max_length=50, null=True, blank=True)
+    bank_account_holder_name = models.CharField(max_length=255, null=True, blank=True)
+
+    eis_payment_type = models.CharField(max_length=50, null=True, blank=True)
+    eis_calculated_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    eis_approved_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    eis_initial_replacement_rate= models.FloatField(null=True, blank=True)
+    eis_initial_monthly_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    eis_monthly_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    increment_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    decrement_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    total_adjustment_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    month_index = models.IntegerField(null=True, blank=True)
+    year = models.IntegerField(null=True, blank=True)
+    processing_date = models.DateField(null=True, blank=True)
+    processed_by = models.ForeignKey(
+        InteractiveUser,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_payment_stage_processed_by",
+    )
+    is_disbursed = models.BooleanField(default=False)
+    is_confirmed = models.BooleanField(default=False)
+    approved = models.CharField(max_length=10, null=True, blank=True)
+    beneficiary_id = models.CharField(max_length=50, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_eis_payment_disbursement_stage'
+
+
 
 class WorkforceEisPaymentDisbursement(HistoryModel):
     workforce_application = models.ForeignKey(

@@ -233,6 +233,10 @@ class Query(graphene.ObjectType):
     workforce_eis_payment_process = graphene.List(
         WorkforceEisPaymentProcessGQLType,
         workforce_application_id=graphene.String(),
+        beneficiary_id= graphene.String(),
+        workforce_application_tracking_number = graphene.String(),
+        workforce_factory_id=graphene.String(),
+        all_association_id= graphene.String(),
         workforce_application_id_in=graphene.List(of_type=graphene.String),
         month=graphene.String(),
         year=graphene.String(),
@@ -1073,18 +1077,47 @@ class Query(graphene.ObjectType):
             return None
     
     
-    def resolve_workforce_eis_payment_process(self, info, workforce_application_id=None, workforce_application_id_in=None, month=None, year=None):
+    def resolve_workforce_eis_payment_process(self, info, workforce_application_id=None, beneficiary_id=None, workforce_application_tracking_number=None, workforce_factory_id=None, all_association_id=None, workforce_application_id_in=None, month=None, year=None):
         try:
             qs = WorkforceEisPaymentProcess.objects.all()
+
             if workforce_application_id:
                 qs = qs.filter(workforce_application_id=workforce_application_id)
+
+            if beneficiary_id:
+                qs = qs.filter(beneficiary_id=beneficiary_id)
+
             if workforce_application_id_in:
                 qs = qs.filter(workforce_application_id__in=workforce_application_id_in)
+
+            if workforce_factory_id:
+                qs = qs.filter(
+                    workforce_application__employee_factory_id=workforce_factory_id
+                )
+            if workforce_application_tracking_number:
+                qs = qs.filter(
+                    workforce_application__tracking_number=workforce_application_tracking_number
+                )
+            if all_association_id:
+                qs = qs.filter(
+                    workforce_application__employee_factory__all_association_id=all_association_id
+                )
+
             if month:
                 qs = qs.filter(month_index=month)
+
             if year:
                 qs = qs.filter(year=year)
-            qs = qs.distinct('workforce_application_id', 'workforce_employee_dependent_id')
+
+            qs = qs.order_by("-date_created")
+
+            if not any([
+                workforce_application_id,
+                workforce_application_id_in,
+                month,
+                year,
+            ]):
+                qs = qs[:500]
 
             return qs
         except WorkforceEisPaymentProcess.DoesNotExist:
