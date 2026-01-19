@@ -240,6 +240,7 @@ class Query(graphene.ObjectType):
         workforce_application_id_in=graphene.List(of_type=graphene.String),
         month=graphene.String(),
         year=graphene.String(),
+        status= graphene.String(),
     )
 
     workforce_eis_payment_disbursement = graphene.List(
@@ -1077,7 +1078,7 @@ class Query(graphene.ObjectType):
             return None
     
     
-    def resolve_workforce_eis_payment_process(self, info, workforce_application_id=None, beneficiary_id=None, workforce_application_tracking_number=None, workforce_factory_id=None, all_association_id=None, workforce_application_id_in=None, month=None, year=None):
+    def resolve_workforce_eis_payment_process(self, info, workforce_application_id=None, beneficiary_id=None, workforce_application_tracking_number=None, workforce_factory_id=None, all_association_id=None, workforce_application_id_in=None, month=None, year=None, status=None):
         try:
             qs = WorkforceEisPaymentProcess.objects.all()
 
@@ -1103,6 +1104,9 @@ class Query(graphene.ObjectType):
                     workforce_application__employee_factory__all_association_id=all_association_id
                 )
 
+            if status:
+                qs = qs.filter(status=status)
+
             if month:
                 qs = qs.filter(month_index=month)
 
@@ -1114,6 +1118,10 @@ class Query(graphene.ObjectType):
             if not any([
                 workforce_application_id,
                 workforce_application_id_in,
+                beneficiary_id,
+                workforce_application_tracking_number,
+                workforce_factory_id,
+                all_association_id,
                 month,
                 year,
             ]):

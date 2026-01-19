@@ -1430,6 +1430,7 @@ class WorkforceEisPaymentProcess(HistoryModel):
     remarriage_or_death_date= models.DateField(null=True, blank=True)
     last_live_check_date = models.DateField(null=True, blank=True)
     live_check_remarks= models.TextField(null=True, blank=True)
+    is_eligible = models.BooleanField(default=True)
 
     class Meta:
         managed = True
