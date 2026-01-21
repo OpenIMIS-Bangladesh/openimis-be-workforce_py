@@ -1241,6 +1241,9 @@ class CreateWorkforceOtpMutation(mixins.ResolveMixin, graphene.Mutation):
         status = graphene.String()
 
     internal_id = graphene.String()
+    message= graphene.String()
+    error= graphene.String()
+    code= graphene.String()
 
     @classmethod
     def mutate(cls, root, info, **data):
@@ -1257,9 +1260,9 @@ class CreateWorkforceOtpMutation(mixins.ResolveMixin, graphene.Mutation):
         if isinstance(result, list):
             raise Exception(result[0]['message'] +
                             ": " + result[0].get('detail', ''))
+            
 
         return result
-
 
 class CreateWorkforceApplicationMovementMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
     _mutation_module = mutation_module

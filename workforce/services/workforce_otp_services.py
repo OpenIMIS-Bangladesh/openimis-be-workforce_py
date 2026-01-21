@@ -22,32 +22,52 @@ class WorkforceOtpServices():
             otp=None
 
         if InteractiveUser.objects.filter(validity_to__isnull=True, login_name=login_name).exists():
-            raise ValidationError({
-                "error": "login_name_already_exists	",
+            # raise ValidationError({
+            #     "error": "login_name_already_exists   ",
+            #     "code": 1001,
+            #     "message": f"User with login name '{login_name}' already exists."
+            # })
+            return {
+                "error": "login_name_already_exists ",
                 "code": 1001,
                 "message": f"User with login name '{login_name}' already exists."
-            })
+            }
 
         if WorkforceUser.objects.filter(nid=nid).exists():
-            raise ValidationError({
+            # raise ValidationError({
+            #     "error": "duplicate_nid",
+            #     "code": 1003,
+            #     "message": f"Duplicate NID '{nid}' in workforce_user."
+            # })
+            return  {
                 "error": "duplicate_nid",
                 "code": 1003,
                 "message": f"Duplicate NID '{nid}' in workforce_user."
-            })
+            }
 
         if InteractiveUser.objects.filter(validity_to__isnull=True, phone=phone_number).exists():
-            raise ValidationError({
+            # raise ValidationError({
+            #     "error": "phone_number_already_exists",
+            #     "code": 1002,
+            #     "message": f"User with phone number '{phone_number}' already exists."
+            # })
+            return {
                 "error": "phone_number_already_exists",
                 "code": 1002,
                 "message": f"User with phone number '{phone_number}' already exists."
-            })
+            }
 
         if WorkforceUser.objects.filter(phone_number=phone_number).exists():
-            raise ValidationError({
+            # raise ValidationError({
+            #     "error": "duplicate_phone_number",
+            #     "code": 1004,
+            #     "message": f"Duplicate phone '{phone_number}' in workforce_user."
+            # })
+            return {
                 "error": "duplicate_phone_number",
                 "code": 1004,
                 "message": f"Duplicate phone '{phone_number}' in workforce_user."
-            })
+            }
 
         if otp:
             otp_obj = WorkforceOtp.objects.create(
@@ -77,13 +97,18 @@ class WorkforceOtpServices():
             message = f"Your verification code is {otp_instance.otp}. This code will expire in 5 minutes. Please do not share this code with anyone."
             send_sms(sms_to=otp_obj.phone_number, message=message)
         else:
-            raise ValidationError({
+            # raise ValidationError({
+            #     "error": "failed_to_create_otp",
+            #     "code": 1005,
+            #     "message": f"OTP creation failed due to an unknown error"
+            # })
+            return  {
                 "error": "failed_to_create_otp",
                 "code": 1005,
                 "message": f"OTP creation failed due to an unknown error"
-            })
+            }
         return {"internal_id": otp_obj.id}
-
+    
     def get(self, **kwargs):
         model = self.OBJECT_TYPE
         internal_id = kwargs.get("internal_id")
