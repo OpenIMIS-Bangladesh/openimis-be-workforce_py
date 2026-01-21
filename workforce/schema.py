@@ -103,8 +103,11 @@ class Query(graphene.ObjectType):
         application_to=graphene.String(),
         application_from=graphene.String(),
         organization_type_in=graphene.List(graphene.String),
-        is_reverted=graphene.Boolean()
+        is_reverted=graphene.Boolean(),
+        date_created_from= graphene.String(),
+        date_created_to= graphene.String()
     )
+
     workforce_document_types = OrderedDjangoFilterConnectionField(
         WorkforceDocumentTypeGQLType,
         client_mutation_id=graphene.String(),
@@ -383,6 +386,8 @@ class Query(graphene.ObjectType):
             application_from=None,
             organization_type_in=None,
             is_reverted=None,
+            date_created_from= None,
+            date_created_to= None,
             **kwargs
     ):
         service = WorkforceApplicationServices(info.context.user)
@@ -437,6 +442,13 @@ class Query(graphene.ObjectType):
                 ).order_by("-date_created").values("date_created")[:1]
 
                 query = query.annotate(applicationForwardDate=Subquery(latest_forward_subquery))
+
+        #new added for searching by raduan
+        if date_created_from:
+            query = query.filter(date_created__gte=date_created_from)
+        if date_created_to:
+            query = query.filter(date_created__lte=date_created_to)
+
 
         latest_movement_subquery = WorkforceApplicationMovement.objects.filter(
             application_id=OuterRef("pk")
