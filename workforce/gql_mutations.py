@@ -2045,3 +2045,36 @@ class UpdateWorkforceEisPaymentProcessApprovalMutation(graphene.Mutation):
             return cls(success=True, errors=[])
         except Exception as e:
             return cls(success=False, errors=[str(e)])
+
+
+class UpdateWorkforceEisBeneficiaryMutation(graphene.Mutation):
+    class Arguments:
+        beneficiary_id = graphene.String(required=True)
+        increment_amount= graphene.String()
+        increment_date= graphene.String()
+        decrement_amount= graphene.String()
+        decrement_date= graphene.String()
+        status= graphene.String()
+        beneficiary_status= graphene.String()
+        reason = graphene.String()
+        remarks = graphene.String()
+        remarriage_or_death_date = graphene.String()
+        last_live_check_date= graphene.String()
+        live_check_remarks = graphene.String()
+        other_beneficiary_data= graphene.String()
+
+    success = graphene.Boolean()
+    errors = graphene.List(graphene.String)
+
+    @classmethod
+    def mutate(cls, root, info, **data):
+        from workforce.models import WorkforceEisPaymentProcess
+        from workforce.services.workforce_eis_payment_services import WorkforceEisPaymentServices
+        try:
+            user = info.context.user if hasattr(info.context, 'user') else None
+            print(data)
+            service= WorkforceEisPaymentServices(user)
+            service.update_beneficiary(user, data)
+            return cls(success=True, errors=[])
+        except Exception as e:
+            return cls(success=False, errors=[str(e)])

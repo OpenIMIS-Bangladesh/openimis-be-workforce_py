@@ -228,3 +228,54 @@ class WorkforceEisPaymentServices(BaseService):
                     #
                 else:
                     continue
+
+
+    def update_beneficiary(self, user, data):
+        beneficiary= WorkforceEisPaymentProcess.objects.filter(beneficiary_id= data['beneficiary_id'], status="active").first()
+        new_row = WorkforceEisPaymentProcess(
+                    workforce_application= beneficiary.workforce_application,
+                    workforce_application_summary = beneficiary.workforce_application_summary,
+                    workforce_employee_dependent = beneficiary.workforce_employee_dependent,
+                    bank = beneficiary.bank,
+                    bank_account_no = beneficiary.bank_account_no,
+                    bank_account_holder_name = beneficiary.bank_account_holder_name,
+                    eis_payment_type = beneficiary.eis_payment_type,
+                    eis_calculated_amount = beneficiary.eis_calculated_amount,
+                    eis_approved_amount = beneficiary.eis_approved_amount,
+                    eis_initial_replacement_rate = beneficiary.eis_initial_replacement_rate,
+                    eis_initial_monthly_amount = beneficiary.eis_initial_monthly_amount,
+                    eis_monthly_amount = safe_float(beneficiary.eis_monthly_amount) + safe_float(data["increment_amount"]) - safe_float(data["decrement_amount"]),
+                    increment_amount = safe_float(data["increment_amount"]),
+                    increment_date = data['increment_date'] if data["increment_date"]!="" else None,
+                    decrement_amount = safe_float(data["decrement_amount"]),
+                    decrement_date = data['decrement_date'] if data['decrement_date']!="" else None,
+                    month_index = beneficiary.month_index,
+                    year = beneficiary.year,
+                    processing_date = date.today(),
+                    is_disbursed = beneficiary.is_disbursed,
+                    approved = beneficiary.approved,
+                    beneficiary_id = beneficiary.beneficiary_id,
+                    beneficiary_status = data["beneficiary_status"],
+                    reason = data["reason"],
+                    remarks = data["remarks"],
+                    remarriage_or_death_date = data["remarriage_or_death_date"],
+                    last_live_check_date = data["last_live_check_date"] or None,
+                    live_check_remarks = data["remarks"] or None,
+                )
+
+        try:
+            new_row.save(username=user.username)
+            try:
+                beneficiary.status= "inactive"
+                beneficiary.save(username=user.username)
+                other_beneficiaries= json.loads(data['other_beneficiary_data'])
+                if other_beneficiaries is not None:
+                    print(other_beneficiaries)
+
+
+            except Exception as e:
+                return e
+        except Exception as e:
+            return e
+
+        return
