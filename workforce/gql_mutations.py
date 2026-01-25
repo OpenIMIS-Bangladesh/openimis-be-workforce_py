@@ -620,7 +620,7 @@ class CreateWorkforceEmployeeMutation(BaseHistoryModelCreateMutationMixin, BaseM
     _mutation_class = "CreateWorkforceEmployeeMutation"
 
     class Input(WorkforceEmployeeInputType):
-        workforce_employer_id = graphene.UUID()
+        # workforce_employer_id = graphene.UUID()
         workforce_factory_id = graphene.UUID()
         join_date = graphene.Date()
         position = graphene.String()
@@ -633,7 +633,7 @@ class CreateWorkforceEmployeeMutation(BaseHistoryModelCreateMutationMixin, BaseM
         required_permission = WorkforceConfig.gql_query_workforces_perms
         service_instance = WorkforceEmployeeServices(user)
 
-        workforce_employer_id = data.pop('workforce_employer_id')
+        # workforce_employer_id = data.pop('workforce_employer_id')
         workforce_factory_id = data.pop('workforce_factory_id')
         join_date = data.pop('join_date')
         position = data.pop('position')
@@ -662,7 +662,7 @@ class CreateWorkforceEmployeeMutation(BaseHistoryModelCreateMutationMixin, BaseM
                     employee_designation_obj = {
                         # Safely get 'id', default to None if missing
                         "workforce_employee_id": created_obj.get('id', None),
-                        "workforce_company_id": workforce_employer_id,
+                        # "workforce_company_id": workforce_employer_id,
                         "workforce_factory_id": workforce_factory_id,
                         "join_date": join_date,
                         "monthly_salary": monthly_earning,  # Safely get 'monthly_earning'
