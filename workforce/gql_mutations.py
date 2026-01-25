@@ -622,8 +622,8 @@ class CreateWorkforceEmployeeMutation(BaseHistoryModelCreateMutationMixin, BaseM
     class Input(WorkforceEmployeeInputType):
         # workforce_employer_id = graphene.UUID()
         workforce_factory_id = graphene.UUID()
-        join_date = graphene.Date()
-        position = graphene.String()
+        # join_date = graphene.Date()
+        # position = graphene.String()
         monthly_earning = graphene.String()
         pass
 
@@ -635,8 +635,8 @@ class CreateWorkforceEmployeeMutation(BaseHistoryModelCreateMutationMixin, BaseM
 
         # workforce_employer_id = data.pop('workforce_employer_id')
         workforce_factory_id = data.pop('workforce_factory_id')
-        join_date = data.pop('join_date')
-        position = data.pop('position')
+        # join_date = data.pop('join_date')
+        # position = data.pop('position')
         monthly_earning = data.pop('monthly_earning')
 
         result = auth_permission_validation(
@@ -664,9 +664,9 @@ class CreateWorkforceEmployeeMutation(BaseHistoryModelCreateMutationMixin, BaseM
                         "workforce_employee_id": created_obj.get('id', None),
                         # "workforce_company_id": workforce_employer_id,
                         "workforce_factory_id": workforce_factory_id,
-                        "join_date": join_date,
+                        # "join_date": join_date,
                         "monthly_salary": monthly_earning,  # Safely get 'monthly_earning'
-                        "position": position,  # Safely get 'position'
+                        # "position": position,  # Safely get 'position'
                     }
 
                     # Proceed with creating the employee designation
