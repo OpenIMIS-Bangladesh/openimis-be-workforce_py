@@ -28,7 +28,7 @@ def create_interactive_user(last_name, other_names, login_name, role_id):
     user_district_class = UserDistrict.objects.create(
         **{
             "user_id": user.id,
-            "location_id": 20,
+            "location_id": 29962,
             "audit_user_id": -1,
         }
     )
