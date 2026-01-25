@@ -634,10 +634,10 @@ class CreateWorkforceEmployeeMutation(BaseHistoryModelCreateMutationMixin, BaseM
         service_instance = WorkforceEmployeeServices(user)
 
         # workforce_employer_id = data.pop('workforce_employer_id')
-        workforce_factory_id = data.pop('workforce_factory_id')
+        workforce_factory_id = data.get('workforce_factory_id')
         # join_date = data.pop('join_date')
         # position = data.pop('position')
-        monthly_earning = data.pop('monthly_earning')
+        monthly_earning = data.get('monthly_earning')
 
         result = auth_permission_validation(
             failure_message=failure_message,
