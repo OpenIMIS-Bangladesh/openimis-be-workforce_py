@@ -292,7 +292,8 @@ class WorkforceEmployeeDependentServices(BaseService):
                 "Interest rate": "8.1%",
                 "Indexation rate": "6%",
                 "Date of accident": calculation_start_date.strftime("%m/%d/%Y") if calculation_start_date else "08/08/2024",
-                "Date of calculation": datetime.now(timezone.utc).strftime("%m/%d/%Y"),
+                "Date of calculation": calculation_start_date.strftime("%m/%d/%Y") if calculation_start_date else "08/08/2024",
+                # "Date of calculation": datetime.now(timezone.utc).strftime("%m/%d/%Y"),
                 "Payment from Central Fund": total_other_payment
             },
             "Worker": {
