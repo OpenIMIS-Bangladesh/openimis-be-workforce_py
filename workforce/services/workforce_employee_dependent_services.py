@@ -370,13 +370,23 @@ class WorkforceEmployeeDependentServices(BaseService):
                     for data in vba_data:
                         if data["Relationship"] == rel:
                             if rel == "Mother" or rel == "Dependent father":
+                                other_parent_present= False
+                                if rel == "Mother":
+                                    for other_parent_data in vba_data:
+                                        if "Dependent father" in other_parent_data["Relationship"]:
+                                            other_parent_present = True
+                                if rel == "Dependent father":
+                                    for other_parent_data in vba_data:
+                                        if "Mother" in other_parent_data["Relationship"]:
+                                            other_parent_present = True
                                 for parent_data in vba_data:
                                     if parent_data["ID"] == "Parent(s)":
                                         dep_obj.eis_calculated_amount = safe_float(parent_data["PV Total pension"]) / 2
                                         dep_obj.eis_approved_amount = safe_float(parent_data["PV Top-Up pension"]) / 2
                                         dep_obj.pv_factor = safe_float(parent_data["PV factor"])
                                         dep_obj.initial_replacement_rate = safe_float(
-                                            parent_data["Initial replacement rate"]) / 2
+                                            data["Initial replacement rate"])/2 if other_parent_present else safe_float(
+                                            data["Initial replacement rate"])
                                         dep_obj.eis_initial_monthly_amount = safe_float(
                                             parent_data["Total initial monthly pension"]) / 2
                                         dep_obj.eis_monthly_amount = safe_float(

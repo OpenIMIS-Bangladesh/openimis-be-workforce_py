@@ -12,6 +12,7 @@ from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 from math import floor
 from workforce.services.helper_service import generate_beneficiary_id
+from decimal import Decimal, InvalidOperation
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,38 @@ def safe_float(value, default=0.0):
         return float(value)
     except (TypeError, ValueError):
         return default
+
+def safe_decimal(value, default=Decimal("0.0")):
+    try:
+        return Decimal(str(value))
+    except (InvalidOperation, TypeError, ValueError):
+        return default
+
+def calculate_age_in_months(effective_date):
+    if not effective_date:
+        return None
+
+    if isinstance(effective_date, str):
+        try:
+            eff_date = datetime.strptime(effective_date, "%Y-%m-%d %H:%M:%S.%f %z")
+        except ValueError:
+            try:
+                eff_date = datetime.strptime(effective_date, "%Y-%m-%d %H:%M:%S")
+            except ValueError:
+                eff_date = datetime.strptime(effective_date, "%Y-%m-%d")
+    elif isinstance(effective_date, date):
+        eff_date = datetime.combine(effective_date, datetime.min.time())
+    else:
+        eff_date = effective_date
+
+    now = datetime.now(timezone.utc)
+
+    months = (now.year - eff_date.year) * 12 + (now.month - eff_date.month)
+
+    if now.day < eff_date.day:
+        months -= 1
+
+    return months
 
 
 class WorkforceEisPaymentServices(BaseService):
@@ -56,8 +89,8 @@ class WorkforceEisPaymentServices(BaseService):
             startdate = accident_info_json.get("dateOfRejoining") if accident_info_json.get("dateOfRejoining") else doctor_json.get("dateOfAssessment")
             start_date = datetime.strptime(startdate, "%Y-%m-%d").date() if isinstance(startdate, str) else startdate
 
-            approved_amount = float(workforce_application.eis_approved_amount) if workforce_application.eis_approved_amount is not None else 0
-            monthly_amount = float(workforce_application.eis_monthly_amount) if workforce_application.eis_monthly_amount is not None else 1
+            approved_amount = safe_decimal(workforce_application.eis_approved_amount) if workforce_application.eis_approved_amount is not None else 0
+            monthly_amount = safe_decimal(workforce_application.eis_monthly_amount) if workforce_application.eis_monthly_amount is not None else 1
 
             # ---------- CALCULATE MONTHS ----------
             full_months = floor(approved_amount / monthly_amount)
@@ -154,8 +187,8 @@ class WorkforceEisPaymentServices(BaseService):
                     beneficiary_id = generate_beneficiary_id(association, accident_type, workforce_application.id, str(dependent_count))
 
 
-                    approved_amount = float(dep.eis_approved_amount)
-                    monthly_amount = float(dep.eis_monthly_amount)
+                    approved_amount = safe_decimal(dep.eis_approved_amount)
+                    monthly_amount = safe_decimal(dep.eis_monthly_amount)
 
                     # ---------- CALCULATE MONTHS ----------
                     full_months = floor(approved_amount / monthly_amount)
@@ -232,6 +265,8 @@ class WorkforceEisPaymentServices(BaseService):
 
     def update_beneficiary(self, user, data):
         beneficiary= WorkforceEisPaymentProcess.objects.filter(beneficiary_id= data['beneficiary_id'], status="active").first()
+        if not beneficiary:
+            return "Active beneficiary not found"
         new_row = WorkforceEisPaymentProcess(
                     workforce_application= beneficiary.workforce_application,
                     workforce_application_summary = beneficiary.workforce_application_summary,
@@ -243,11 +278,11 @@ class WorkforceEisPaymentServices(BaseService):
                     eis_calculated_amount = beneficiary.eis_calculated_amount,
                     eis_approved_amount = beneficiary.eis_approved_amount,
                     eis_initial_replacement_rate = beneficiary.eis_initial_replacement_rate,
-                    eis_initial_monthly_amount = beneficiary.eis_initial_monthly_amount,
-                    eis_monthly_amount = safe_float(beneficiary.eis_monthly_amount) + safe_float(data["increment_amount"]) - safe_float(data["decrement_amount"]),
-                    increment_amount = safe_float(data["increment_amount"]),
+                    eis_initial_monthly_amount = beneficiary.eis_initial_monthly_amount + safe_decimal(data["increment_amount"]) - safe_decimal(data["decrement_amount"]),
+                    eis_monthly_amount = safe_decimal(beneficiary.eis_monthly_amount) + safe_decimal(data["increment_amount"]) - safe_decimal(data["decrement_amount"]),
+                    increment_amount = safe_decimal(data["increment_amount"]),
                     increment_date = data['increment_date'] if data["increment_date"]!="" else None,
-                    decrement_amount = safe_float(data["decrement_amount"]),
+                    decrement_amount = safe_decimal(data["decrement_amount"]),
                     decrement_date = data['decrement_date'] if data['decrement_date']!="" else None,
                     month_index = beneficiary.month_index,
                     year = beneficiary.year,
@@ -268,10 +303,62 @@ class WorkforceEisPaymentServices(BaseService):
             try:
                 beneficiary.status= "inactive"
                 beneficiary.save(username=user.username)
-                other_beneficiaries= json.loads(data['other_beneficiary_data'])
-                if other_beneficiaries is not None:
-                    print(other_beneficiaries)
+                try:
+                    other_beneficiaries = json.loads(data.get('other_beneficiary_data') or "{}")
+                except json.JSONDecodeError:
+                    return "Invalid beneficiary JSON"
 
+                if other_beneficiaries is not None:
+                    month_diff= calculate_age_in_months(beneficiary.remarriage_or_death_date)
+                    initial_monthly_amount_total = safe_decimal(beneficiary.eis_initial_monthly_amount) / (month_diff if month_diff>0 else 1)
+                    monthly_amount_total = safe_decimal(beneficiary.eis_monthly_amount) / (month_diff if month_diff>0 else 1)
+                    beneficiary_count= len(other_beneficiaries)
+                    decrement_amount= monthly_amount_total / beneficiary_count
+                    if other_beneficiaries:
+                        for beneficiary_id, details in other_beneficiaries.items():
+                            increment_amount = int(details["incrementAmount"])
+                            increment_date = details["incrementDate"]
+                            other_beneficiary = WorkforceEisPaymentProcess.objects.filter(
+                            beneficiary_id=beneficiary_id, status="active").first()
+                            new_row = WorkforceEisPaymentProcess(
+                                workforce_application=other_beneficiary.workforce_application,
+                                workforce_application_summary=other_beneficiary.workforce_application_summary,
+                                workforce_employee_dependent=other_beneficiary.workforce_employee_dependent,
+                                bank=other_beneficiary.bank,
+                                bank_account_no=other_beneficiary.bank_account_no,
+                                bank_account_holder_name=other_beneficiary.bank_account_holder_name,
+                                eis_payment_type=other_beneficiary.eis_payment_type,
+                                eis_calculated_amount=other_beneficiary.eis_calculated_amount,
+                                eis_approved_amount=other_beneficiary.eis_approved_amount,
+                                eis_initial_replacement_rate=other_beneficiary.eis_initial_replacement_rate,
+                                eis_initial_monthly_amount=other_beneficiary.eis_initial_monthly_amount,
+                                eis_monthly_amount=safe_decimal(other_beneficiary.eis_monthly_amount) + safe_decimal(increment_amount) - safe_decimal(decrement_amount),
+                                increment_amount=safe_decimal(increment_amount),
+                                increment_date=increment_date if increment_date != "" else None,
+                                decrement_amount=safe_decimal(decrement_amount),
+                                decrement_date=date.today(),
+                                month_index=other_beneficiary.month_index,
+                                year=other_beneficiary.year,
+                                processing_date=date.today(),
+                                is_disbursed=other_beneficiary.is_disbursed,
+                                approved=other_beneficiary.approved,
+                                beneficiary_id=beneficiary_id,
+                                beneficiary_status=other_beneficiary.beneficiary_status,
+                                reason=other_beneficiary.reason,
+                                remarks="Amount adjusted for other beneficiary's death or remarriage",
+                                remarriage_or_death_date=other_beneficiary.remarriage_or_death_date,
+                                last_live_check_date=other_beneficiary.last_live_check_date or None,
+                                live_check_remarks=data["remarks"] or None,
+                            )
+                            try:
+                                new_row.save(username=user.username)
+                                other_beneficiary.status= "inactive"
+                                try:
+                                    other_beneficiary.save(username=user.username)
+                                except Exception as e:
+                                    return e
+                            except Exception as e:
+                                return e
 
             except Exception as e:
                 return e

@@ -1409,6 +1409,7 @@ class WorkforceEisPaymentProcess(HistoryModel):
     increment_date= models.DateField(null=True, blank=True)
     decrement_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     decrement_date= models.DateField(null=True, blank=True)
+    decrement_end_date= models.DateField(null=True, blank=True)
     total_adjustment_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     month_index = models.IntegerField(null=True, blank=True)
     year = models.IntegerField(null=True, blank=True)
