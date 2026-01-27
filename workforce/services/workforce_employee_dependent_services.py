@@ -371,14 +371,13 @@ class WorkforceEmployeeDependentServices(BaseService):
                     for data in vba_data:
                         if data["Relationship"] == rel:
                             if rel == "Mother" or rel == "Dependent father":
-                                other_parent_present= False
-                                if rel == "Mother":
+                                if rel in ("Mother", "Dependent father"):
+                                    other_parent_present = False
                                     for other_parent_data in vba_data:
-                                        if "Dependent father" in other_parent_data["Relationship"]:
+                                        relationship = other_parent_data.get("Relationship") or ""
+                                        if rel == "Mother" and "Dependent father" in relationship:
                                             other_parent_present = True
-                                if rel == "Dependent father":
-                                    for other_parent_data in vba_data:
-                                        if "Mother" in other_parent_data["Relationship"]:
+                                        if rel == "Dependent father" and "Mother" in relationship:
                                             other_parent_present = True
                                 for parent_data in vba_data:
                                     if parent_data["ID"] == "Parent(s)":
