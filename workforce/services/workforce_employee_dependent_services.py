@@ -42,105 +42,110 @@ class WorkforceEmployeeDependentServices(BaseService):
         else:
             return "Female"
 
-    def get_relation_for_api(self, dep_obj):
+    def get_relation_for_api(self, dep_obj, worker_age):
         age = self.calculate_age(dep_obj.birth_date)
 
         relation = dep_obj.relation_with_worker
         marital = dep_obj.marital_status
         disability = dep_obj.disability_status
 
-        if relation == "workforce.relation.brother":
+        #GLOBAL RULE (same as JS)
+        # if (
+        #         relation != "workforce.relation.wife"
+        #         and age < 18
+        #         and marital == "workforce.marital_status.married"
+        # ):
+        #     return None
+
+        # Wife
+        if relation == "workforce.relation.wife":
+            if age >= 16 and marital == "workforce.marital_status.widow":
+                return "Widow"
+            return None
+
+        # Husband
+        elif relation == "workforce.relation.husband":
+            if age > 18 and marital == "workforce.marital_status.widower":
+                return "Dependent widower"
+            return None
+
+        # Son
+        elif relation == "workforce.relation.son":
+            if age < 18:
+                return "Minor son"
+            if age >= 18 and disability == "yes":
+                return "Dependent disabled son"
+            return None
+
+        # Daughter
+        elif relation == "workforce.relation.daughter":
+            if marital == "workforce.marital_status.single":
+                return "Unmarried daughter"
+            return None
+
+        # Brother
+        elif relation == "workforce.relation.brother":
             if age < 18:
                 return "Dependent minor brother"
-            else:
-                return None
+            return None
 
+        # Sister
         elif relation == "workforce.relation.sister":
-            if age < 18:
-                return "Dependent minor sister"
-            elif marital == "workforce.marital_status.unmarried":
+            if marital == "workforce.marital_status.single":
                 return "Dependent unmarried sister"
-            elif marital == "workforce.marital_status.widowed":
-                return "Dependent widowed sister"
-            else:
-                return None
+            return None
 
-        elif relation == "workforce.relation.daughter":
-            if disability == "yes":
-                return "Dependent disabled daughter"
-            elif age < 18:
-                return "Minor daughter"
-            elif marital == "workforce.marital_status.unmarried":
-                return "Unmarried daughter"
-            elif marital == "workforce.marital_status.widowed":
-                return "Dependent widowed daughter"
-            else:
-                return None
-
-        elif relation == "workforce.relation.son":
-            if disability == "yes":
-                return "Dependent disabled son"
-            elif age < 18:
-                return "Minor son"
-            else:
-                return None
-
-        elif relation == "workforce.relation.husband":
-            return "Dependent widower"
-
-        elif relation == "workforce.relation.wife":
-            return "Widow"
-
+        # Father
         elif relation == "workforce.relation.father":
-            return "Dependent father"
+            if age > worker_age:
+                return "Dependent father"
+            return None
 
+        # Mother
         elif relation == "workforce.relation.mother":
-            return "Mother"
+            if age > worker_age:
+                return "Mother"
+            return None
 
+        # Grand parents
         elif relation == "workforce.relation.grand_father":
             return "Dependent paternal grandfather"
 
         elif relation == "workforce.relation.grand_mother":
             return "Dependent paternal grandmother"
 
-        elif relation == "workforce.relation.grand_son":
+        # Grand children (all age < 18)
+        elif relation in (
+                "workforce.relation.grand_son",
+                "workforce.relation.grand_son_from_daughter",
+        ):
             if age < 18:
-                return "Dependent minor son of a deceased son"
-            else:
-                return None
+                return "Dependent minor grandson"
+            return None
 
-        elif relation == "workforce.relation.grand_daughter":
+        elif relation in (
+                "workforce.relation.grand_daughter",
+                "workforce.relation.grand_daughter_from_daughter",
+        ):
             if age < 18:
-                return "Dependent minor daughter of a deceased son"
-            else:
-                return None
+                return "Dependent minor granddaughter"
+            return None
 
-        elif relation == "workforce.relation.grand_son_from_daughter":
-            if age < 18:
-                return "Dependent minor son of a deceased daughter"
-            else:
-                return None
-
-        elif relation == "workforce.relation.grand_daughter_from_daughter":
-            if age < 18:
-                return "Dependent minor daughter of a deceased daughter"
-            else:
-                return None
-
+        # Daughter in law
         elif relation == "workforce.relation.daughter_in_law":
             if marital == "workforce.marital_status.widowed":
                 return "Dependent widowed daughter-in-law"
-            else:
-                return None
+            return None
 
+        # Illegitimate children
         elif relation == "workforce.relation.illegitimate_son":
             return "Dependent son born out of wedlock"
 
         elif relation == "workforce.relation.illegitimate_daughter":
             if marital == "workforce.marital_status.unmarried":
                 return "Dependent unmarried daughter born out of wedlock"
-            else:
-                return None
+            return None
+
         return None
 
     def calculate_age(self, birth_date):
@@ -228,17 +233,22 @@ class WorkforceEmployeeDependentServices(BaseService):
 
     def calculate_eis_amount(self, workforce_application_id, application_type):
         dependents = WorkforceEmployeeDependent.objects.filter(workforce_application_id=workforce_application_id)
-        dependents = list(dependents)  # evaluate queryset once
-        dependents = [
-            dep for dep in dependents
-            if self.get_relation_for_api(dep) and dep.is_eligible == True and dep.bank_id is not None
-        ]
-
         workforce_application = WorkforceApplication.objects.get(id=workforce_application_id)
         worker = WorkforceEmployee.objects.get(id=workforce_application.workforce_employee_id)
 
         # Calculate age
         worker_age = self.calculate_age(worker.birth_date)
+        if worker_age is None or worker_age =="":
+            deceased_worker_info= json.loads(workforce_application.deceased_worker_info) if workforce_application.deceased_worker_info else None
+            if deceased_worker_info is not None and deceased_worker_info!="[{}]":
+                worker_dob= deceased_worker_info.get("birthDate", None)
+                worker_age= self.calculate_age(worker_dob) if worker_dob else 0
+        dependents = list(dependents)  # evaluate queryset once
+        dependents = [
+            dep for dep in dependents
+            if self.get_relation_for_api(dep,worker_age) and dep.is_eligible == True and dep.bank_id is not None
+        ]
+
 
         # metadata_json= workforce_application.metadata
         # metadata= json.loads(metadata_json)
@@ -321,7 +331,7 @@ class WorkforceEmployeeDependentServices(BaseService):
                 "Date of birth": dep.birth_date.strftime("%m/%d/%Y") if dep.birth_date else "11/02/1996",
                 "Age at calculation date": str(self.calculate_age(dep.birth_date)) if dep.birth_date else "30",
                 "Sex": self.get_gender_by_relation_for_api(dep.relation_with_worker) or "Female",
-                "Relationship": self.get_relation_for_api(dep) or ""
+                "Relationship": self.get_relation_for_api(dep, worker_age) or ""
             })
             dep_key = dep_key + 1
 
@@ -379,18 +389,29 @@ class WorkforceEmployeeDependentServices(BaseService):
                                             other_parent_present = True
                                         if rel == "Dependent father" and "Mother" in relationship:
                                             other_parent_present = True
+                                    bro_sis_present = False
+                                    for bro_sis_data in vba_data:
+                                        bs_relation = bro_sis_data.get("Relationship") or ""
+                                        if "sister" in bs_relation.lower() or "brother" in bs_relation.lower():
+                                            bro_sis_present = True
+
                                 for parent_data in vba_data:
                                     if parent_data["ID"] == "Parent(s)":
-                                        dep_obj.eis_calculated_amount = safe_float(parent_data["PV Total pension"]) / 2
-                                        dep_obj.eis_approved_amount = safe_float(parent_data["PV Top-Up pension"]) / 2
-                                        dep_obj.pv_factor = safe_float(parent_data["PV factor"])
-                                        dep_obj.initial_replacement_rate = safe_float(
-                                            data["Initial replacement rate"])/2 if other_parent_present else safe_float(
-                                            data["Initial replacement rate"])
-                                        dep_obj.eis_initial_monthly_amount = safe_float(
-                                            parent_data["Total initial monthly pension"]) / 2
-                                        dep_obj.eis_monthly_amount = safe_float(
-                                            parent_data["Top-up monthly pension"]) / 2
+                                        dep_obj.eis_calculated_amount = safe_float(parent_data["PV Total pension"]) / 2 if other_parent_present else safe_float(parent_data["PV Total pension"])
+                                        dep_obj.eis_approved_amount = safe_float(parent_data["PV Top-Up pension"]) / 2 if other_parent_present else safe_float(parent_data["PV Top-Up pension"])
+                                        dep_obj.pv_factor = safe_float(parent_data["PV factor"]) /2 if other_parent_present else safe_float(parent_data["PV factor"])
+                                        dep_obj.initial_replacement_rate = safe_float(data["Initial replacement rate"])/2 if other_parent_present else safe_float(data["Initial replacement rate"])
+                                        dep_obj.eis_initial_monthly_amount = safe_float(parent_data["Total initial monthly pension"]) / 2 if other_parent_present else safe_float(parent_data["Total initial monthly pension"])
+                                        dep_obj.eis_monthly_amount = safe_float(parent_data["Top-up monthly pension"]) / 2 if other_parent_present else safe_float(parent_data["Top-up monthly pension"])
+
+                                        if bro_sis_present:
+                                            dep_obj.eis_calculated_amount = dep_obj.eis_calculated_amount/2
+                                            dep_obj.eis_approved_amount = dep_obj.eis_approved_amount/2
+                                            dep_obj.pv_factor = dep_obj.pv_factor/2
+                                            dep_obj.initial_replacement_rate = dep_obj.initial_replacement_rate/2
+                                            dep_obj.eis_initial_monthly_amount = dep_obj.eis_initial_monthly_amount/2
+                                            dep_obj.eis_monthly_amount = dep_obj.eis_monthly_amount/2
+
                                         dep_obj.is_eligible = True
                                         try:
                                             dep_obj.save(username=self.user.username)
@@ -454,7 +475,7 @@ class WorkforceEmployeeDependentServices(BaseService):
                 elif relation == "workforce.relation.sister":
                     if age < 18:
                         set_vba_data(dep_obj, "Dependent minor sister")
-                    elif marital == "workforce.marital_status.unmarried":
+                    elif marital == "workforce.marital_status.single":
                         set_vba_data(dep_obj, "Dependent unmarried sister")
                     elif marital == "workforce.marital_status.widowed":
                         set_vba_data(dep_obj, "Dependent widowed sister")
@@ -470,7 +491,7 @@ class WorkforceEmployeeDependentServices(BaseService):
                         set_vba_data(dep_obj, "Dependent disabled daughter")
                     elif age < 18:
                         set_vba_data(dep_obj, "Minor daughter")
-                    elif marital == "workforce.marital_status.unmarried":
+                    elif marital == "workforce.marital_status.single":
                         set_vba_data(dep_obj, "Unmarried daughter")
                     elif marital == "workforce.marital_status.widowed":
                         set_vba_data(dep_obj, "Dependent widowed daughter")
@@ -545,7 +566,7 @@ class WorkforceEmployeeDependentServices(BaseService):
                     set_vba_data(dep_obj, "Dependent son born out of wedlock")
 
                 elif relation == "workforce.relation.illegitimate_daughter":
-                    if marital == "workforce.marital_status.unmarried":
+                    if marital == "workforce.marital_status.single":
                         set_vba_data(dep_obj, "Dependent unmarried daughter born out of wedlock")
                     else:
                         dep_obj.is_eligible = False
