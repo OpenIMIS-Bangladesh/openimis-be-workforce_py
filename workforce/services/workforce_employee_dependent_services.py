@@ -405,12 +405,12 @@ class WorkforceEmployeeDependentServices(BaseService):
                                         dep_obj.eis_monthly_amount = safe_float(parent_data["Top-up monthly pension"]) / 2 if other_parent_present else safe_float(parent_data["Top-up monthly pension"])
 
                                         if bro_sis_present:
-                                            dep_obj.eis_calculated_amount = dep_obj.eis_calculated_amount/2
-                                            dep_obj.eis_approved_amount = dep_obj.eis_approved_amount/2
-                                            dep_obj.pv_factor = dep_obj.pv_factor/2
-                                            dep_obj.initial_replacement_rate = dep_obj.initial_replacement_rate/2
-                                            dep_obj.eis_initial_monthly_amount = dep_obj.eis_initial_monthly_amount/2
-                                            dep_obj.eis_monthly_amount = dep_obj.eis_monthly_amount/2
+                                            dep_obj.eis_calculated_amount = dep_obj.eis_calculated_amount/2 if other_parent_present else dep_obj.eis_calculated_amount
+                                            dep_obj.eis_approved_amount = dep_obj.eis_approved_amount/2 if other_parent_present else dep_obj.eis_approved_amount
+                                            dep_obj.pv_factor = dep_obj.pv_factor/2 if other_parent_present else dep_obj.pv_factor
+                                            dep_obj.initial_replacement_rate = dep_obj.initial_replacement_rate/2 if other_parent_present else dep_obj.initial_replacement_rate
+                                            dep_obj.eis_initial_monthly_amount = dep_obj.eis_initial_monthly_amount/2 if other_parent_present else dep_obj.eis_initial_monthly_amount
+                                            dep_obj.eis_monthly_amount = dep_obj.eis_monthly_amount/2 if other_parent_present else dep_obj.eis_monthly_amount
 
                                         dep_obj.is_eligible = True
                                         try:
