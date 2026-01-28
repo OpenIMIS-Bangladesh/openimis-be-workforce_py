@@ -405,8 +405,8 @@ class WorkforceApplicationServices(BaseService):
 
         if application_status in ["new", "verified", "forward_for_verification", "approved_by_doctor"] and all_bank_data:
                     # if application_instance.application_type in has_dependent_application_types:
-                    if len(incoming_ids)>0 and application_status not in  ["new", "draft"]:
-                        WorkforceEmployeeBankingInfo.objects.filter(application= application_instance).exclude(dependent_id__in=incoming_ids).delete()
+                    # if len(incoming_ids)>0 and application_status not in  ["new", "draft"]:
+                    #     WorkforceEmployeeBankingInfo.objects.filter(application= application_instance).exclude(dependent_id__in=incoming_ids).delete()
                     for bank_data in all_bank_data:
                         bank_info_id= None;
                         if bank_data.get("applicant_type") == "dependent":
