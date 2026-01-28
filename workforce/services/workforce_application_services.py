@@ -268,6 +268,12 @@ class WorkforceApplicationServices(BaseService):
                     dependents = json.loads(dependents_data)
 
                 if dependents_data and dependents_data != "[{}]":
+                    incoming_ids = []
+                    for dep in dependents:
+                        dep_id = dep.get("id")
+                        if dep_id:
+                            incoming_ids.append(extract_uuid(dep_id))
+                    WorkforceEmployeeDependent.objects.filter(workforce_application=application_instance).exclude(id__in=incoming_ids).delete()
                     for dep in dependents:
                         dependent_id= dep.get("id")
                         if dependent_id is not None:
@@ -398,6 +404,8 @@ class WorkforceApplicationServices(BaseService):
 
         if application_status in ["new", "verified", "forward_for_verification", "approved_by_doctor"] and all_bank_data:
                     # if application_instance.application_type in has_dependent_application_types:
+                    if len(incoming_ids)>0:
+                        WorkforceEmployeeBankingInfo.objects.filter(application= application_instance).exclude(dependent_id__in=incoming_ids).delete()
                     for bank_data in all_bank_data:
                         bank_info_id= None;
                         if bank_data.get("applicant_type") == "dependent":
