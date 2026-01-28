@@ -138,7 +138,7 @@ class WorkforceApplicationServices(BaseService):
                         user_created_id=user_id,
                         user_updated_id=user_id,
                         status="active",
-                        relation_with_worker=dep.get("relationType"),
+                        relation_with_worker=dep.get("relationType") if "relationType" in dep else dep.get("relationWithWorker", None),
                         disability_status=dep.get("isDisabled"),
                         disability_type=dep.get("disabilityType") if "disabilityType" in dep else None
                     )
@@ -311,7 +311,7 @@ class WorkforceApplicationServices(BaseService):
                             dep_instance.user_updated_id = user_id
                             dep_instance.status = "active"
                             dep_instance.attachments = attachments
-                            dep_instance.relation_with_worker = dep.get("relationType")
+                            dep_instance.relation_with_worker = dep.get("relationType") if "relationType" in dep else dep.get("relationWithWorker", None),
                             dep_instance.disability_status = dep.get("isDisabled")
                             dep_instance.percentage_of_cf_grant = dep.get("percentage_of_grant", None);
                             dep_instance.disability_type = dep.get(
@@ -348,7 +348,7 @@ class WorkforceApplicationServices(BaseService):
                                 user_updated_id=user_id,
                                 status="active",
                                 attachments=attachments,
-                                relation_with_worker=dep.get("relationType"),
+                                relation_with_worker=dep.get("relationType") if "relationType" in dep else dep.get("relationWithWorker", None),
                                 disability_status=dep.get("isDisabled"),
                                 disability_type=dep.get("disabilityType") if "disabilityType" in dep else None,
                                 is_eligible=eligibility_status,
