@@ -280,7 +280,7 @@ class WorkforceApplicationServices(BaseService):
                         if dependent_id is not None:
                             dep_instance= WorkforceEmployeeDependent.objects.get(id=extract_uuid(dep.get("id")))
                         else: dep_instance = None
-                        eligibility_status = dep.get("isEligible", False)
+                        eligibility_status = dep.get("isEligible", True)
                         remarks = dep.get("remarks", None)
                         present_location_instance = Location.objects.get(
                             id=extract_uuid(dep.get("presentLocation", {}).get("id")))
