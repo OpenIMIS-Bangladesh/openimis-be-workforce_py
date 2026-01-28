@@ -1423,6 +1423,7 @@ class WorkforceEisPaymentProcess(HistoryModel):
     )
     is_disbursed = models.BooleanField(default=False)
     approved = models.CharField(max_length=10, null=True, blank=True)
+    approval_date= models.DateField(null=True, blank=True)
     beneficiary_id = models.CharField(max_length=50, null=True, blank=True)
     status = models.CharField(default="active", max_length=50, null=True, blank=True)
     beneficiary_status = models.CharField(max_length=25, db_comment="hold, closed, eligible", default="eligible")

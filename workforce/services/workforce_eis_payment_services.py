@@ -445,8 +445,7 @@ class WorkforceEisPaymentServices(BaseService):
 
                 other_beneficiary_records.append({
                     "obj": other_obj,
-                    "increment": inc_amt,
-                    "increment_date": parse_frontend_date(details.get("incrementDate"))
+                    "increment": inc_amt
                 })
 
         # C. Calculate the Debt and Monthly Decrement
@@ -524,9 +523,10 @@ class WorkforceEisPaymentServices(BaseService):
                 eis_initial_monthly_amount=new_initial_monthly,
                 eis_monthly_amount=new_monthly,
                 increment_amount=item["increment"],
-                increment_date=item["increment_date"] or today,
+                increment_date= event_date,
                 decrement_amount=monthly_decrement_per_person,
-                decrement_date=recovery_end_date,
+                decrement_date=event_date,
+                decrement_end_date=recovery_end_date,
                 month_index=old_other.month_index,
                 year=old_other.year,
                 processing_date=today,

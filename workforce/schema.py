@@ -1125,7 +1125,7 @@ class Query(graphene.ObjectType):
             if year:
                 qs = qs.filter(year=year)
 
-            qs = qs.order_by("-date_created")
+            qs = qs.order_by("-beneficiary_id")
 
             if not any([
                 workforce_application_id,
