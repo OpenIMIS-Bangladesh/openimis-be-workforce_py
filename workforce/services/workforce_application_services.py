@@ -311,9 +311,9 @@ class WorkforceApplicationServices(BaseService):
                             dep_instance.user_updated_id = user_id
                             dep_instance.status = "active"
                             dep_instance.attachments = attachments
-                            dep_instance.relation_with_worker = dep.get("relationType") if "relationType" in dep else dep.get("relationWithWorker", None),
+                            dep_instance.relation_with_worker = dep.get("relationType") if "relationType" in dep else dep.get("relationWithWorker", None)
                             dep_instance.disability_status = dep.get("isDisabled")
-                            dep_instance.percentage_of_cf_grant = dep.get("percentage_of_grant", None);
+                            dep_instance.percentage_of_cf_grant = dep.get("percentage_of_grant", None)
                             dep_instance.disability_type = dep.get(
                                 "disabilityType") if "disabilityType" in dep else None
                             dep_instance.is_eligible = eligibility_status
