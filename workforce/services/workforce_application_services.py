@@ -268,8 +268,8 @@ class WorkforceApplicationServices(BaseService):
                     dependents = json.loads(dependents_data)
 
                 if dependents_data and dependents_data != "[{}]":
+                    incoming_ids = []
                     if application_status not in  ["new", "draft"]:
-                        incoming_ids = []
                         for dep in dependents:
                             dep_id = dep.get("id")
                             if dep_id:
