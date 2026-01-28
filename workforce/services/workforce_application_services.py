@@ -8,7 +8,7 @@ from rx.linq.observable.blocking.first import first
 
 from workforce.models import (
     WorkforceApplication, WorkforceGrantMoney, WorkforceEmployee, WorkforceEmployeeDependent,
-    WorkforceEmployeeBankingInfo, WorkforceDocument, WorkforceFactory, Bank
+    WorkforceEmployeeBankingInfo, WorkforceDocument, WorkforceFactory, Bank, WorkforceEisPaymentProcess
 )
 from workforce.models import WorkforceAssociation, WorkforceOrganizationEmployee
 from .helper_service import create_application_movement, cf_and_eis_application_movement_to_factory_admin, dependent_uuid_to_base64
@@ -274,6 +274,8 @@ class WorkforceApplicationServices(BaseService):
                             dep_id = dep.get("id")
                             if dep_id:
                                 incoming_ids.append(extract_uuid(dep_id))
+                        WorkforceEisPaymentProcess.objects.filter(workforce_application=application_instance).exclude(workforce_employee_dependent_id__in=incoming_ids).delete()
+                        WorkforceEmployeeBankingInfo.objects.filter(application=application_instance).exclude(dependant_id__in=incoming_ids).delete()
                         WorkforceEmployeeDependent.objects.filter(workforce_application=application_instance).exclude(id__in=incoming_ids).delete()
                     for dep in dependents:
                         dependent_id= dep.get("id")
@@ -403,7 +405,7 @@ class WorkforceApplicationServices(BaseService):
                 key=lambda x: 1 if x.get("accountHolderType") == "select_from_another_dependent" else 0
             )
 
-        if application_status in ["new", "verified", "forward_for_verification", "approved_by_doctor"] and all_bank_data:
+        if (application_status or application_instance.status in ["new", "verified", "forward_for_verification", "approved_by_doctor"]) and all_bank_data:
                     # if application_instance.application_type in has_dependent_application_types:
                     # if len(incoming_ids)>0 and application_status not in  ["new", "draft"]:
                     #     WorkforceEmployeeBankingInfo.objects.filter(application= application_instance).exclude(dependent_id__in=incoming_ids).delete()
