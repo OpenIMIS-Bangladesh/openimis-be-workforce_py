@@ -244,6 +244,10 @@ class Query(graphene.ObjectType):
         month=graphene.String(),
         year=graphene.String(),
         status= graphene.String(),
+        beneficiary_status=graphene.String(),
+        approved= graphene.String(),
+        approval_date_from= graphene.String(),
+        approval_date_to= graphene.String()
     )
 
     workforce_eis_payment_disbursement = graphene.List(
@@ -1090,7 +1094,23 @@ class Query(graphene.ObjectType):
             return None
     
     
-    def resolve_workforce_eis_payment_process(self, info, workforce_application_id=None, beneficiary_id=None, workforce_application_tracking_number=None, workforce_factory_id=None, all_association_id=None, workforce_application_id_in=None, month=None, year=None, status=None):
+    def resolve_workforce_eis_payment_process(
+            self,
+            info,
+            workforce_application_id=None,
+            beneficiary_id=None,
+            workforce_application_tracking_number=None,
+            workforce_factory_id=None,
+            all_association_id=None,
+            workforce_application_id_in=None,
+            month=None,
+            year=None,
+            status=None,
+            beneficiary_status=None,
+            approved=None,
+            approval_date_from=None,
+            approval_date_to=None
+        ):
         try:
             qs = WorkforceEisPaymentProcess.objects.all()
 
@@ -1119,11 +1139,33 @@ class Query(graphene.ObjectType):
             if status:
                 qs = qs.filter(status=status)
 
-            if month:
-                qs = qs.filter(month_index=month)
+            if beneficiary_status:
+                qs = qs.filter(beneficiary_status=beneficiary_status)
 
-            if year:
-                qs = qs.filter(year=year)
+            # if month:
+            #     qs = qs.filter(month_index=month)
+            #
+            # if year:
+            #     qs = qs.filter(year=year)
+
+            combined_year_month_date = None
+
+            if year and month:
+                combined_year_month_date = date(int(year), int(month), 1)
+            if combined_year_month_date:
+                qs = qs.filter(
+                    Q(remarriage_or_death_date__isnull=True) |
+                    Q(remarriage_or_death_date__gt=combined_year_month_date)
+                )
+
+            if approved:
+                qs = qs.filter(approved=approved)
+
+            if approval_date_from:
+                qs = qs.filter(approval_date__gte=approval_date_from)
+
+            if approval_date_to:
+                qs = qs.filter(approval_date__lte=approval_date_to)
 
             qs = qs.order_by("-beneficiary_id")
 

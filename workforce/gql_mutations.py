@@ -2041,7 +2041,7 @@ class UpdateWorkforceEisPaymentProcessApprovalMutation(graphene.Mutation):
         from workforce.models import WorkforceEisPaymentProcess
         try:
             user = info.context.user if hasattr(info.context, 'user') else None
-            WorkforceEisPaymentProcess.objects.filter(beneficiary_id= data["beneficiary_id"]).update(approved=data["approved"])
+            WorkforceEisPaymentProcess.objects.filter(beneficiary_id= data["beneficiary_id"]).update(approved=data["approved"], approval_date= date.today())
             return cls(success=True, errors=[])
         except Exception as e:
             return cls(success=False, errors=[str(e)])
