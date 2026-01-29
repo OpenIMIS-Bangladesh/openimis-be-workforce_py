@@ -1440,6 +1440,13 @@ class WorkforceEisPaymentProcess(HistoryModel):
 
 
 class WorkforceEisPaymentDisbursementStage(HistoryModel):
+    workforce_eis_payment_process = models.ForeignKey(
+        "WorkforceEisPaymentProcess",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_eis_payment_stage_relation",
+    )
     workforce_application = models.ForeignKey(
         "WorkforceApplication",
         models.DO_NOTHING,
@@ -1478,6 +1485,7 @@ class WorkforceEisPaymentDisbursementStage(HistoryModel):
     eis_initial_replacement_rate= models.FloatField(null=True, blank=True)
     eis_initial_monthly_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     eis_monthly_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    paid_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     increment_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     decrement_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     total_adjustment_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
@@ -1492,6 +1500,7 @@ class WorkforceEisPaymentDisbursementStage(HistoryModel):
         related_name="workforce_payment_stage_processed_by",
     )
     is_disbursed = models.BooleanField(default=False)
+    disbursement_date= models.DateField(null=True, blank=True)
     is_confirmed = models.BooleanField(default=False)
     approved = models.CharField(max_length=10, null=True, blank=True)
     beneficiary_id = models.CharField(max_length=50, null=True, blank=True)
@@ -1503,6 +1512,14 @@ class WorkforceEisPaymentDisbursementStage(HistoryModel):
 
 
 class WorkforceEisPaymentDisbursement(HistoryModel):
+
+    workforce_eis_payment_disbursement_stage = models.ForeignKey(
+        "WorkforceEisPaymentDisbursementStage",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_payment_disbursement_stage_disbursement",
+    )
     workforce_application = models.ForeignKey(
         "WorkforceApplication",
         models.DO_NOTHING,
@@ -1540,9 +1557,11 @@ class WorkforceEisPaymentDisbursement(HistoryModel):
     eis_initial_replacement_rate= models.FloatField(null=True, blank=True)
     eis_initial_monthly_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     eis_monthly_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    paid_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     month_index = models.IntegerField(null=True, blank=True)
     year = models.IntegerField(null=True, blank=True)
     disbursement_date = models.DateField(null=True, blank=True)
+    beneficiary_id = models.CharField(max_length=50, null=True, blank=True)
     disbursed_by = models.ForeignKey(
         InteractiveUser,
         models.DO_NOTHING,

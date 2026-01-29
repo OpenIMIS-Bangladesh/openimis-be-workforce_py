@@ -2072,9 +2072,67 @@ class UpdateWorkforceEisBeneficiaryMutation(graphene.Mutation):
         from workforce.services.workforce_eis_payment_services import WorkforceEisPaymentServices
         try:
             user = info.context.user if hasattr(info.context, 'user') else None
-            print(data)
             service= WorkforceEisPaymentServices(user)
             service.update_beneficiary(user, data)
+            return cls(success=True, errors=[])
+        except Exception as e:
+            return cls(success=False, errors=[str(e)])
+
+
+class CreateWorkforceEisPaymentStageMutation(graphene.Mutation):
+    class Arguments:
+        workforceEisPaymentProcessIdIn = graphene.List(graphene.String)
+        month = graphene.String()
+        year = graphene.String()
+
+    success = graphene.Boolean()
+    errors = graphene.List(graphene.String)
+
+    @classmethod
+    def mutate(cls, root, info, **data):
+        from workforce.services.workforce_eis_payment_disbursement_stage_services import WorkforceEisPaymentDisbursementStageServices
+        try:
+            user = info.context.user if hasattr(info.context, 'user') else None
+            service= WorkforceEisPaymentDisbursementStageServices(user)
+            service.create_payment_stage(user, data)
+            return cls(success=True, errors=[])
+        except Exception as e:
+            return cls(success=False, errors=[str(e)])
+
+class DeleteWorkforceEisPaymentStageMutation(graphene.Mutation):
+    class Arguments:
+        workforceEisPaymentStageIdIn = graphene.List(graphene.String)
+
+    success = graphene.Boolean()
+    errors = graphene.List(graphene.String)
+
+    @classmethod
+    def mutate(cls, root, info, **data):
+        from workforce.services.workforce_eis_payment_disbursement_stage_services import WorkforceEisPaymentDisbursementStageServices
+        try:
+            user = info.context.user if hasattr(info.context, 'user') else None
+            service= WorkforceEisPaymentDisbursementStageServices(user)
+            service.delete_payment_stage(user, data)
+            return cls(success=True, errors=[])
+        except Exception as e:
+            return cls(success=False, errors=[str(e)])
+
+
+class CreateWorkforceEisPaymentDisbursementMutation(graphene.Mutation):
+    class Arguments:
+        workforceEisPaymentStageIdIn = graphene.List(graphene.String)
+
+    success = graphene.Boolean()
+    errors = graphene.List(graphene.String)
+
+    @classmethod
+    def mutate(cls, root, info, **data):
+        from workforce.models import WorkforceEisPaymentDisbursementStage
+        from workforce.services.workforce_eis_payment_disbursement_services import WorkforceEisPaymentDisbursementServices
+        try:
+            user = info.context.user if hasattr(info.context, 'user') else None
+            service= WorkforceEisPaymentDisbursementServices(user)
+            service.create_payment_disbursement(user, data)
             return cls(success=True, errors=[])
         except Exception as e:
             return cls(success=False, errors=[str(e)])

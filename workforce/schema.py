@@ -247,8 +247,19 @@ class Query(graphene.ObjectType):
         beneficiary_status=graphene.String(),
         approved= graphene.String(),
         approval_date_from= graphene.String(),
-        approval_date_to= graphene.String()
+        approval_date_to= graphene.String(),
+        not_in_stage= graphene.String()
     )
+
+
+    workforce_eis_payment_disbursement_stage = graphene.List(
+        WorkforceEisPaymentDisbursementStageGQLType,
+        month=graphene.String(),
+        year=graphene.String(),
+        is_disbursed= graphene.String(),
+        not_in_disburse= graphene.String()
+    )
+
 
     workforce_eis_payment_disbursement = graphene.List(
         WorkforceEisPaymentDisbursementGQLType,
@@ -1109,7 +1120,8 @@ class Query(graphene.ObjectType):
             beneficiary_status=None,
             approved=None,
             approval_date_from=None,
-            approval_date_to=None
+            approval_date_to=None,
+            not_in_stage= None
         ):
         try:
             qs = WorkforceEisPaymentProcess.objects.all()
@@ -1167,6 +1179,15 @@ class Query(graphene.ObjectType):
             if approval_date_to:
                 qs = qs.filter(approval_date__lte=approval_date_to)
 
+            if not_in_stage == "yes" and year and month:
+                beneficiary_ids = WorkforceEisPaymentDisbursementStage.objects.filter(
+                    month_index=month,
+                    year=year,
+                    is_deleted=False
+                ).values_list("beneficiary_id", flat=True)
+
+                qs = qs.exclude(beneficiary_id__in=beneficiary_ids)
+
             qs = qs.order_by("-beneficiary_id")
 
             if not any([
@@ -1184,6 +1205,51 @@ class Query(graphene.ObjectType):
             return qs
         except WorkforceEisPaymentProcess.DoesNotExist:
             return None
+
+
+    def resolve_workforce_eis_payment_disbursement_stage(
+            self,
+            info,
+            month=None,
+            year=None,
+            is_disbursed= None,
+            not_in_disburse= None
+        ):
+        try:
+            qs = WorkforceEisPaymentDisbursementStage.objects.all()
+
+            if month:
+                qs = qs.filter(month_index=month)
+
+            if year:
+                qs = qs.filter(year=year)
+
+            if is_disbursed:
+                if is_disbursed == "yes":
+                    qs = qs.filter(is_disbursed=True)
+                elif is_disbursed == "no":
+                    qs = qs.filter(is_disbursed=False)
+
+            if not_in_disburse == "yes" and year and month:
+                beneficiary_ids = WorkforceEisPaymentDisbursement.objects.filter(
+                    month_index=month,
+                    year=year
+                ).values_list("beneficiary_id", flat=True)
+                qs = qs.exclude(beneficiary_id__in=beneficiary_ids)
+
+            qs = qs.filter(is_deleted=False)
+            qs = qs.order_by("-beneficiary_id")
+
+            if not any([
+                month,
+                year,
+            ]):
+                qs = qs[:500]
+
+            return qs
+        except WorkforceEisPaymentDisbursementStage.DoesNotExist:
+            return None
+
 
 
     def resolve_workforce_eis_payment_disbursement(self, info, workforce_application_id=None, workforce_application_id_in=None, month=None, year=None):
@@ -1391,4 +1457,8 @@ class Mutation(graphene.ObjectType):
 
 
     update_workforce_eis_beneficiary = UpdateWorkforceEisBeneficiaryMutation.Field()
+
+    create_workforce_eis_payment_stage = CreateWorkforceEisPaymentStageMutation.Field()
+    delete_workforce_eis_payment_stage = DeleteWorkforceEisPaymentStageMutation.Field()
+    create_workforce_eis_payment_disbursement = CreateWorkforceEisPaymentDisbursementMutation.Field()
 
