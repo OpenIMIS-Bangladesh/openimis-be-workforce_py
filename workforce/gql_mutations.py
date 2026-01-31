@@ -1820,6 +1820,7 @@ class TestWorkforcePaymentMutation(graphene.Mutation):
 class CreateWorkforceEisPaymentProcessMutation(graphene.Mutation):
     class Arguments:
         workforce_application_id = graphene.String(required=True)
+        recall= graphene.String()
         month = graphene.String()
         year = graphene.String()
 
@@ -1842,19 +1843,31 @@ class CreateWorkforceEisPaymentProcessMutation(graphene.Mutation):
                         workforce_application_id=data["workforce_application_id"]
                 ).exists():
                     return cls(success=False, errors=["Disbursement already exists"])
+                WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id)
             if workforce_application.application_type == "financialAssistance":
-                if WorkforceEmployeeDependent.objects.filter(
-                        workforce_application_id=data["workforce_application_id"], eis_approved_amount__isnull=False
-                ).exists():
-                    WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id)
-                else:
+                if "recall" in data and data["recall"]=="yes":
                     service = WorkforceEmployeeDependentServices(user)
                     service.calculate_eis_amount(
                         data["workforce_application_id"],
                         workforce_application.application_type
                     )
+                    WorkforceEisPaymentProcess.objects.filter(
+                        workforce_application_id=data["workforce_application_id"]).delete()
                     WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id)
-            WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id)
+                else:
+                    WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id)
+
+                # if WorkforceEmployeeDependent.objects.filter(
+                #         workforce_application_id=data["workforce_application_id"], eis_approved_amount__isnull=False
+                # ).exists():
+                #     WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id)
+                # else:
+                #     service = WorkforceEmployeeDependentServices(user)
+                #     service.calculate_eis_amount(
+                #         data["workforce_application_id"],
+                #         workforce_application.application_type
+                #     )
+                #     WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id)
             return cls(success=True, errors=[])
         except Exception as e:
             return cls(success=False, errors=[str(e)])

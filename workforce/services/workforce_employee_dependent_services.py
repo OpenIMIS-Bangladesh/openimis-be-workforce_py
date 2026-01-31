@@ -400,7 +400,7 @@ class WorkforceEmployeeDependentServices(BaseService):
                                         dep_obj.eis_calculated_amount = safe_float(parent_data["PV Total pension"]) / 2 if other_parent_present else safe_float(parent_data["PV Total pension"])
                                         dep_obj.eis_approved_amount = safe_float(parent_data["PV Top-Up pension"]) / 2 if other_parent_present else safe_float(parent_data["PV Top-Up pension"])
                                         dep_obj.pv_factor = safe_float(parent_data["PV factor"]) /2 if other_parent_present else safe_float(parent_data["PV factor"])
-                                        dep_obj.initial_replacement_rate = safe_float(data["Initial replacement rate"])/2 if other_parent_present else safe_float(data["Initial replacement rate"])
+                                        dep_obj.initial_replacement_rate = safe_float(parent_data["Initial replacement rate"])/2 if other_parent_present else safe_float(parent_data["Initial replacement rate"])
                                         dep_obj.eis_initial_monthly_amount = safe_float(parent_data["Total initial monthly pension"]) / 2 if other_parent_present else safe_float(parent_data["Total initial monthly pension"])
                                         dep_obj.eis_monthly_amount = safe_float(parent_data["Top-up monthly pension"]) / 2 if other_parent_present else safe_float(parent_data["Top-up monthly pension"])
 
@@ -408,7 +408,7 @@ class WorkforceEmployeeDependentServices(BaseService):
                                             dep_obj.eis_calculated_amount = safe_float(parent_data["PV Total pension"])/4 if other_parent_present else safe_float(parent_data["PV Total pension"])
                                             dep_obj.eis_approved_amount = safe_float(parent_data["PV Top-Up pension"])/4 if other_parent_present else safe_float(parent_data["PV Top-Up pension"])
                                             dep_obj.pv_factor = safe_float(parent_data["PV factor"])/4 if other_parent_present else safe_float(parent_data["PV factor"])
-                                            dep_obj.initial_replacement_rate = safe_float(data["Initial replacement rate"])/4 if other_parent_present else safe_float(data["Initial replacement rate"])
+                                            dep_obj.initial_replacement_rate = safe_float(parent_data["Initial replacement rate"])/4 if other_parent_present else safe_float(parent_data["Initial replacement rate"])
                                             dep_obj.eis_initial_monthly_amount = safe_float(parent_data["Total initial monthly pension"])/4 if other_parent_present else safe_float(parent_data["Total initial monthly pension"])
                                             dep_obj.eis_monthly_amount = safe_float(parent_data["Top-up monthly pension"])/4 if other_parent_present else safe_float(parent_data["Top-up monthly pension"])
 
