@@ -1845,7 +1845,9 @@ class CreateWorkforceEisPaymentProcessMutation(graphene.Mutation):
                     return cls(success=False, errors=["Disbursement already exists"])
                 WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id)
             if workforce_application.application_type == "financialAssistance":
-                if "recall" in data and data["recall"]=="yes":
+                if ("recall" in data and data["recall"]=="yes") or not WorkforceEisPaymentProcess.objects.filter(
+                        workforce_application_id=data["workforce_application_id"]
+                ).exists():
                     service = WorkforceEmployeeDependentServices(user)
                     service.calculate_eis_amount(
                         data["workforce_application_id"],
