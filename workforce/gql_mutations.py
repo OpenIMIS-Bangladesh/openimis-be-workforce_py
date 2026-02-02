@@ -2037,7 +2037,27 @@ class UpdateWorkforceEisPaymentProcessPaymentTypeMutation(graphene.Mutation):
         from workforce.models import WorkforceEisPaymentProcess
         try:
             user = info.context.user if hasattr(info.context, 'user') else None
-            payment_processes = WorkforceEisPaymentProcess.objects.filter(beneficiary_id= data["beneficiary_id"]).update(eis_payment_type=data["payment_type"])
+            payment_processes = WorkforceEisPaymentProcess.objects.filter(beneficiary_id= data["beneficiary_id"])
+            for payment_process in payment_processes:
+                if data["payment_type"]== "onetime":
+                    payment_process.onetime_amount = payment_process.eis_approved_amount
+                    payment_process.payment_type_remarks= f"The beneficiary will get One-time payment of {payment_process.eis_approved_amount:.2f}"
+                    payment_process.eis_payment_type= data["payment_type"]
+                elif data["payment_type"]== "installment":
+                    payment_process.trimonthly_amount = payment_process.eis_approved_amount
+                    #payment_process.payment_type_remarks = f"The beneficiary will get Tri-monthly payment of {(payment_process.eis_monthly_amount*3):.2f}"
+                    #murad vai told me to change this to total amount
+                    payment_process.payment_type_remarks = f"The beneficiary will get Tri-monthly payment of {payment_process.eis_approved_amount :.2f}"
+                    payment_process.eis_payment_type = data["payment_type"]
+                else:
+                    payment_process.eis_payment_type = data["payment_type"]
+                    payment_process.payment_type_remarks = None
+                    payment_process.onetime_amount = None
+                    payment_process.trimonthly_amount = None
+                try:
+                    payment_process.save(username=user.username)
+                except Exception as e:
+                    continue
             return cls(success=True, errors=[])
         except Exception as e:
             return cls(success=False, errors=[str(e)])

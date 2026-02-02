@@ -1433,6 +1433,9 @@ class WorkforceEisPaymentProcess(HistoryModel):
     last_live_check_date = models.DateField(null=True, blank=True)
     live_check_remarks= models.TextField(null=True, blank=True)
     is_eligible = models.BooleanField(default=True)
+    payment_type_remarks= models.TextField(blank=True, null=True)
+    onetime_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    trimonthly_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
 
     class Meta:
         managed = True
