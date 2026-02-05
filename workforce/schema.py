@@ -577,6 +577,21 @@ class Query(graphene.ObjectType):
             query = query.filter(section_type__in=section_type_in)
         if organization_type_in:
             query = query.filter(organization_type__in=organization_type_in)
+
+        #check if there is any application in the summary. Experimental block by Tahir
+        valid_summary_ids = []
+        for summary in query:
+            applications = WorkforceApplication.objects.filter(
+                Q(blwf_application_summary_id=summary.id) |
+                Q(cf_application_summary_id=summary.id) |
+                Q(eis_application_summary_id=summary.id)
+            )
+
+            if applications.exists():
+                valid_summary_ids.append(summary.id)
+        #block end. You can remove this block if necessary.
+
+        query = query.filter(id__in=valid_summary_ids)
         return gql_optimizer.query(query, info)
     def resolve_workforce_application_summary_movement(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
