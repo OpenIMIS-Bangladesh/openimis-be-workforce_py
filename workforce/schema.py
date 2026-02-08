@@ -579,7 +579,9 @@ class Query(graphene.ObjectType):
             query = query.filter(organization_type__in=organization_type_in)
 
         #check if there is any application in the summary. Experimental block by Tahir
+        # recent_threshold = timezone.now() - timedelta(seconds=30)
         valid_summary_ids = []
+        client_mutation_id = kwargs.get("client_mutation_id", None)
         for summary in query:
             applications = WorkforceApplication.objects.filter(
                 Q(blwf_application_summary_id=summary.id) |
@@ -587,11 +589,12 @@ class Query(graphene.ObjectType):
                 Q(eis_application_summary_id=summary.id)
             )
 
-            if applications.exists():
+            if applications.exists() or (client_mutation_id is not None and client_mutation_id!=""):
+                # or summary.date_created >= recent_threshold:
                 valid_summary_ids.append(summary.id)
+        query = query.filter(id__in=valid_summary_ids)
         #block end. You can remove this block if necessary.
 
-        query = query.filter(id__in=valid_summary_ids)
         return gql_optimizer.query(query, info)
     def resolve_workforce_application_summary_movement(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
