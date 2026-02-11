@@ -1436,6 +1436,7 @@ class WorkforceEisPaymentProcess(HistoryModel):
     payment_type_remarks= models.TextField(blank=True, null=True)
     onetime_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     trimonthly_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    payable_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
 
     class Meta:
         managed = True

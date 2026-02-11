@@ -113,7 +113,7 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
                 eis_initial_replacement_rate = workforce_eis_payment_process.eis_initial_replacement_rate,
                 eis_initial_monthly_amount = workforce_eis_payment_process.eis_initial_monthly_amount,
                 eis_monthly_amount = workforce_eis_payment_process.eis_monthly_amount,
-                paid_amount= workforce_eis_payment_process.eis_monthly_amount,
+                paid_amount= workforce_eis_payment_process.payable_amount,
                 increment_amount = workforce_eis_payment_process.increment_amount,
                 decrement_amount = workforce_eis_payment_process.decrement_amount,
                 total_adjustment_amount = workforce_eis_payment_process.total_adjustment_amount,
