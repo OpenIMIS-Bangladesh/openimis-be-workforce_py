@@ -166,6 +166,15 @@ class WorkforceApplicationServices(BaseService):
         # Fetch the complete instance after update
         try:
             application_instance = WorkforceApplication.objects.get(id=application_id)
+            if application_instance.status in ["verified", "forward_to_eis_advisor", "approved_by_eis_advisor", "forward_to_comiitee", "approved_by_committee"]:
+                application_instance.eis_verified = 1
+            else:
+                application_instance.eis_verified = 1
+            try:
+                application_instance.save(username=self.user.username)
+            except Exception as e:
+                raise Exception(f"Failed to update eis verified status: {e}")
+
         except WorkforceApplication.DoesNotExist:
             raise Exception(f"Application with id {application_id} not found")
 

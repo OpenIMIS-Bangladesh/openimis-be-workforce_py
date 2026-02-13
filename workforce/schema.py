@@ -403,6 +403,7 @@ class Query(graphene.ObjectType):
             is_reverted=None,
             date_created_from= None,
             date_created_to= None,
+            eis_verified = None,
             **kwargs
     ):
         service = WorkforceApplicationServices(info.context.user)
@@ -463,6 +464,9 @@ class Query(graphene.ObjectType):
             query = query.filter(date_created__gte=date_created_from)
         if date_created_to:
             query = query.filter(date_created__lte=date_created_to)
+
+        if eis_verified:
+            query = query.filter(eis_verified=eis_verified)
 
 
         latest_movement_subquery = WorkforceApplicationMovement.objects.filter(

@@ -2041,6 +2041,7 @@ class UpdateWorkforceEisPaymentProcessPaymentTypeMutation(graphene.Mutation):
             for payment_process in payment_processes:
                 if data["payment_type"]== "onetime":
                     payment_process.onetime_amount = payment_process.eis_approved_amount
+                    payment_process.payable_amount = payment_process.eis_approved_amount
                     payment_process.payment_type_remarks= f"The beneficiary will get One-time payment of {payment_process.eis_approved_amount:.2f}"
                     payment_process.eis_payment_type= data["payment_type"]
                 elif data["payment_type"]== "installment":

@@ -327,3 +327,6 @@ class WorkforceConfig(AppConfig):
         from core.models import ModuleConfiguration
         cfg = ModuleConfiguration.get_or_default(MODULE_NAME, DEFAULT_CFG)
         self.__load_config(cfg)
+
+        from .scheduler import start
+        start()

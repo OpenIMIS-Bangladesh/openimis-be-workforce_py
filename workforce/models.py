@@ -876,6 +876,7 @@ class WorkforceApplication(HistoryModel):
     deceased_worker_info = models.JSONField(null=True, blank=True)
     deceased_worker_info_verification = models.CharField(max_length=30, null=True, blank=True)
     deceased_worker_info_verification_remarks = models.TextField(null=True, blank=True)
+    eis_verified = models.BooleanField(null=True, blank=True)
 
     class Meta:
         managed = True
