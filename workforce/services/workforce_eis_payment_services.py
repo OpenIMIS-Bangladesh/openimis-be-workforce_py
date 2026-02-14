@@ -1,4 +1,7 @@
 import logging
+
+from OpenSSL.rand import status
+from core.models import user
 from core.services import BaseService
 from pamqp.decode import double
 from workforce.models import WorkforceEmployeeDependent, WorkforceApplication, WorkforceEmployee, WorkforceFactory, \
@@ -12,7 +15,7 @@ from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 from math import floor
 from workforce.services.helper_service import generate_beneficiary_id
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from django.db import transaction
@@ -20,6 +23,10 @@ from django.db import transaction
 
 logger = logging.getLogger(__name__)
 
+
+def extract_uuid(encoded_str):
+    decoded = base64.b64decode(encoded_str).decode()
+    return decoded.split(":")[1]
 
 def safe_float(value, default=0.0):
     try:
@@ -76,6 +83,12 @@ def calculate_months_difference(start_date, end_date):
         return 0
     diff = relativedelta(end_date, start_date)
     return diff.years * 12 + diff.months
+
+
+THREE_DECIMAL = Decimal("0.001")
+
+def round_three(value):
+    return value.quantize(THREE_DECIMAL, rounding=ROUND_HALF_UP)
 
 
 class WorkforceEisPaymentServices(BaseService):
@@ -329,7 +342,7 @@ class WorkforceEisPaymentServices(BaseService):
 
     @transaction.atomic
     def update_beneficiary(self, user, data):
-
+        print(data)
         MIN_ALLOWED_AMOUNT = Decimal("0.00")
 
         # 1. Fetch Main Beneficiary
@@ -370,12 +383,14 @@ class WorkforceEisPaymentServices(BaseService):
                 continue
 
             increment = safe_decimal(details.get("incrementAmount"))
+            normal_decrement = safe_decimal(details.get("decrementAmount"))
             actual_monthly_total += safe_decimal(other_obj.eis_monthly_amount)
             target_monthly_total += safe_decimal(other_obj.eis_monthly_amount) + increment
 
             other_beneficiary_records.append({
                 "obj": other_obj,
-                "increment": increment
+                "increment": increment,
+                "normal_decrement": normal_decrement,
             })
 
         total_overpayment = (actual_monthly_total - target_monthly_total) * Decimal(months_elapsed)
@@ -384,6 +399,9 @@ class WorkforceEisPaymentServices(BaseService):
         # 5. Close main beneficiary (do NOT zero amounts)
         main_beneficiary.status = "inactive"
         main_beneficiary.save(username=user.username)
+
+        main_increment= safe_decimal(data["increment_amount"]) if "increment_amount" in data else 0
+        main_decrement= safe_decimal(data["decrement_amount"]) if "decrement_amount" in data else 0
 
         new_main_row = WorkforceEisPaymentProcess(
             workforce_application=main_beneficiary.workforce_application,
@@ -398,20 +416,24 @@ class WorkforceEisPaymentServices(BaseService):
             eis_initial_replacement_rate=main_beneficiary.eis_initial_replacement_rate,
             eis_initial_monthly_amount=main_beneficiary.eis_initial_monthly_amount,
             eis_monthly_amount=main_beneficiary.eis_monthly_amount,
+            increment_amount= round_three(main_increment) if "increment_amount" in data else None,
+            increment_date= today,
+            decrement_amount= round_three(main_decrement) if "decrement_amount" in data else None,
+            decrement_date= today,
             month_index=main_beneficiary.month_index,
             year=main_beneficiary.year,
             processing_date=today,
             is_disbursed=main_beneficiary.is_disbursed,
             approved=main_beneficiary.approved,
             beneficiary_id=main_beneficiary.beneficiary_id,
-            beneficiary_status="closed",
+            beneficiary_status= data.get("beneficiary_status") if "beneficiary_status" in data else main_beneficiary.beneficiary_status,
             status="active",
             reason=data.get("reason"),
             remarks=data.get("remarks"),
             remarriage_or_death_date=event_date,
             last_live_check_date=parse_frontend_date(data.get("last_live_check_date")),
-            live_check_remarks=data.get("remarks"),
-            payable_amount= main_beneficiary.eis_monthly_amount
+            live_check_remarks=data.get("live_check_remarks"),
+            payable_amount= safe_decimal(main_beneficiary.payable_amount) + main_increment - main_decrement
         )
         new_main_row.save(username=user.username)
 
@@ -426,6 +448,7 @@ class WorkforceEisPaymentServices(BaseService):
             for item in other_beneficiary_records:
                 old_other = item["obj"]
                 increment = item["increment"]
+                normal_decrement= item["normal_decrement"]
 
                 max_monthly = safe_decimal(old_other.eis_monthly_amount) + increment
                 capacity = max_monthly - MIN_ALLOWED_AMOUNT
@@ -485,9 +508,9 @@ class WorkforceEisPaymentServices(BaseService):
                 eis_monthly_amount=old_other.eis_monthly_amount,
                 increment_amount=increment,
                 increment_date=event_date,
-                decrement_amount=recovery_amount,
-                decrement_date=today,
-                decrement_end_date=decrement_end_date,
+                decrement_amount=recovery_amount if data.get("beneficiary_status")=="closed" else None,
+                decrement_date=today if data.get("beneficiary_status")=="closed" else None,
+                decrement_end_date=decrement_end_date if data.get("beneficiary_status")=="closed" else None,
                 month_index=old_other.month_index,
                 year=old_other.year,
                 processing_date=today,
@@ -498,10 +521,10 @@ class WorkforceEisPaymentServices(BaseService):
                 status="active",
                 reason=old_other.beneficiary_status,
                 remarks=old_other.remarks,
-                remarriage_or_death_date=old_other.remarriage_or_death_date,
-                last_live_check_date=old_other.last_live_check_date,
-                live_check_remarks=old_other.live_check_remarks,
-                payable_amount= max_monthly - recovery_amount
+                remarriage_or_death_date=old_other.remarriage_or_death_date if data.get("beneficiary_status")=="closed" else None,
+                last_live_check_date=old_other.last_live_check_date if data.get("beneficiary_status")=="hold" else None,
+                live_check_remarks=old_other.live_check_remarks if data.get("beneficiary_status")=="hold" else None,
+                payable_amount= (max_monthly - recovery_amount) if data.get("beneficiary_status")=="closed" else (round_three(old_other.payable_amount + safe_decimal(increment) - safe_decimal(normal_decrement))),
             )
 
             new_other_row.save(username=user.username)
@@ -509,3 +532,37 @@ class WorkforceEisPaymentServices(BaseService):
             remaining_overpayment -= recovery_amount
 
         return "Success"
+
+    def update_payment_by_association(self, user, data):
+        try:
+            association_id= extract_uuid(data["association_id"])
+            factories= WorkforceFactory.objects.filter(all_association_id= association_id)
+
+            factory_ids= []
+            for factory in factories:
+                factory_ids.append(factory.id)
+
+            workforce_application= WorkforceApplication.objects.filter(employee_factory_id__in= factory_ids)
+            workforce_application_ids= []
+            for workforce_application in workforce_application:
+                workforce_application_ids.append(workforce_application.id)
+
+            increment_percent= safe_decimal(data["increment"]) if "increment" in data else 0
+            decrement_percent= safe_decimal(data["decrement"]) if "decrement" in data else 0
+            payments= WorkforceEisPaymentProcess.objects.filter(workforce_application_id__in=workforce_application_ids, status="active").exclude(beneficiary_status__in=["closed"])
+
+            today = date.today()
+            for payment in payments:
+                payable_amount= payment.payable_amount
+                payment.payable_amount = round_three(safe_decimal(payable_amount) + (safe_decimal(payable_amount) * (increment_percent/100)) - (safe_decimal(payable_amount) * (decrement_percent/100))) if increment_percent>0 or decrement_percent>0 else payable_amount
+                payment.increment_amount = round_three(safe_decimal(payable_amount) * (increment_percent/100)) if increment_percent>0 else None
+                payment.decrement_amount = round_three(safe_decimal(payable_amount) * (increment_percent/100)) if decrement_percent>0 else None
+                payment.increment_date = today if increment_percent>0 else None
+                payment.decrement_date = today if decrement_percent>0 else None
+                try:
+                    payment.save(username=user.username)
+                except Exception as e:
+                    continue
+
+        except Exception as e:
+            return e

@@ -2172,3 +2172,25 @@ class CreateWorkforceEisPaymentDisbursementMutation(graphene.Mutation):
             return cls(success=True, errors=[])
         except Exception as e:
             return cls(success=False, errors=[str(e)])
+
+
+class UpdateWorkforceEisPaymentByAssociationMutation(graphene.Mutation):
+    class Arguments:
+        association_id = graphene.String(required=True)
+        increment = graphene.String(required=True)
+        decrement = graphene.String(required=True)
+
+    success = graphene.Boolean()
+    errors = graphene.List(graphene.String)
+
+    @classmethod
+    def mutate(cls, root, info, **data):
+        from workforce.models import WorkforceEisPaymentProcess
+        from workforce.services.workforce_eis_payment_services import WorkforceEisPaymentServices
+        try:
+            user = info.context.user if hasattr(info.context, 'user') else None
+            service_instance= WorkforceEisPaymentServices(user)
+            service_instance.update_payment_by_association(user, data)
+            return cls(success=True, errors=[])
+        except Exception as e:
+            return cls(success=False, errors=[str(e)])

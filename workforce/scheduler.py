@@ -17,7 +17,7 @@ def my_test_job():
     print(today)
     # Filter rows where decrement_end_date equals today and decrement_amount > 0
     decremented_payments = WorkforceEisPaymentProcess.objects.filter(
-        decrement_end_date=today,
+        decrement_end_date__lte=today,
         decrement_amount__gt=0,
         status="active"
     )

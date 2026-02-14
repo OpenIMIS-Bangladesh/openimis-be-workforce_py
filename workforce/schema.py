@@ -1477,6 +1477,8 @@ class Mutation(graphene.ObjectType):
     update_workforce_eis_payment_process_payment_type = UpdateWorkforceEisPaymentProcessPaymentTypeMutation.Field()
     update_workforce_eis_payment_process_approval = UpdateWorkforceEisPaymentProcessApprovalMutation.Field()
 
+    update_workforce_eis_payment_by_association = UpdateWorkforceEisPaymentByAssociationMutation.Field()
+
 
     update_workforce_eis_beneficiary = UpdateWorkforceEisBeneficiaryMutation.Field()
 
