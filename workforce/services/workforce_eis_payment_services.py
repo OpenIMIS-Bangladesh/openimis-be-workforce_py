@@ -536,20 +536,9 @@ class WorkforceEisPaymentServices(BaseService):
     def update_payment_by_association(self, user, data):
         try:
             association_id= extract_uuid(data["association_id"])
-            factories= WorkforceFactory.objects.filter(all_association_id= association_id)
-
-            factory_ids= []
-            for factory in factories:
-                factory_ids.append(factory.id)
-
-            workforce_application= WorkforceApplication.objects.filter(employee_factory_id__in= factory_ids)
-            workforce_application_ids= []
-            for workforce_application in workforce_application:
-                workforce_application_ids.append(workforce_application.id)
-
             increment_percent= safe_decimal(data["increment"]) if "increment" in data else 0
             decrement_percent= safe_decimal(data["decrement"]) if "decrement" in data else 0
-            payments= WorkforceEisPaymentProcess.objects.filter(workforce_application_id__in=workforce_application_ids, status="active").exclude(beneficiary_status__in=["closed"])
+            payments= WorkforceEisPaymentProcess.objects.filter(workforce_application__employee_factory__all_association_id=association_id).exclude(beneficiary_status__in=["closed"])
 
             today = date.today()
             for payment in payments:

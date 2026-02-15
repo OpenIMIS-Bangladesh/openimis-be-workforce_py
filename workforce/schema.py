@@ -256,6 +256,8 @@ class Query(graphene.ObjectType):
         WorkforceEisPaymentDisbursementStageGQLType,
         month=graphene.String(),
         year=graphene.String(),
+        workforce_factory_id= graphene.String(),
+        all_association_id= graphene.String(),
         is_disbursed= graphene.String(),
         not_in_disburse= graphene.String()
     )
@@ -1234,6 +1236,8 @@ class Query(graphene.ObjectType):
             info,
             month=None,
             year=None,
+            workforce_factory_id= None,
+            all_association_id= None,
             is_disbursed= None,
             not_in_disburse= None
         ):
@@ -1251,6 +1255,16 @@ class Query(graphene.ObjectType):
                     qs = qs.filter(is_disbursed=True)
                 elif is_disbursed == "no":
                     qs = qs.filter(is_disbursed=False)
+
+            if workforce_factory_id:
+                qs = qs.filter(
+                    workforce_application__employee_factory_id=workforce_factory_id
+                )
+
+            if all_association_id:
+                qs = qs.filter(
+                    workforce_application__employee_factory__all_association_id=all_association_id
+                )
 
             if not_in_disburse == "yes" and year and month:
                 beneficiary_ids = WorkforceEisPaymentDisbursement.objects.filter(
