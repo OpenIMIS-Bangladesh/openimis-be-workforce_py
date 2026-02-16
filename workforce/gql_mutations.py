@@ -1875,53 +1875,6 @@ class CreateWorkforceEisPaymentProcessMutation(graphene.Mutation):
             return cls(success=False, errors=[str(e)])
 
 
-
-class CreateWorkforceEisPaymentDisbursementMutation(graphene.Mutation):
-    class Arguments:
-        workforce_application_id = graphene.String(required=True)
-        month = graphene.String(required=False)
-        year = graphene.String(required=False)
-
-    success = graphene.Boolean()
-    errors = graphene.List(graphene.String)
-
-    @classmethod
-    def mutate(cls, root, info, **data):
-        from workforce.models import WorkforceEisPaymentProcess
-        from workforce.models import WorkforceEisPaymentDisbursement
-        try:
-            user = info.context.user if hasattr(info.context, 'user') else None
-            if WorkforceEisPaymentDisbursement.objects.filter(
-                    workforce_application_id=data["workforce_application_id"]
-            ).exists():
-                return cls(success=True, errors=["Disbursement already exists"])
-            payment_processes= WorkforceEisPaymentProcess.objects.filter(workforce_application_id=data["workforce_application_id"])
-            for process in payment_processes:
-                now = datetime.now()
-                disburse_obj = WorkforceEisPaymentDisbursement(
-                    workforce_application= process.workforce_application,
-                    # bank=some_bank_instance,
-                    bank_account_no= process.bank_account_no,
-                    bank_account_holder_name= process.bank_account_holder_name,
-                    eis_payment_type="monthly",
-                    eis_calculated_amount= process.eis_calculated_amount,
-                    eis_approved_amount= process.eis_approved_amount,
-                    eis_monthly_amount=process.eis_monthly_amount,
-                    month_index= data["month"] if "month" in data else now.month,  # could be given from frontend, need to make sure
-                    year= data["year"] if "year" in data else now.year,  # could be given from frontend, need to make sure
-                    disbursement_date= date.today()
-                    # disbursed_by=interactive_user,
-                )
-
-                disburse_obj.save(username= user.username)
-                payment_process = WorkforceEisPaymentProcess.objects.get(id=process.id)
-                payment_process.is_disbursed = True
-                payment_process.save(username= user.username)
-            return cls(success=True, errors=[])
-        except Exception as e:
-            return cls(success=False, errors=[str(e)])
-
-
 class CreateWorkforceAllAssociationMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
     _mutation_module = mutation_module
     _mutation_class = "CreateWorkforceAllAssociationMutation"

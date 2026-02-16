@@ -97,38 +97,39 @@ class WorkforceEisPaymentDisbursementServices(BaseService):
         for eis_stage_id in eis_stage_ids:
             stage_id= extract_uuid(eis_stage_id)
             stage_instance= WorkforceEisPaymentDisbursementStage.objects.get(id=stage_id)
-            new_disburse= WorkforceEisPaymentDisbursement(
-                workforce_eis_payment_disbursement_stage= stage_instance,
-                workforce_application = stage_instance.workforce_application,
-                workforce_application_summary = stage_instance.workforce_application_summary,
-                workforce_employee_dependent =stage_instance.workforce_employee_dependent,
-                bank = stage_instance.bank,
-                bank_account_no = stage_instance.bank_account_no,
-                bank_account_holder_name = stage_instance.bank_account_holder_name,
-                eis_payment_type = stage_instance.eis_payment_type,
-                eis_calculated_amount =  stage_instance.eis_calculated_amount,
-                eis_approved_amount = stage_instance.eis_approved_amount,
-                eis_initial_replacement_rate = stage_instance.eis_initial_replacement_rate,
-                eis_initial_monthly_amount = stage_instance.eis_initial_monthly_amount,
-                eis_monthly_amount = stage_instance.eis_monthly_amount,
-                paid_amount = stage_instance.paid_amount,
-                month_index = stage_instance.month_index,
-                year = stage_instance.year,
-                disbursement_date = date.today(),
-                beneficiary_id = stage_instance.beneficiary_id,
-            )
             if WorkforceEisPaymentDisbursement.objects.filter(beneficiary_id= stage_instance.beneficiary_id, month_index= stage_instance.month_index, year= stage_instance.year).exists():
                 continue
-            try:
-                new_disburse.save(username=user.username)
+            else:
+                new_disburse= WorkforceEisPaymentDisbursement(
+                    workforce_eis_payment_disbursement_stage= stage_instance,
+                    workforce_application = stage_instance.workforce_application,
+                    workforce_application_summary = stage_instance.workforce_application_summary,
+                    workforce_employee_dependent =stage_instance.workforce_employee_dependent,
+                    bank = stage_instance.bank,
+                    bank_account_no = stage_instance.bank_account_no,
+                    bank_account_holder_name = stage_instance.bank_account_holder_name,
+                    eis_payment_type = stage_instance.eis_payment_type,
+                    eis_calculated_amount =  stage_instance.eis_calculated_amount,
+                    eis_approved_amount = stage_instance.eis_approved_amount,
+                    eis_initial_replacement_rate = stage_instance.eis_initial_replacement_rate,
+                    eis_initial_monthly_amount = stage_instance.eis_initial_monthly_amount,
+                    eis_monthly_amount = stage_instance.eis_monthly_amount,
+                    paid_amount = stage_instance.paid_amount,
+                    month_index = stage_instance.month_index,
+                    year = stage_instance.year,
+                    disbursement_date = date.today(),
+                    beneficiary_id = stage_instance.beneficiary_id,
+                )
                 try:
-                    stage_instance.is_disbursed = True
-                    stage_instance.disbursement_date= date.today()
-                    stage_instance.save(username=user.username)
+                    new_disburse.save(username=user.username)
+                    try:
+                        stage_instance.is_disbursed = True
+                        stage_instance.disbursement_date= date.today()
+                        stage_instance.save(username=user.username)
+                    except Exception as e:
+                        continue
                 except Exception as e:
                     continue
-            except Exception as e:
-                continue
         return "success"
 
 

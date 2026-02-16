@@ -1620,3 +1620,24 @@ class WorkforceOtherCompensationInfo(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_other_compensation_info'
+
+
+class WorkforceAssociationUserMap(HistoryModel):
+    all_association = models.ForeignKey(
+        WorkforceAllAssociation,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="association_user_map_association",
+    )
+    user = models.ForeignKey(
+        InteractiveUser,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="association_user_map_user",
+    )
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_association_user_map'
