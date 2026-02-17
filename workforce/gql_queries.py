@@ -1164,6 +1164,7 @@ class WorkforceInteractiveUserGQLType(graphene.ObjectType):
     other_names = graphene.String()
     phone = graphene.String()
     email_id = graphene.String()
+    login_name= graphene.String()
 
 
 class WorkforceEisPaymentProcessGQLType(DjangoObjectType):

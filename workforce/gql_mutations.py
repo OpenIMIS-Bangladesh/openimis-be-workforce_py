@@ -2200,3 +2200,21 @@ class UpdateWorkforceAssociationUserMapMutation(BaseHistoryModelCreateMutationMi
         )
 
         return result
+
+
+class DeleteWorkforceAssociationUserMapMutation(graphene.Mutation):
+    class Arguments:
+        map_id = graphene.String(required=True)
+
+    success = graphene.Boolean()
+    errors = graphene.List(graphene.String)
+
+    @classmethod
+    def mutate(cls, root, info, **data):
+        from workforce.models import WorkforceAssociationUserMap
+        try:
+            user = info.context.user if hasattr(info.context, 'user') else None
+            WorkforceAssociationUserMap.objects.get(id=data["map_id"]).delete(username= user.username)
+            return cls(success=True, errors=[])
+        except Exception as e:
+            return cls(success=False, errors=[str(e)])

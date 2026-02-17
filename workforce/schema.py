@@ -234,6 +234,12 @@ class Query(graphene.ObjectType):
         email_id=graphene.String(required=False)
     )
 
+    workforce_interactive_users = graphene.List(
+        WorkforceInteractiveUserGQLType,
+        id=graphene.String(required=False),
+        login_name=graphene.String(required=False),
+    )
+
 
     workforce_eis_payment_process = graphene.List(
         WorkforceEisPaymentProcessGQLType,
@@ -1140,6 +1146,20 @@ class Query(graphene.ObjectType):
             return InteractiveUser.objects.get(id=id)
         except InteractiveUser.DoesNotExist:
             return None
+
+    def resolve_workforce_interactive_users(self, info, id=None, login_name=None):
+        try:
+            query= InteractiveUser.objects.all()
+
+            if id:
+                query= query.filter(id=id)
+
+            if login_name:
+                query= query.filter(login_name__icontains=login_name)
+
+            return query
+        except InteractiveUser.DoesNotExist:
+            return None
     
     
     def resolve_workforce_eis_payment_process(
@@ -1402,7 +1422,7 @@ class Query(graphene.ObjectType):
             **kwargs
     ):
 
-        query= WorkforceAssociationUserMap.objects.all()
+        query= WorkforceAssociationUserMap.objects.filter(is_deleted=False)
         if all_association_id:
             query = query.filter(all_association_id=all_association_id)
         if user_id:
@@ -1532,4 +1552,5 @@ class Mutation(graphene.ObjectType):
 
     create_workforce_association_user_map = CreateWorkforceAssociationUserMapMutation.Field()
     update_workforce_association_user_map = UpdateWorkforceAssociationUserMapMutation.Field()
+    delete_workforce_association_user_map = DeleteWorkforceAssociationUserMapMutation.Field()
 
