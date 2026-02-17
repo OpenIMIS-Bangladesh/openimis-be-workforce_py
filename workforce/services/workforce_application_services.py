@@ -167,9 +167,9 @@ class WorkforceApplicationServices(BaseService):
         try:
             application_instance = WorkforceApplication.objects.get(id=application_id)
             if application_instance.status in ["verified", "forward_to_eis_advisor", "approved_by_eis_advisor", "forward_to_comiitee", "approved_by_committee"]:
-                application_instance.eis_verified = 1
+                application_instance.eis_verified = True
             else:
-                application_instance.eis_verified = 0
+                application_instance.eis_verified = False
             try:
                 application_instance.save(username=self.user.username)
             except Exception as e:
