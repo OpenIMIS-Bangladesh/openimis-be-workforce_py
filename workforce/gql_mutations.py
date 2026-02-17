@@ -24,10 +24,12 @@ from .gql_types import (
     WorkforceEducationInputType, WorkforceEmployeeBankingInfoInputType,
     WorkforceFactoryRegistrationInputType,
     WorkforceFactoryRegistrationApprovalInputType, WorkforceApplicationBulkUpdateInputType,
-    WorkforceInteractiveUserInputType, WorkforceAllAssociationInputType, WorkforceOtherCompensationInfoInputType
+    WorkforceInteractiveUserInputType, WorkforceAllAssociationInputType, WorkforceOtherCompensationInfoInputType,
+    WorkforceAssociationUserMapInputType
 )
 
 from .models import Bank
+from .services.workforce_association_user_map_services import WorkforceAssociationUserMapServices
 from .services.workforce_organization_services import WorkforceOrganizationServices
 from .services.workforce_other_compensation_info_services import WorkforceOtherCompensationInfoServices
 from .services.workforce_representative_services import WorkforceRepresentativeServices
@@ -2147,3 +2149,54 @@ class UpdateWorkforceEisPaymentByAssociationMutation(graphene.Mutation):
             return cls(success=True, errors=[])
         except Exception as e:
             return cls(success=False, errors=[str(e)])
+
+
+
+class CreateWorkforceAssociationUserMapMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateWorkforceAssociationUserMapMutation"
+
+    class Input(WorkforceAssociationUserMapInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_create_workforce_association_user_map"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = WorkforceAssociationUserMapServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission="",
+            call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class UpdateWorkforceAssociationUserMapMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWorkforceAssociationUserMapMutation"
+
+    class Input(WorkforceAssociationUserMapInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_update_workforce_association_user_map"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = WorkforceAssociationUserMapServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission="",
+            call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result

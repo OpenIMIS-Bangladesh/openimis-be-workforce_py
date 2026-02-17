@@ -1,6 +1,7 @@
 import os
 from collections import defaultdict
 
+import graphene
 import graphene_django_optimizer as gql_optimizer
 import requests
 from django.db.models import Count
@@ -105,7 +106,8 @@ class Query(graphene.ObjectType):
         organization_type_in=graphene.List(graphene.String),
         is_reverted=graphene.Boolean(),
         date_created_from= graphene.String(),
-        date_created_to= graphene.String()
+        date_created_to= graphene.String(),
+        all_association_id_in= graphene.List(graphene.String)
     )
 
     workforce_document_types = OrderedDjangoFilterConnectionField(
@@ -289,6 +291,13 @@ class Query(graphene.ObjectType):
         ),
     )
 
+    workforce_association_user_map = OrderedDjangoFilterConnectionField(
+        WorkforceAssociationUserMapGQLType,
+        client_mutation_id=graphene.String(required=False),
+        all_association_id= graphene.String(),
+        user_id= graphene.Int()
+    )
+
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("unauthorized"))
@@ -406,6 +415,7 @@ class Query(graphene.ObjectType):
             date_created_from= None,
             date_created_to= None,
             eis_verified = None,
+            all_association_id_in= None,
             **kwargs
     ):
         service = WorkforceApplicationServices(info.context.user)
@@ -469,6 +479,9 @@ class Query(graphene.ObjectType):
 
         if eis_verified:
             query = query.filter(eis_verified=eis_verified)
+
+        if all_association_id_in:
+            query = query.filter(employee_factory__all_association_id__in= all_association_id_in)
 
 
         latest_movement_subquery = WorkforceApplicationMovement.objects.filter(
@@ -1381,6 +1394,23 @@ class Query(graphene.ObjectType):
         return results
 
 
+    def resolve_workforce_association_user_map(
+            self,
+            info,
+            all_association_id=None,
+            user_id=None,
+            **kwargs
+    ):
+
+        query= WorkforceAssociationUserMap.objects.all()
+        if all_association_id:
+            query = query.filter(all_association_id=all_association_id)
+        if user_id:
+            query = query.filter(user_id=user_id)
+        query = query.order_by("-date_created")
+        return gql_optimizer.query(query, info)
+
+
 class Mutation(graphene.ObjectType):
     create_workforce_representative = CreateWorkforceRepresentativeMutation.Field()
     update_workforce_representative = UpdateWorkforceRepresentativeMutation.Field()
@@ -1498,4 +1528,8 @@ class Mutation(graphene.ObjectType):
     create_workforce_eis_payment_stage = CreateWorkforceEisPaymentStageMutation.Field()
     delete_workforce_eis_payment_stage = DeleteWorkforceEisPaymentStageMutation.Field()
     create_workforce_eis_payment_disbursement = CreateWorkforceEisPaymentDisbursementMutation.Field()
+
+
+    create_workforce_association_user_map = CreateWorkforceAssociationUserMapMutation.Field()
+    update_workforce_association_user_map = UpdateWorkforceAssociationUserMapMutation.Field()
 

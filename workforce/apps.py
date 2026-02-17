@@ -158,6 +158,10 @@ DEFAULT_CFG = {
      # WorkforceEisAssociationCommittee (812xxx)
     "gql_workforce_eis_association_committee_perms": ["816000"],
 
+
+    # WorkforceAssociation (816xxx)
+    "gql_workforce_association_perms": ["836001"],
+
     "default_validations_disabled": False,
 }
 
@@ -254,10 +258,10 @@ class WorkforceConfig(AppConfig):
     gql_workforce_checker_two_perms = []
 
     # WorkforceBGMEAAssociation (816xxx)
-    gql_workforce_bgmea_association_perms = []
+    # gql_workforce_bgmea_association_perms = []
 
     # WorkforceBKMEAAssociation (821xxx)
-    gql_workforce_bkmea_association_perms = []
+    # gql_workforce_bkmea_association_perms = []
 
     # WorkforceSectionAdminTwo (xxx)
     gql_workforce_section_admin_two_perms = []
@@ -315,6 +319,9 @@ class WorkforceConfig(AppConfig):
 
      # WorkforceAssociationCommitte (xxx)
     gql_workforce_eis_association_committee_perms = []
+
+    # WorkforceAssociation (816xxx)
+    gql_workforce_association_perms = []
 
     default_validations_disabled = None
 

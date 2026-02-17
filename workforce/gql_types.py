@@ -727,3 +727,10 @@ class WorkforceOtherCompensationInfoInputType(OpenIMISMutation.Input):
     is_eis_benefit_adjustment_eligible = graphene.String(required=False)
     remarks = graphene.String(required=False)
     payment_type = graphene.String(required=False)
+
+
+
+class WorkforceAssociationUserMapInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    all_association_id = graphene.String(required=False)
+    user_id = graphene.Int(required=False)
