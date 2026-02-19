@@ -281,6 +281,7 @@ class Query(graphene.ObjectType):
 
     workforce_all_association = OrderedDjangoFilterConnectionField(
         WorkforceAllAssociationGQLType,
+        id_in= graphene.List(of_type=graphene.String),
         client_mutation_id=graphene.String(required=False),
     )
 
@@ -301,6 +302,7 @@ class Query(graphene.ObjectType):
         WorkforceAssociationUserMapGQLType,
         client_mutation_id=graphene.String(required=False),
         all_association_id= graphene.String(),
+        all_association_id_in= graphene.List(graphene.String),
         user_id= graphene.Int()
     )
 
@@ -1336,10 +1338,16 @@ class Query(graphene.ObjectType):
         except WorkforceEisPaymentProcess.DoesNotExist:
             return None
 
-    def resolve_workforce_all_association(self, info, **kwargs):
-        if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
-            raise PermissionDenied(_("Unauthorized access"))
-        pass
+    def resolve_workforce_all_association(self, info, id_in=None, **kwargs):
+        # if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
+        #     raise PermissionDenied(_("Unauthorized access"))
+        try:
+            qs = WorkforceAllAssociation.objects.all()
+            if id_in:
+                qs = WorkforceAllAssociation.objects.filter(id__in=id_in)
+            return qs
+        except WorkforceAllAssociation.DoesNotExist:
+            pass
 
     def resolve_workforce_other_compensation_info(self, info, workforce_application_id=None, **kwargs):
         try:
@@ -1418,6 +1426,7 @@ class Query(graphene.ObjectType):
             self,
             info,
             all_association_id=None,
+            all_association_id_in=None,
             user_id=None,
             **kwargs
     ):
@@ -1425,6 +1434,8 @@ class Query(graphene.ObjectType):
         query= WorkforceAssociationUserMap.objects.filter(is_deleted=False)
         if all_association_id:
             query = query.filter(all_association_id=all_association_id)
+        if all_association_id_in:
+            query = query.filter(all_association_id__in=all_association_id_in)
         if user_id:
             query = query.filter(user_id=user_id)
         query = query.order_by("-date_created")
