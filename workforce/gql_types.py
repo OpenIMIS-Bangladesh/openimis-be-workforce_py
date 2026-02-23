@@ -77,6 +77,8 @@ class WorkforceOrganizationEmployeeInputType(OpenIMISMutation.Input):
     related_user_id = graphene.UUID(required=False)
     association_id = graphene.UUID(required=False)
     all_association_id = graphene.UUID(required=False)
+    workforce_employer_factory_id= graphene.UUID(required=False)
+    role_id= graphene.Int(required=False)
 
 
 class WorkforceOrganizationEmployeeDesignationInputType(OpenIMISMutation.Input):

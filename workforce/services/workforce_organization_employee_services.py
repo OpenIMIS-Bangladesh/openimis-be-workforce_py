@@ -20,7 +20,8 @@ class WorkforceOrganizationEmployeeServices(BaseService):
             create_user = create_interactive_user(
                 obj_data.get('name_en'),
                 obj_data.get('name_bn'),
-                obj_data.get('email'), 800
+                obj_data.get('email'),
+                obj_data.get('role_id', 800)
             )
             user = create_user.id
 

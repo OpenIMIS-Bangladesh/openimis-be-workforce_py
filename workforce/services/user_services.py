@@ -1,4 +1,5 @@
 from core.models import InteractiveUser, User
+from core.models.user import UserRole
 from location.models import UserDistrict
 from workforce.models import WorkforceUser
 from django.db.models import Q
@@ -19,6 +20,14 @@ def create_interactive_user(last_name, other_names, login_name, role_id):
     )
 
     user_add_core_user = User.objects.create(
+        **{
+            "audit_user_id": -1,
+            "role_id": role_id,
+            "user_id": user.id,
+        }
+    )
+
+    user_add_user_role = UserRole.objects.create(
         **{
             "username": user.login_name,
             "i_user_id": user.id,
