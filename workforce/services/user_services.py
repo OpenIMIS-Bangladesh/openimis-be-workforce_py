@@ -19,7 +19,6 @@ def create_interactive_user(last_name, other_names, login_name, role_id):
         }
     )
 
-
     user_add_core_user = User.objects.create(
         **{
             "username": user.login_name,
@@ -27,13 +26,14 @@ def create_interactive_user(last_name, other_names, login_name, role_id):
         }
     )
 
-    user_add_user_role = UserRole.objects.create(
-        **{
-            "audit_user_id": -1,
-            "role_id": role_id,
-            "user_id": user.id,
-        }
-    )
+    if role_id and role_id!=0:
+        user_add_user_role = UserRole.objects.create(
+            **{
+                "audit_user_id": -1,
+                "role_id": role_id,
+                "user_id": user.id,
+            }
+        )
 
 
     user_district_class = UserDistrict.objects.create(

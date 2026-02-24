@@ -668,7 +668,7 @@ class Query(graphene.ObjectType):
         ]
 
     def resolve_workforce_user_role(self, info, role_id_in=None, orderBy=None, **kwargs):
-        qs = UserRole.objects.all()
+        qs = UserRole.objects.filter(validity_to__isnull=True)
         if role_id_in:
             qs = qs.filter(role_id__in=role_id_in)
         if orderBy:

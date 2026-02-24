@@ -17,7 +17,7 @@ class WorkforceEmployeeServices(BaseService):
             user = obj_data['related_user_id']
         else:
             create_user = create_interactive_user(obj_data.get('first_name_en'), obj_data.get('last_name_en', obj_data.get('first_name_en', "-")),
-                                                  obj_data.get('phone_number', obj_data.get('nid')), obj_data.get('role_id', 60))
+                                                  obj_data.get('phone_number', obj_data.get('nid')), obj_data.get('role_id', 0))
             user = create_user.id
 
         obj_data['related_user_id'] = user

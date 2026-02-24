@@ -247,6 +247,7 @@ class WorkforceEmployeeInputType(OpenIMISMutation.Input):
     death_date = graphene.String()
     status = graphene.String()
     related_user_id = graphene.UUID()
+    role_id= graphene.Int()
 
 
 class WorkforceEmployeeDesignationInputType(OpenIMISMutation.Input):

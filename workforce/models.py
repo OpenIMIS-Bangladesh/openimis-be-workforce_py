@@ -369,6 +369,22 @@ class WorkforceOffice(HistoryModel):
         managed = True
         db_table = 'workforce_employer_offices'
 
+class WorkforceAllAssociation(HistoryModel):
+    name_bn = models.CharField(max_length=512, null=True, blank=True)
+    name_en = models.CharField(max_length=512, null=True, blank=True)
+    address = models.CharField(max_length=512, null=True, blank=True)
+    email = models.CharField(max_length=100, null=True, blank=True)
+    phone = models.CharField(max_length=30, null=True, blank=True)
+    short_name_bn = models.CharField(max_length=50, null=True, blank=True)
+    short_name_en = models.CharField(max_length=50, null=True, blank=True)
+    web_address = models.CharField(max_length=512, null=True, blank=True)
+    status = models.CharField(max_length=30, null=True, blank=True)
+    minimum_salary = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    start_date= models.DateField(null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_all_association'
 
 
 
@@ -448,6 +464,15 @@ class WorkforceEmployee(HistoryModel):
         null=False,
         related_name="employee_related_user",
     )
+    user_type= models.CharField(null=True, blank=True, max_length=100)
+    all_association = models.ForeignKey(
+        WorkforceAllAssociation,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_employee_association",
+    )
+
 
     class Meta:
         managed = True
@@ -1591,22 +1616,6 @@ class WorkforceEisPaymentDisbursement(HistoryModel):
         db_table = 'workforce_eis_payment_disbursements'
 
 
-class WorkforceAllAssociation(HistoryModel):
-    name_bn = models.CharField(max_length=512, null=True, blank=True)
-    name_en = models.CharField(max_length=512, null=True, blank=True)
-    address = models.CharField(max_length=512, null=True, blank=True)
-    email = models.CharField(max_length=100, null=True, blank=True)
-    phone = models.CharField(max_length=30, null=True, blank=True)
-    short_name_bn = models.CharField(max_length=50, null=True, blank=True)
-    short_name_en = models.CharField(max_length=50, null=True, blank=True)
-    web_address = models.CharField(max_length=512, null=True, blank=True)
-    status = models.CharField(max_length=30, null=True, blank=True)
-    minimum_salary = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    start_date= models.DateField(null=True, blank=True)
-
-    class Meta:
-        managed = True
-        db_table = 'workforce_all_association'
 
 
 class WorkforceOtherCompensationInfo(HistoryModel):
