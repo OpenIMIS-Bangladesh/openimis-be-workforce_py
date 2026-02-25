@@ -451,6 +451,8 @@ class WorkforceApplicationInputType(OpenIMISMutation.Input):
     deceased_worker_info_verification = graphene.String()
     deceased_worker_info_verification_remarks = graphene.String()
     status = graphene.String()
+    eis_approval_ids= graphene.String()
+    eis_approved_by_ids= graphene.String()
 
 
 class WorkforceDocumentTypeInputType(OpenIMISMutation.Input):
