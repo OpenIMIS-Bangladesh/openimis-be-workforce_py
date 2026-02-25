@@ -515,7 +515,7 @@ class WorkforceApplicationServices(BaseService):
 
                         else:
                             banking_info = WorkforceEmployeeBankingInfo(
-                                # dependant=dependent,
+                                dependant=dependent,
                                 type="dependent",
                                 employee=workforce_employee,
                                 name_bn=dependent.name_bn,
