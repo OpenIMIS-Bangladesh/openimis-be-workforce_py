@@ -1210,9 +1210,9 @@ class Query(graphene.ObjectType):
                     workforce_application__employee_factory__all_association_id=all_association_id
                 )
 
-            if status:
-                qs = qs.filter(status=status)
-
+            # if status:
+            #     qs = qs.filter(status=status)
+            qs = qs.filter(status="active")
             if beneficiary_status:
                 qs = qs.filter(beneficiary_status=beneficiary_status)
 
