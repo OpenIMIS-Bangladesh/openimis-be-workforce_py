@@ -1192,7 +1192,7 @@ class Query(graphene.ObjectType):
                 qs = qs.filter(workforce_application_id=workforce_application_id)
 
             if beneficiary_id:
-                qs = qs.filter(beneficiary_id=beneficiary_id)
+                qs = qs.filter(beneficiary_id__icontains=beneficiary_id)
 
             if workforce_application_id_in:
                 qs = qs.filter(workforce_application_id__in=workforce_application_id_in)
@@ -1203,7 +1203,7 @@ class Query(graphene.ObjectType):
                 )
             if workforce_application_tracking_number:
                 qs = qs.filter(
-                    workforce_application__tracking_number=workforce_application_tracking_number
+                    workforce_application__tracking_number__icontains=workforce_application_tracking_number
                 )
             if all_association_id:
                 qs = qs.filter(
