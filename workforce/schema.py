@@ -19,6 +19,7 @@ from core.schema import OrderedDjangoFilterConnectionField
 from .gql_mutations import *
 from .gql_queries import *
 from .models import *
+from django.db.models.expressions import RawSQL
 
 
 class Query(graphene.ObjectType):
@@ -257,6 +258,8 @@ class Query(graphene.ObjectType):
         approved= graphene.String(),
         approval_date_from= graphene.String(),
         approval_date_to= graphene.String(),
+        accident_date_from= graphene.String(),
+        accident_date_to= graphene.String(),
         not_in_stage= graphene.String()
     )
 
@@ -1192,6 +1195,8 @@ class Query(graphene.ObjectType):
             approved=None,
             approval_date_from=None,
             approval_date_to=None,
+            accident_date_from=None,
+            accident_date_to=None,
             not_in_stage= None
         ):
         try:
@@ -1249,6 +1254,12 @@ class Query(graphene.ObjectType):
 
             if approval_date_to:
                 qs = qs.filter(approval_date__lte=approval_date_to)
+
+            if accident_date_from:
+                qs = qs.filter(workforce_application__accident_date__gte= accident_date_from)
+
+            if accident_date_to:
+                qs = qs.filter(workforce_application__accident_date__lte= accident_date_to)
 
             if not_in_stage == "yes" and year and month:
                 beneficiary_ids = WorkforceEisPaymentDisbursementStage.objects.filter(

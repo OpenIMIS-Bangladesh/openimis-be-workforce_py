@@ -915,6 +915,7 @@ class WorkforceApplication(HistoryModel):
     eis_verified = models.BooleanField(null=True, blank=True)
     eis_approval_ids= models.JSONField(null=True, blank=True)
     eis_approved_by_ids= models.JSONField(null=True, blank=True)
+    accident_date= models.DateField(null=True, blank=True)
 
     class Meta:
         managed = True
