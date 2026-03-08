@@ -2218,3 +2218,65 @@ class DeleteWorkforceAssociationUserMapMutation(graphene.Mutation):
             return cls(success=True, errors=[])
         except Exception as e:
             return cls(success=False, errors=[str(e)])
+
+
+class CreateWorkforceEisBankAdviceMutation(graphene.Mutation):
+    class Arguments:
+        payment_disbursement_stage_ids = graphene.List(graphene.String)
+        month= graphene.String()
+        year= graphene.String()
+
+    success = graphene.Boolean()
+    errors = graphene.List(graphene.String)
+
+    @classmethod
+    def mutate(cls, root, info, **data):
+        from workforce.models import WorkforceEisPaymentDisbursementStage
+        from workforce.services.workforce_eis_bank_advice_services import WorkforceEisBankAdviceServices
+        try:
+            user = info.context.user if hasattr(info.context, 'user') else None
+            service= WorkforceEisBankAdviceServices(user)
+            service.create_bank_advice(user, data)
+            return cls(success=True, errors=[])
+        except Exception as e:
+            return cls(success=False, errors=[str(e)])
+
+
+class UpdateWorkforceEisBankAdviceMutation(graphene.Mutation):
+    class Arguments:
+        id = graphene.String()
+
+    success = graphene.Boolean()
+    errors = graphene.List(graphene.String)
+
+    @classmethod
+    def mutate(cls, root, info, **data):
+        from workforce.models import WorkforceEisBankAdvice
+        from workforce.services.workforce_eis_bank_advice_services import WorkforceEisBankAdviceServices
+        try:
+            user = info.context.user if hasattr(info.context, 'user') else None
+            service= WorkforceEisBankAdviceServices(user)
+            service.update_confirmation(user, data)
+            return cls(success=True, errors=[])
+        except Exception as e:
+            return cls(success=False, errors=[str(e)])
+
+
+class RevertWorkforceEisBankAdviceMutation(graphene.Mutation):
+    class Arguments:
+        id = graphene.String()
+
+    success = graphene.Boolean()
+    errors = graphene.List(graphene.String)
+
+    @classmethod
+    def mutate(cls, root, info, **data):
+        from workforce.models import WorkforceEisBankAdvice
+        from workforce.services.workforce_eis_bank_advice_services import WorkforceEisBankAdviceServices
+        try:
+            user = info.context.user if hasattr(info.context, 'user') else None
+            service= WorkforceEisBankAdviceServices(user)
+            service.revert_confirmation(user, data)
+            return cls(success=True, errors=[])
+        except Exception as e:
+            return cls(success=False, errors=[str(e)])

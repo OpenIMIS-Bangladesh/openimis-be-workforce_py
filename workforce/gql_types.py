@@ -740,3 +740,11 @@ class WorkforceAssociationUserMapInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
     all_association_id = graphene.String(required=False)
     user_id = graphene.Int(required=False)
+
+
+class WorkforceEisBankAdviceInputType(OpenIMISMutation.Input):
+    advice_date = graphene.String()
+    is_confirmed = graphene.Boolean()
+    remarks = graphene.String()
+    month= graphene.String()
+    year = graphene.String()

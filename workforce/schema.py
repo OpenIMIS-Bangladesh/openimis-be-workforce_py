@@ -268,7 +268,8 @@ class Query(graphene.ObjectType):
         workforce_factory_id= graphene.String(),
         all_association_id= graphene.String(),
         is_disbursed= graphene.String(),
-        not_in_disburse= graphene.String()
+        not_in_disburse= graphene.String(),
+        workforce_eis_bank_advice_id= graphene.String()
     )
 
 
@@ -305,6 +306,14 @@ class Query(graphene.ObjectType):
         all_association_id= graphene.String(),
         all_association_id_in= graphene.List(graphene.String),
         user_id= graphene.Int()
+    )
+
+    workforce_eis_bank_advice = graphene.List(
+        WorkforceEisBankAdviceGQLType,
+        advice_date=graphene.String(),
+        is_confirmed=graphene.Boolean(),
+        month=graphene.String(),
+        year=graphene.String(),
     )
 
     def resolve_workforce_representatives(self, info, **kwargs):
@@ -1186,7 +1195,7 @@ class Query(graphene.ObjectType):
             not_in_stage= None
         ):
         try:
-            qs = WorkforceEisPaymentProcess.objects.all()
+            qs = WorkforceEisPaymentProcess.objects.filter(is_deleted=False)
 
             if workforce_application_id:
                 qs = qs.filter(workforce_application_id=workforce_application_id)
@@ -1277,10 +1286,11 @@ class Query(graphene.ObjectType):
             workforce_factory_id= None,
             all_association_id= None,
             is_disbursed= None,
-            not_in_disburse= None
+            not_in_disburse= None,
+            workforce_eis_bank_advice_id= None
         ):
         try:
-            qs = WorkforceEisPaymentDisbursementStage.objects.all()
+            qs = WorkforceEisPaymentDisbursementStage.objects.filter(is_deleted=False)
 
             if month:
                 qs = qs.filter(month_index=month)
@@ -1311,6 +1321,9 @@ class Query(graphene.ObjectType):
                 ).values_list("beneficiary_id", flat=True)
                 qs = qs.exclude(beneficiary_id__in=beneficiary_ids)
 
+            if workforce_eis_bank_advice_id:
+                qs= qs.filter(workforce_eis_bank_advice_id= workforce_eis_bank_advice_id)
+
             qs = qs.filter(is_deleted=False)
             qs = qs.order_by("-beneficiary_id")
 
@@ -1328,7 +1341,7 @@ class Query(graphene.ObjectType):
 
     def resolve_workforce_eis_payment_disbursement(self, info, workforce_application_id=None, workforce_application_id_in=None, month=None, year=None):
         try:
-            qs = WorkforceEisPaymentDisbursement.objects.all()
+            qs = WorkforceEisPaymentDisbursement.objects.filter(is_deleted=False)
             if workforce_application_id:
                 qs = qs.filter(workforce_application_id=workforce_application_id)
             if workforce_application_id_in:
@@ -1444,6 +1457,20 @@ class Query(graphene.ObjectType):
         query = query.order_by("-date_created")
         return gql_optimizer.query(query, info)
 
+    def resolve_workforce_eis_bank_advice(self, info, advice_date=None, is_confirmed=None, month=None, year=None):
+        try:
+            qs = WorkforceEisBankAdvice.objects.filter(is_deleted=False)
+            if advice_date:
+                qs = qs.filter(advice_date=advice_date)
+            if is_confirmed:
+                qs = qs.filter(is_confirmed=is_confirmed)
+            if month:
+                qs = qs.filter(month=month)
+            if year:
+                qs = qs.filter(year=year)
+            return qs
+        except WorkforceEisBankAdvice.DoesNotExist:
+            return None
 
 class Mutation(graphene.ObjectType):
     create_workforce_representative = CreateWorkforceRepresentativeMutation.Field()
@@ -1568,3 +1595,6 @@ class Mutation(graphene.ObjectType):
     update_workforce_association_user_map = UpdateWorkforceAssociationUserMapMutation.Field()
     delete_workforce_association_user_map = DeleteWorkforceAssociationUserMapMutation.Field()
 
+    create_workforce_eis_bank_advice = CreateWorkforceEisBankAdviceMutation.Field()
+    update_workforce_eis_bank_advice = UpdateWorkforceEisBankAdviceMutation.Field()
+    revert_workforce_eis_bank_advice = RevertWorkforceEisBankAdviceMutation.Field()

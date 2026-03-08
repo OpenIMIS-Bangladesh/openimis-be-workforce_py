@@ -140,7 +140,8 @@ class WorkforceEisPaymentServices(BaseService):
                     processing_date=date.today(),
                     beneficiary_id=beneficiary_id,
                     is_disbursed=False,
-                    payable_amount=workforce_application.eis_monthly_amount
+                    payable_amount=workforce_application.eis_monthly_amount,
+                    phone_number= workforce_application.workforce_employee.phone_number or None
                 )
                 payment_obj.save(username=user.username)
             return None
@@ -179,166 +180,13 @@ class WorkforceEisPaymentServices(BaseService):
                         processing_date=date.today(),
                         beneficiary_id=beneficiary_id,
                         is_disbursed=False,
-                        payable_amount= dep.eis_monthly_amount
+                        payable_amount= dep.eis_monthly_amount,
+                        phone_number= dep.phone_number or None
                     )
                     payment_obj.save(username=user.username)
                 else:
                     continue
 
-
-    def safe_decimal(value):
-        """Utility to safely convert values to Decimal."""
-        try:
-            return Decimal(str(value)) if value not in [None, ""] else Decimal("0.00")
-        except:
-            return Decimal("0.00")
-
-    # @transaction.atomic
-    # def update_beneficiary(self, user, data):
-    #     # 1. Fetch Main Beneficiary
-    #     main_beneficiary = WorkforceEisPaymentProcess.objects.filter(
-    #         beneficiary_id=data.get('beneficiary_id'),
-    #         status="active"
-    #     ).first()
-    #
-    #     if not main_beneficiary:
-    #         return "Active beneficiary not found"
-    #
-    #     # 2. Setup Base Dates
-    #     # Event date (death/remarriage) from frontend
-    #     event_date = parse_frontend_date(data.get("remarriage_or_death_date")) or date.today()
-    #     today = date.today()
-    #
-    #     # Calculate months elapsed (N)
-    #     diff = relativedelta(today, event_date)
-    #     months_elapsed = diff.years * 12 + diff.months
-    #     # If the update happens in the same month, we treat recovery as 1 month
-    #     recovery_period = months_elapsed if months_elapsed > 0 else 1
-    #
-    #     # 3. Parse JSON for Other Beneficiaries
-    #     try:
-    #         other_beneficiaries_input = json.loads(data.get('other_beneficiary_data') or "{}")
-    #     except (json.JSONDecodeError, TypeError):
-    #         return "Invalid other_beneficiary_data JSON"
-    #
-    #     # 4. Scenario Calculation: (Actual Paid) - (Should Have Paid)
-    #     # This determines the total 'Debt' to be recovered
-    #
-    #     # A. Current Monthly Total (Main + Others)
-    #     actual_monthly_total = safe_decimal(main_beneficiary.eis_monthly_amount)
-    #
-    #     # B. Target Monthly Total (Others + their new Increments)
-    #     target_monthly_total = Decimal("0.00")
-    #     other_beneficiary_records = []
-    #
-    #     for b_id, details in other_beneficiaries_input.items():
-    #         other_obj = WorkforceEisPaymentProcess.objects.filter(beneficiary_id=b_id, status="active").first()
-    #         if other_obj:
-    #             inc_amt = safe_decimal(details.get("incrementAmount"))
-    #             actual_monthly_total += safe_decimal(other_obj.eis_monthly_amount)
-    #             target_monthly_total += (safe_decimal(other_obj.eis_monthly_amount) + inc_amt)
-    #
-    #             other_beneficiary_records.append({
-    #                 "obj": other_obj,
-    #                 "increment": inc_amt
-    #             })
-    #
-    #     # C. Calculate the Debt and Monthly Decrement
-    #     total_overpayment = (actual_monthly_total - target_monthly_total) * Decimal(months_elapsed)
-    #
-    #     num_others = len(other_beneficiary_records)
-    #     monthly_decrement_per_person = Decimal("0.00")
-    #     if num_others > 0 and total_overpayment > 0:
-    #         # Debt / total people / months to recover
-    #         monthly_decrement_per_person = (total_overpayment / Decimal(num_others)) / Decimal(recovery_period)
-    #
-    #     # 5. Inactivate Main Beneficiary & Create Closure Row
-    #     main_beneficiary.status = "inactive"
-    #     main_beneficiary.save(username=user.username)
-    #
-    #     new_main_row = WorkforceEisPaymentProcess(
-    #         workforce_application=main_beneficiary.workforce_application,
-    #         workforce_application_summary=main_beneficiary.workforce_application_summary,
-    #         workforce_employee_dependent=main_beneficiary.workforce_employee_dependent,
-    #         bank=main_beneficiary.bank,
-    #         bank_account_no=main_beneficiary.bank_account_no,
-    #         bank_account_holder_name=main_beneficiary.bank_account_holder_name,
-    #         eis_payment_type=main_beneficiary.eis_payment_type,
-    #         eis_calculated_amount=main_beneficiary.eis_calculated_amount,
-    #         eis_approved_amount=main_beneficiary.eis_approved_amount,
-    #         eis_initial_replacement_rate=main_beneficiary.eis_initial_replacement_rate,
-    #         # Reset financial fields for the closed record
-    #         eis_initial_monthly_amount=0,
-    #         eis_monthly_amount=0,
-    #         increment_amount=0,
-    #         decrement_amount=0,
-    #         month_index=main_beneficiary.month_index,
-    #         year=main_beneficiary.year,
-    #         processing_date=today,
-    #         is_disbursed=main_beneficiary.is_disbursed,
-    #         approved=main_beneficiary.approved,
-    #         beneficiary_id=main_beneficiary.beneficiary_id,
-    #         beneficiary_status="closed",
-    #         status="active",
-    #         reason=data.get("reason"),
-    #         remarks=data.get("remarks"),
-    #         remarriage_or_death_date=event_date,
-    #         last_live_check_date=parse_frontend_date(data.get("last_live_check_date")),
-    #         live_check_remarks=data.get("remarks")
-    #     )
-    #     new_main_row.save(username=user.username)
-    #
-    #     # 6. Process Other Beneficiaries (Update Existing -> Create New)
-    #     recovery_end_date = today + relativedelta(months=recovery_period)
-    #
-    #     for item in other_beneficiary_records:
-    #         old_other = item["obj"]
-    #
-    #         # Mark old as inactive
-    #         old_other.status = "inactive"
-    #         old_other.save(username=user.username)
-    #
-    #         # New Monthly = Old + Increment - Monthly Recovery
-    #         new_monthly = (safe_decimal(old_other.eis_monthly_amount) + item[
-    #             "increment"]) - monthly_decrement_per_person
-    #         new_initial_monthly = (safe_decimal(old_other.eis_initial_monthly_amount) + item[
-    #             "increment"]) - monthly_decrement_per_person
-    #
-    #         other_beneficiary_new_row=WorkforceEisPaymentProcess(
-    #             workforce_application=old_other.workforce_application,
-    #             workforce_application_summary=old_other.workforce_application_summary,
-    #             workforce_employee_dependent=old_other.workforce_employee_dependent,
-    #             bank=old_other.bank,
-    #             bank_account_no=old_other.bank_account_no,
-    #             bank_account_holder_name=old_other.bank_account_holder_name,
-    #             eis_payment_type=old_other.eis_payment_type,
-    #             eis_calculated_amount=old_other.eis_calculated_amount,
-    #             eis_approved_amount=old_other.eis_approved_amount,
-    #             eis_initial_replacement_rate=old_other.eis_initial_replacement_rate,
-    #             eis_initial_monthly_amount=new_initial_monthly,
-    #             eis_monthly_amount=new_monthly,
-    #             increment_amount=item["increment"],
-    #             increment_date= event_date,
-    #             decrement_amount=monthly_decrement_per_person,
-    #             decrement_date=event_date,
-    #             decrement_end_date=recovery_end_date,
-    #             month_index=old_other.month_index,
-    #             year=old_other.year,
-    #             processing_date=today,
-    #             is_disbursed=old_other.is_disbursed,
-    #             approved=old_other.approved,
-    #             beneficiary_id=old_other.beneficiary_id,
-    #             beneficiary_status=old_other.beneficiary_status,
-    #             status="active",
-    #             reason=old_other.beneficiary_status,
-    #             remarks=old_other.remarks,
-    #             remarriage_or_death_date=old_other.remarriage_or_death_date,
-    #             last_live_check_date=old_other.last_live_check_date,
-    #             live_check_remarks=old_other.live_check_remarks
-    #         )
-    #         other_beneficiary_new_row.save(username=user.username)
-    #
-    #     return "Success"
 
     @transaction.atomic
     def update_beneficiary(self, user, data):
@@ -434,7 +282,8 @@ class WorkforceEisPaymentServices(BaseService):
             remarriage_or_death_date=event_date,
             last_live_check_date=parse_frontend_date(data.get("last_live_check_date")),
             live_check_remarks=data.get("live_check_remarks"),
-            payable_amount= safe_decimal(main_beneficiary.payable_amount) + main_increment - main_decrement
+            payable_amount= safe_decimal(main_beneficiary.payable_amount) + main_increment - main_decrement,
+            phone_number= main_beneficiary.phone_number or None
         )
         new_main_row.save(username=user.username)
 
@@ -527,6 +376,7 @@ class WorkforceEisPaymentServices(BaseService):
                 last_live_check_date=old_other.last_live_check_date if data.get("beneficiary_status")=="hold" else None,
                 live_check_remarks=old_other.live_check_remarks if data.get("beneficiary_status")=="hold" else None,
                 payable_amount= (max_monthly - recovery_amount) if data.get("beneficiary_status")=="closed" else (round_three(old_other.payable_amount + safe_decimal(increment) - safe_decimal(normal_decrement))),
+                phone_number= old_other.phone_number or None
             )
 
             new_other_row.save(username=user.username)

@@ -119,6 +119,7 @@ class WorkforceEisPaymentDisbursementServices(BaseService):
                     year = stage_instance.year,
                     disbursement_date = date.today(),
                     beneficiary_id = stage_instance.beneficiary_id,
+                    phone_number = stage_instance.phone_number
                 )
                 try:
                     new_disburse.save(username=user.username)

@@ -1405,6 +1405,17 @@ class WorkforceAssociation(HistoryModel):
         db_table = 'workforce_association'
 
 
+class WorkforceEisBankAdvice(HistoryModel):
+    advice_date = models.DateField(null=True, blank=True)
+    is_confirmed = models.BooleanField(default=False)
+    remarks= models.TextField(null=True, blank=True)
+    month = models.IntegerField(null=True, blank=True)
+    year = models.IntegerField(null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_eis_bank_advice'
+
 class WorkforceEisPaymentProcess(HistoryModel):
     workforce_application = models.ForeignKey(
         "WorkforceApplication",
@@ -1476,6 +1487,7 @@ class WorkforceEisPaymentProcess(HistoryModel):
     onetime_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     trimonthly_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     payable_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
+    phone_number= models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         managed = True
@@ -1547,6 +1559,14 @@ class WorkforceEisPaymentDisbursementStage(HistoryModel):
     is_confirmed = models.BooleanField(default=False)
     approved = models.CharField(max_length=10, null=True, blank=True)
     beneficiary_id = models.CharField(max_length=50, null=True, blank=True)
+    phone_number = models.CharField(max_length=50, null=True, blank=True)
+    workforce_eis_bank_advice = models.ForeignKey(
+        "WorkforceEisBankAdvice",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_eis_bank_advice_payment_stage",
+    )
 
     class Meta:
         managed = True
@@ -1612,6 +1632,7 @@ class WorkforceEisPaymentDisbursement(HistoryModel):
         null=True,
         related_name="workforce_payment_disbursed_by",
     )
+    phone_number = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         managed = True

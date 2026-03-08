@@ -123,7 +123,8 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
                 is_disbursed = False,
                 is_confirmed = False,
                 approved = "yes",
-                beneficiary_id = workforce_eis_payment_process.beneficiary_id
+                beneficiary_id = workforce_eis_payment_process.beneficiary_id,
+                phone_number = workforce_eis_payment_process.phone_number
             )
             try:
                 new_stage.save(username=user.username)
