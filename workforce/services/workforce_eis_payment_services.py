@@ -407,3 +407,57 @@ class WorkforceEisPaymentServices(BaseService):
 
         except Exception as e:
             return e
+
+
+
+    def update_beneficiary_bank(self, user, data):
+
+        # 1. Fetch Main Beneficiary
+        main_beneficiary = WorkforceEisPaymentProcess.objects.filter(
+            beneficiary_id=data.get("beneficiary_id"),
+            status="active"
+        ).first()
+
+        main_beneficiary.status= "inactive"
+
+
+        new_main_row = WorkforceEisPaymentProcess(
+            workforce_application=main_beneficiary.workforce_application,
+            workforce_application_summary=main_beneficiary.workforce_application_summary,
+            workforce_employee_dependent=main_beneficiary.workforce_employee_dependent,
+            bank=data.get("bank_id"),
+            bank_account_no=data.get("bank_account_no"),
+            bank_account_holder_name=data.get("bank_account_holder_name"),
+            eis_payment_type=main_beneficiary.eis_payment_type,
+            payment_type_remarks= main_beneficiary.payment_type_remarks,
+            eis_calculated_amount=main_beneficiary.eis_calculated_amount,
+            eis_approved_amount=main_beneficiary.eis_approved_amount,
+            eis_initial_replacement_rate=main_beneficiary.eis_initial_replacement_rate,
+            eis_initial_monthly_amount=main_beneficiary.eis_initial_monthly_amount,
+            eis_monthly_amount=main_beneficiary.eis_monthly_amount,
+            increment_amount= main_beneficiary.increment_amount,
+            increment_date= main_beneficiary.increment_date,
+            decrement_amount= main_beneficiary.decrement_amount,
+            decrement_date= main_beneficiary.decrement_date,
+            month_index=main_beneficiary.month_index,
+            year=main_beneficiary.year,
+            processing_date=main_beneficiary.processing_date,
+            is_disbursed=main_beneficiary.is_disbursed,
+            approved=main_beneficiary.approved,
+            beneficiary_id=main_beneficiary.beneficiary_id,
+            beneficiary_status= main_beneficiary.beneficiary_status,
+            status="active",
+            reason= main_beneficiary.reason,
+            remarks=main_beneficiary.remarriage_or_death_date,
+            remarriage_or_death_date=main_beneficiary.remarriage_or_death_date,
+            last_live_check_date=main_beneficiary.last_live_check_date,
+            live_check_remarks=main_beneficiary.live_check_remarks,
+            payable_amount= main_beneficiary.payable_amount,
+            phone_number= data.get("phone_number")
+        )
+
+        try:
+            new_main_row.save(username=user.username)
+            main_beneficiary.save(username=user.username)
+        except Exception as e:
+            return e

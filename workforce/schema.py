@@ -1596,6 +1596,7 @@ class Mutation(graphene.ObjectType):
 
 
     update_workforce_eis_beneficiary = UpdateWorkforceEisBeneficiaryMutation.Field()
+    update_workforce_eis_beneficiary_bank = UpdateWorkforceEisBeneficiaryBankMutation.Field()
 
     create_workforce_eis_payment_stage = CreateWorkforceEisPaymentStageMutation.Field()
     delete_workforce_eis_payment_stage = DeleteWorkforceEisPaymentStageMutation.Field()
@@ -1609,3 +1610,4 @@ class Mutation(graphene.ObjectType):
     create_workforce_eis_bank_advice = CreateWorkforceEisBankAdviceMutation.Field()
     update_workforce_eis_bank_advice = UpdateWorkforceEisBankAdviceMutation.Field()
     revert_workforce_eis_bank_advice = RevertWorkforceEisBankAdviceMutation.Field()
+
