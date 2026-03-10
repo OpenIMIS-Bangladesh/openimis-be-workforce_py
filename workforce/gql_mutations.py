@@ -2300,7 +2300,7 @@ class UpdateWorkforceEisBeneficiaryBankMutation(graphene.Mutation):
         try:
             user = info.context.user if hasattr(info.context, 'user') else None
             service= WorkforceEisPaymentServices(user)
-            service.update_beneficiary(user, data)
+            service.update_beneficiary_bank(user, data)
             return cls(success=True, errors=[])
         except Exception as e:
             return cls(success=False, errors=[str(e)])

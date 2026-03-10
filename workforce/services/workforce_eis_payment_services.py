@@ -420,12 +420,14 @@ class WorkforceEisPaymentServices(BaseService):
 
         main_beneficiary.status= "inactive"
 
+        workforce_bank= Bank.objects.filter(id= data.get("bank_id")).first()
+
 
         new_main_row = WorkforceEisPaymentProcess(
             workforce_application=main_beneficiary.workforce_application,
             workforce_application_summary=main_beneficiary.workforce_application_summary,
             workforce_employee_dependent=main_beneficiary.workforce_employee_dependent,
-            bank=data.get("bank_id"),
+            bank=workforce_bank if workforce_bank else main_beneficiary.bank,
             bank_account_no=data.get("bank_account_no"),
             bank_account_holder_name=data.get("bank_account_holder_name"),
             eis_payment_type=main_beneficiary.eis_payment_type,
