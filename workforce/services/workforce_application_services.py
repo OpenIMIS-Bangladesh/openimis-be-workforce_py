@@ -617,15 +617,21 @@ class WorkforceApplicationServices(BaseService):
                                 files = attr.get("files", [])
                                 file_data = [
                                     {
-                                        "file_url": info.get("uploadInfo", {}).get("file_url"),
-                                        "file_path": info.get("uploadInfo", {}).get("file_path")
+                                        "file_url": info.get("url"),
+                                        "file_path": info.get("path")
                                     }
                                     for info in files
                                 ]
+                                # file_data = [
+                                #     {
+                                #         "file_url": info.get("uploadInfo", {}).get("file_url"),
+                                #         "file_path": info.get("uploadInfo", {}).get("file_path")
+                                #     }
+                                #     for info in files
+                                # ]
                                 for item in file_data:
                                     try:
-                                        document = WorkforceDocument.objects.get(path=item.get("file_path"),
-                                                                                 url=item.get("file_url"))
+                                        document = WorkforceDocument.objects.filter(path=item.get("file_path"),url=item.get("file_url")).first()
                                     except WorkforceDocument.DoesNotExist:
                                         continue
                                     try:
