@@ -380,31 +380,34 @@ class WorkforceApplicationServices(BaseService):
                                 remarks = remarks
                             )
                             dep_instance.save(username=self.user.username)
-                        if attachments and attachments != "[{}]":
+                        try:
+                            if attachments and attachments != "[{}]":
 
-                            for attr in attachments:
-                                files = attr.get("files", [])
-                                file_data = [
-                                    {
-                                        "file_url": info.get("uploadInfo", {}).get("file_url"),
-                                        "file_path": info.get("uploadInfo", {}).get("file_path")
-                                    }
-                                    for info in files
-                                ]
+                                for attr in attachments:
+                                    files = attr.get("files", [])
+                                    file_data = [
+                                        {
+                                            "file_url": info.get("uploadInfo", {}).get("file_url"),
+                                            "file_path": info.get("uploadInfo", {}).get("file_path")
+                                        }
+                                        for info in files
+                                    ]
 
-                                for item in file_data:
-                                    try:
-                                        document = WorkforceDocument.objects.get(path=item.get("file_path"),
-                                                                                 url=item.get("file_url"))
-                                    except WorkforceDocument.DoesNotExist:
-                                        continue
+                                    for item in file_data:
+                                        try:
+                                            document = WorkforceDocument.objects.get(path=item.get("file_path"),
+                                                                                     url=item.get("file_url"))
+                                        except WorkforceDocument.DoesNotExist:
+                                            continue
 
-                                    try:
-                                        document.workforce_dependent_id = dep_instance.id
-                                        document.workforce_application_id = application_id
-                                        document.save(username=self.user.username)
-                                    except Exception as e:
-                                        continue
+                                        try:
+                                            document.workforce_dependent_id = dep_instance.id
+                                            document.workforce_application_id = application_id
+                                            document.save(username=self.user.username)
+                                        except Exception as e:
+                                            continue
+                        except Exception as e:
+                            continue
 
 
             except Exception as e:
