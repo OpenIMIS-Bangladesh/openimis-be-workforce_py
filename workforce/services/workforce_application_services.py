@@ -311,7 +311,7 @@ class WorkforceApplicationServices(BaseService):
                             id=extract_uuid(dep.get("presentLocation", {}).get("id")))
                         permanent_location_instance = Location.objects.get(
                             id=extract_uuid(dep.get("permanentLocation", {}).get("id")))
-                        attachments = dep.get("attachments")
+                        attachments = dep.get("attachments") if "attachments" in dep.keys() else None
 
                         if dep_instance is not None:
                             dep_instance.workforce_application = application_instance
@@ -381,22 +381,27 @@ class WorkforceApplicationServices(BaseService):
                             )
                             dep_instance.save(username=self.user.username)
                         try:
-                            if attachments and attachments != "[{}]":
+                            if attachments is not None and attachments != "[{}]":
 
                                 for attr in attachments:
                                     files = attr.get("files", [])
+                                    # file_data= []
+                                    # for info in files:
+                                    #     file_obj= {
+                                    #         "file_url": info.get("uploadInfo", {}).get("url"),
+                                    #         "file_path": info.get("uploadInfo", {}).get("path")
+                                    #     }
                                     file_data = [
                                         {
-                                            "file_url": info.get("uploadInfo", {}).get("file_url"),
-                                            "file_path": info.get("uploadInfo", {}).get("file_path")
+                                            "file_url": info.get("url"),
+                                            "file_path": info.get("path")
                                         }
                                         for info in files
                                     ]
 
                                     for item in file_data:
                                         try:
-                                            document = WorkforceDocument.objects.get(path=item.get("file_path"),
-                                                                                     url=item.get("file_url"))
+                                            document = WorkforceDocument.objects.filter(path=item.get("file_path"), url=item.get("file_url")).first()
                                         except WorkforceDocument.DoesNotExist:
                                             continue
 
@@ -559,17 +564,23 @@ class WorkforceApplicationServices(BaseService):
                             if attachments and attachments != "[{}]":
                                 for attr in attachments:
                                     files = attr.get("files", [])
+                                    # file_data = [
+                                    #     {
+                                    #         "file_url": info.get("uploadInfo", {}).get("file_url"),
+                                    #         "file_path": info.get("uploadInfo", {}).get("file_path")
+                                    #     }
+                                    #     for info in files
+                                    # ]
                                     file_data = [
                                         {
-                                            "file_url": info.get("uploadInfo", {}).get("file_url"),
-                                            "file_path": info.get("uploadInfo", {}).get("file_path")
+                                            "file_url": info.get("url"),
+                                            "file_path": info.get("path")
                                         }
                                         for info in files
                                     ]
                                     for item in file_data:
                                         try:
-                                            document = WorkforceDocument.objects.get(path=item.get("file_path"),
-                                                                                     url=item.get("file_url"))
+                                            document = WorkforceDocument.objects.filter(path=item.get("file_path"), url=item.get("file_url")).first()
                                         except WorkforceDocument.DoesNotExist:
                                             continue
                                         try:
