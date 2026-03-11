@@ -109,7 +109,8 @@ class Query(graphene.ObjectType):
         is_reverted=graphene.Boolean(),
         date_created_from= graphene.String(),
         date_created_to= graphene.String(),
-        all_association_id_in= graphene.List(graphene.String)
+        all_association_id_in= graphene.List(graphene.String),
+        eis_application_summary_id= graphene.String()
     )
 
     workforce_document_types = OrderedDjangoFilterConnectionField(
@@ -439,6 +440,7 @@ class Query(graphene.ObjectType):
             date_created_to= None,
             eis_verified = None,
             all_association_id_in= None,
+            eis_application_summary_id = None,
             **kwargs
     ):
         service = WorkforceApplicationServices(info.context.user)
@@ -505,6 +507,9 @@ class Query(graphene.ObjectType):
 
         if all_association_id_in:
             query = query.filter(employee_factory__all_association_id__in= all_association_id_in)
+
+        if eis_application_summary_id:
+            query = query.filter(eis_application_summary_id=eis_application_summary_id)
 
 
         latest_movement_subquery = WorkforceApplicationMovement.objects.filter(
