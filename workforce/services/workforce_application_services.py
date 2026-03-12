@@ -343,7 +343,7 @@ class WorkforceApplicationServices(BaseService):
                                 "disabilityType") if "disabilityType" in dep else None
                             dep_instance.is_eligible = eligibility_status
                             dep_instance.remarks = remarks
-                            dep_instance.dummy_field = ("1" if dep_instance.dummy_field == "0" or dep_instance.dummy_field is None else "0")
+                            dep_instance.dummy_field = "1" if dep_instance.dummy_field == "0" or dep_instance.dummy_field is None else "0"
                             try:
                                 dep_instance.save(user=self.user)
                             except Exception as e:
@@ -518,17 +518,14 @@ class WorkforceApplicationServices(BaseService):
                             update_banking_info.account_holder_name = dependent.bank_account_holder_name
                             update_banking_info.account_no = dependent.bank_account_no
                             update_banking_info.branch = dependent.bank
-                            update_banking_info.nid = (
-                                dependent.nid if dependent.nid else dependent.account_holder_nid),
+                            update_banking_info.nid = dependent.nid if dependent.nid else dependent.account_holder_nid,
                             update_banking_info.date_of_birth = dependent.account_holder_dob
                             update_banking_info.status = "active"
-                            update_banking_info.amount = (
-                                "1" if banking_info.amount == "0" or banking_info.amount == None else "0")
+                            update_banking_info.amount = "1" if banking_info.amount == "0" or banking_info.amount == None else "0"
                             update_banking_info.relation_with_dependent = dependent.account_holder_relation_with_dependent
                             update_banking_info.nid = dependent.account_holder_nid
                             update_banking_info.account_holder_type = holder_type
-                            update_banking_info.parent_dependent = (
-                                dependent.parent_dependent if dependent.parent_dependent else None)
+                            update_banking_info.parent_dependent = dependent.parent_dependent if dependent.parent_dependent else None
                             try:
                                 update_banking_info.save(username=self.user.username)
                                 bank_info_id= update_banking_info.id
@@ -546,18 +543,17 @@ class WorkforceApplicationServices(BaseService):
                                 account_holder_name=dependent.bank_account_holder_name,
                                 account_no=dependent.bank_account_no,
                                 branch=dependent.bank,
-                                nid=(dependent.nid if dependent.nid else dependent.account_holder_nid),
+                                nid=dependent.nid if dependent.nid else dependent.account_holder_nid,
                                 date_of_birth=dependent.account_holder_dob,
                                 status="active",
                                 relation_with_dependent=dependent.account_holder_relation_with_dependent,
                                 account_holder_type=holder_type,
-                                parent_dependent=(
-                                    dependent.parent_dependent if dependent.parent_dependent else None)
+                                parent_dependent=dependent.parent_dependent if dependent.parent_dependent else None
                             )
                             banking_info.save(username=self.user.username)
                             bank_info_id= banking_info.id
-                        # dependent.dummy_field = (
-                        #     "1" if dependent.dummy_field == "0" or dependent.dummy_field is None else "0")
+                        # dependent.dummy_field =
+                        #     "1" if dependent.dummy_field == "0" or dependent.dummy_field is None else "0"
                         try:
                             dependent.save(username=self.user.username)
                             attachments = bank_data.get("attachments", [])

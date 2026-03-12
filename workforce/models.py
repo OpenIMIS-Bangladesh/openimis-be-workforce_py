@@ -602,6 +602,13 @@ class WorkforceDocument(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_documents'
+        # constraints = [
+        #     models.UniqueConstraint(
+        #         fields=['path', 'url'],
+        #         name='unique_document_source'
+        #     )
+        # ]
+
 
 
 class Bank(HistoryModel):
