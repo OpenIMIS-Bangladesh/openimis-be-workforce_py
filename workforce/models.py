@@ -1498,7 +1498,7 @@ class WorkforceEisPaymentProcess(HistoryModel):
     phone_number= models.CharField(max_length=50, null=True, blank=True)
     arrear_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     arrear_payment_month= models.IntegerField(null=True, blank=True)
-    arrear_payment_year= models.IntegerField(null=True, blank=True)
+    # arrear_payment_year= models.IntegerField(null=True, blank=True)
 
     class Meta:
         managed = True
