@@ -5,7 +5,7 @@ from core.models import user
 from core.services import BaseService
 from pamqp.decode import double
 from workforce.models import WorkforceEmployeeDependent, WorkforceApplication, WorkforceEmployee, WorkforceFactory, \
-    WorkforceEisPaymentProcess, Bank
+    WorkforceEisPaymentProcess, Bank, WorkforceEisPaymentDisbursement, WorkforceEisPaymentDisbursementStage
 from datetime import datetime, timezone, date
 import requests
 import json
@@ -387,23 +387,70 @@ class WorkforceEisPaymentServices(BaseService):
 
     def update_payment_by_association(self, user, data):
         try:
-            association_id= extract_uuid(data["association_id"])
-            increment_percent= safe_decimal(data["increment"]) if "increment" in data else 0
-            decrement_percent= safe_decimal(data["decrement"]) if "decrement" in data else 0
-            payments= WorkforceEisPaymentProcess.objects.filter(workforce_application__employee_factory__all_association_id=association_id).exclude(beneficiary_status__in=["closed"])
+            association_id = extract_uuid(data["association_id"])
+            payment_process_ids = data["payment_process_ids"]
 
-            today = date.today()
-            for payment in payments:
-                payable_amount= payment.payable_amount
-                payment.payable_amount = round_three(safe_decimal(payable_amount) + (safe_decimal(payable_amount) * (increment_percent/100)) - (safe_decimal(payable_amount) * (decrement_percent/100))) if increment_percent>0 or decrement_percent>0 else payable_amount
-                payment.increment_amount = round_three(safe_decimal(payable_amount) * (increment_percent/100)) if increment_percent>0 else None
-                payment.decrement_amount = round_three(safe_decimal(payable_amount) * (increment_percent/100)) if decrement_percent>0 else None
-                payment.increment_date = today if increment_percent>0 else None
-                payment.decrement_date = today if decrement_percent>0 else None
+            increment_percent = safe_decimal(data["increment"]) if "increment" in data else 0
+            decrement_percent = safe_decimal(data["decrement"]) if "decrement" in data else 0
+
+            increment_effective_date = data["increment_date"]
+            decrement_effective_date = data["decrement_date"]
+
+            current_date = date.today()
+
+            def month_difference(start_date, end_date):
+                return (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)
+
+            for payment_process_id in payment_process_ids:
+                process_id = extract_uuid(payment_process_id)
+
+                payment_process_instance = WorkforceEisPaymentProcess.objects.filter(
+                    id=process_id
+                ).first()
+
+                if not payment_process_instance:
+                    continue
+
+                base_amount = safe_decimal(payment_process_instance.payable_amount)
+
+                increment_amount = base_amount * (increment_percent / 100)
+                decrement_amount = base_amount * (decrement_percent / 100)
+
+                # convert string to date if needed
+                inc_date = datetime.strptime(increment_effective_date, "%Y-%m-%d").date()
+                dec_date = datetime.strptime(decrement_effective_date, "%Y-%m-%d").date()
+
+                # months calculation
+                increment_months = max(month_difference(inc_date, current_date), 0) -1 #calculate upto previous month becouse current months payable is already incremented
+                decrement_months = max(month_difference(dec_date, current_date), 0) -1
+
+                # arrear calculations
+                arrear_increment = increment_months * increment_amount
+                arrear_decrement = decrement_months * decrement_amount
+
+
+                payment_process_instance.arrear_amount = arrear_increment - arrear_decrement
+                payment_process_instance.arrear_month = current_date.month - 1
+                payment_process_instance.arrear_year = current_date.year
+                payment_process_instance.payable_amount= round_three(safe_decimal(base_amount+increment_amount-decrement_amount))
+
                 try:
-                    payment.save(username=user.username)
+                    payment_process_instance.save(username=user.username)
                 except Exception as e:
                     continue
+            # payments= WorkforceEisPaymentProcess.objects.filter(workforce_application__employee_factory__all_association_id=association_id).exclude(beneficiary_status__in=["closed"])
+            # today = date.today()
+            # for payment in payments:
+            #     payable_amount= payment.payable_amount
+            #     payment.payable_amount = round_three(safe_decimal(payable_amount) + (safe_decimal(payable_amount) * (increment_percent/100)) - (safe_decimal(payable_amount) * (decrement_percent/100))) if increment_percent>0 or decrement_percent>0 else payable_amount
+            #     payment.increment_amount = round_three(safe_decimal(payable_amount) * (increment_percent/100)) if increment_percent>0 else None
+            #     payment.decrement_amount = round_three(safe_decimal(payable_amount) * (increment_percent/100)) if decrement_percent>0 else None
+            #     payment.increment_date = today if increment_percent>0 else None
+            #     payment.decrement_date = today if decrement_percent>0 else None
+            #     try:
+            #         payment.save(username=user.username)
+            #     except Exception as e:
+            #         continue
 
         except Exception as e:
             return e

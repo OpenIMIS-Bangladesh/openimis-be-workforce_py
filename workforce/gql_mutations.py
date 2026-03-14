@@ -2132,8 +2132,11 @@ class CreateWorkforceEisPaymentDisbursementMutation(graphene.Mutation):
 class UpdateWorkforceEisPaymentByAssociationMutation(graphene.Mutation):
     class Arguments:
         association_id = graphene.String(required=True)
+        payment_process_ids= graphene.List(graphene.String)
         increment = graphene.String(required=True)
         decrement = graphene.String(required=True)
+        increment_date= graphene.String(required=True)
+        decrement_date= graphene.String(required=True)
 
     success = graphene.Boolean()
     errors = graphene.List(graphene.String)
