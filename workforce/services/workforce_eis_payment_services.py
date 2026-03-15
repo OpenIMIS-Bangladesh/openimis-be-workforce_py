@@ -417,12 +417,12 @@ class WorkforceEisPaymentServices(BaseService):
                 decrement_amount = base_amount * (decrement_percent / 100)
 
                 # convert string to date if needed
-                inc_date = datetime.strptime(increment_effective_date, "%Y-%m-%d").date()
-                dec_date = datetime.strptime(decrement_effective_date, "%Y-%m-%d").date()
+                inc_date = datetime.strptime(increment_effective_date, "%Y-%m-%d").date() if increment_effective_date!="" else None
+                dec_date = datetime.strptime(decrement_effective_date, "%Y-%m-%d").date() if decrement_effective_date!="" else None
 
                 # months calculation
-                increment_months = max(month_difference(inc_date, current_date), 0) -1 #calculate upto previous month becouse current months payable is already incremented
-                decrement_months = max(month_difference(dec_date, current_date), 0) -1
+                increment_months = max(month_difference(inc_date, current_date), 0) -1 if inc_date is not None else 0 #calculate upto previous month becouse current months payable is already incremented
+                decrement_months = max(month_difference(dec_date, current_date), 0) -1 if dec_date is not None else 0
 
                 # arrear calculations
                 arrear_increment = increment_months * increment_amount
