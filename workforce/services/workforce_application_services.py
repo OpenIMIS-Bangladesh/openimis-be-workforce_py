@@ -8,7 +8,8 @@ from rx.linq.observable.blocking.first import first
 
 from workforce.models import (
     WorkforceApplication, WorkforceGrantMoney, WorkforceEmployee, WorkforceEmployeeDependent,
-    WorkforceEmployeeBankingInfo, WorkforceDocument, WorkforceFactory, Bank, WorkforceEisPaymentProcess
+    WorkforceEmployeeBankingInfo, WorkforceDocument, WorkforceFactory, Bank, WorkforceEisPaymentProcess,
+    WorkforceApplicationSummary
 )
 from workforce.models import WorkforceAssociation, WorkforceOrganizationEmployee
 from .helper_service import create_application_movement, cf_and_eis_application_movement_to_factory_admin, dependent_uuid_to_base64
@@ -177,6 +178,18 @@ class WorkforceApplicationServices(BaseService):
 
         except WorkforceApplication.DoesNotExist:
             raise Exception(f"Application with id {application_id} not found")
+
+        try:
+            if status in ["approved_by_committee"]:
+                committee_forwarded_summary_applications= WorkforceApplication.objects.filter(eis_application_summary_id=application_instance_before_update.eis_application_summary_id, status="forward_to_comiittee")
+                application_count= len(committee_forwarded_summary_applications)
+                if application_count <1:
+                    summary_instance= WorkforceApplicationSummary.objects.get(id= application_instance_before_update.eis_application_summary_id)
+                    summary_instance.status = "approved_by_committee"
+                    summary_instance.save(username=self.user.username)
+        except Exception as e:
+            print(f"Failed to update eis summary approval status: {e}")
+
 
         organization_type = application_instance.organization_type
         application_type = application_instance.application_type
