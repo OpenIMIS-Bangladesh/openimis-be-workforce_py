@@ -145,7 +145,7 @@ class WorkforceFactoryInputType(OpenIMISMutation.Input):
     group_name = graphene.String()
     license_type = graphene.String()
     location_id = graphene.String(required=True)
-    office_location_id = graphene.String(required=True)
+    office_location_id = graphene.String()
     future_date = graphene.String()
     date_of_eis_incorporation = graphene.String()
     date_of_factory_establishment = graphene.String()
