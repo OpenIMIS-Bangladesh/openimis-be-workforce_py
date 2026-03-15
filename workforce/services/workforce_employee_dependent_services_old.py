@@ -79,9 +79,9 @@ class WorkforceEmployeeDependentServices(BaseService):
 
         # Daughter
         elif relation == "workforce.relation.daughter":
-            if marital == "workforce.marital_status.married" or marital == "workforce.marital_status.widow":
-                return None
-            return "Unmarried daughter"
+            if marital == "workforce.marital_status.single":
+                return "Unmarried daughter"
+            return None
 
         # Brother
         elif relation == "workforce.relation.brother":
@@ -91,9 +91,9 @@ class WorkforceEmployeeDependentServices(BaseService):
 
         # Sister
         elif relation == "workforce.relation.sister":
-            if marital == "workforce.marital_status.married" or marital == "workforce.marital_status.widow":
-                return None
-            return "Dependent unmarried sister"
+            if marital == "workforce.marital_status.single":
+                return "Dependent unmarried sister"
+            return None
 
         # Father
         elif relation == "workforce.relation.father":
@@ -331,9 +331,7 @@ class WorkforceEmployeeDependentServices(BaseService):
                 "Date of birth": dep.birth_date.strftime("%m/%d/%Y") if dep.birth_date else "11/02/1996",
                 "Age at calculation date": str(self.calculate_age(dep.birth_date)) if dep.birth_date else "30",
                 "Sex": self.get_gender_by_relation_for_api(dep.relation_with_worker) or "Female",
-                "Relationship": self.get_relation_for_api(dep, worker_age) or "",
-                "nid": dep.nid
-
+                "Relationship": self.get_relation_for_api(dep, worker_age) or ""
             })
             dep_key = dep_key + 1
 
@@ -378,120 +376,209 @@ class WorkforceEmployeeDependentServices(BaseService):
                 dep_obj = WorkforceEmployeeDependent.objects.get(id=dependent.id)
                 age = self.calculate_age(dep_obj.birth_date)
 
-                dep_data_for_check = {}
-
-                total_amount = 0
-                top_up_amount = 0
-                pv_factor = 0
-                initial_replacement_rate = 0
-                initial_monthly_amount = 0
-                monthly_amount = 0
-
-                # find dependent data in payload
-                for dep_data in payload["Dependents"]:
-                    if dep_data["Name"] == dep_obj.name_en and dep_data["nid"] == dep_obj.nid:
-                        dep_data_for_check = dep_data
-                        break
-
-                relation = str(dep_obj.relation_with_worker).lower()
-
-                # -------- PARENT LOGIC --------
-                if "workforce.relation.father" in relation or "workforce.relation.mother" in relation:
-
-                    father_present = False
-                    mother_present = False
-
-                    for thisdata in vba_data:
-                        relationship = str(thisdata.get("Relationship", "")).lower()
-
-                        if "mother" in relationship:
-                            mother_present = True
-
-                        if "dependent father" in relationship:
-                            father_present = True
-
-                    # get parent data
-                    parent_data = None
-                    for row in vba_data:
-                        if row.get("ID") == "Parent(s)":
-                            parent_data = row
-                            break
-
-                    if parent_data:
-                        total_amount = safe_float(parent_data["PV Total pension"])
-                        top_up_amount = safe_float(parent_data["PV Top-Up pension"])
-                        pv_factor = safe_float(parent_data["PV factor"])
-                        initial_replacement_rate = safe_float(parent_data["Initial replacement rate"])
-                        initial_monthly_amount = safe_float(parent_data["Total initial monthly pension"])
-                        monthly_amount = safe_float(parent_data["Top-up monthly pension"])
-
-                    # if both parents exist split
-                    if mother_present and father_present:
-                        total_amount /= 2
-                        top_up_amount /= 2
-                        pv_factor /= 2
-                        initial_replacement_rate /= 2
-                        initial_monthly_amount /= 2
-                        monthly_amount /= 2
-
-                    dep_obj.eis_calculated_amount = total_amount
-                    dep_obj.eis_approved_amount = top_up_amount
-                    dep_obj.pv_factor = pv_factor
-                    dep_obj.initial_replacement_rate = initial_replacement_rate
-                    dep_obj.eis_initial_monthly_amount = initial_monthly_amount
-                    dep_obj.eis_monthly_amount = monthly_amount
-                    dep_obj.is_eligible = True
-
-                # -------- OTHER DEPENDENTS --------
-                else:
+                # Helper to assign VBA data to dependent
+                def set_vba_data(dep_obj, rel):
                     for data in vba_data:
+                        if data["Relationship"] == rel:
+                            if rel == "Mother" or rel == "Dependent father":
+                                if rel in ("Mother", "Dependent father"):
+                                    other_parent_present = False
+                                    for other_parent_data in vba_data:
+                                        relationship = other_parent_data.get("Relationship") or ""
+                                        if rel == "Mother" and "Dependent father" in relationship:
+                                            other_parent_present = True
+                                        if rel == "Dependent father" and "Mother" in relationship:
+                                            other_parent_present = True
+                                    bro_sis_present = False
+                                    for bro_sis_data in vba_data:
+                                        bs_relation = bro_sis_data.get("Relationship") or ""
+                                        if "sister" in bs_relation.lower() or "brother" in bs_relation.lower():
+                                            bro_sis_present = True
 
+                                for parent_data in vba_data:
+                                    if parent_data["ID"] == "Parent(s)":
+                                        dep_obj.eis_calculated_amount = safe_float(parent_data["PV Total pension"]) / 2 if other_parent_present else safe_float(parent_data["PV Total pension"])
+                                        dep_obj.eis_approved_amount = safe_float(parent_data["PV Top-Up pension"]) / 2 if other_parent_present else safe_float(parent_data["PV Top-Up pension"])
+                                        dep_obj.pv_factor = safe_float(parent_data["PV factor"]) /2 if other_parent_present else safe_float(parent_data["PV factor"])
+                                        dep_obj.initial_replacement_rate = safe_float(parent_data["Initial replacement rate"])/2 if other_parent_present else safe_float(parent_data["Initial replacement rate"])
+                                        dep_obj.eis_initial_monthly_amount = safe_float(parent_data["Total initial monthly pension"]) / 2 if other_parent_present else safe_float(parent_data["Total initial monthly pension"])
+                                        dep_obj.eis_monthly_amount = safe_float(parent_data["Top-up monthly pension"]) / 2 if other_parent_present else safe_float(parent_data["Top-up monthly pension"])
+
+                                        if bro_sis_present:
+                                            dep_obj.eis_calculated_amount = safe_float(parent_data["PV Total pension"])/2 if other_parent_present else safe_float(parent_data["PV Total pension"])
+                                            dep_obj.eis_approved_amount = safe_float(parent_data["PV Top-Up pension"])/2 if other_parent_present else safe_float(parent_data["PV Top-Up pension"])
+                                            dep_obj.pv_factor = safe_float(parent_data["PV factor"])/2 if other_parent_present else safe_float(parent_data["PV factor"])
+                                            dep_obj.initial_replacement_rate = safe_float(parent_data["Initial replacement rate"])/2 if other_parent_present else safe_float(parent_data["Initial replacement rate"])
+                                            dep_obj.eis_initial_monthly_amount = safe_float(parent_data["Total initial monthly pension"])/2 if other_parent_present else safe_float(parent_data["Total initial monthly pension"])
+                                            dep_obj.eis_monthly_amount = safe_float(parent_data["Top-up monthly pension"])/2 if other_parent_present else safe_float(parent_data["Top-up monthly pension"])
+
+                                        dep_obj.is_eligible = True
+                                        try:
+                                            dep_obj.save(username=self.user.username)
+                                        except Exception as e:
+                                            continue
+                            elif (
+                                    rel == "Widow" or
+                                    rel == "Dependent widower" or
+                                    rel == "Minor son" or
+                                    rel == "Minor daughter" or
+                                    rel == "Unmarried daughter" or
+                                    rel == "Dependent widowed daughter" or
+                                    rel == "Dependent disabled son" or
+                                    rel == "Dependent disabled daughter" or
+                                    rel == "Dependent son born out of wedlock" or
+                                    rel == "Dependent unmarried daughter born out of wedlock"
+                            ):
+                                for wife_children_data in vba_data:
+                                    if wife_children_data["ID"] == "Spouse(s) and Orphan(s)":
+                                        dep_obj.initial_replacement_rate = safe_float(data["Initial replacement rate"])
+                                        dep_obj.eis_calculated_amount = safe_float(wife_children_data["PV Total pension"]) * safe_float(data["Initial replacement rate"])
+                                        dep_obj.eis_approved_amount = safe_float(wife_children_data["PV Top-Up pension"]) * safe_float(data["Initial replacement rate"])
+                                        dep_obj.pv_factor = safe_float(wife_children_data["PV factor"])
+                                        dep_obj.eis_initial_monthly_amount = safe_float(data["Total initial monthly pension"])
+                                        dep_obj.eis_monthly_amount = safe_float(data["Top-up monthly pension"])
+                                        dep_obj.is_eligible = True
+                                        try:
+                                            dep_obj.save(username=self.user.username)
+                                        except Exception as e:
+                                            continue
+                            else:
+                                dep_obj.eis_calculated_amount = safe_float(data["PV Total pension"])
+                                dep_obj.eis_approved_amount = safe_float(data["PV Top-Up pension"])
+                                dep_obj.pv_factor = safe_float(data["PV factor"])
+                                dep_obj.initial_replacement_rate = safe_float(data["Initial replacement rate"])
+                                dep_obj.eis_initial_monthly_amount = safe_float(data["Total initial monthly pension"])
+                                dep_obj.eis_monthly_amount = safe_float(data["Top-up monthly pension"])
+                                dep_obj.is_eligible = True
+                                try:
+                                    dep_obj.save(username=self.user.username)
+                                except Exception as e:
+                                    continue
+                            return True
+                    return False
+
+                relation = dependent.relation_with_worker
+                marital = dependent.marital_status
+                disability = dependent.disability_status
+
+                # --- Relation-wise Eligibility ---
+                if relation == "workforce.relation.brother":
+                    if age < 18:
+                        set_vba_data(dep_obj, "Dependent minor brother")
+                    else:
+                        dep_obj.is_eligible = False
                         try:
-                            if int(data.get("ID")) != int(dep_data_for_check.get("ID")):
-                                continue
-                        except (TypeError, ValueError):
+                            dep_obj.save(username=self.user.username)
+                        except Exception as e:
                             continue
 
-                        relationship = str(data.get("Relationship", "")).lower()
+                elif relation == "workforce.relation.sister":
+                    if age < 18:
+                        set_vba_data(dep_obj, "Dependent minor sister")
+                    elif marital == "workforce.marital_status.single":
+                        set_vba_data(dep_obj, "Dependent unmarried sister")
+                    elif marital == "workforce.marital_status.widowed":
+                        set_vba_data(dep_obj, "Dependent widowed sister")
+                    else:
+                        dep_obj.is_eligible = False
+                        try:
+                            dep_obj.save(username=self.user.username)
+                        except Exception as e:
+                            continue
 
-                        if (
-                                data.get("Relationship") in ["Widow", "Dependent widower"]
-                                or "son" in relationship
-                                or "daughter" in relationship
-                        ):
+                elif relation == "workforce.relation.daughter":
+                    if disability == "yes":
+                        set_vba_data(dep_obj, "Dependent disabled daughter")
+                    elif age < 18:
+                        set_vba_data(dep_obj, "Minor daughter")
+                    elif marital == "workforce.marital_status.single":
+                        set_vba_data(dep_obj, "Unmarried daughter")
+                    elif marital == "workforce.marital_status.widowed":
+                        set_vba_data(dep_obj, "Dependent widowed daughter")
+                    else:
+                        dep_obj.is_eligible = False
+                        try:
+                            dep_obj.save(username=self.user.username)
+                        except Exception as e:
+                            continue
 
-                            for spouse_orphan in vba_data:
-                                if spouse_orphan.get("ID") == "Spouse(s) and Orphan(s)":
-                                    total_amount = safe_float(spouse_orphan["PV Total pension"])
-                                    top_up_amount = safe_float(spouse_orphan["PV Top-Up pension"])
+                elif relation == "workforce.relation.son":
+                    if disability == "yes":
+                        set_vba_data(dep_obj, "Dependent disabled son")
+                    elif age < 18:
+                        set_vba_data(dep_obj, "Minor son")
+                    else:
+                        dep_obj.is_eligible = False
+                        try:
+                            dep_obj.save(username=self.user.username)
+                        except Exception as e:
+                            continue
 
-                                    dep_obj.eis_calculated_amount = total_amount * safe_float(
-                                        data["Initial replacement rate"])
-                                    dep_obj.eis_approved_amount = top_up_amount * safe_float(
-                                        data["Initial replacement rate"])
-                                    dep_obj.pv_factor = safe_float(data["PV factor"])
-                                    dep_obj.initial_replacement_rate = safe_float(data["Initial replacement rate"])
-                                    dep_obj.eis_initial_monthly_amount = safe_float(
-                                        data["Total initial monthly pension"])
-                                    dep_obj.eis_monthly_amount = safe_float(data["Top-up monthly pension"])
-                                    dep_obj.is_eligible = True
-                                    break
+                elif relation == "workforce.relation.husband":
+                    set_vba_data(dep_obj, "Dependent widower")
 
-                        else:
-                            dep_obj.eis_calculated_amount = safe_float(data["PV Total pension"])
-                            dep_obj.eis_approved_amount = safe_float(data["PV Top-Up pension"])
-                            dep_obj.pv_factor = safe_float(data["PV factor"])
-                            dep_obj.initial_replacement_rate = safe_float(data["Initial replacement rate"])
-                            dep_obj.eis_initial_monthly_amount = safe_float(data["Total initial monthly pension"])
-                            dep_obj.eis_monthly_amount = safe_float(data["Top-up monthly pension"])
-                            dep_obj.is_eligible = True
+                elif relation == "workforce.relation.wife":
+                    set_vba_data(dep_obj, "Widow")
 
-                try:
-                    dep_obj.save(username=self.user.username)
-                except Exception:
-                    continue
+                elif relation == "workforce.relation.father":
+                    set_vba_data(dep_obj, "Dependent father")
 
-        return None
+                elif relation == "workforce.relation.mother":
+                    set_vba_data(dep_obj, "Mother")
 
+                elif relation == "workforce.relation.grand_father":
+                    set_vba_data(dep_obj, "Dependent paternal grandfather")
 
+                elif relation == "workforce.relation.grand_mother":
+                    set_vba_data(dep_obj, "Dependent paternal grandmother")
+
+                elif relation == "workforce.relation.grand_son":
+                    if age < 18:
+                        set_vba_data(dep_obj, "Dependent minor son of a deceased son")
+                    else:
+                        dep_obj.is_eligible = False
+                        try:
+                            dep_obj.save(username=self.user.username)
+                        except Exception as e:
+                            continue
+
+                elif relation == "workforce.relation.grand_daughter":
+                    if age < 18:
+                        set_vba_data(dep_obj, "Dependent minor daughter of a deceased son")
+                    else:
+                        dep_obj.is_eligible = False
+                        try:
+                            dep_obj.save(username=self.user.username)
+                        except Exception as e:
+                            continue
+
+                elif relation == "workforce.relation.daughter_in_law":
+                    if marital == "workforce.marital_status.widowed":
+                        set_vba_data(dep_obj, "Dependent widowed daughter-in-law")
+                    else:
+                        dep_obj.is_eligible = False
+                        try:
+                            dep_obj.save(username=self.user.username)
+                        except Exception as e:
+                            continue
+
+                elif relation == "workforce.relation.illegitimate_son":
+                    set_vba_data(dep_obj, "Dependent son born out of wedlock")
+
+                elif relation == "workforce.relation.illegitimate_daughter":
+                    if marital == "workforce.marital_status.single":
+                        set_vba_data(dep_obj, "Dependent unmarried daughter born out of wedlock")
+                    else:
+                        dep_obj.is_eligible = False
+                        try:
+                            dep_obj.save(username=self.user.username)
+                        except Exception as e:
+                            continue
+
+                else:
+                    dep_obj.is_eligible = False
+                    try:
+                        dep_obj.save(username=self.user.username)
+                    except Exception as e:
+                        continue
 
