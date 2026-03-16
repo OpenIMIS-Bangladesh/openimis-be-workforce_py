@@ -430,9 +430,9 @@ class WorkforceEisPaymentServices(BaseService):
 
 
                 payment_process_instance.arrear_amount = arrear_increment - arrear_decrement
-                payment_process_instance.arrear_month = current_date.month - 1
-                payment_process_instance.arrear_year = current_date.year
-                payment_process_instance.payable_amount= round_three(safe_decimal(base_amount+increment_amount-decrement_amount))
+                payment_process_instance.arrear_payment_month = current_date.month - 1 #because current month payment is already incremented payment. In advice need to calculate until prev month
+                payment_process_instance.arrear_payment_year = current_date.year
+                payment_process_instance.payable_amount= round_three(safe_decimal(payment_process_instance.payable_amount)+increment_amount-decrement_amount)
 
                 try:
                     payment_process_instance.save(username=user.username)

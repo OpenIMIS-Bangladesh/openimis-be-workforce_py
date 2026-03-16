@@ -105,6 +105,7 @@ class WorkforceEisBankAdviceServices(BaseService):
         bank_advice = WorkforceEisBankAdvice(
             advice_date=today,
             is_confirmed=False,
+            confirmation_date=today,
             month=data["month"],
             year=data["year"]
         )
@@ -129,12 +130,62 @@ class WorkforceEisBankAdviceServices(BaseService):
         return "success"
 
 
+
+    @transaction.atomic
     def update_confirmation(self, user, data):
-        # instance = WorkforceEisBankAdvice.objects.get(id= extract_uuid(data["id"]))
-        instance = WorkforceEisBankAdvice.objects.get(id= data["id"])
+
+        today = date.today()
+
+        instance = WorkforceEisBankAdvice.objects.get(id=data["id"])
+
+        stage_instances = WorkforceEisPaymentDisbursementStage.objects.filter(
+            workforce_eis_bank_advice_id=data["id"]
+        )
+
+        for stage_instance in stage_instances:
+            WorkforceEisPaymentDisbursement.objects.filter(
+                beneficiary_id=stage_instance.beneficiary_id,
+                month_index=stage_instance.month_index,
+                year=stage_instance.year
+            ).delete()
+
+            disburse_instance = WorkforceEisPaymentDisbursement(
+                workforce_eis_payment_disbursement_stage=stage_instance,
+                workforce_application=stage_instance.workforce_application,
+                workforce_application_summary=stage_instance.workforce_application_summary,
+                workforce_employee_dependent=stage_instance.workforce_employee_dependent,
+                bank=stage_instance.bank,
+                bank_account_no=stage_instance.bank_account_no,
+                bank_account_holder_name=stage_instance.bank_account_holder_name,
+                eis_payment_type=stage_instance.eis_payment_type,
+                eis_calculated_amount=stage_instance.eis_calculated_amount,
+                eis_approved_amount=stage_instance.eis_approved_amount,
+                eis_initial_replacement_rate=stage_instance.eis_initial_replacement_rate,
+                eis_initial_monthly_amount=stage_instance.eis_initial_monthly_amount,
+                eis_monthly_amount=stage_instance.eis_monthly_amount,
+                paid_amount=stage_instance.paid_amount,
+                month_index=stage_instance.month_index,
+                year=stage_instance.year,
+                disbursement_date=today,
+                beneficiary_id=stage_instance.beneficiary_id,
+                phone_number=stage_instance.phone_number
+            )
+            try:
+                disburse_instance.save(username=user.username)
+                stage_instance.is_disbursed = True
+                stage_instance.disbursement_date = today
+                try:
+                    stage_instance.save(username=user.username)
+                except Exception as e:
+                    continue
+            except Exception as e:
+                continue
         instance.is_confirmed = True
-        instance.remarks= "The Bank Advice was Confirmed"
-        instance.save(username=user.username)
+        instance.remarks = "The Bank Advice was Confirmed"
+        try:
+            instance.save(username=user.username)
+        except Exception as e:
+            raise e
         return "success"
 
     def revert_confirmation(self, user, data):

@@ -1416,6 +1416,7 @@ class WorkforceAssociation(HistoryModel):
 class WorkforceEisBankAdvice(HistoryModel):
     advice_date = models.DateField(null=True, blank=True)
     is_confirmed = models.BooleanField(default=False)
+    confirmation_date =  models.DateField(null=True, blank=True)
     remarks= models.TextField(null=True, blank=True)
     month = models.IntegerField(null=True, blank=True)
     year = models.IntegerField(null=True, blank=True)

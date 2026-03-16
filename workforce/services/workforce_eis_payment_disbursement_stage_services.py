@@ -99,6 +99,10 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
         for eis_process_id in eis_process_ids:
             process_id= extract_uuid(eis_process_id)
             workforce_eis_payment_process= WorkforceEisPaymentProcess.objects.get(id=process_id)
+            if safe_decimal(workforce_eis_payment_process.arrear_payment_month) == safe_decimal(month) -1 and safe_decimal(workforce_eis_payment_process.arrear_payment_year) == safe_decimal(year):
+                paid_amount = safe_decimal(workforce_eis_payment_process.payable_amount) + safe_decimal(workforce_eis_payment_process.arrear_amount)
+            else:
+                paid_amount = workforce_eis_payment_process.payable_amount
             new_stage= WorkforceEisPaymentDisbursementStage(
                 workforce_eis_payment_process= workforce_eis_payment_process,
                 workforce_application = workforce_eis_payment_process.workforce_application,
@@ -113,7 +117,8 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
                 eis_initial_replacement_rate = workforce_eis_payment_process.eis_initial_replacement_rate,
                 eis_initial_monthly_amount = workforce_eis_payment_process.eis_initial_monthly_amount,
                 eis_monthly_amount = workforce_eis_payment_process.eis_monthly_amount,
-                paid_amount= workforce_eis_payment_process.payable_amount,
+                paid_amount= paid_amount,
+                # paid_amount= workforce_eis_payment_process.paid_amount,
                 increment_amount = workforce_eis_payment_process.increment_amount,
                 decrement_amount = workforce_eis_payment_process.decrement_amount,
                 total_adjustment_amount = workforce_eis_payment_process.total_adjustment_amount,
