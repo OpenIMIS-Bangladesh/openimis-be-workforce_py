@@ -293,7 +293,7 @@ class WorkforceEmployeeDependentServices(BaseService):
                                   WorkforceOtherCompensationInfo.objects
                                   .filter(
                                       workforce_application_id=workforce_application_id,
-                                      is_eis_benefit_adjustment_eligible="Yes"
+                                      is_eis_benefit_adjustment_eligible="true"
                                   )
                                   .aggregate(total=Sum('amount'))
                               )['total'] or 0
