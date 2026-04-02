@@ -112,41 +112,42 @@ class WorkforceApplicationServices(BaseService):
         application_instance = WorkforceApplication.objects.get(id=application_id)
 
         user_id = self.user.id
-        dependents_data = obj_data.get("employee_dependent_info")
+        if "employee_dependent_info" in obj_data:
+            dependents_data = obj_data.get("employee_dependent_info")
 
-        if dependents_data and dependents_data != "[{}]":
-            try:
-                dependents = json.loads(dependents_data)
-                for dep in dependents:
-                    # Save for main application
-                    dep_instance = WorkforceEmployeeDependent(
-                        workforce_application=application_instance,
-                        name_bn=dep.get("nameBn"),
-                        name_en=dep.get("nameEn"),
-                        father_name_bn=dep.get("fatherNameBn"),
-                        father_name_en=dep.get("fatherNameEn"),
-                        mother_name_bn=dep.get("motherNameBn"),
-                        mother_name_en=dep.get("motherNameEn"),
-                        nid=dep.get("nid"),
-                        phone_number=dep.get("phoneNumber"),
-                        email=dep.get("email"),
-                        occupation=dep.get("occupation"),
-                        birth_certificate_no=dep.get("birthCertificateNo"),
-                        birth_date=dep.get("birthDate"),
-                        marital_status=dep.get("maritalStatus"),
-                        present_address=dep.get("presentAddress"),
-                        permanent_address=dep.get("permanentAddress"),
-                        user_created_id=user_id,
-                        user_updated_id=user_id,
-                        status="active",
-                        relation_with_worker=dep.get("relationType") if "relationType" in dep else dep.get("relationWithWorker", None),
-                        disability_status=dep.get("isDisabled"),
-                        disability_type=dep.get("disabilityType") if "disabilityType" in dep else None
-                    )
-                    dep_instance.save(username=self.user.username)
+            if dependents_data and dependents_data != "[{}]":
+                try:
+                    dependents = json.loads(dependents_data)
+                    for dep in dependents:
+                        # Save for main application
+                        dep_instance = WorkforceEmployeeDependent(
+                            workforce_application=application_instance,
+                            name_bn=dep.get("nameBn"),
+                            name_en=dep.get("nameEn"),
+                            father_name_bn=dep.get("fatherNameBn"),
+                            father_name_en=dep.get("fatherNameEn"),
+                            mother_name_bn=dep.get("motherNameBn"),
+                            mother_name_en=dep.get("motherNameEn"),
+                            nid=dep.get("nid"),
+                            phone_number=dep.get("phoneNumber"),
+                            email=dep.get("email"),
+                            occupation=dep.get("occupation"),
+                            birth_certificate_no=dep.get("birthCertificateNo"),
+                            birth_date=dep.get("birthDate"),
+                            marital_status=dep.get("maritalStatus"),
+                            present_address=dep.get("presentAddress"),
+                            permanent_address=dep.get("permanentAddress"),
+                            user_created_id=user_id,
+                            user_updated_id=user_id,
+                            status="active",
+                            relation_with_worker=dep.get("relationType") if "relationType" in dep else dep.get("relationWithWorker", None),
+                            disability_status=dep.get("isDisabled"),
+                            disability_type=dep.get("disabilityType") if "disabilityType" in dep else None
+                        )
+                        dep_instance.save(username=self.user.username)
 
-            except Exception as e:
-                logger.error(f"Failed to save dependent: {e}")
+                except Exception as e:
+                    logger.error(f"Failed to save dependent: {e}")
 
         return application
 
