@@ -4,6 +4,8 @@ import base64
 from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned, ValidationError
 from core.services import BaseService
+from rest_framework.response import Response
+from rest_framework import status
 from rx.linq.observable.blocking.first import first
 
 from workforce.models import (
@@ -79,9 +81,11 @@ class WorkforceApplicationServices(BaseService):
                             ).exclude(status="draft")
 
                             if existing_applications_cf.exists():
-                                raise ValidationError(
-                                    "An application for financial assistance from cf already exists for this NID."
-                                )
+                                Response({'status': 'error', 'message': 'An application for financial assistance from Central Fund already exists for this NID.',
+                                          'key': 'INVALID_PHONE_NUMBER'}, status=status.HTTP_400_BAD_REQUEST)
+                                # raise ValidationError(
+                                #     "An application for financial assistance from cf already exists for this NID."
+                                # )
                         if organization_type == "eis":
                             existing_applications_eis = WorkforceApplication.objects.filter(
                                 application_type="financialAssistance",
@@ -90,9 +94,12 @@ class WorkforceApplicationServices(BaseService):
                             ).exclude(status="draft")
 
                             if existing_applications_eis.exists():
-                                raise ValidationError(
-                                    "An application for financial assistance from eis already exists for this NID."
-                                )
+                                Response({'status': 'error',
+                                          'message': 'An application for financial assistance from EIS already exists for this NID.',
+                                          'key': 'INVALID_PHONE_NUMBER'}, status=status.HTTP_400_BAD_REQUEST)
+                                # raise ValidationError(
+                                #     "An application for financial assistance from eis already exists for this NID."
+                                # )
 
                     except ObjectDoesNotExist:
                         logger.warning("No matching WorkforceEmployee found for given ID.")
