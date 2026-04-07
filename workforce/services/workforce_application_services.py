@@ -313,7 +313,7 @@ class WorkforceApplicationServices(BaseService):
 
                 if dependents_data and dependents_data != "[{}]":
                     incoming_ids = []
-                    if application_status not in  ["new", "draft", "forward_for_verification"]:
+                    if application_status not in  ["new", "draft"]:
                         for dep in dependents:
                             dep_id = dep.get("id")
                             if dep_id:
