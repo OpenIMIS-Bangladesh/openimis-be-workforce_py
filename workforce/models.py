@@ -1,6 +1,7 @@
 from django.db import models
 from core.models import HistoryModel, InteractiveUser
 from core.models.user import Role
+from core.models.user import RoleRight
 from location.models import Location
 from django.utils import timezone
 from datetime import timedelta
@@ -1696,3 +1697,62 @@ class WorkforceAssociationUserMap(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_association_user_map'
+
+
+class WorkforceCommittee(HistoryModel):
+    name_en = models.CharField(max_length=50, null=True, blank=True, db_comment="factory, officer")
+    name_bn = models.TextField(null=True, blank=True)
+    associations= models.JSONField(null=True, blank=True)
+    assigned_role= models.ForeignKey(
+        Role,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="assigned_role_id",
+    )
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_committee'
+
+class WorkforceCommitteeAssociationMap(HistoryModel):
+    all_association= models.ForeignKey(
+        WorkforceAllAssociation,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="committee_all_association_map_association_id",
+    )
+    committee= models.ForeignKey(
+        WorkforceCommittee,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="committee_all_association_map_committee_id",
+    )
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_committee_association_map'
+
+
+class WorkforceCommitteeUserMap(HistoryModel):
+    committee= models.ForeignKey(
+        WorkforceCommittee,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="committee_user_map_committee_id",
+    )
+    user= models.ForeignKey(
+        InteractiveUser,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="committee_user_map_committee_id",
+    )
+    is_noa_signature_user = models.BooleanField(default=False)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_committee_user_map'

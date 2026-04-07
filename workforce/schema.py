@@ -320,6 +320,25 @@ class Query(graphene.ObjectType):
         year=graphene.String(),
     )
 
+    workforce_committees = graphene.List(
+        WorkforceCommitteeGQLType,
+        client_mutation_id=graphene.String(required=False),
+        orderBy=graphene.List(of_type=graphene.String),
+    )
+
+    workforce_committee_association_maps = graphene.List(
+        WorkforceCommitteeAssociationMapGQLType,
+        client_mutation_id=graphene.String(required=False),
+        orderBy=graphene.List(of_type=graphene.String),
+    )
+
+    workforce_committee_user_maps = graphene.List(
+        WorkforceCommitteeUserMapGQLType,
+        committee_id= graphene.String(),
+        client_mutation_id=graphene.String(required=False),
+        orderBy=graphene.List(of_type=graphene.String),
+    )
+
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("unauthorized"))
@@ -1488,6 +1507,35 @@ class Query(graphene.ObjectType):
         except WorkforceEisBankAdvice.DoesNotExist:
             return None
 
+    def resolve_workforce_committees(self, info, **kwargs):
+        service = WorkforceCommitteeServices(info.context.user)
+        # query = service.get(**kwargs)
+        try:
+            qs = WorkforceCommittee.objects.filter(is_deleted=False)
+            return qs
+        except WorkforceCommittee.DoesNotExist:
+            return None
+
+    def resolve_workforce_committee_association_maps(self, info, **kwargs):
+        service = WorkforceCommitteeAssociationMapServices(info.context.user)
+        # query = service.get(**kwargs)
+        try:
+            qs = WorkforceCommitteeAssociationMap.objects.filter(is_deleted=False)
+            return qs
+        except Exception as e:
+            return None
+
+    def resolve_workforce_committee_user_maps(self, info, committee_id=None, **kwargs):
+        service = WorkforceCommitteeUserMapServices(info.context.user)
+        # query = service.get(**kwargs)
+        try:
+            qs = WorkforceCommitteeUserMap.objects.filter(is_deleted=False)
+            if committee_id:
+                qs = qs.filter(committee_id=committee_id)
+            return qs
+        except Exception as e:
+            return None
+
 class Mutation(graphene.ObjectType):
     create_workforce_representative = CreateWorkforceRepresentativeMutation.Field()
     update_workforce_representative = UpdateWorkforceRepresentativeMutation.Field()
@@ -1615,4 +1663,16 @@ class Mutation(graphene.ObjectType):
     create_workforce_eis_bank_advice = CreateWorkforceEisBankAdviceMutation.Field()
     update_workforce_eis_bank_advice = UpdateWorkforceEisBankAdviceMutation.Field()
     revert_workforce_eis_bank_advice = RevertWorkforceEisBankAdviceMutation.Field()
+
+    create_workforce_committee = CreateWorkforceCommitteeMutation.Field()
+    update_workforce_committee = UpdateWorkforceCommitteeMutation.Field()
+    delete_workforce_committee = DeleteWorkforceCommitteeMutation.Field()
+
+    create_workforce_committee_association_map = CreateWorkforceCommitteeAssociationMapMutation.Field()
+    update_workforce_committee_association_map = UpdateWorkforceCommitteeAssociationMapMutation.Field()
+
+    create_workforce_committee_user_map = CreateWorkforceCommitteeUserMapMutation.Field()
+    update_workforce_committee_user_map = UpdateWorkforceCommitteeUserMapMutation.Field()
+    delete_workforce_committee_user_map = DeleteWorkforceCommitteeUserMapMutation.Field()
+    update_workforce_committee_user_map_noa_signature = UpdateWorkforceCommitteeUserMapNoaSignatureMutation.Field()
 

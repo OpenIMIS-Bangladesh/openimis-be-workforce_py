@@ -257,7 +257,7 @@ class WorkforceEmployeeDependentServices(BaseService):
             doctor_json = json.loads(workforce_application.doctors_entry) if workforce_application.doctors_entry else None
             if doctor_json is None:
                 return False
-            disability_percentage = doctor_json.get("disabilityPerSchedule")
+            disability_percentage = doctor_json.get("disabilityPerSchedule") if "disabilityPerSchedule" in doctor_json else "0"
             accident_info_json = json.loads(
                 workforce_application.employee_accident_info) if workforce_application.employee_accident_info else None
             if accident_info_json is None:
@@ -272,10 +272,7 @@ class WorkforceEmployeeDependentServices(BaseService):
                 return False
             calculation_start_date = accident_info_json.get("dateOfDeath") if accident_info_json.get("dateOfDeath") else None
             calculation_start_date = datetime.strptime(calculation_start_date, "%Y-%m-%d").date() if isinstance(calculation_start_date, str) else calculation_start_date
-            if application_type == "financialAssistance":
-                disability_percentage = "100"
-            else:
-                disability_percentage = "0"
+            disability_percentage = "100"
 
 
         last_base_salary = float(workforce_application.last_base_salary) if workforce_application.last_base_salary else 0
@@ -310,7 +307,7 @@ class WorkforceEmployeeDependentServices(BaseService):
                 "Name": worker.first_name_en,
                 "ID": str(worker.id),
                 "Status": "Disabled" if application_type == "disabilityAssistance" else "Deceased",
-                "Disability level": disability_percentage + ("" if "%" in disability_percentage else "%"),
+                "Disability level": disability_percentage + ("" if disability_percentage is not None and "%" in disability_percentage else "%"),
                 # "Disability level": "50%",
                 "Monthly earnings used for calculation": str(salary_parameter),
                 "Date of birth": worker.birth_date.strftime("%m/%d/%Y") if worker.birth_date else "10/16/1997",

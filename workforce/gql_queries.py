@@ -2,19 +2,7 @@ import graphene
 from graphene_django import DjangoObjectType
 
 from core.gql_queries import InteractiveUserGQLType
-from .models import (
-    WorkforceRepresentative, WorkforceOrganization, WorkforceOrganizationUnit,
-    WorkforceOrganizationUnitDesignation, WorkforceOrganizationEmployee,
-    WorkforceEmployer, WorkforceOffice, WorkforceFactory, WorkforceEmployee, WorkforceOrganizationEmployeeDesignation,
-    WorkforceDocument, Bank, WorkforceEmployeeDependent, WorkforceEmployeeDesignation, WorkforceEmployeeAccident,
-    WorkforceEmployeeAccountInfo, WorkforceApplication, WorkforceDocumentType, WorkforceDocumentMap,
-    WorkforceUser, WorkforceApplicationMovement, WorkforceApplicationSummary,
-    WorkforceApplicationSummaryMovement,
-    WorkforceGrantMoney, WorkforceDiseases, WorkforceEducation, WorkforceEmployeeBankingInfo,
-    WorkforceFactoryRegistration, WorkforceEisPaymentDisbursement,
-    WorkforceEisPaymentProcess, WorkforceAllAssociation, WorkforceOtherCompensationInfo,
-    WorkforceEisPaymentDisbursementStage, WorkforceAssociationUserMap, WorkforceEisBankAdvice
-)
+from .models import *
 from core import prefix_filterset, ExtendedConnection
 from location.schema import LocationGQLType
 import django_filters
@@ -1319,5 +1307,42 @@ class WorkforceEisBankAdviceGQLType(DjangoObjectType):
             "remarks": ["exact", "icontains"],
             "month": ["exact", "icontains"],
             "year": ["exact", "icontains"],
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceCommitteeGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceCommittee
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "name_en": ["exact", "icontains"],
+            "name_bn": ["exact", "icontains"],
+            "assigned_role": ["exact"],
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceCommitteeAssociationMapGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceCommitteeAssociationMap
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "committee": ["exact"],
+            "all_association": ["exact"],
+        }
+        connection_class = ExtendedConnection
+
+
+class WorkforceCommitteeUserMapGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceCommitteeUserMap
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "committee": ["exact"],
+            "user": ["exact"],
         }
         connection_class = ExtendedConnection

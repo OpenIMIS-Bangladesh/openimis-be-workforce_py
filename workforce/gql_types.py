@@ -748,3 +748,22 @@ class WorkforceEisBankAdviceInputType(OpenIMISMutation.Input):
     remarks = graphene.String()
     month= graphene.String()
     year = graphene.String()
+
+
+class WorkforceCommitteeInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    name_en = graphene.String(required=True)
+    name_bn = graphene.String(required=False)
+    associations = graphene.JSONString(required=False)
+
+
+class WorkforceCommitteeAssociationMapInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    committee_id = graphene.UUID(required=True)
+    all_association_id = graphene.UUID(required=True)
+
+
+class WorkforceCommitteeUserMapInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    committee_id = graphene.UUID(required=True)
+    user_id = graphene.Int(required=True)
