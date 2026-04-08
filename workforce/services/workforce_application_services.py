@@ -318,7 +318,7 @@ class WorkforceApplicationServices(BaseService):
                             dep_id = dep.get("id")
                             if dep_id:
                                 incoming_ids.append(extract_uuid(dep_id))
-                        WorkforceDocument.objects.filter(workforce_application=application_instance).exclude(workforce_dependent_id__in=incoming_ids).delete()
+                        WorkforceDocument.objects.filter(workforce_application=application_instance, workforce_dependent_id__isnull=False).exclude(workforce_dependent_id__in=incoming_ids).delete()
                         WorkforceEisPaymentProcess.objects.filter(workforce_application=application_instance).exclude(workforce_employee_dependent_id__in=incoming_ids).delete()
                         WorkforceEmployeeBankingInfo.objects.filter(application=application_instance).exclude(dependant_id__in=incoming_ids).delete()
                         WorkforceEmployeeDependent.objects.filter(workforce_application=application_instance).exclude(id__in=incoming_ids).delete()
