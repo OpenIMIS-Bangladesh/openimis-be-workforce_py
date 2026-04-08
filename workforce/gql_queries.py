@@ -1336,6 +1336,27 @@ class WorkforceCommitteeAssociationMapGQLType(DjangoObjectType):
         connection_class = ExtendedConnection
 
 
+class WorkforceCommitteeUserGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceCommitteeUser
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "login_name": ["exact", "icontains"],
+            "representative_name": ["exact", "icontains"],
+            "organization_name": ["exact", "icontains"],
+            "designation": ["exact", "icontains"],
+            "representative_type": ["exact", "icontains"],
+            "committee_role": ["exact", "icontains"],
+            "phone_number": ["exact", "icontains"],
+            "email": ["exact", "icontains"],
+            "office_address": ["exact", "icontains"],
+            "current_address": ["exact", "icontains"],
+            "related_user_id": ["exact"],
+        }
+        connection_class = ExtendedConnection
+
+
 class WorkforceCommitteeUserMapGQLType(DjangoObjectType):
     class Meta:
         model = WorkforceCommitteeUserMap

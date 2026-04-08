@@ -763,6 +763,21 @@ class WorkforceCommitteeAssociationMapInputType(OpenIMISMutation.Input):
     all_association_id = graphene.UUID(required=True)
 
 
+class WorkforceCommitteeUserInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    login_name = graphene.String(required=False)
+    representative_name = graphene.String(required=False)
+    organization_name = graphene.String(required=False)
+    designation = graphene.String(required=False)
+    representative_type = graphene.String(required=False)
+    committee_role = graphene.String(required=False)
+    phone_number = graphene.String(required=False)
+    email = graphene.String(required=False)
+    office_address = graphene.String(required=False)
+    current_address = graphene.String(required=False)
+    related_user_id = graphene.Int(required=False)
+
+
 class WorkforceCommitteeUserMapInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
     committee_id = graphene.UUID(required=True)

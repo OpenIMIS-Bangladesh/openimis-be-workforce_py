@@ -19,6 +19,7 @@ from core.schema import OrderedDjangoFilterConnectionField
 from .gql_mutations import *
 from .gql_queries import *
 from .models import *
+from .services.workforce_committee_user_services import WorkforceCommitteeUserServices
 from django.db.models.expressions import RawSQL
 
 
@@ -328,6 +329,12 @@ class Query(graphene.ObjectType):
 
     workforce_committee_association_maps = graphene.List(
         WorkforceCommitteeAssociationMapGQLType,
+        client_mutation_id=graphene.String(required=False),
+        orderBy=graphene.List(of_type=graphene.String),
+    )
+
+    workforce_committee_users = OrderedDjangoFilterConnectionField(
+        WorkforceCommitteeUserGQLType,
         client_mutation_id=graphene.String(required=False),
         orderBy=graphene.List(of_type=graphene.String),
     )
@@ -1525,6 +1532,14 @@ class Query(graphene.ObjectType):
         except Exception as e:
             return None
 
+    def resolve_workforce_committee_users(self, info, **kwargs):
+        service = WorkforceCommitteeUserServices(info.context.user)
+        try:
+            query = service.get(**kwargs)
+            return gql_optimizer.query(query, info)
+        except Exception:
+            return None
+
     def resolve_workforce_committee_user_maps(self, info, committee_id=None, **kwargs):
         service = WorkforceCommitteeUserMapServices(info.context.user)
         # query = service.get(**kwargs)
@@ -1670,6 +1685,10 @@ class Mutation(graphene.ObjectType):
 
     create_workforce_committee_association_map = CreateWorkforceCommitteeAssociationMapMutation.Field()
     update_workforce_committee_association_map = UpdateWorkforceCommitteeAssociationMapMutation.Field()
+
+    create_workforce_committee_user = CreateWorkforceCommitteeUserMutation.Field()
+    update_workforce_committee_user = UpdateWorkforceCommitteeUserMutation.Field()
+    delete_workforce_committee_user = DeleteWorkforceCommitteeUserMutation.Field()
 
     create_workforce_committee_user_map = CreateWorkforceCommitteeUserMapMutation.Field()
     update_workforce_committee_user_map = UpdateWorkforceCommitteeUserMapMutation.Field()

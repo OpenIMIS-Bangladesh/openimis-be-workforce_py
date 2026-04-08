@@ -26,7 +26,7 @@ from .gql_types import (
     WorkforceFactoryRegistrationApprovalInputType, WorkforceApplicationBulkUpdateInputType,
     WorkforceInteractiveUserInputType, WorkforceAllAssociationInputType, WorkforceOtherCompensationInfoInputType,
     WorkforceAssociationUserMapInputType, WorkforceCommitteeInputType, WorkforceCommitteeAssociationMapInputType,
-    WorkforceCommitteeUserMapInputType
+    WorkforceCommitteeUserInputType, WorkforceCommitteeUserMapInputType
 )
 
 from .models import Bank
@@ -68,6 +68,7 @@ from .services.update_interactive_user_services import UpdateInteractiveUserServ
 from .services.workforce_all_association_services import WorkforceAllAssociationServices
 from .services.workforce_committee_services import WorkforceCommitteeServices
 from .services.workforce_committee_association_map_services import WorkforceCommitteeAssociationMapServices
+from .services.workforce_committee_user_services import WorkforceCommitteeUserServices
 from .services.workforce_committee_user_map_services import WorkforceCommitteeUserMapServices
 from .gql_queries import (
     WorkforceInteractiveUserGQLType
@@ -1845,15 +1846,21 @@ class CreateWorkforceEisPaymentProcessMutation(graphene.Mutation):
             user = info.context.user if hasattr(info.context, 'user') else None
             workforce_application = WorkforceApplication.objects.get(id=data["workforce_application_id"])
             if workforce_application.application_type == "disabilityAssistance":
-                if WorkforceEisPaymentProcess.objects.filter(
+                # if WorkforceEisPaymentProcess.objects.filter(
+                #         workforce_application_id=data["workforce_application_id"]
+                # ).exists():
+                #     return cls(success=False, errors=["Disbursement already exists"])
+                if ("recall" in data and data["recall"] == "yes") or not WorkforceEisPaymentProcess.objects.filter(
                         workforce_application_id=data["workforce_application_id"]
                 ).exists():
-                    return cls(success=False, errors=["Disbursement already exists"])
-                # service = WorkforceEmployeeDependentServices(user)
-                # service.calculate_eis_amount(
-                #     data["workforce_application_id"],
-                #     workforce_application.application_type
-                # )
+                    WorkforceEisPaymentProcess.objects.filter(
+                                workforce_application_id=data["workforce_application_id"]
+                        ).delete()
+                    service = WorkforceEmployeeDependentServices(user)
+                    service.calculate_eis_amount(
+                        data["workforce_application_id"],
+                        workforce_application.application_type
+                    )
                 WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id)
 
             if workforce_application.application_type == "financialAssistance":
@@ -2419,6 +2426,54 @@ class UpdateWorkforceCommitteeAssociationMapMutation(BaseHistoryModelCreateMutat
         return result
 
 
+class CreateWorkforceCommitteeUserMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateWorkforceCommitteeUserMutation"
+
+    class Input(WorkforceCommitteeUserInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_create_workforce_committee_user"
+        service_instance = WorkforceCommitteeUserServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission="",
+            call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class UpdateWorkforceCommitteeUserMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWorkforceCommitteeUserMutation"
+
+    class Input(WorkforceCommitteeUserInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_update_workforce_committee_user"
+        service_instance = WorkforceCommitteeUserServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission="",
+            call_type='update',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
 class CreateWorkforceCommitteeUserMapMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
     _mutation_module = mutation_module
     _mutation_class = "CreateWorkforceCommitteeUserMapMutation"
@@ -2467,6 +2522,24 @@ class UpdateWorkforceCommitteeUserMapMutation(BaseHistoryModelCreateMutationMixi
         )
 
         return result
+
+
+class DeleteWorkforceCommitteeUserMutation(graphene.Mutation):
+    class Arguments:
+        id = graphene.String(required=True)
+
+    success = graphene.Boolean()
+    errors = graphene.List(graphene.String)
+
+    @classmethod
+    def mutate(cls, root, info, **data):
+        from workforce.models import WorkforceCommitteeUser
+        try:
+            user = info.context.user if hasattr(info.context, 'user') else None
+            WorkforceCommitteeUser.objects.get(id=data["id"]).delete(username=user.username)
+            return cls(success=True, errors=[])
+        except Exception as e:
+            return cls(success=False, errors=[str(e)])
 
 
 class DeleteWorkforceCommitteeUserMapMutation(graphene.Mutation):
@@ -2528,6 +2601,7 @@ class DeleteWorkforceCommitteeMutation(graphene.Mutation):
     def mutate(cls, root, info, **data):
         from workforce.models import WorkforceCommittee
         from core.models.user import UserRole
+        from core.models.user import Role
         from core.models.user import RoleRight
         try:
             user = info.context.user if hasattr(info.context, 'user') else None
@@ -2537,6 +2611,7 @@ class DeleteWorkforceCommitteeMutation(graphene.Mutation):
             role_rights.delete()
             user_role.delete()
             committee.delete(username=user.username)
+            Role.objects.filter(id=committee.assigned_role_id).delete()
             return cls(success=True, errors=[])
         except Exception as e:
             return cls(success=False, errors=[str(e)])

@@ -25,6 +25,7 @@ class WorkforceCommitteeUserMapServices(BaseService):
         new_map= WorkforceCommitteeUserMap(committee_id=committee_id, user_id=user_id, is_noa_signature_user=False)
         try:
             new_map.save(username=self.user.username)
+            UserRole.objects.filter(user_id=user_id).delete()
             new_user_role= UserRole(
                 user_id=user_id,
                 role_id=committee.assigned_role_id,

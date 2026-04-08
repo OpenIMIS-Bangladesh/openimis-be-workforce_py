@@ -1736,6 +1736,30 @@ class WorkforceCommitteeAssociationMap(HistoryModel):
         db_table = 'workforce_committee_association_map'
 
 
+class WorkforceCommitteeUser(HistoryModel):
+    login_name = models.CharField(max_length=150, blank=True, null=True)
+    representative_name = models.TextField(blank=True, null=True)
+    organization_name = models.TextField(blank=True, null=True)
+    designation = models.TextField(blank=True, null=True)
+    representative_type = models.CharField(max_length=100, blank=True, null=True)
+    committee_role = models.CharField(max_length=100, blank=True, null=True)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    office_address = models.TextField(blank=True, null=True)
+    current_address = models.TextField(blank=True, null=True)
+    related_user_id = models.ForeignKey(
+        InteractiveUser,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="committee_related_user_id",
+    )
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_committee_user'
+
+
 class WorkforceCommitteeUserMap(HistoryModel):
     committee= models.ForeignKey(
         WorkforceCommittee,
@@ -1749,7 +1773,7 @@ class WorkforceCommitteeUserMap(HistoryModel):
         models.DO_NOTHING,
         blank=True,
         null=True,
-        related_name="committee_user_map_committee_id",
+        related_name="committee_user_map_user_id",
     )
     is_noa_signature_user = models.BooleanField(default=False)
 
