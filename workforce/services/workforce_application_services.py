@@ -279,7 +279,7 @@ class WorkforceApplicationServices(BaseService):
         dependent_update_request = obj_data.get("employee_dependent_info", [])
         if dependent_update_request and dependent_update_request != "[{}]":
             try:
-                if application_status == "draft" or application_status == "new" or application_status=="forward_for_verification":
+                if application_status == "draft" or application_status == "new":
                     # Remove old dependents + related banking info for CF application
                     existing_dependents = WorkforceEmployeeDependent.objects.filter(
                         workforce_application=application_instance
@@ -318,6 +318,7 @@ class WorkforceApplicationServices(BaseService):
                             dep_id = dep.get("id")
                             if dep_id:
                                 incoming_ids.append(extract_uuid(dep_id))
+                        WorkforceDocument.objects.filter(workforce_application=application_instance).exclude(workforce_dependent_id__in=incoming_ids).delete()
                         WorkforceEisPaymentProcess.objects.filter(workforce_application=application_instance).exclude(workforce_employee_dependent_id__in=incoming_ids).delete()
                         WorkforceEmployeeBankingInfo.objects.filter(application=application_instance).exclude(dependant_id__in=incoming_ids).delete()
                         WorkforceEmployeeDependent.objects.filter(workforce_application=application_instance).exclude(id__in=incoming_ids).delete()
