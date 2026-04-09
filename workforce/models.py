@@ -1790,6 +1790,13 @@ class WorkforceCommitteeUserMap(HistoryModel):
         null=True,
         related_name="committee_user_map_user_id",
     )
+    workforce_committee_user= models.ForeignKey(
+        WorkforceCommitteeUser,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="committee_user_map_committee_user_id",
+    )
     is_noa_signature_user = models.BooleanField(default=False)
     role_in_committee= models.CharField(max_length=200, blank=True, null=True)
 

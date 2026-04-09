@@ -5,7 +5,7 @@ from core.models.user import UserRole, InteractiveUser
 from core.services import BaseService
 from django.db import IntegrityError
 
-from workforce.models import WorkforceCommitteeUserMap, WorkforceCommittee
+from workforce.models import WorkforceCommitteeUserMap, WorkforceCommittee, WorkforceCommitteeUser
 
 logger = logging.getLogger(__name__)
 
@@ -22,18 +22,20 @@ class WorkforceCommitteeUserMapServices(BaseService):
         committee_id= obj_data["committee_id"]
         user_id= obj_data["user_id"]
         committee = WorkforceCommittee.objects.get(id=committee_id)
-        new_map= WorkforceCommitteeUserMap(committee_id=committee_id, user_id=user_id, is_noa_signature_user=False)
+        committee_user= WorkforceCommitteeUser.objects.filter(related_user_id=user_id).first()
+        new_map= WorkforceCommitteeUserMap(committee_id=committee_id, user_id=user_id, is_noa_signature_user=False, workforce_committee_user_id=committee_user.id)
         try:
             new_map.save(username=self.user.username)
-            UserRole.objects.filter(user_id=user_id).delete()
-            InteractiveUser.objects.get(user_id=user_id).update(role_id= committee.assigned_role_id)
+            # UserRole.objects.filter(user_id=user_id).delete()
+            InteractiveUser.objects.get(id=user_id).update(role_id= committee.assigned_role_id)
             new_user_role= UserRole(
                 user_id=user_id,
                 role_id=committee.assigned_role_id,
                 audit_user_id=1
             )
             new_user_role.save()
-        except IntegrityError as e:
+        except Exception as e:
+            print(e)
             return None
 
 
