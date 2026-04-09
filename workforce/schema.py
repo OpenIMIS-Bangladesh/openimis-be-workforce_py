@@ -348,6 +348,7 @@ class Query(graphene.ObjectType):
     workforce_committee_user_maps = graphene.List(
         WorkforceCommitteeUserMapGQLType,
         committee_id= graphene.String(),
+        user_id_in= graphene.List(of_type=graphene.String),
         client_mutation_id=graphene.String(required=False),
         orderBy=graphene.List(of_type=graphene.String),
     )
@@ -357,6 +358,19 @@ class Query(graphene.ObjectType):
         WorkforceUserRoleGQLType,
         user_id= graphene.String(required=True),
     )
+
+
+    fetch_noa_signature_by_approvers = graphene.Field(
+        WorkforceDocumentGQLType,
+        user_id_in= graphene.List(of_type=graphene.String),
+    )
+
+    fetch_workforce_noa_signer_user_by_approvers = graphene.Field(
+        WorkforceCommitteeUserMapGQLType,
+        user_id_in= graphene.List(of_type=graphene.String),
+    )
+
+
 
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
@@ -1554,23 +1568,43 @@ class Query(graphene.ObjectType):
         except Exception:
             return None
 
-    def resolve_workforce_committee_user_maps(self, info, committee_id=None, **kwargs):
+    def resolve_workforce_committee_user_maps(self, info, committee_id=None, user_id_in=None, **kwargs):
         service = WorkforceCommitteeUserMapServices(info.context.user)
         # query = service.get(**kwargs)
         try:
             qs = WorkforceCommitteeUserMap.objects.filter(is_deleted=False)
             if committee_id:
                 qs = qs.filter(committee_id=committee_id)
+            if user_id_in:
+                qs = qs.filter(user_id__in=user_id_in)
             return qs
         except Exception as e:
             return None
 
 
     def resolve_fetch_user_role_by_user_id(self, info, user_id=None, **kwargs):
-        service = WorkforceCommitteeUserMapServices(info.context.user)
-        # query = service.get(**kwargs)
         try:
             qs = UserRole.objects.filter(user_id=user_id)
+            return qs
+        except Exception as e:
+            return None
+
+    def resolve_fetch_noa_signature_by_approvers(self, info, user_id_in=None, **kwargs):
+        try:
+            user_map = WorkforceCommitteeUserMap.objects.filter(user_id__in=user_id_in).first()
+            committee_id = user_map.committee_id
+            noa_user = WorkforceCommitteeUserMap.objects.filter(committee_id=committee_id, is_noa_signature_user=True).first()
+            noa_user_id= noa_user.user_id
+            qs = WorkforceDocument.objects.filter(holder_id=noa_user_id, document_type="signature").order_by("-date_created").first()
+            return qs
+        except Exception as e:
+            return None
+
+    def resolve_fetch_workforce_noa_signer_user_by_approvers(self, info, user_id_in=None, **kwargs):
+        try:
+            user_map = WorkforceCommitteeUserMap.objects.filter(user_id__in=user_id_in).first()
+            committee_id= user_map.committee_id
+            qs = WorkforceCommitteeUserMap.objects.filter(committee_id=committee_id, is_noa_signature_user=True).first()
             return qs
         except Exception as e:
             return None

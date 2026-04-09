@@ -49,14 +49,15 @@ class WorkforceCommitteeServices(BaseService):
         
         # Step 2: Copy RoleRights from role_id=58
         try:
-            source_role_rights = RoleRight.objects.filter(role_id=66)
+            association_roles= Role.objects.filter(id__in=[66,58,49]).first()
+            source_role_rights = RoleRight.objects.filter(role_id=association_roles.id)
             if not source_role_rights.exists():
                 logger.warning("No RoleRights found for role_id=58")
             
             for source_right in source_role_rights:
                 new_role_right = RoleRight(
                     role_id=new_role.id,
-                    right_id=source_right.id,
+                    right_id=source_right.right_id,
                     audit_user_id=1
                 )
                 new_role_right.save()
