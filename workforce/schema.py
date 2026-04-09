@@ -73,6 +73,7 @@ class Query(graphene.ObjectType):
     )
     workforce_documents = OrderedDjangoFilterConnectionField(
         WorkforceDocumentGQLType,
+        workforce_factory_id= graphene.String(),
         orderBy=graphene.List(of_type=graphene.String),
     )
     workforce_banks = OrderedDjangoFilterConnectionField(
@@ -443,10 +444,15 @@ class Query(graphene.ObjectType):
         # if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
         #     raise PermissionDenied(_("Unauthorized access"))
         pass
-    def resolve_workforce_documents(self, info, **kwargs):
+    def resolve_workforce_documents(self, info, workforce_factory_id=None, **kwargs):
         # if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
         #     raise PermissionDenied(_("Unauthorized access"))
-        return WorkforceDocument.objects.filter(is_deleted=False)
+        # return WorkforceDocument.objects.filter(is_deleted=False)
+        service = WorkforceDocumentServices(info.context.user)
+        query = service.get(**kwargs)
+        if workforce_factory_id:
+            query= query.filter(factory_id=workforce_factory_id)
+        return gql_optimizer.query(query, info)
 
     def resolve_workforce_banks(self, info, get_unique=None, **kwargs):
         query = Bank.objects.filter(is_deleted=False)
