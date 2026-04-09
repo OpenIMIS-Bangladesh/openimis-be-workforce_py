@@ -339,7 +339,7 @@ class Query(graphene.ObjectType):
         orderBy=graphene.List(of_type=graphene.String),
     )
 
-    workforce_committee_users = OrderedDjangoFilterConnectionField(
+    workforce_committee_users = graphene.List(
         WorkforceCommitteeUserGQLType,
         client_mutation_id=graphene.String(required=False),
         orderBy=graphene.List(of_type=graphene.String),
@@ -350,6 +350,12 @@ class Query(graphene.ObjectType):
         committee_id= graphene.String(),
         client_mutation_id=graphene.String(required=False),
         orderBy=graphene.List(of_type=graphene.String),
+    )
+
+
+    fetch_user_role_by_user_id = graphene.List(
+        WorkforceUserRoleGQLType,
+        user_id= graphene.String(required=True),
     )
 
     def resolve_workforce_representatives(self, info, **kwargs):
@@ -1541,8 +1547,10 @@ class Query(graphene.ObjectType):
     def resolve_workforce_committee_users(self, info, **kwargs):
         service = WorkforceCommitteeUserServices(info.context.user)
         try:
-            query = service.get(**kwargs)
-            return gql_optimizer.query(query, info)
+            # query = service.get(**kwargs)
+            # return gql_optimizer.query(query, info)
+            qs= WorkforceCommitteeUser.objects.filter(is_deleted=False)
+            return qs
         except Exception:
             return None
 
@@ -1553,6 +1561,16 @@ class Query(graphene.ObjectType):
             qs = WorkforceCommitteeUserMap.objects.filter(is_deleted=False)
             if committee_id:
                 qs = qs.filter(committee_id=committee_id)
+            return qs
+        except Exception as e:
+            return None
+
+
+    def resolve_fetch_user_role_by_user_id(self, info, user_id=None, **kwargs):
+        service = WorkforceCommitteeUserMapServices(info.context.user)
+        # query = service.get(**kwargs)
+        try:
+            qs = UserRole.objects.filter(user_id=user_id)
             return qs
         except Exception as e:
             return None

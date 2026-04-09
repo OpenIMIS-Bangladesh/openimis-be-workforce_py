@@ -1758,7 +1758,6 @@ class WorkforceCommitteeUser(HistoryModel):
     organization_name = models.TextField(blank=True, null=True)
     designation = models.TextField(blank=True, null=True)
     representative_type = models.CharField(max_length=100, blank=True, null=True)
-    committee_role = models.CharField(max_length=100, blank=True, null=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     office_address = models.TextField(blank=True, null=True)
@@ -1792,6 +1791,7 @@ class WorkforceCommitteeUserMap(HistoryModel):
         related_name="committee_user_map_user_id",
     )
     is_noa_signature_user = models.BooleanField(default=False)
+    role_in_committee= models.CharField(max_length=200, blank=True, null=True)
 
     class Meta:
         managed = True

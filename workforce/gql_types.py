@@ -774,7 +774,6 @@ class WorkforceCommitteeUserInputType(OpenIMISMutation.Input):
     organization_name = graphene.String(required=False)
     designation = graphene.String(required=False)
     representative_type = graphene.String(required=False)
-    committee_role = graphene.String(required=False)
     phone_number = graphene.String(required=False)
     email = graphene.String(required=False)
     office_address = graphene.String(required=False)
@@ -786,3 +785,5 @@ class WorkforceCommitteeUserMapInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
     committee_id = graphene.UUID(required=True)
     user_id = graphene.Int(required=True)
+    is_noa_signature_user = graphene.Boolean(required=False)
+    role_in_committee= graphene.String(required=False)
