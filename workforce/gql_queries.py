@@ -802,9 +802,12 @@ class WorkforceDocumentMapGQLType(DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         filter_fields = {
             "id": ["exact"],
-            "workforce_document_type_id": ["exact"],
-            "mapped_by_id": ["exact"],
-            "type": ["contains"],
+            "workforce_application_id": ["exact"],
+            "workforce_document_id": ["exact"],
+            "verified_by_id": ["exact"],
+            "verified_by_role_id": ["exact"],
+            "verification_date": ["icontains"],
+            "note": ["icontains"],
             "status": ["exact"],
         }
         connection_class = ExtendedConnection
@@ -1344,6 +1347,7 @@ class WorkforceCommitteeUserGQLType(DjangoObjectType):
             "id": ["exact"],
             "login_name": ["exact", "icontains"],
             "representative_name": ["exact", "icontains"],
+            "representative_name_bn": ["exact", "icontains"],
             "organization_name": ["exact", "icontains"],
             "designation": ["exact", "icontains"],
             "representative_type": ["exact", "icontains"],

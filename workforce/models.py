@@ -957,21 +957,36 @@ class WorkforceDocumentType(HistoryModel):
 
 
 class WorkforceDocumentMap(HistoryModel):
-    workforce_document_type = models.ForeignKey(
-        WorkforceDocumentType,
+    workforce_application = models.ForeignKey(
+        WorkforceApplication,
         models.DO_NOTHING,
         blank=True,
         null=True,
-        related_name="workforce_document_type",
+        related_name="workforce_document_map_application",
     )
-    mapped_by = models.ForeignKey(
+    workforce_document= models.ForeignKey(
+        WorkforceDocument,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name= "workforce_document_map_document_id",
+    )
+    verified_by = models.ForeignKey(
         InteractiveUser,
         models.DO_NOTHING,
         blank=True,
         null=True,
-        related_name="mapped_by",
+        related_name="document_verifier"
     )
-    type = models.CharField(max_length=500, null=True, blank=True)
+    verified_by_role = models.ForeignKey(
+        InteractiveUser,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="document_verifier_role"
+    )
+    verification_date= models.DateField(null=True, blank=True)
+    note = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=30, null=True, blank=True)
 
     class Meta:
@@ -1739,6 +1754,7 @@ class WorkforceCommitteeAssociationMap(HistoryModel):
 class WorkforceCommitteeUser(HistoryModel):
     login_name = models.CharField(max_length=150, blank=True, null=True)
     representative_name = models.TextField(blank=True, null=True)
+    representative_name_bn = models.TextField(blank=True, null=True)
     organization_name = models.TextField(blank=True, null=True)
     designation = models.TextField(blank=True, null=True)
     representative_type = models.CharField(max_length=100, blank=True, null=True)
@@ -1747,7 +1763,7 @@ class WorkforceCommitteeUser(HistoryModel):
     email = models.EmailField(blank=True, null=True)
     office_address = models.TextField(blank=True, null=True)
     current_address = models.TextField(blank=True, null=True)
-    related_user_id = models.ForeignKey(
+    related_user = models.ForeignKey(
         InteractiveUser,
         models.DO_NOTHING,
         blank=True,

@@ -121,8 +121,14 @@ class Query(graphene.ObjectType):
         application_for_in=graphene.List(graphene.String),
         document_type_in=graphene.List(graphene.String)
     )
-    workforce_document_map = OrderedDjangoFilterConnectionField(
+    workforce_document_map = graphene.List(
         WorkforceDocumentMapGQLType,
+        workforce_application_id=graphene.String(),
+        workforce_document_id=graphene.String(),
+        verified_by_id=graphene.String(),
+        verified_by_role_id=graphene.String(),
+        status=graphene.String(),
+        verification_date=graphene.String(),
         client_mutation_id=graphene.String(),
         orderBy=graphene.List(of_type=graphene.String),
     )
@@ -1550,6 +1556,32 @@ class Query(graphene.ObjectType):
             return qs
         except Exception as e:
             return None
+
+    def resolve_workforce_document_map(self, info, workforce_application_id=None, workforce_document_id=None, verified_by_id=None, verified_by_role_id=None, status=None, verification_date=None, **kwargs):
+        try:
+            qs = WorkforceDocumentMap.objects.filter(is_deleted=False)
+            if workforce_application_id:
+                qs = qs.filter(workforce_application_id=workforce_application_id)
+            if workforce_document_id:
+                qs = qs.filter(workforce_document_id=workforce_document_id)
+
+            if verified_by_id:
+                qs = qs.filter(verified_by_id=verified_by_id)
+
+            if verified_by_role_id:
+                qs = qs.filter(verified_by_role_id=verified_by_role_id)
+
+            if status:
+                qs = qs.filter(status=status)
+
+            if verification_date:
+                qs = qs.filter(verification_date= verification_date)
+
+            return qs
+        except Exception as e:
+            return {"error": f"Token error: {str(e)}"}
+
+
 
 class Mutation(graphene.ObjectType):
     create_workforce_representative = CreateWorkforceRepresentativeMutation.Field()

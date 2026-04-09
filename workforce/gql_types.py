@@ -475,10 +475,13 @@ class WorkforceDocumentTypeInputType(OpenIMISMutation.Input):
 
 class WorkforceDocumentMapInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
-    workforce_document_type_id = graphene.UUID()
-    mapped_by_id = graphene.String()
-    type = graphene.String()
-    status = graphene.String()
+    workforce_application_id = graphene.String()
+    workforce_document_id = graphene.String()
+    verified_by_id = graphene.String()
+    verified_by_role_id = graphene.String()
+    verification_date = graphene.String()
+    note = graphene.String()
+    status= graphene.String()
 
 
 class WorkforceUserInputType(OpenIMISMutation.Input):
@@ -767,6 +770,7 @@ class WorkforceCommitteeUserInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
     login_name = graphene.String(required=False)
     representative_name = graphene.String(required=False)
+    representative_name_bn = graphene.String(required=False)
     organization_name = graphene.String(required=False)
     designation = graphene.String(required=False)
     representative_type = graphene.String(required=False)

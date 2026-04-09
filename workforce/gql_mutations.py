@@ -10,24 +10,7 @@ from .apps import WorkforceConfig
 from datetime import date, datetime
 import json
 import graphene
-from .gql_types import (
-    WorkforceOrganizationInputType, WorkforceRepresentativeInputType, WorkforceOrganizationUnitInputType,
-    WorkforceOrganizationUnitDesignationInputType, WorkforceOrganizationEmployeeInputType,
-    WorkforceEmployerInputType, WorkforceOfficeInputType, WorkforceFactoryInputType,
-    WorkforceEmployeeInputType, WorkforceOrganizationEmployeeDesignationInputType,
-    WorkforceEmployerStatusInput, WorkforceDocumentInputType, WorkforceBankInputType,
-    WorkforceEmployeeDependentInputType, WorkforceEmployeeDesignationInputType,
-    WorkforceEmployeeAccidentInputType, WorkforceEmployeeAccountInfoInputType,
-    WorkforceApplicationInputType, WorkforceDocumentTypeInputType, WorkforceDocumentMapInputType,
-    WorkforceUserInputType, WorkforceApplicationMovementInputType, WorkforceApplicationSummaryInputType,
-    WorkforceApplicationSummaryMovementInputType, WorkforceGrantMoneyInputType, WorkforceDiseasesInputType,
-    WorkforceEducationInputType, WorkforceEmployeeBankingInfoInputType,
-    WorkforceFactoryRegistrationInputType,
-    WorkforceFactoryRegistrationApprovalInputType, WorkforceApplicationBulkUpdateInputType,
-    WorkforceInteractiveUserInputType, WorkforceAllAssociationInputType, WorkforceOtherCompensationInfoInputType,
-    WorkforceAssociationUserMapInputType, WorkforceCommitteeInputType, WorkforceCommitteeAssociationMapInputType,
-    WorkforceCommitteeUserInputType, WorkforceCommitteeUserMapInputType
-)
+from .gql_types import *
 
 from .models import Bank
 from .services.workforce_association_user_map_services import WorkforceAssociationUserMapServices

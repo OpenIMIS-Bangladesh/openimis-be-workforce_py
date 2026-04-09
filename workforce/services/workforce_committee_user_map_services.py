@@ -1,7 +1,7 @@
 import logging
 import base64
 
-from core.models.user import UserRole
+from core.models.user import UserRole, InteractiveUser
 from core.services import BaseService
 from django.db import IntegrityError
 
@@ -26,6 +26,7 @@ class WorkforceCommitteeUserMapServices(BaseService):
         try:
             new_map.save(username=self.user.username)
             UserRole.objects.filter(user_id=user_id).delete()
+            InteractiveUser.objects.get(user_id=user_id).update(role_id= committee.assigned_role_id)
             new_user_role= UserRole(
                 user_id=user_id,
                 role_id=committee.assigned_role_id,
