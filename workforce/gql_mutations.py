@@ -2598,3 +2598,23 @@ class DeleteWorkforceCommitteeMutation(graphene.Mutation):
             return cls(success=True, errors=[])
         except Exception as e:
             return cls(success=False, errors=[str(e)])
+
+
+class SendSmsNotificationMutation(graphene.Mutation):
+    class Arguments:
+        message = graphene.String(required=True)
+        phone_number= graphene.String(required=True)
+
+    success = graphene.Boolean()
+    message = graphene.String()
+    errors = graphene.List(graphene.String)
+
+    @classmethod
+    def mutate(cls, root, info, **data):
+        from workforce.services.workforce_sms_services import send_sms
+        try:
+            user = info.context.user if hasattr(info.context, 'user') else None
+            send_sms(data["phone_number"], data["message"])
+            return cls(success=True, message="SMS has been sent successfully to: "+data["phone_number"], errors=[])
+        except Exception as e:
+            return cls(success=False, message="Invalid Phone Number or something went wrong", errors=[str(e)])

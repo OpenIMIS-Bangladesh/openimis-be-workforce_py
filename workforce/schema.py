@@ -1785,3 +1785,6 @@ class Mutation(graphene.ObjectType):
     delete_workforce_committee_user_map = DeleteWorkforceCommitteeUserMapMutation.Field()
     update_workforce_committee_user_map_noa_signature = UpdateWorkforceCommitteeUserMapNoaSignatureMutation.Field()
 
+
+    send_sms_notification= SendSmsNotificationMutation.Field()
+
