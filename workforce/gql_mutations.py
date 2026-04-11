@@ -53,6 +53,7 @@ from .services.workforce_committee_services import WorkforceCommitteeServices
 from .services.workforce_committee_association_map_services import WorkforceCommitteeAssociationMapServices
 from .services.workforce_committee_user_services import WorkforceCommitteeUserServices
 from .services.workforce_committee_user_map_services import WorkforceCommitteeUserMapServices
+from .services.workforce_notification_services import WorkforceNotificationServices
 from .gql_queries import (
     WorkforceInteractiveUserGQLType
 )
@@ -2598,6 +2599,54 @@ class DeleteWorkforceCommitteeMutation(graphene.Mutation):
             return cls(success=True, errors=[])
         except Exception as e:
             return cls(success=False, errors=[str(e)])
+
+
+class CreateWorkforceNotificationMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateWorkforceNotificationMutation"
+
+    class Input(WorkforceNotificationInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_create_workforce_notification"
+        service_instance = WorkforceNotificationServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission="",
+            call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class UpdateWorkforceNotificationMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWorkforceNotificationMutation"
+
+    class Input(WorkforceNotificationInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_update_workforce_notification"
+        service_instance = WorkforceNotificationServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission="",
+            call_type='update',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
 
 
 class SendSmsNotificationMutation(graphene.Mutation):

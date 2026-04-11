@@ -1372,3 +1372,17 @@ class WorkforceCommitteeUserMapGQLType(DjangoObjectType):
             "role_in_committee": ["exact"]
         }
         connection_class = ExtendedConnection
+
+
+class WorkforceNotificationGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceNotification
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "notification": ["exact", "icontains"],
+            "status": ["exact", "icontains"],
+            "is_read": ["exact"],
+            "user_id": ["exact"],
+        }
+        connection_class = ExtendedConnection

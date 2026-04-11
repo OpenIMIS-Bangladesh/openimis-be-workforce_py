@@ -1806,17 +1806,18 @@ class WorkforceCommitteeUserMap(HistoryModel):
         db_table = 'workforce_committee_user_map'
 
 
-# class WorkforceNotification(HistoryModel):
-#     notification = models.TextField(blank=True, null=True)
-#     is_read = models.TextField(blank=True, null=True))
-#     user_id = models.ForeignKey(
-#         InteractiveUser,
-#         models.DO_NOTHING,
-#         blank=True,
-#         null=True,
-#         related_name="committee_related_user_id",
-#     )
-#
-#     class Meta:
-#         managed = True
-#         db_table = 'workforce_committee_user'
+class WorkforceNotification(HistoryModel):
+    notification = models.TextField(blank=True, null=True)
+    is_read = models.BooleanField(blank=True, null=True, default=False)
+    status= models.TextField(blank=True, null=True)
+    user_id = models.ForeignKey(
+        InteractiveUser,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_notification_user_id",
+    )
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_notification'

@@ -787,3 +787,11 @@ class WorkforceCommitteeUserMapInputType(OpenIMISMutation.Input):
     user_id = graphene.Int(required=True)
     is_noa_signature_user = graphene.Boolean(required=False)
     role_in_committee= graphene.String(required=False)
+
+
+class WorkforceNotificationInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    notification = graphene.String(required=True)
+    status = graphene.String(required=False)
+    is_read = graphene.Boolean(required=False)
+    user_id = graphene.UUID(required=True)

@@ -354,6 +354,11 @@ class Query(graphene.ObjectType):
         orderBy=graphene.List(of_type=graphene.String),
     )
 
+    workforce_notifications = OrderedDjangoFilterConnectionField(
+        WorkforceNotificationGQLType,
+        # user_id=graphene.String(required=True),
+        orderBy=graphene.List(of_type=graphene.String),
+    )
 
     fetch_user_role_by_user_id = graphene.List(
         WorkforceUserRoleGQLType,
@@ -1587,6 +1592,33 @@ class Query(graphene.ObjectType):
         except Exception as e:
             return None
 
+    def resolve_workforce_notifications(self, info, user_id=None, **kwargs):
+        try:
+            if not user_id:
+                return WorkforceNotification.objects.none()
+            
+            # Get all unread notifications for the user
+            unread_notifications = WorkforceNotification.objects.filter(
+                user_id=user_id,
+                is_read=False
+            )
+            
+            # Get last 10 read notifications for the user
+            read_notifications = WorkforceNotification.objects.filter(
+                user_id=user_id,
+                is_read=True
+            ).order_by('-date_created')[:10]
+            
+            # Combine both querysets
+            from django.db.models import Q
+            qs = WorkforceNotification.objects.filter(
+                Q(user_id=user_id, is_read=False) |
+                Q(user_id=user_id, is_read=True, id__in=read_notifications.values_list('id', flat=True))
+            ).order_by('-date_created')
+            
+            return qs
+        except Exception as e:
+            return None
 
     def resolve_fetch_user_role_by_user_id(self, info, user_id=None, **kwargs):
         try:
@@ -1785,6 +1817,8 @@ class Mutation(graphene.ObjectType):
     delete_workforce_committee_user_map = DeleteWorkforceCommitteeUserMapMutation.Field()
     update_workforce_committee_user_map_noa_signature = UpdateWorkforceCommitteeUserMapNoaSignatureMutation.Field()
 
+    create_workforce_notification = CreateWorkforceNotificationMutation.Field()
+    update_workforce_notification = UpdateWorkforceNotificationMutation.Field()
 
     send_sms_notification= SendSmsNotificationMutation.Field()
 
