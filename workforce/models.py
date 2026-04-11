@@ -1808,9 +1808,10 @@ class WorkforceCommitteeUserMap(HistoryModel):
 
 class WorkforceNotification(HistoryModel):
     notification = models.TextField(blank=True, null=True)
+    notification_bn = models.TextField(blank=True, null=True)
     is_read = models.BooleanField(blank=True, null=True, default=False)
     status= models.TextField(blank=True, null=True)
-    user_id = models.ForeignKey(
+    user = models.ForeignKey(
         InteractiveUser,
         models.DO_NOTHING,
         blank=True,

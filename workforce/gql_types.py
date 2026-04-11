@@ -538,6 +538,7 @@ class WorkforceApplicationSummaryInputType(OpenIMISMutation.Input):
     section_type = graphene.String()
     year = graphene.Int()
     month = graphene.String()
+    user_ids= graphene.String()
 
 
 class WorkforceApplicationSummaryMovementInputType(OpenIMISMutation.Input):
@@ -792,6 +793,7 @@ class WorkforceCommitteeUserMapInputType(OpenIMISMutation.Input):
 class WorkforceNotificationInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
     notification = graphene.String(required=True)
+    notification_bn = graphene.String(required=True)
     status = graphene.String(required=False)
     is_read = graphene.Boolean(required=False)
-    user_id = graphene.UUID(required=True)
+    user_id = graphene.Int(required=True)

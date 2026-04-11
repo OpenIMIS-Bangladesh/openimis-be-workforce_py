@@ -486,6 +486,7 @@ class WorkforceApplicationSummaryGQLType(DjangoObjectType):
             "section_type": ["exact"],
             "year": ["exact"],
             "month": ["exact"],
+            "user_ids": [],
         }
         connection_class = ExtendedConnection
 
@@ -929,7 +930,7 @@ class WorkforceApplicationSummaryMovementGQLType(DjangoObjectType):
             "reverting_date": ["exact"],
             "reverted_by_id": ["exact"],
             "revert_note": [],
-            "status": ["exact"],
+            "status": ["exact"]
         }
         connection_class = ExtendedConnection
 
@@ -1381,6 +1382,7 @@ class WorkforceNotificationGQLType(DjangoObjectType):
         filter_fields = {
             "id": ["exact"],
             "notification": ["exact", "icontains"],
+            "notification_bn": ["exact", "icontains"],
             "status": ["exact", "icontains"],
             "is_read": ["exact"],
             "user_id": ["exact"],

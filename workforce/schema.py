@@ -157,7 +157,8 @@ class Query(graphene.ObjectType):
         orderBy=graphene.List(of_type=graphene.String),
         status_in=graphene.List(graphene.String),
         section_type_in=graphene.List(graphene.String),
-        organization_type_in=graphene.List(graphene.String)
+        organization_type_in=graphene.List(graphene.String),
+        user_id= graphene.String()
     )
     workforce_application_summary_movement = OrderedDjangoFilterConnectionField(
         WorkforceApplicationSummaryMovementGQLType,
@@ -356,7 +357,7 @@ class Query(graphene.ObjectType):
 
     workforce_notifications = OrderedDjangoFilterConnectionField(
         WorkforceNotificationGQLType,
-        # user_id=graphene.String(required=True),
+        logged_in_user_id=graphene.String(required=True),
         orderBy=graphene.List(of_type=graphene.String),
     )
 
@@ -675,7 +676,7 @@ class Query(graphene.ObjectType):
         except Exception as e:
             return {"error": f"NID fetch error: {str(e)}"}
 
-    def resolve_workforce_application_summary(self, info, status_in=None, section_type_in=None, organization_type_in=None, **kwargs):
+    def resolve_workforce_application_summary(self, info, status_in=None, section_type_in=None, organization_type_in=None, user_id=None, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("Unauthorized access"))
 
@@ -687,6 +688,7 @@ class Query(graphene.ObjectType):
             query = query.filter(section_type__in=section_type_in)
         if organization_type_in:
             query = query.filter(organization_type__in=organization_type_in)
+
 
         #check if there is any application in the summary. Experimental block by Tahir
         # recent_threshold = timezone.now() - timedelta(seconds=30)
@@ -703,6 +705,20 @@ class Query(graphene.ObjectType):
                 # or summary.date_created >= recent_threshold:
                 valid_summary_ids.append(summary.id)
         query = query.filter(id__in=valid_summary_ids)
+
+        if user_id:
+            matched_ids = []
+
+            for data in query:
+                try:
+                    user_ids = json.loads(data.user_ids or "[]")
+                except json.JSONDecodeError:
+                    user_ids = []
+
+                if user_id in user_ids:
+                    matched_ids.append(data.id)
+
+            query = query.filter(id__in=matched_ids)
         #block end. You can remove this block if necessary.
 
         return gql_optimizer.query(query, info)
@@ -1592,8 +1608,9 @@ class Query(graphene.ObjectType):
         except Exception as e:
             return None
 
-    def resolve_workforce_notifications(self, info, user_id=None, **kwargs):
+    def resolve_workforce_notifications(self, info, logged_in_user_id=None, **kwargs):
         try:
+            user_id= logged_in_user_id
             if not user_id:
                 return WorkforceNotification.objects.none()
             
@@ -1616,7 +1633,7 @@ class Query(graphene.ObjectType):
                 Q(user_id=user_id, is_read=True, id__in=read_notifications.values_list('id', flat=True))
             ).order_by('-date_created')
             
-            return qs
+            return gql_optimizer.query(qs, info)
         except Exception as e:
             return None
 
