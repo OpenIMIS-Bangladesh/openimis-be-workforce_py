@@ -1125,6 +1125,7 @@ class WorkforceApplicationSummary(HistoryModel):
     section_type = models.CharField(max_length=30, null=True, blank=True)
     year = models.IntegerField(null=True, blank=True)
     month = models.CharField(max_length=20, null=True, blank=True)
+    user_ids= models.JSONField(null=True, blank=True)
 
     class Meta:
         managed = True
@@ -1803,3 +1804,19 @@ class WorkforceCommitteeUserMap(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_committee_user_map'
+
+
+# class WorkforceNotification(HistoryModel):
+#     notification = models.TextField(blank=True, null=True)
+#     is_read = models.TextField(blank=True, null=True))
+#     user_id = models.ForeignKey(
+#         InteractiveUser,
+#         models.DO_NOTHING,
+#         blank=True,
+#         null=True,
+#         related_name="committee_related_user_id",
+#     )
+#
+#     class Meta:
+#         managed = True
+#         db_table = 'workforce_committee_user'
