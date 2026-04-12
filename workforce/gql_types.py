@@ -797,3 +797,4 @@ class WorkforceNotificationInputType(OpenIMISMutation.Input):
     status = graphene.String(required=False)
     is_read = graphene.Boolean(required=False)
     user_id = graphene.Int(required=True)
+    workforce_application_id = graphene.String(required=True)

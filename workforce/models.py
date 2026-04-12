@@ -1818,6 +1818,13 @@ class WorkforceNotification(HistoryModel):
         null=True,
         related_name="workforce_notification_user_id",
     )
+    workforce_application = models.ForeignKey(
+        WorkforceApplication,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_notification_application_id",
+    )
 
     class Meta:
         managed = True

@@ -1386,5 +1386,6 @@ class WorkforceNotificationGQLType(DjangoObjectType):
             "status": ["exact", "icontains"],
             "is_read": ["exact"],
             "user_id": ["exact"],
+            "workforce_application_id": ["exact"],
         }
         connection_class = ExtendedConnection
