@@ -27,6 +27,11 @@ class WorkforceApplicationMovementServices(BaseService):
             from_role = UserRole.objects.filter(user_id=from_user_id).first()
             role = Role.objects.get(id=from_role.role_id) if from_role else None
 
+            to_role_id= obj_data.get("to_role_id", None)
+            if to_user_id is None:
+                users_by_role= UserRole.objects.filter(role_id=to_role_id).first()
+                to_user_id = users_by_role.user
+
             notification = WorkforceNotification(
                 notification="You have received an application to work on from: " +
                              (from_user_id.last_name if from_user_id else "EIS Coordinator") +

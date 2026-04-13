@@ -510,3 +510,68 @@ class WorkforceEisPaymentServices(BaseService):
             main_beneficiary.save(username=user.username)
         except Exception as e:
             return e
+
+    def calculate_arrear(self, payment_process_instance):
+        workforce_application = payment_process_instance.workforce_application
+        # ---------- Arrear Calculation ----------
+        if workforce_application.application_type=="disabilityAssistance":
+            doctor_json = json.loads(workforce_application.doctors_entry) if workforce_application.doctors_entry else None
+            if doctor_json is None:
+                return False
+            accident_info_json = json.loads(
+                workforce_application.employee_accident_info) if workforce_application.employee_accident_info else None
+            if accident_info_json is None:
+                return False
+
+            calculation_start_date = accident_info_json.get("dateOfRejoining") if accident_info_json.get(
+                "dateOfRejoining") else doctor_json.get("dateOfAssessment")
+            calculation_start_date = datetime.strptime(calculation_start_date, "%Y-%m-%d").date() if isinstance(
+                calculation_start_date, str) else calculation_start_date
+        elif workforce_application.application_type=="financialAssistance":
+            accident_info_json = json.loads(
+                workforce_application.employee_accident_info) if workforce_application.employee_accident_info else None
+            if accident_info_json is None:
+                return False
+            calculation_start_date = accident_info_json.get("dateOfDeath") if accident_info_json.get(
+                "dateOfDeath") else None
+            calculation_start_date = datetime.strptime(calculation_start_date, "%Y-%m-%d").date() if isinstance(
+                calculation_start_date, str) else calculation_start_date
+        else:
+            return False
+
+        today = date.today()
+
+        # total months difference
+        total_months = (today.year - calculation_start_date.year) * 12 + (
+                today.month - calculation_start_date.month)
+
+        # adjust if current day is less than start day (not a full month yet)
+        if today.day < calculation_start_date.day:
+            total_months = 1
+
+        # remaining months after years
+        months = total_months % 12
+
+        # quarters (each = 3 months)
+        quarters = total_months // 3
+
+        arrear_month = today.month
+        arrear_year = today.year
+
+        try:
+            if payment_process_instance.eis_payment_type== "onetime":
+                arrear_payment= round_three(payment_process_instance.eis_approved_amount)
+            elif payment_process_instance.eis_payment_type== "installment":
+                arrear_payment= round_three(payment_process_instance.payable_amount)* quarters
+            else:
+                arrear_payment= round_three(payment_process_instance.payable_amount)* months
+
+            if today.month-1<=0:
+                return False
+            else:
+                payment_process_instance.arrear_amount= arrear_payment
+                payment_process_instance.arrear_payment_month= today.month-1
+                payment_process_instance.arrear_payment_year= today.year
+                payment_process_instance.save(username= self.user.username)
+        except Exception as e:
+            return e

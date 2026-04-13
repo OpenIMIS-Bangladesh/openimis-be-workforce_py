@@ -9,7 +9,8 @@ from django.utils import timezone
 from core.models import Role
 from datetime import datetime
 
-from ..models import WorkforceGrantMoney, WorkforceEisPaymentProcess, WorkforceFactory, WorkforceDocument
+from ..models import WorkforceGrantMoney, WorkforceEisPaymentProcess, WorkforceFactory, WorkforceDocument, \
+    WorkforceAllAssociation
 
 logger = logging.getLogger(__name__)
 now = timezone.now()
@@ -159,14 +160,26 @@ def generate_beneficiary_id(association, accident_type, application_id=None, dep
         else:
             accident_type_no = "00"
 
+        associations= WorkforceAllAssociation.objects.all().order_by("short_name_en")
+        association_position_in_db= 0
+        for ass in associations:
+            if ass.short_name_en== association:
+                association_position_in_db += 1
+                break
+            else:
+                association_position_in_db += 1
+
+
         # Using dummy data for association.
         # Patch this part after building association numbering mechanism.
         if association is None:
             association = "00"
-        elif association == "BGMEA":
-            association = "01"
-        elif association == "BEPZA":
-            association = "02"
+        # elif association == "BGMEA":
+        #     association = "01"
+        # elif association == "BEPZA":
+        #     association = "02"
+        else:
+            association = f"{association_position_in_db:02}"
 
         if dependent_count is None:
             beneficiary_id = f"EIS.{get_current_year()}.{association}.{accident_type_no}.{random_number}"
