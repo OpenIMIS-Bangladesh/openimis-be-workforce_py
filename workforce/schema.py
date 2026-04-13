@@ -1506,8 +1506,9 @@ class Query(graphene.ObjectType):
 
             doc = latest_docs_map.get(user_id)
             user_role= UserRole.objects.filter(user_id=user_id).first() or None
-            role_detail= Role.objects.get(id=user_role.role_id)
-            results.append({
+            if user_role is not None:
+                role_detail= Role.objects.get(id=user_role.role_id)
+                results.append({
                 "user_id": user_id,
                 "last_name": user.last_name,
                 "other_names": user.other_names,
