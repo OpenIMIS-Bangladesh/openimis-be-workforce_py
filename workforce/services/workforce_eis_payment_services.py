@@ -550,7 +550,7 @@ class WorkforceEisPaymentServices(BaseService):
             total_months = 1
 
         # remaining months after years
-        months = total_months % 12
+        months = total_months
 
         # quarters (each = 3 months)
         quarters = total_months // 3
