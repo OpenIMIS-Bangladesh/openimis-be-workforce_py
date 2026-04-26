@@ -252,7 +252,6 @@ class Query(graphene.ObjectType):
         login_name=graphene.String(required=False),
     )
 
-
     workforce_eis_payment_process = graphene.List(
         WorkforceEisPaymentProcessGQLType,
         workforce_application_id=graphene.String(),
@@ -523,14 +522,14 @@ class Query(graphene.ObjectType):
 
         if application_to:
             application_to_id = application_to
-            query = query.filter(application__application_to_id=application_to_id)
+            query = query.filter(application__application_to_id=application_to_id).distinct()
 
         if application_from:
             application_from_id = application_from
-            query = query.filter(application__application_from_id=application_from_id)
+            query = query.filter(application__application_from_id=application_from_id).distinct()
 
         if is_reverted:
-            query = query.filter(application__is_reverted=is_reverted)
+            query = query.filter(application__is_reverted=is_reverted).distinct()
 
         if application_to:
             try:
@@ -542,7 +541,7 @@ class Query(graphene.ObjectType):
                 latest_receive_subquery = WorkforceApplicationMovement.objects.filter(
                     application_id=OuterRef("pk"),
                     application_to_id=app_to_id,
-                ).order_by("-date_created").values("date_created")[:1]
+                ).distinct().order_by("-date_created").values("date_created")[:1]
 
                 query = query.annotate(applicationReceiveDate=Subquery(latest_receive_subquery))
 
@@ -556,7 +555,7 @@ class Query(graphene.ObjectType):
                 latest_forward_subquery = WorkforceApplicationMovement.objects.filter(
                     application_id=OuterRef("pk"),
                     application_from_id=app_from_id,
-                ).order_by("-date_created").values("date_created")[:1]
+                ).distinct().order_by("-date_created").values("date_created")[:1]
 
                 query = query.annotate(applicationForwardDate=Subquery(latest_forward_subquery))
 
@@ -578,7 +577,7 @@ class Query(graphene.ObjectType):
 
         latest_movement_subquery = WorkforceApplicationMovement.objects.filter(
             application_id=OuterRef("pk")
-        ).order_by("-date_created").values("date_created")[:1]
+        ).distinct().order_by("-date_created").values("date_created")[:1]
 
         query = query.annotate(lastMovementDate=Subquery(latest_movement_subquery))
 
