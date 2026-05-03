@@ -1374,6 +1374,17 @@ class WorkforceCommitteeUserMapGQLType(DjangoObjectType):
         }
         connection_class = ExtendedConnection
 
+class WorkforceCommitteeBankAdviceMapGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceCommitteeBankAdviceMap
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "committee": ["exact"],
+            "advice_template":["icontains"]
+        }
+        connection_class = ExtendedConnection
+
 
 class WorkforceNotificationGQLType(DjangoObjectType):
     class Meta:

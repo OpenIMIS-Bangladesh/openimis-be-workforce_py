@@ -54,6 +54,7 @@ from .services.workforce_committee_association_map_services import WorkforceComm
 from .services.workforce_committee_user_services import WorkforceCommitteeUserServices
 from .services.workforce_committee_user_map_services import WorkforceCommitteeUserMapServices
 from .services.workforce_notification_services import WorkforceNotificationServices
+from .services.workforce_committee_bank_advice_map_services import WorkforceCommitteeBankAdviceMapServices
 from .gql_queries import (
     WorkforceInteractiveUserGQLType
 )
@@ -2527,6 +2528,73 @@ class DeleteWorkforceCommitteeUserMutation(graphene.Mutation):
         try:
             user = info.context.user if hasattr(info.context, 'user') else None
             WorkforceCommitteeUser.objects.get(id=data["id"]).delete(username=user.username)
+            return cls(success=True, errors=[])
+        except Exception as e:
+            return cls(success=False, errors=[str(e)])
+
+class CreateWorkforceCommitteeBankAdviceMapMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateWorkforceCommitteeBankAdviceMapMutation"
+
+    class Input(WorkforceCommitteeBankAdviceMapInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_create_workforce_committee_bank_advice_map"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = WorkforceCommitteeBankAdviceMapServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission="",
+            call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class UpdateWorkforceCommitteeBankAdviceMapMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWorkforceCommitteeBankAdviceMapMutation"
+
+    class Input(WorkforceCommitteeBankAdviceMapInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_update_workforce_committee_bank_advice_map"
+        required_permission = WorkforceConfig.gql_query_workforces_perms
+        service_instance = WorkforceCommitteeBankAdviceMapServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission="",
+            call_type='update',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class DeleteWorkforceCommitteeBankAdviceMapMutation(graphene.Mutation):
+    class Arguments:
+        id = graphene.String(required=True)
+
+    success = graphene.Boolean()
+    errors = graphene.List(graphene.String)
+
+    @classmethod
+    def mutate(cls, root, info, **data):
+        from workforce.models import WorkforceCommitteeBankAdviceMap
+        try:
+            user = info.context.user if hasattr(info.context, 'user') else None
+            WorkforceCommitteeBankAdviceMap.objects.get(id=data["id"]).delete(username=user.username)
             return cls(success=True, errors=[])
         except Exception as e:
             return cls(success=False, errors=[str(e)])

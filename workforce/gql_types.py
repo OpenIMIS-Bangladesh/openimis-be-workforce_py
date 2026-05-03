@@ -798,3 +798,8 @@ class WorkforceNotificationInputType(OpenIMISMutation.Input):
     is_read = graphene.Boolean(required=False)
     user_id = graphene.Int(required=True)
     workforce_application_id = graphene.String(required=True)
+
+class WorkforceCommitteeBankAdviceMapInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+    committee_id = graphene.UUID(required=True)
+    advice_template= graphene.String(required=False)

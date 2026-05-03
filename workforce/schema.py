@@ -354,6 +354,14 @@ class Query(graphene.ObjectType):
         orderBy=graphene.List(of_type=graphene.String),
     )
 
+    workforce_committee_bank_advice_maps = graphene.List(
+        WorkforceCommitteeBankAdviceMapGQLType,
+        committee_id=graphene.String(),
+        client_mutation_id=graphene.String(required=False),
+        orderBy=graphene.List(of_type=graphene.String),
+    )
+
+
     workforce_notifications = OrderedDjangoFilterConnectionField(
         WorkforceNotificationGQLType,
         logged_in_user_id=graphene.String(required=True),
@@ -1608,6 +1616,17 @@ class Query(graphene.ObjectType):
         except Exception as e:
             return None
 
+    def resolve_workforce_committee_bank_advice_maps(self, info, committee_id=None, **kwargs):
+        # service = WorkforceCommitteeUserMapServices(info.context.user)
+        # query = service.get(**kwargs)
+        try:
+            qs = WorkforceCommitteeBankAdviceMap.objects.filter(is_deleted=False)
+            if committee_id:
+                qs = qs.filter(committee_id=committee_id)
+            return qs
+        except Exception as e:
+            return None
+
     def resolve_workforce_notifications(self, info, logged_in_user_id=None, **kwargs):
         try:
             user_id= logged_in_user_id
@@ -1833,6 +1852,10 @@ class Mutation(graphene.ObjectType):
     update_workforce_committee_user_map = UpdateWorkforceCommitteeUserMapMutation.Field()
     delete_workforce_committee_user_map = DeleteWorkforceCommitteeUserMapMutation.Field()
     update_workforce_committee_user_map_noa_signature = UpdateWorkforceCommitteeUserMapNoaSignatureMutation.Field()
+
+    create_workforce_committee_bank_advice_map = CreateWorkforceCommitteeBankAdviceMapMutation.Field()
+    update_workforce_committee_bank_advice_map = UpdateWorkforceCommitteeBankAdviceMapMutation.Field()
+    delete_workforce_committee_bank_advice_map = DeleteWorkforceCommitteeBankAdviceMapMutation.Field()
 
     create_workforce_notification = CreateWorkforceNotificationMutation.Field()
     update_workforce_notification = UpdateWorkforceNotificationMutation.Field()

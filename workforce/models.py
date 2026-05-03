@@ -1,3 +1,5 @@
+from operator import truediv
+
 from django.db import models
 from core.models import HistoryModel, InteractiveUser
 from core.models.user import Role
@@ -382,7 +384,7 @@ class WorkforceAllAssociation(HistoryModel):
     status = models.CharField(max_length=30, null=True, blank=True)
     minimum_salary = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     start_date= models.DateField(null=True, blank=True)
-    association_number= models.IntegerField()
+    association_number= models.IntegerField(null=True, blank=True)
 
     class Meta:
         managed = True
@@ -1830,3 +1832,17 @@ class WorkforceNotification(HistoryModel):
     class Meta:
         managed = True
         db_table = 'workforce_notification'
+
+class WorkforceCommitteeBankAdviceMap(HistoryModel):
+    committee= models.ForeignKey(
+        WorkforceCommittee,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="committee_bank_advice_map_committee_id",
+    )
+    advice_template = models.TextField(null=True,blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_committee_bank_advice_map'
