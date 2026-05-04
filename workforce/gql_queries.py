@@ -568,6 +568,7 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "deceased_worker_info": [],
             "deceased_worker_info_verification": [],
             "deceased_worker_info_verification_remarks": [],
+            "committee_id": ["exact"],
         }
         connection_class = ExtendedConnection
 

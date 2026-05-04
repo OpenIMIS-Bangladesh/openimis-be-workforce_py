@@ -354,7 +354,7 @@ class Query(graphene.ObjectType):
         orderBy=graphene.List(of_type=graphene.String),
     )
 
-    workforce_committee_bank_advice_maps = graphene.List(
+    workforce_committee_bank_advice_maps = OrderedDjangoFilterConnectionField(
         WorkforceCommitteeBankAdviceMapGQLType,
         committee_id=graphene.String(),
         client_mutation_id=graphene.String(required=False),
