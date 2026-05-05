@@ -11,7 +11,7 @@ from rx.linq.observable.blocking.first import first
 from workforce.models import (
     WorkforceApplication, WorkforceGrantMoney, WorkforceEmployee, WorkforceEmployeeDependent,
     WorkforceEmployeeBankingInfo, WorkforceDocument, WorkforceFactory, Bank, WorkforceEisPaymentProcess,
-    WorkforceApplicationSummary
+    WorkforceApplicationSummary, WorkforceApplicationMovement
 )
 from workforce.models import WorkforceAssociation, WorkforceOrganizationEmployee
 from .helper_service import create_application_movement, cf_and_eis_application_movement_to_factory_admin, dependent_uuid_to_base64
@@ -439,7 +439,7 @@ class WorkforceApplicationServices(BaseService):
 
             except Exception as e:
                 logger.error(f"Error while updating dependents: {e}")
-                raise ValidationError("Failed to update dependents.")
+                # raise ValidationError("Failed to update dependents.")
 
 
         #######################################################################
@@ -663,51 +663,62 @@ class WorkforceApplicationServices(BaseService):
         # ================================================================
         # 4. Handle BLWF new application movement to DIFE admin
         # ================================================================
-        if application_status == 'new' and organization_type == 'blwf' and application_status != status_before_update:
+        # movement_instance= WorkforceApplicationMovement.objects.filter(application_id= application_instance.id, status="new")
+        if obj_data.get("status") == 'new' and obj_data.get("organization_type") == 'blwf':
             application_id_for_movement = obj_data.get("id")
             application_type= application_instance.application_type
             if application_type == "deadlyGrant":
                 employee= json.loads(application_instance.deceased_worker_info) if application_instance.deceased_worker_info else None
             else:
                 employee = application_instance.workforce_employee
-            present_location = employee.present_location if application_type!='deadlyGrant' else employee.get("permanent_location")
+            present_location = employee.present_location if application_type!='deadlyGrant' else employee.get("permanentLocation")
             applicant_location = None
 
-            if present_location:
-                location = present_location
-                while location:
-                    if location.type == 'D':
-                        applicant_location = location.id
-                        break
-                    location = location.parent
+            try:
+                if present_location:
+                    location = present_location
+                    while location:
+                        if application_type == "deadlyGrant":
+                            if location.get("type") == 'D':
+                                applicant_location = extract_uuid(location.get("id"))
+                                break
+                            location = location.get("parent", None)
+                        else:
+                            if location.type == 'D':
+                                applicant_location = location.id
+                                break
+                            location = location.parent
 
-            association = None
-            for assoc in WorkforceAssociation.objects.filter(association_type='dife'):
-                if assoc.jurisdiction_locations:
-                    loc_ids = [loc_id.strip() for loc_id in assoc.jurisdiction_locations.split(',')]
-                    if str(applicant_location) in loc_ids:
-                        association = assoc
-                        break
+                association = None
+                for assoc in WorkforceAssociation.objects.filter(association_type='dife'):
+                    if assoc.jurisdiction_locations:
+                        loc_ids = [loc_id.strip() for loc_id in assoc.jurisdiction_locations.split(',')]
+                        if str(applicant_location) in loc_ids:
+                            association = assoc
+                            break
 
-            if not association:
-                raise ValueError(f"No DIFE association found for location {applicant_location}")
+                if not association:
+                    raise ValueError(f"No DIFE association found for location {applicant_location}")
 
-            emp_obj = WorkforceOrganizationEmployee.objects.filter(association_id=association.id).first()
-            if not emp_obj:
-                raise ValueError(f"No WorkforceOrganizationEmployee found for association_id={association.id}")
+                emp_obj = WorkforceOrganizationEmployee.objects.filter(association_id=association.id).first()
+                if not emp_obj:
+                    raise ValueError(f"No WorkforceOrganizationEmployee found for association_id={association.id}")
 
-            application_to = emp_obj.related_user_id
+                application_to = emp_obj.related_user_id
 
-            # Create movement to DIFE Admin
-            create_application_movement(
-                application_id=application_id_for_movement,
-                status='new',
-                action='forward_to_dife_admin',
-                role_name='blwf_dol_dife',
-                user_str=str(self.user),
-                application_to=application_to,
-                note=""
-            )
+                # Create movement to DIFE Admin
+                create_application_movement(
+                    application_id=application_id_for_movement,
+                    status='new',
+                    action='forward_to_dife_admin',
+                    role_name='blwf_dol_dife',
+                    user_str=str(self.user),
+                    application_to=application_to,
+                    note=""
+                )
+            except Exception as e:
+                print(e)
+
 
 
         # ================================================================
