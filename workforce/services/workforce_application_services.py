@@ -665,8 +665,12 @@ class WorkforceApplicationServices(BaseService):
         # ================================================================
         if application_status == 'new' and organization_type == 'blwf' and application_status != status_before_update:
             application_id_for_movement = obj_data.get("id")
-            employee = application_instance.workforce_employee
-            present_location = employee.present_location
+            application_type= application_instance.application_type
+            if application_type == "deadlyGrant":
+                employee= json.loads(application_instance.deceased_worker_info) if application_instance.deceased_worker_info else None
+            else:
+                employee = application_instance.workforce_employee
+            present_location = employee.present_location if application_type!='deadlyGrant' else employee.get("permanent_location")
             applicant_location = None
 
             if present_location:
@@ -709,8 +713,7 @@ class WorkforceApplicationServices(BaseService):
         # ================================================================
         # 5. Handle CF and EIS new application movement to Factory Admin
         # ================================================================
-        if application_status == 'new' and organization_type in ['cf',
-                                                                 'eis'] and application_status != status_before_update:
+        if application_status == 'new' and organization_type in ['cf','eis'] and application_status != status_before_update:
             application_id_for_movement = obj_data.get("id")
             application_instance = WorkforceApplication.objects.get(id=application_id_for_movement)
             cf_and_eis_application_movement_to_factory_admin(self, application_instance, application_id_for_movement)
