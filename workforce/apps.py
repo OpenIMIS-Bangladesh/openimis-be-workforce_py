@@ -329,6 +329,9 @@ class WorkforceConfig(AppConfig):
      # WorkforceEisBgmeaBkmeaCommittee (xxx)
     gql_workforce_eis_bgmea_bkmea_committee_perms = []
 
+    # # WorkforceSendConfirmationLink (xxx)
+    # gql_query_send_confirmation_link_perms =[]
+
     default_validations_disabled = None
 
     def __load_config(self, cfg):

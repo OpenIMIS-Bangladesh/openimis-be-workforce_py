@@ -55,6 +55,7 @@ from .services.workforce_committee_user_services import WorkforceCommitteeUserSe
 from .services.workforce_committee_user_map_services import WorkforceCommitteeUserMapServices
 from .services.workforce_notification_services import WorkforceNotificationServices
 from .services.workforce_committee_bank_advice_map_services import WorkforceCommitteeBankAdviceMapServices
+from .services.SendConfirmationLnkServices import SendConfirmationLnkServices
 from .gql_queries import (
     WorkforceInteractiveUserGQLType
 )
@@ -2741,3 +2742,27 @@ class SendSmsNotificationMutation(graphene.Mutation):
             return cls(success=True, message="SMS has been sent successfully to: "+data["phone_number"], errors=[])
         except Exception as e:
             return cls(success=False, message="Invalid Phone Number or something went wrong", errors=[str(e)])
+
+class SendWorkforceConfirmationLinkMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateSendWorkforceConfirmationLinkMutation"
+
+    class Input(WorkforceApplicationInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_create_confirmation_link"
+        required_permission = ""
+        service_instance = SendConfirmationLnkServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission='',
+            call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result

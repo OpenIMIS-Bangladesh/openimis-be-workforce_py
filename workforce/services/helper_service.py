@@ -3,6 +3,7 @@ import random
 import re
 import uuid
 import logging
+import os
 from django.apps import apps
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -229,6 +230,17 @@ def dependent_uuid_to_base64(uuid_str: str) -> str:
     encoded = base64.b64encode(combined.encode("utf-8")).decode("utf-8")
     return encoded
 
+
+# helper function for generate link
+def build_confirmation_link(application_id: str, base_url: str = None) -> str:
+    if not application_id:
+        raise ValueError("application_id is required")
+
+    if base_url is None:
+        base_url = os.environ.get("WORKFORCE_FRONTEND_URL", "http://localhost:3000")
+
+    base_url = base_url.rstrip("/")
+    return f"{base_url}/front/workforce/confirmation/{application_id}"
 
 # def relate_document_with_banking_info(dependent_id):
 #     document_instance = WorkforceDocument.objects.file()

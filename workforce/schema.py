@@ -63,6 +63,7 @@ class Query(graphene.ObjectType):
     )
     workforce_employer_factories = OrderedDjangoFilterConnectionField(
         WorkforceFactoryGQLType,
+        search_name=graphene.String(required=False),
         all_association_id_in= graphene.List(graphene.String),
         client_mutation_id=graphene.String(),
         orderBy=graphene.List(of_type=graphene.String),
@@ -435,9 +436,15 @@ class Query(graphene.ObjectType):
         #     raise PermissionDenied(_("Unauthorized access"))
         pass
 
-    def resolve_workforce_employer_factories(self, info, all_association_id_in=None, **kwargs):
+    def resolve_workforce_employer_factories(self, info,search_name=None, all_association_id_in=None, **kwargs):
         service = WorkforceFactoryServices(info.context.user)
         query = service.get(**kwargs)
+        if search_name:
+            query = query.filter(
+                Q(name_en__icontains=search_name) |
+                Q(name_bn__icontains=search_name)
+            )
+
         if all_association_id_in:
             query= query.filter(all_association_id__in= all_association_id_in)
         return gql_optimizer.query(query, info)
@@ -1861,4 +1868,5 @@ class Mutation(graphene.ObjectType):
     update_workforce_notification = UpdateWorkforceNotificationMutation.Field()
 
     send_sms_notification= SendSmsNotificationMutation.Field()
+    create_workforce_send_confirmation_link = SendWorkforceConfirmationLinkMutation.Field()
 
