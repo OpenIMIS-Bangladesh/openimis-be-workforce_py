@@ -169,6 +169,98 @@ class WorkforceEmployeeDependentServices(BaseService):
         age = now.year - dob.year - ((now.month, now.day) < (dob.month, dob.day))
         return age
 
+    def calculate_age_custom(self, birth_date, date_for_calculation=None):
+        if not birth_date:
+            return None
+
+        if isinstance(birth_date, str):
+            try:
+                dob = datetime.strptime(birth_date, "%Y-%m-%d %H:%M:%S.%f %z")
+            except ValueError:
+                try:
+                    dob = datetime.strptime(birth_date, "%Y-%m-%d %H:%M:%S")
+                except ValueError:
+                    dob = datetime.strptime(birth_date, "%Y-%m-%d")
+        elif isinstance(birth_date, date):
+            dob = datetime.combine(birth_date, datetime.min.time())
+        else:
+            dob = birth_date  # already a datetime
+
+        if date_for_calculation:
+            if isinstance(date_for_calculation, str):
+                try:
+                    ref_date = datetime.strptime(date_for_calculation, "%Y-%m-%d %H:%M:%S.%f %z")
+                except ValueError:
+                    try:
+                        ref_date = datetime.strptime(date_for_calculation, "%Y-%m-%d %H:%M:%S")
+                    except ValueError:
+                        ref_date = datetime.strptime(date_for_calculation, "%Y-%m-%d")
+            elif isinstance(date_for_calculation, date):
+                ref_date = datetime.combine(date_for_calculation, datetime.min.time())
+            else:
+                ref_date = date_for_calculation
+        else:
+            ref_date = datetime.now(timezone.utc)
+
+        age = ref_date.year - dob.year - (
+                (ref_date.month, ref_date.day) < (dob.month, dob.day)
+        )
+        return age
+
+    def calculate_days(self, start_date, end_date=None):
+        if not start_date:
+            return None
+
+        # -------------------------
+        # Parse start_date
+        # -------------------------
+        if isinstance(start_date, str):
+            try:
+                start = datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S.%f %z")
+            except ValueError:
+                try:
+                    start = datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
+                except ValueError:
+                    start = datetime.strptime(start_date, "%Y-%m-%d")
+
+        elif isinstance(start_date, date):
+            start = datetime.combine(start_date, datetime.min.time())
+
+        else:
+            start = start_date  # already datetime
+
+        # -------------------------
+        # Parse end_date
+        # -------------------------
+        if end_date:
+            if isinstance(end_date, str):
+                try:
+                    end = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S.%f %z")
+                except ValueError:
+                    try:
+                        end = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+                    except ValueError:
+                        end = datetime.strptime(end_date, "%Y-%m-%d")
+
+            elif isinstance(end_date, date):
+                end = datetime.combine(end_date, datetime.min.time())
+
+            else:
+                end = end_date
+        else:
+            end = datetime.now(timezone.utc)
+
+        # -------------------------
+        # Calculate difference in days
+        # -------------------------
+        if start.tzinfo and end.tzinfo:
+            delta = end - start
+        else:
+            delta = end.replace(tzinfo=None) - start.replace(tzinfo=None)
+
+        return delta.days
+
+
     def update_eligibility(self, workforce_application_id):
         try:
             dependents = WorkforceEmployeeDependent.objects.filter(workforce_application_id=workforce_application_id)
