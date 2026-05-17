@@ -760,8 +760,8 @@ class WorkforceCommitteeInputType(OpenIMISMutation.Input):
     name_en = graphene.String(required=True)
     name_bn = graphene.String(required=False)
     associations = graphene.JSONString(required=False)
-    approval_type = graphene.JSONString(required=False)
-    organization_type = graphene.JSONString(required=False)
+    approval_type = graphene.String(required=False)
+    organization_type = graphene.String(required=False)
 
 
 class WorkforceCommitteeAssociationMapInputType(OpenIMISMutation.Input):
