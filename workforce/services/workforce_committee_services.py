@@ -28,7 +28,9 @@ class WorkforceCommitteeServices(BaseService):
         name_en = obj_data.get("name_en")
         name_bn = obj_data.get("name_bn")
         associations_json = obj_data.get("associations")
-        
+        organization_type = obj_data.get("organization_type")
+        approval_type = obj_data.get("approval_type")
+
         if not name_en:
             raise ValidationError("name_en is required for creating a committee")
         

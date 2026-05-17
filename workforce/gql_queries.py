@@ -1325,6 +1325,8 @@ class WorkforceCommitteeGQLType(DjangoObjectType):
             "name_en": ["exact", "icontains"],
             "name_bn": ["exact", "icontains"],
             "assigned_role": ["exact"],
+            "approval_type": ["exact"],
+            "organization_type": ["exact"],
         }
         connection_class = ExtendedConnection
 
