@@ -32,6 +32,24 @@ def safe_float(value, default=0.0):
         return float(value)
     except (TypeError, ValueError):
         return default
+def get_district_name_by_location_id(location_id):
+    district_name = None
+    try:
+        location = Location.objects.get(id=location_id)
+        upazilla = Location.objects.get(id=location.parent_id)
+        district = Location.objects.get(id=upazilla.parent_id)
+        district_name = district.name
+        return district_name
+    except Exception as e:
+        return None
+
+def getAccidentType(key):
+    accident_type = {}
+    accident_type["workforce.accident.mainType.workplace"] = "কর্মস্থলে দুর্ঘটনা"
+    accident_type["workforce.accident.mainType.onDutyRTA"] = "কর্মস্থলের কাজে যাওয়ার পথে সড়ক দুর্ঘটনা"
+    accident_type["workforce.accident.mainType.commuting"] = "বাসা থেকে কর্মস্থল/কর্মস্থল থেকে বাসায় যাওয়ার পথে দুর্ঘটনা"
+    return accident_type[key]
+
 
 class FileUploadView(APIView):
     parser_classes = [MultiPartParser, FormParser]
@@ -179,7 +197,7 @@ class EisSiteData(APIView):
                 if worker_accident_info.get('inOutsideFactory') and worker_accident_info[
                     'inOutsideFactory'] != "অন্যস্থানে":
                     if item.get('factory_location_id'):
-                        final_data_item['accident_district'] = self.get_district_name_by_location_id(
+                        final_data_item['accident_district'] = get_district_name_by_location_id(
                             item.get('factory_location_id'))
                     else:
                         final_data_item['accident_district'] = None
@@ -187,7 +205,7 @@ class EisSiteData(APIView):
                     final_data_item['accident_district'] = None
 
                 if worker_accident_info.get('accidentMainType'):
-                    final_data_item["accident_type"] = self.getAccidentType(worker_accident_info.get('accidentMainType'))
+                    final_data_item["accident_type"] = getAccidentType(worker_accident_info.get('accidentMainType'))
 
                 if item.get('case_type') == 'financialAssistance':
 
@@ -207,13 +225,13 @@ class EisSiteData(APIView):
                     final_data_item["beneficiary_relation_with_worker"] = dependent_service.get_relation_for_api(dependent, final_data_item["worker_age"])
                     final_data_item["beneficiary_date_of_birth"] = item.get('dependent_date_of_birth')
                     if item.get('dependent_permanent_location_id'):
-                        final_data_item['beneficiary_permanent_district'] = self.get_district_name_by_location_id(
+                        final_data_item['beneficiary_permanent_district'] = get_district_name_by_location_id(
                             item.get('dependent_permanent_location_id'))
                     else:
                         final_data_item['beneficiary_permanent_district']= None
 
                     if item.get('dependent_present_location_id'):
-                        final_data_item['beneficiary_present_district'] = self.get_district_name_by_location_id(
+                        final_data_item['beneficiary_present_district'] = get_district_name_by_location_id(
                             item.get('dependent_present_location_id'))
                     else:
                         final_data_item['beneficiary_present_district']= None
@@ -233,20 +251,20 @@ class EisSiteData(APIView):
                     final_data_item["beneficiary_age"] = dependent_service.calculate_age_custom(worker_date_of_birth)
                     final_data_item["worker_place_of_death"] = None
                     if item.get('worker_permanent_location_id'):
-                        final_data_item['beneficiary_permanent_district'] = self.get_district_name_by_location_id(
+                        final_data_item['beneficiary_permanent_district'] = get_district_name_by_location_id(
                             item.get('worker_permanent_location_id'))
                     else:
                         final_data_item["beneficiary_permanent_district"] = None
 
                     if item.get('worker_present_location_id'):
-                        final_data_item['beneficiary_present_district'] = self.get_district_name_by_location_id(
+                        final_data_item['beneficiary_present_district'] = get_district_name_by_location_id(
                             item.get('worker_present_location_id'))
                     else:
                         final_data_item["beneficiary_present_district"] = None
 
 
                 if item.get('factory_location_id'):
-                    final_data_item['factory_district'] = self.get_district_name_by_location_id(item.get('factory_location_id'))
+                    final_data_item['factory_district'] = get_district_name_by_location_id(item.get('factory_location_id'))
                 else:
                     final_data_item['factory_district'] = None
 
@@ -274,24 +292,6 @@ class EisSiteData(APIView):
 
 
 class EisCaseData(APIView):
-    def get_district_name_by_location_id(self, location_id):
-        district_name = None
-        try:
-            location = Location.objects.get(id=location_id)
-            upazilla = Location.objects.get(id=location.parent_id)
-            district = Location.objects.get(id=upazilla.parent_id)
-            district_name = district.name
-            return district_name
-        except Exception as e:
-            return None
-
-    def getAccidentType(self, key):
-        accident_type = {}
-        accident_type["workforce.accident.mainType.workplace"] = "কর্মস্থলে দুর্ঘটনা"
-        accident_type["workforce.accident.mainType.onDutyRTA"] = "কর্মস্থলের কাজে যাওয়ার পথে সড়ক দুর্ঘটনা"
-        accident_type["workforce.accident.mainType.commuting"] = "বাসা থেকে কর্মস্থল/কর্মস্থল থেকে বাসায় যাওয়ার পথে দুর্ঘটনা"
-        return accident_type[key]
-
     def get(self, request):
         try:
             user= InteractiveUser.objects.get(id=1)
@@ -330,7 +330,7 @@ class EisCaseData(APIView):
                 final_data_item["worker_beneficiary_count"]= 0
 
                 if data.get('factory_location_id'):
-                    final_data_item['factory_district'] = self.get_district_name_by_location_id(data.get('factory_location_id'))
+                    final_data_item['factory_district'] = get_district_name_by_location_id(data.get('factory_location_id'))
                 else:
                     final_data_item['factory_district'] = None
 
@@ -345,11 +345,11 @@ class EisCaseData(APIView):
                 accident_place= worker_accident_info.get('inOutsideFactory', None)
                 endorsement_date= movement_data.date_created.date()
                 total_days_of_endorsement = dependent_service.calculate_days(worker_accident_info.get("accidentDate"), endorsement_date)
-                accident_type=  self.getAccidentType(worker_accident_info.get('accidentMainType')) if worker_accident_info.get('accidentMainType') else None
+                accident_type=  getAccidentType(worker_accident_info.get('accidentMainType')) if worker_accident_info.get('accidentMainType') else None
                 if worker_accident_info.get('inOutsideFactory') and worker_accident_info[
                     'inOutsideFactory'] != "অন্যস্থানে":
                     if data.get('factory_location_id'):
-                        accident_district = self.get_district_name_by_location_id(
+                        accident_district = get_district_name_by_location_id(
                             data.get('factory_location_id'))
                     else:
                         accident_district = None
@@ -381,10 +381,14 @@ class EisCaseData(APIView):
 
                     final_data_item["worker_beneficiary_count"]= dep_count
 
+                other_compensations= WorkforceOtherCompensationInfo.objects.filter(workforce_application_id=data.get("case_id"), is_eis_benefit_adjustment_eligible="true")
+                total_compensations= 0
+                for compensation in other_compensations:
+                    total_compensations+= compensation.amount
 
                 ############# Final Data curating #############
-                final_data_item["worker_permanent_district"] = self.get_district_name_by_location_id(final_data_item["worker_permanent_location_id"])
-                final_data_item["worker_present_district"] = self.get_district_name_by_location_id(final_data_item["worker_present_location_id"])
+                final_data_item["worker_permanent_district"] = get_district_name_by_location_id(final_data_item["worker_permanent_location_id"])
+                final_data_item["worker_present_district"] = get_district_name_by_location_id(final_data_item["worker_present_location_id"])
                 final_data_item["worker_age"] = worker_age
                 final_data_item["endorsement_date"] = endorsement_date
                 final_data_item["total_days_of_endorsement"] = total_days_of_endorsement
@@ -393,6 +397,7 @@ class EisCaseData(APIView):
                 final_data_item["accident_place"] = accident_place
                 final_data_item["accident_district"] = accident_district
                 final_data_item["worker_death_place"] = worker_place_of_death
+                final_data_item["total_compensations_by_other_entities"] = total_compensations
 
                 final_data.append(final_data_item)
 
