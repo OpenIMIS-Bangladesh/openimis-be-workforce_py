@@ -9,8 +9,10 @@ from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from .services.file_services import save_uploaded_file, retrieve_file_response
+from .services.workforce_application_services import WorkforceApplicationServices
 from .services.workforce_sms_services import send_sms
-from .models import WorkforceEmployee, generate_otp, WorkforceEisPaymentProcess, WorkforceOtherCompensationInfo, WorkforceEmployeeDependent
+from .models import WorkforceEmployee, generate_otp, WorkforceEisPaymentProcess, WorkforceOtherCompensationInfo, \
+    WorkforceEmployeeDependent, WorkforceApplication, WorkforceApplicationMovement
 from core.models import InteractiveUser
 import os
 from rest_framework.permissions import AllowAny
@@ -19,6 +21,17 @@ from django.db.models.fields.json import KeyTextTransform
 from datetime import datetime, timezone, date
 import json
 from workforce.services.workforce_employee_dependent_services import WorkforceEmployeeDependentServices
+import base64
+
+def extract_uuid(encoded_str):
+    decoded = base64.b64decode(encoded_str).decode()
+    return decoded.split(":")[1]
+
+def safe_float(value, default=0.0):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
 
 class FileUploadView(APIView):
     parser_classes = [MultiPartParser, FormParser]
@@ -258,3 +271,137 @@ class EisSiteData(APIView):
 
         except Exception as e:
             return Response({'status': 'error', 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class EisCaseData(APIView):
+    def get_district_name_by_location_id(self, location_id):
+        district_name = None
+        try:
+            location = Location.objects.get(id=location_id)
+            upazilla = Location.objects.get(id=location.parent_id)
+            district = Location.objects.get(id=upazilla.parent_id)
+            district_name = district.name
+            return district_name
+        except Exception as e:
+            return None
+
+    def getAccidentType(self, key):
+        accident_type = {}
+        accident_type["workforce.accident.mainType.workplace"] = "কর্মস্থলে দুর্ঘটনা"
+        accident_type["workforce.accident.mainType.onDutyRTA"] = "কর্মস্থলের কাজে যাওয়ার পথে সড়ক দুর্ঘটনা"
+        accident_type["workforce.accident.mainType.commuting"] = "বাসা থেকে কর্মস্থল/কর্মস্থল থেকে বাসায় যাওয়ার পথে দুর্ঘটনা"
+        return accident_type[key]
+
+    def get(self, request):
+        try:
+            user= InteractiveUser.objects.get(id=1)
+            dependent_service= WorkforceEmployeeDependentServices(user)
+            application_service= WorkforceApplicationServices(user)
+            application_data= (WorkforceApplication.objects.filter(status__in=["approved_by_committee"], organization_type="eis").
+                values(
+                case_id= F('id'),
+                case_type= F('application_type'),
+                worker_name_en=F('workforce_employee__first_name_en'),
+                worker_name_bn=F('workforce_employee__first_name_bn'),
+                worker_gender=F('workforce_employee__gender'),
+                worker_date_of_birth=F('workforce_employee__birth_date'),
+                worker_permanent_location_id=F('workforce_employee__permanent_location_id'),
+                worker_present_location_id=F('workforce_employee__present_location_id'),
+                factory_id= F('employee_factory_id'),
+                factory_name_en= F('employee_factory__name_en'),
+                factory_name_bn= F('employee_factory__name_bn'),
+                factory_address= F('employee_factory__address'),
+                factory_location_id= F('employee_factory__location_id'),
+                association_id= F('employee_factory__all_association_id'),
+                association_name_en= F('employee_factory__all_association__name_en'),
+                association_name_bn= F('employee_factory__all_association__name_bn'),
+                association_short_name_en= F('employee_factory__all_association__short_name_en'),
+                association_short_name_bn= F('employee_factory__all_association__short_name_bn'),
+                worker_accident_info= F('employee_accident_info'),
+                dead_worker_info= F('deceased_worker_info'),
+                monthly_benefit= F('eis_monthly_amount')
+            ))
+
+            final_data= []
+
+            for data in application_data:
+                #set query result first
+                final_data_item= data
+                final_data_item["worker_beneficiary_count"]= 0
+
+                if data.get('factory_location_id'):
+                    final_data_item['factory_district'] = self.get_district_name_by_location_id(data.get('factory_location_id'))
+                else:
+                    final_data_item['factory_district'] = None
+
+
+                ######## Set data from accident #######
+                worker_accident_info= json.loads(data.get("worker_accident_info")) if data.get("worker_accident_info") else None
+                # first_payment_process= WorkforceEisPaymentProcess.objects.filter(workforce_application_id=data.get("case_id"), status="active", approved="yes").first()
+                movement_data= WorkforceApplicationMovement.objects.filter(application_id=data.get("case_id"), status__in=["approved_by_committee"]).order_by("-date_created").first()
+                if movement_data is None:
+                    continue
+                accident_date= worker_accident_info.get("accidentDate", None)
+                accident_place= worker_accident_info.get('inOutsideFactory', None)
+                endorsement_date= movement_data.date_created.date()
+                total_days_of_endorsement = dependent_service.calculate_days(worker_accident_info.get("accidentDate"), endorsement_date)
+                accident_type=  self.getAccidentType(worker_accident_info.get('accidentMainType')) if worker_accident_info.get('accidentMainType') else None
+                if worker_accident_info.get('inOutsideFactory') and worker_accident_info[
+                    'inOutsideFactory'] != "অন্যস্থানে":
+                    if data.get('factory_location_id'):
+                        accident_district = self.get_district_name_by_location_id(
+                            data.get('factory_location_id'))
+                    else:
+                        accident_district = None
+                else:
+                    accident_district = None
+                worker_place_of_death = worker_accident_info.get('placeOfDeath', None)
+                worker_age= dependent_service.calculate_age_custom(final_data_item["worker_date_of_birth"])
+                ######## Set data from accident END #######
+
+
+                ######## Change worker data if death case #######
+                if data.get('case_type')== "financialAssistance":
+                    dead_worker_info = json.loads(data.get("dead_worker_info")) if data.get(
+                        "dead_worker_info") is not None else None
+                    final_data_item["worker_name_en"] = dead_worker_info.get("nameEn")
+                    final_data_item["worker_name_bn"] = dead_worker_info.get("nameBn")
+                    final_data_item["worker_gender"] = dead_worker_info.get("gender").get("name")
+                    final_data_item["worker_date_of_birth"] = dead_worker_info.get("birthDate")
+                    final_data_item["worker_permanent_location_id"] = extract_uuid(dead_worker_info.get("permanentLocation").get("id"))
+                    final_data_item["worker_present_location_id"] = extract_uuid(dead_worker_info.get("presentLocation").get("id"))
+                    worker_age = dependent_service.calculate_age_custom(dead_worker_info.get("birthDate"), dead_worker_info.get("deathDate"))
+                    dependents= WorkforceEmployeeDependent.objects.filter(workforce_application_id=data.get("case_id"), is_eligible=True).values("id","eis_monthly_amount")
+                    total_benefit=0
+                    dep_count=0
+                    for dependent in dependents:
+                        total_benefit+= safe_float(dependent["eis_monthly_amount"])
+                        dep_count+=1
+                    final_data_item["monthly_benefit"]= total_benefit
+
+                    final_data_item["worker_beneficiary_count"]= dep_count
+
+
+                ############# Final Data curating #############
+                final_data_item["worker_permanent_district"] = self.get_district_name_by_location_id(final_data_item["worker_permanent_location_id"])
+                final_data_item["worker_present_district"] = self.get_district_name_by_location_id(final_data_item["worker_present_location_id"])
+                final_data_item["worker_age"] = worker_age
+                final_data_item["endorsement_date"] = endorsement_date
+                final_data_item["total_days_of_endorsement"] = total_days_of_endorsement
+                final_data_item["accident_date"] = accident_date
+                final_data_item["accident_type"] = accident_type
+                final_data_item["accident_place"] = accident_place
+                final_data_item["accident_district"] = accident_district
+                final_data_item["worker_death_place"] = worker_place_of_death
+
+                final_data.append(final_data_item)
+
+
+
+
+            return Response({'status': 'success', 'message': 'Data Retrieved Successfully', 'data': list(final_data)}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({'status': 'error', 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
