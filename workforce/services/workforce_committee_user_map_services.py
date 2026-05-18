@@ -23,7 +23,7 @@ class WorkforceCommitteeUserMapServices(BaseService):
         user_id= obj_data["user_id"]
         committee = WorkforceCommittee.objects.get(id=committee_id)
         committee_user= WorkforceCommitteeUser.objects.filter(related_user_id=user_id).first()
-        new_map= WorkforceCommitteeUserMap(committee_id=committee_id, user_id=user_id, is_noa_signature_user=False, workforce_committee_user_id=committee_user.id)
+        new_map= WorkforceCommitteeUserMap(committee_id=committee_id, user_id=user_id, is_noa_signature_user=False, workforce_committee_user_id=committee_user.id, is_Representative=False)
         try:
             new_map.save(username=self.user.username)
             # UserRole.objects.filter(user_id=user_id).delete()

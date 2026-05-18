@@ -1373,7 +1373,8 @@ class WorkforceCommitteeUserMapGQLType(DjangoObjectType):
             "committee": ["exact"],
             "user": ["exact"],
             "is_noa_signature_user":["exact"],
-            "role_in_committee": ["exact"]
+            "role_in_committee": ["exact"],
+            "is_Representative": ["exact"],
         }
         connection_class = ExtendedConnection
 

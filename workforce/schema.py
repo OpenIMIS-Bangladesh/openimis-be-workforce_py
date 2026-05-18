@@ -331,6 +331,8 @@ class Query(graphene.ObjectType):
 
     workforce_committees = graphene.List(
         WorkforceCommitteeGQLType,
+        organization_type=graphene.String(),
+        approval_type=graphene.String(),
         client_mutation_id=graphene.String(required=False),
         orderBy=graphene.List(of_type=graphene.String),
     )
@@ -1582,11 +1584,15 @@ class Query(graphene.ObjectType):
         except WorkforceEisBankAdvice.DoesNotExist:
             return None
 
-    def resolve_workforce_committees(self, info, **kwargs):
+    def resolve_workforce_committees(self, info,organization_type =None,approval_type=None,**kwargs):
         service = WorkforceCommitteeServices(info.context.user)
         # query = service.get(**kwargs)
         try:
             qs = WorkforceCommittee.objects.filter(is_deleted=False)
+            if organization_type:
+                qs = qs.filter(organization_type=organization_type)
+            if approval_type:
+                qs = qs.filter(approval_type=approval_type)
             return qs
         except WorkforceCommittee.DoesNotExist:
             return None

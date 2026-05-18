@@ -1806,6 +1806,7 @@ class WorkforceCommitteeUserMap(HistoryModel):
     )
     is_noa_signature_user = models.BooleanField(default=False)
     role_in_committee= models.CharField(max_length=200, blank=True, null=True)
+    is_Representative = models.BooleanField(default=False,blank=True,null=True)
 
     class Meta:
         managed = True
