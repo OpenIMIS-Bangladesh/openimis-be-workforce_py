@@ -51,8 +51,13 @@ class WorkforceCommitteeServices(BaseService):
         
         # Step 2: Copy RoleRights from role_id=58
         try:
-            association_roles= Role.objects.filter(id__in=[66,58,49]).first()
-            source_role_rights = RoleRight.objects.filter(role_id=association_roles.id)
+            if organization_type == 'blwf':
+                association_roles = Role.objects.filter(id__in=[41]).first()
+            elif organization_type == 'eis':
+                association_roles = Role.objects.filter(id__in=[66, 58, 49]).first()
+            else:
+                association_roles = Role.objects.filter(id__in=[19]).first()
+            source_role_rights = RoleRight.objects.filter(role_id=association_roles.id,validity_to__isnull =True)
             if not source_role_rights.exists():
                 logger.warning("No RoleRights found for role_id=58")
             
