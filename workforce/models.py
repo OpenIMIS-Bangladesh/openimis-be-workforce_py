@@ -1851,12 +1851,3 @@ class WorkforceCommitteeBankAdviceMap(HistoryModel):
         managed = True
         db_table = 'workforce_committee_bank_advice_map'
 
-
-class WebsiteLegalGuideline(HistoryModel):
-    document_url= models.TextField(null=True, blank= True)
-    document_path= models.TextField(null=True, blank= True)
-    description = models.TextField(null=True, blank=True)
-
-    class Meta:
-        managed = True
-        db_table = 'website_legal_guidelines'
