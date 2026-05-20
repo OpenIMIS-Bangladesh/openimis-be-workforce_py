@@ -1853,13 +1853,8 @@ class WorkforceCommitteeBankAdviceMap(HistoryModel):
 
 
 class WebsiteLegalGuideline(HistoryModel):
-    workforce_document = models.ForeignKey(
-        WorkforceDocument,
-        models.DO_NOTHING,
-        blank=True,
-        null=True,
-        related_name="website_document",
-    )
+    document_url= models.TextField(null=True, blank= True)
+    document_path= models.TextField(null=True, blank= True)
     description = models.TextField(null=True, blank=True)
 
     class Meta:

@@ -1412,5 +1412,7 @@ class WebsiteLegalGuidelineGQLType(DjangoObjectType):
         filter_fields = {
             "id": ["exact"],
             "description": ["exact", "icontains"],
+            "document_url": ["exact", "icontains"],
+            "document_path": ["exact", "icontains"],
         }
         connection_class = ExtendedConnection
