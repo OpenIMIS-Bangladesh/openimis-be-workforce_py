@@ -387,6 +387,11 @@ class Query(graphene.ObjectType):
         user_id_in= graphene.List(of_type=graphene.String),
     )
 
+    website_legal_guidelines = graphene.Field(
+        WebsiteLegalGuidelineGQLType,
+        id= graphene.String,
+    )
+
 
 
     def resolve_workforce_representatives(self, info, **kwargs):
@@ -1720,6 +1725,15 @@ class Query(graphene.ObjectType):
         except Exception as e:
             return {"error": f"Token error: {str(e)}"}
 
+    def resolve_website_legal_guidelines(self, info, id=None, **kwargs):
+        try:
+            qs= WebsiteLegalGuideline.objects.order_by("-date_created").first()
+            if id:
+                qs = WebsiteLegalGuideline.objects.get(id=id)
+            return qs
+        except Exception as e:
+            return {"error": f"Token error: {str(e)}"}
+
 
 
 class Mutation(graphene.ObjectType):
@@ -1875,4 +1889,6 @@ class Mutation(graphene.ObjectType):
 
     send_sms_notification= SendSmsNotificationMutation.Field()
     create_workforce_send_confirmation_link = SendWorkforceConfirmationLinkMutation.Field()
+    create_website_legal_guideline = CreateWebsiteLegalGuidelineMutation.Field()
+    update_website_legal_guideline = UpdateWebsiteLegalGuidelineMutation.Field()
 

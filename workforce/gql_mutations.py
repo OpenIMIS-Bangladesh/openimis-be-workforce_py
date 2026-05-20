@@ -13,6 +13,7 @@ import graphene
 from .gql_types import *
 
 from .models import Bank
+from .services.website_legal_guideline_services import WebsiteLegalGuidelineServices
 from .services.workforce_association_user_map_services import WorkforceAssociationUserMapServices
 from .services.workforce_organization_services import WorkforceOrganizationServices
 from .services.workforce_other_compensation_info_services import WorkforceOtherCompensationInfoServices
@@ -2760,6 +2761,55 @@ class SendWorkforceConfirmationLinkMutation(BaseHistoryModelCreateMutationMixin,
             failure_message=failure_message,
             required_permission='',
             call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+
+class CreateWebsiteLegalGuidelineMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateWebsiteLegalGuidelineMutation"
+
+    class Input(WebsiteLegalGuidelineInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_create_website_legal_guideline_document"
+        required_permission = ""
+        service_instance = WebsiteLegalGuidelineServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission='',
+            call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=data
+        )
+
+        return result
+
+class UpdateWebsiteLegalGuidelineMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWebsiteLegalGuidelineMutation"
+
+    class Input(WebsiteLegalGuidelineInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **data):
+        failure_message = "workforce.mutation.failed_to_update_website_legal_guideline_document"
+        required_permission = ""
+        service_instance = WebsiteLegalGuidelineServices(user)
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission='',
+            call_type='update',
             service_instance=service_instance,
             user=user,
             data=data

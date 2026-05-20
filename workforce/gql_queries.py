@@ -1404,3 +1404,13 @@ class WorkforceNotificationGQLType(DjangoObjectType):
             "workforce_application_id": ["exact"],
         }
         connection_class = ExtendedConnection
+
+class WebsiteLegalGuidelineGQLType(DjangoObjectType):
+    class Meta:
+        model = WebsiteLegalGuideline
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "notification": ["exact", "icontains"],
+        }
+        connection_class = ExtendedConnection
