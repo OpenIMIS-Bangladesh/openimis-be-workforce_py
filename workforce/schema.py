@@ -389,7 +389,6 @@ class Query(graphene.ObjectType):
 
     website_legal_guidelines = graphene.Field(
         WebsiteLegalGuidelineGQLType,
-        id= graphene.String,
     )
 
 
@@ -1725,11 +1724,9 @@ class Query(graphene.ObjectType):
         except Exception as e:
             return {"error": f"Token error: {str(e)}"}
 
-    def resolve_website_legal_guidelines(self, info, id=None, **kwargs):
+    def resolve_website_legal_guidelines(self, info):
         try:
             qs= WebsiteLegalGuideline.objects.order_by("-date_created").first()
-            if id:
-                qs = WebsiteLegalGuideline.objects.get(id=id)
             return qs
         except Exception as e:
             return {"error": f"Token error: {str(e)}"}

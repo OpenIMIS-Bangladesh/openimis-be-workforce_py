@@ -809,6 +809,7 @@ class WorkforceCommitteeBankAdviceMapInputType(OpenIMISMutation.Input):
     advice_template= graphene.String(required=False)
 
 
-class WebsiteLegalGuideline(OpenIMISMutation.Input):
+class WebsiteLegalGuidelineInputType(OpenIMISMutation.Input):
     id = graphene.String(required=False)
     workforce_document = graphene.UUID(required=False)
+    description = graphene.String(required=False)

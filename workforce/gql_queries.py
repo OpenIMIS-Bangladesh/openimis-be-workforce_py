@@ -1411,6 +1411,6 @@ class WebsiteLegalGuidelineGQLType(DjangoObjectType):
         interfaces = (graphene.relay.Node,)
         filter_fields = {
             "id": ["exact"],
-            "notification": ["exact", "icontains"],
+            "description": ["exact", "icontains"],
         }
         connection_class = ExtendedConnection
