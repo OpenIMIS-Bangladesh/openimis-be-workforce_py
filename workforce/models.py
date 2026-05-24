@@ -1860,3 +1860,14 @@ class WebsiteLegalGuideline(HistoryModel):
         managed = True
         db_table = 'website_legal_guidelines'
 
+
+class WebsiteVisitorMessage(HistoryModel):
+    visitor_name= models.TextField(null=True, blank= True)
+    visitor_number= models.CharField(max_length=20 ,null=True, blank= True)
+    visitor_email = models.CharField(max_length=50, null=True, blank=True)
+    visitor_message = models.TextField(null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'website_visitor_messages'
+

@@ -1416,3 +1416,15 @@ class WebsiteLegalGuidelineGQLType(DjangoObjectType):
             "document_path": ["exact", "icontains"],
         }
         connection_class = ExtendedConnection
+
+class WebsiteVisitorMessageGQLType(DjangoObjectType):
+    class Meta:
+        model = WebsiteVisitorMessage
+        interfaces = (graphene.relay.Node,)
+        filter_fields = {
+            "id": ["exact"],
+            "visitor_name": ["exact", "icontains"],
+            "visitor_email": ["exact", "icontains"],
+            "visitor_message": ["exact", "icontains"],
+        }
+        connection_class = ExtendedConnection

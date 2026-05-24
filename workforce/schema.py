@@ -392,6 +392,28 @@ class Query(graphene.ObjectType):
     )
 
 
+    website_visitor_messages = graphene.List(
+        WebsiteVisitorMessageGQLType,
+        visitor_name= graphene.String(required=False),
+        visitor_email= graphene.String(required=False),
+        visitor_number= graphene.String(required=False),
+    )
+
+    def resolve_website_visitor_messages(self, info, visitor_name=None, visitor_email=None, visitor_number=None,  **kwargs):
+        qs = WebsiteVisitorMessage.objects.all().order_by("-date_created")
+
+        if visitor_name:
+            qs = qs.filter(visitor_name=visitor_name)
+
+        if visitor_email:
+            qs = qs.filter(visitor_email=visitor_email)
+
+        if visitor_number:
+            qs = qs.filter(visitor_number=visitor_number)
+
+        return qs[:1000]
+
+
 
     def resolve_workforce_representatives(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
