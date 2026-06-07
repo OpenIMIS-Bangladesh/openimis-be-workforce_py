@@ -539,6 +539,7 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "phone_number": ["exact"],
             "tracking_number": ["exact"],
             **prefix_filterset("workforce_employee__", WorkforceEmployeeGQLType._meta.filter_fields),
+            # **prefix_filterset("application__",lambda :WorkforceApplicationMovementGQLType._meta.filter_fields),
             **prefix_filterset("cf_application_summary__", WorkforceApplicationSummaryGQLType._meta.filter_fields),
             **prefix_filterset("eis_application_summary__", WorkforceApplicationSummaryGQLType._meta.filter_fields),
             **prefix_filterset("blwf_application_summary__", WorkforceApplicationSummaryGQLType._meta.filter_fields),
@@ -569,6 +570,8 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "deceased_worker_info_verification": [],
             "deceased_worker_info_verification_remarks": [],
             "committee_id": ["exact"],
+            "workforce_employee__nid": ["exact"],
+            "application__status": ["exact"],
         }
         connection_class = ExtendedConnection
 
