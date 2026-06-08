@@ -24,6 +24,21 @@ class WorkforceDocumentServices(BaseService):
         return query
 
     def create(self, obj_data):
+        holder_id = obj_data.get("holder_id")
+        path= obj_data.get("path")
+        url= obj_data.get("url")
+        document_type_id = obj_data.get("workforce_document_type_id")
+        app_id = obj_data.get("workforce_application_id")
+
+        if not holder_id and app_id and document_type_id:
+            existing_doc = WorkforceDocument.objects.filter(
+                workforce_document_type_id = document_type_id,
+                workforce_application_id = app_id,
+                is_deleted = False
+            ).first()
+            if existing_doc:
+                obj_data["id"]= existing_doc.id
+                return super().update(obj_data)
         return super().create(obj_data)
 
     def update(self, obj_data):
