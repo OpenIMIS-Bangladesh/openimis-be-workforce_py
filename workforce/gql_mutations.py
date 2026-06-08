@@ -2816,3 +2816,115 @@ class UpdateWebsiteLegalGuidelineMutation(BaseHistoryModelCreateMutationMixin, B
         )
 
         return result
+
+class UserPaymentConfirmationMutation(graphene.Mutation):
+    class Arguments:
+        workforce_eis_payment_disbursement_stage_id= graphene.String()
+        confirmation= graphene.Boolean()
+
+    success = graphene.Boolean()
+    message = graphene.String()
+    errors = graphene.List(graphene.String)
+
+    @classmethod
+    def mutate(cls, root, info, **data):
+        from workforce.services.workforce_sms_services import send_sms
+        from workforce.models import WorkforceEisPaymentDisbursementStage
+        user= InteractiveUser.objects.first()
+        stage_instance= WorkforceEisPaymentDisbursementStage.objects.get(id= data["workforce_eis_payment_disbursement_stage_id"])
+        try:
+            if data["confirmation"]:
+                try:
+                    stage_instance.user_confirmed= True
+                    stage_instance.save(username=user.login_name)
+                except Exception as e:
+                    print(e)
+            else:
+                try:
+                    stage_instance.user_confirmed= False
+                    stage_instance.save(username=user.login_name)
+                except Exception as e:
+                    print(e)
+            return cls(success=True, message="Confirmation Successfull", errors=[])
+        except Exception as e:
+            return cls(success=False, message="Invalid Request", errors=[str(e)])
+
+
+class ConfirmNoaMutation(graphene.Mutation):
+    class Arguments:
+        workforce_eis_payment_process_id= graphene.String()
+        confirmation= graphene.Boolean()
+        is_sms_sent= graphene.Boolean()
+
+    success = graphene.Boolean()
+    message = graphene.String()
+    errors = graphene.List(graphene.String)
+
+    @classmethod
+    def mutate(cls, root, info, **data):
+        from workforce.services.workforce_sms_services import send_sms
+        from workforce.models import WorkforceEisPaymentProcess
+        user= InteractiveUser.objects.first()
+        process_instance= WorkforceEisPaymentProcess.objects.get(id= data["workforce_eis_payment_process_id"])
+        try:
+            if data["confirmation"]:
+                try:
+                    process_instance.noa_confirmed= True
+                    process_instance.save(username=user.login_name)
+                except Exception as e:
+                    print(e)
+            else:
+                try:
+                    process_instance.noa_confirmed= False
+                    process_instance.save(username=user.login_name)
+                except Exception as e:
+                    print(e)
+
+            if data["is_sms_sent"]:
+                try:
+                    process_instance.noa_sms_sent= True
+                    process_instance.save(username=user.login_name)
+                except Exception as e:
+                    print(e)
+            else:
+                try:
+                    process_instance.noa_sms_sent= False
+                    process_instance.save(username=user.login_name)
+                except Exception as e:
+                    print(e)
+            return cls(success=True, message="Confirmation Successfull", errors=[])
+        except Exception as e:
+            return cls(success=False, message="Invalid Request", errors=[str(e)])
+
+
+class BlockNoaMutation(graphene.Mutation):
+    class Arguments:
+        workforce_eis_payment_process_id= graphene.String()
+        is_blocked= graphene.Boolean()
+
+    success = graphene.Boolean()
+    message = graphene.String()
+    errors = graphene.List(graphene.String)
+
+    @classmethod
+    def mutate(cls, root, info, **data):
+        from workforce.services.workforce_sms_services import send_sms
+        from workforce.models import WorkforceEisPaymentProcess
+        user= InteractiveUser.objects.first()
+        process_instance= WorkforceEisPaymentProcess.objects.get(id= data["workforce_eis_payment_process_id"])
+        try:
+            if data["is_blocked"]:
+                try:
+                    process_instance.noa_blocked= True
+                    process_instance.save(username=user.login_name)
+                except Exception as e:
+                    print(e)
+            else:
+                try:
+                    process_instance.noa_blocked= False
+                    process_instance.save(username=user.login_name)
+                except Exception as e:
+                    print(e)
+            return cls(success=True, message="NOA Download Blocking Successfull", errors=[])
+        except Exception as e:
+            return cls(success=False, message="Invalid Request", errors=[str(e)])

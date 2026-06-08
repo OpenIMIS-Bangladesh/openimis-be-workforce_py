@@ -1185,6 +1185,8 @@ class WorkforceEisPaymentProcessGQLType(DjangoObjectType):
             "processing_date": ["exact"],
             "is_disbursed": ["exact"],
             "approved": ["exact"],
+            "noa_confirmed": ["exact"],
+            "noa_sms_sent": ["exact"],
         }
 
     def resolve_workforce_employee_dependent(self, info):
@@ -1215,6 +1217,7 @@ class WorkforceEisPaymentDisbursementStageGQLType(DjangoObjectType):
             "is_disbursed": ["exact"],
             "approved": ["exact"],
             "beneficiary_id": ["exact"],
+            "user_confirmed": ["exact"],
         }
 
     def resolve_workforce_employee_dependent(self, info):

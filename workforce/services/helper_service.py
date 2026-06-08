@@ -240,7 +240,18 @@ def build_confirmation_link(application_id: str, base_url: str = None) -> str:
         base_url = os.environ.get("WORKFORCE_FRONTEND_URL", "http://localhost:3000")
 
     base_url = base_url.rstrip("/")
-    return f"{base_url}/front/workforce/confirmation/{application_id}"
+    return f"{base_url}/front/workforce/confirmation?application_id{application_id}"
+
+
+def build_payment_confirmation_link(disbursement_id: str, base_url: str = None) -> str:
+    if not disbursement_id:
+        raise ValueError("disbursement_id is required")
+
+    if base_url is None:
+        base_url = os.environ.get("WORKFORCE_FRONTEND_URL", "http://localhost:3000")
+
+    base_url = base_url.rstrip("/")
+    return f"{base_url}/front/workforce/confirmation?disbursement_id={disbursement_id}"
 
 # def relate_document_with_banking_info(dependent_id):
 #     document_instance = WorkforceDocument.objects.file()
