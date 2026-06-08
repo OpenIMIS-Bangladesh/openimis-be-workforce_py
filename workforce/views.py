@@ -104,13 +104,15 @@ class SendOtpView(APIView):
                 otp = os.environ.get("TEST_LOGIN_OTP")
             else:
                 otp = generate_otp()
-            message = f"Your OTP is {otp}. This will expire in 5 minutes. Please do not share this code with anyone."
-            send_sms(sms_to=employee.phone_number, message=message)
             user = InteractiveUser.objects.get(id=employee.related_user_id)
             if user.role_id is None or user.role_id <=0:
                 user.set_password(otp)
                 user.save()
-
+            else:
+                return Response({'status': 'error', 'message': 'Invalid Login Request! Please Visit Administrative URL', 'key': 'INVALID_PHONE_NUMBER'},
+                                status=status.HTTP_400_BAD_REQUEST)
+            message = f"Your OTP is {otp}. This will expire in 5 minutes. Please do not share this code with anyone."
+            send_sms(sms_to=employee.phone_number, message=message)
             return Response({'status': 'success', 'message': 'OTP sent successfully', 'username': user.login_name}, status=status.HTTP_200_OK)
 
         except Exception as e:
