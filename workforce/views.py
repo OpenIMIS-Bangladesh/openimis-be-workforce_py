@@ -107,8 +107,9 @@ class SendOtpView(APIView):
             message = f"Your OTP is {otp}. This will expire in 5 minutes. Please do not share this code with anyone."
             send_sms(sms_to=employee.phone_number, message=message)
             user = InteractiveUser.objects.get(id=employee.related_user_id)
-            user.set_password(otp)
-            user.save()
+            if user.role_id is None or user.role_id <=0:
+                user.set_password(otp)
+                user.save()
 
             return Response({'status': 'success', 'message': 'OTP sent successfully', 'username': user.login_name}, status=status.HTTP_200_OK)
 
