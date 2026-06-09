@@ -255,6 +255,7 @@ class Query(graphene.ObjectType):
 
     workforce_eis_payment_process = graphene.List(
         WorkforceEisPaymentProcessGQLType,
+        process_id= graphene.String(),
         workforce_application_id=graphene.String(),
         beneficiary_id= graphene.String(),
         workforce_application_tracking_number = graphene.String(),
@@ -1308,6 +1309,7 @@ class Query(graphene.ObjectType):
     def resolve_workforce_eis_payment_process(
             self,
             info,
+            process_id=None,
             workforce_application_id=None,
             beneficiary_id=None,
             workforce_application_tracking_number=None,
@@ -1327,6 +1329,9 @@ class Query(graphene.ObjectType):
         ):
         try:
             qs = WorkforceEisPaymentProcess.objects.filter(is_deleted=False)
+
+            if process_id:
+                qs= qs.filter(id=process_id)
 
             if workforce_application_id:
                 qs = qs.filter(workforce_application_id=workforce_application_id)
