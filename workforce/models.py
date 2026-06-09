@@ -1521,6 +1521,9 @@ class WorkforceEisPaymentProcess(HistoryModel):
     arrear_amount= models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
     arrear_payment_month= models.IntegerField(null=True, blank=True)
     arrear_payment_year= models.IntegerField(null=True, blank=True)
+    noa_sms_sent=  models.BooleanField(default=False, null=True)
+    noa_confirmed= models.BooleanField(default=False, null=True)
+    noa_blocked= models.BooleanField(default=False, null=True)
 
     class Meta:
         managed = True
@@ -1600,6 +1603,7 @@ class WorkforceEisPaymentDisbursementStage(HistoryModel):
         null=True,
         related_name="workforce_eis_bank_advice_payment_stage",
     )
+    user_confirmed= models.BooleanField(default=False)
 
     class Meta:
         managed = True
@@ -1666,6 +1670,7 @@ class WorkforceEisPaymentDisbursement(HistoryModel):
         related_name="workforce_payment_disbursed_by",
     )
     phone_number = models.CharField(max_length=50, null=True, blank=True)
+    user_confirmed = models.BooleanField(default=False)
 
     class Meta:
         managed = True

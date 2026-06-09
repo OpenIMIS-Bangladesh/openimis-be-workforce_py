@@ -1911,3 +1911,8 @@ class Mutation(graphene.ObjectType):
     create_website_legal_guideline = CreateWebsiteLegalGuidelineMutation.Field()
     update_website_legal_guideline = UpdateWebsiteLegalGuidelineMutation.Field()
 
+    user_payment_confirmation = UserPaymentConfirmationMutation.Field()
+
+    confirm_noa = ConfirmNoaMutation.Field()
+
+    block_noa = BlockNoaMutation.Field()
