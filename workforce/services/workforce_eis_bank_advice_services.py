@@ -222,9 +222,9 @@ class WorkforceEisBankAdviceServices(BaseService):
                     year_in_english= str(stage_instance.year)
                     phone_number= stage_instance.phone_number
                     confirmation_url= build_payment_confirmation_link(stage_instance.id)
-                    confirmation_url_shortened= shorten_url(confirmation_url)
+                    # confirmation_url_shortened= shorten_url(confirmation_url)
                     message = f"""Dear beneficiary, Please confirm your payment of {full_month_name_in_english}, {year_in_english} From EIS-PILOT With the following link. Please Contact: 01886921030 For any query.
-                    {confirmation_url_shortened}
+                    {confirmation_url}
                     """
                     # message = f"""সম্মানিত বেনিফিট গ্রহীতা,
                     # ই.আই.এস পাইলট হতে আপনার প্রাপ্য {full_month_name_in_bangla}, {year_in_bangla} মাসের মাসিক টপ-আপ বেনিফিট আপনার ব্যাংক অ্যাকাউন্টে প্রেরিত হয়েছে। অনুগ্রহ পূর্বক নিম্নউল্লেখিত মোবাইল নাম্বারে SMS এর মাধ্যমে অথবা নিম্নউল্লেখিত লিংকে ভিজিট করে টাকা প্রাপ্তি নিশ্চিত করুন।
