@@ -13,7 +13,7 @@ import base64
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 from math import floor
-from workforce.services.helper_service import generate_beneficiary_id, build_payment_confirmation_link
+from workforce.services.helper_service import generate_beneficiary_id, build_payment_confirmation_link, shorten_url
 from decimal import Decimal, InvalidOperation
 from datetime import date
 from dateutil.relativedelta import relativedelta
@@ -34,6 +34,17 @@ def get_bangla_month(month_index):
     if 1 <= month_index <= 12:
         return months[month_index - 1]
     return "অবৈধ মাস"
+
+def get_english_month(month_index):
+    months = [
+        "January", "February", "March", "April",
+        "May", "June", "July", "August",
+        "September", "October", "November", "December"
+    ]
+
+    if 1 <= month_index <= 12:
+        return months[month_index - 1]
+    return "Invalid Month"
 
 def to_bangla_numbers(text: str) -> str:
     bangla_digits = {
@@ -205,18 +216,24 @@ class WorkforceEisBankAdviceServices(BaseService):
                 stage_instance.disbursement_date = today
                 try:
                     stage_instance.save(username=user.username)
-                    full_month_name_in_bangla= get_bangla_month(stage_instance.month_index)
-                    year_in_bangla= to_bangla_numbers(str(stage_instance.year))
+                    # full_month_name_in_bangla= get_bangla_month(stage_instance.month_index)
+                    full_month_name_in_english= get_english_month(stage_instance.month_index)
+                    # year_in_bangla= to_bangla_numbers(str(stage_instance.year))
+                    year_in_english= str(stage_instance.year)
                     phone_number= stage_instance.phone_number
                     confirmation_url= build_payment_confirmation_link(stage_instance.id)
-                    message = f"""সম্মানিত বেনিফিট গ্রহীতা,
-                    ই.আই.এস পাইলট হতে আপনার প্রাপ্য {full_month_name_in_bangla}, {year_in_bangla} মাসের মাসিক টপ-আপ বেনিফিট আপনার ব্যাংক অ্যাকাউন্টে প্রেরিত হয়েছে। অনুগ্রহ পূর্বক নিম্নউল্লেখিত মোবাইল নাম্বারে SMS এর মাধ্যমে অথবা নিম্নউল্লেখিত লিংকে ভিজিট করে টাকা প্রাপ্তি নিশ্চিত করুন।
-                    প্রয়োজনে যোগাযোগ
-                    মোবাইল: ০১৮৮৬৯২১০৩০
-                    প্রাপ্তি নিশ্চিতের জন্য লিংকঃ {confirmation_url}
-                    ই-মেইল: specialunit@eis-pilot-bd.org
-                    ঠিকানা: ১৯৬, ১০ম তলা, ই.আই.এস পাইলট স্পেশাল ইউনিট, শ্রম ভবন, শহীদ সৈয়দ নজরুল ইসলাম সরণি, বিজয়নগর, ঢাকা-১০০০
+                    confirmation_url_shortened= shorten_url(confirmation_url)
+                    message = f"""Dear beneficiary, Please confirm your payment of {full_month_name_in_english}, {year_in_english} From EIS-PILOT With the following link. Please Contact: 01886921030 For any query.
+                    {confirmation_url_shortened}
                     """
+                    # message = f"""সম্মানিত বেনিফিট গ্রহীতা,
+                    # ই.আই.এস পাইলট হতে আপনার প্রাপ্য {full_month_name_in_bangla}, {year_in_bangla} মাসের মাসিক টপ-আপ বেনিফিট আপনার ব্যাংক অ্যাকাউন্টে প্রেরিত হয়েছে। অনুগ্রহ পূর্বক নিম্নউল্লেখিত মোবাইল নাম্বারে SMS এর মাধ্যমে অথবা নিম্নউল্লেখিত লিংকে ভিজিট করে টাকা প্রাপ্তি নিশ্চিত করুন।
+                    # প্রয়োজনে যোগাযোগ
+                    # মোবাইল: ০১৮৮৬৯২১০৩০
+                    # প্রাপ্তি নিশ্চিতের জন্য লিংকঃ {confirmation_url}
+                    # ই-মেইল: specialunit@eis-pilot-bd.org
+                    # ঠিকানা: ১৯৬, ১০ম তলা, ই.আই.এস পাইলট স্পেশাল ইউনিট, শ্রম ভবন, শহীদ সৈয়দ নজরুল ইসলাম সরণি, বিজয়নগর, ঢাকা-১০০০
+                    # """
                     send_sms(phone_number, message)
                 except Exception as e:
                     continue

@@ -9,10 +9,12 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 from core.models import Role
 from datetime import datetime
+import requests
 
 from ..models import WorkforceGrantMoney, WorkforceEisPaymentProcess, WorkforceFactory, WorkforceDocument, \
     WorkforceAllAssociation
 
+BITLY_ACCESS_TOKEN = "178b32ff89aee198023dcdddd5b2801cbd482e5d"
 logger = logging.getLogger(__name__)
 now = timezone.now()
 
@@ -20,6 +22,29 @@ WorkforceApplication = apps.get_model("workforce", "WorkforceApplication")
 WorkforceApplicationMovement = apps.get_model("workforce", "WorkforceApplicationMovement")
 UserRole = apps.get_model("core", "UserRole")
 User = apps.get_model("core", "User")
+
+
+
+def shorten_url(long_url):
+    try:
+        response = requests.post(
+            "https://api-ssl.bitly.com/v4/shorten",
+            headers={
+                "Authorization": f"Bearer {BITLY_ACCESS_TOKEN}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "long_url": long_url
+            },
+            timeout=10
+        )
+
+        response.raise_for_status()
+        return response.json()["link"]
+
+    except Exception as e:
+        print(f"Bitly error: {e}")
+        return long_url  # fallback to original URL
 
 
 def clean_dependents_data(dependents_data):
@@ -248,7 +273,7 @@ def build_payment_confirmation_link(disbursement_id: str, base_url: str = None) 
         raise ValueError("disbursement_id is required")
 
     if base_url is None:
-        base_url = os.environ.get("WORKFORCE_FRONTEND_URL", "http://localhost:3000")
+        base_url = os.environ.get("EIS_FRONTEND_URL", "http://localhost:3000")
 
     base_url = base_url.rstrip("/")
     return f"{base_url}/front/workforce/confirmation?disbursement_id={disbursement_id}"
