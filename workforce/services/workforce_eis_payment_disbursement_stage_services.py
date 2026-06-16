@@ -99,10 +99,50 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
         for eis_process_id in eis_process_ids:
             process_id= extract_uuid(eis_process_id)
             workforce_eis_payment_process= WorkforceEisPaymentProcess.objects.get(id=process_id)
+            workforce_application= workforce_eis_payment_process.workforce_application
+
+            #FIRST DISBURSEMENT ARREAR CALCULATION NUMBER OF MONTHS ================
+            calculation_start_date = ""
+            if workforce_application.application_type == "disabilityAssistance":
+                doctor_json = json.loads(
+                    workforce_application.doctors_entry) if workforce_application.doctors_entry else None
+                if doctor_json is None:
+                    return False
+                accident_info_json = json.loads(
+                    workforce_application.employee_accident_info) if workforce_application.employee_accident_info else None
+
+
+                calculation_start_date = accident_info_json.get("dateOfRejoining") if accident_info_json.get(
+                    "dateOfRejoining") else doctor_json.get("dateOfAssessment")
+                calculation_start_date = datetime.strptime(calculation_start_date, "%Y-%m-%d").date() if isinstance(
+                    calculation_start_date, str) else calculation_start_date
+            else:
+                accident_info_json = json.loads(
+                    workforce_application.employee_accident_info) if workforce_application.employee_accident_info else None
+                if accident_info_json is None:
+                    return False
+                calculation_start_date = accident_info_json.get("dateOfDeath") if accident_info_json.get(
+                    "dateOfDeath") else None
+                calculation_start_date = datetime.strptime(calculation_start_date, "%Y-%m-%d").date() if isinstance(
+                    calculation_start_date, str) else calculation_start_date
+
+            target_date = date(int(year), int(month), 1)
+
+            months_gone = (
+                    (target_date.year - calculation_start_date.year) * 12
+                    + (target_date.month - calculation_start_date.month)
+            )
+            if target_date.day < calculation_start_date.day:
+                months_gone -= 1
+
+            # FIRST DISBURSEMENT ARREAR CALCULATION NUMBER OF MONTHS END ================
+
+
+
             if safe_decimal(workforce_eis_payment_process.arrear_payment_month) == safe_decimal(month) -1 and safe_decimal(workforce_eis_payment_process.arrear_payment_year) == safe_decimal(year):
                 paid_amount = safe_decimal(workforce_eis_payment_process.payable_amount) + safe_decimal(workforce_eis_payment_process.arrear_amount)
             else:
-                paid_amount = workforce_eis_payment_process.payable_amount
+                paid_amount = workforce_eis_payment_process.payable_amount * months_gone
             new_stage= WorkforceEisPaymentDisbursementStage(
                 workforce_eis_payment_process= workforce_eis_payment_process,
                 workforce_application = workforce_eis_payment_process.workforce_application,

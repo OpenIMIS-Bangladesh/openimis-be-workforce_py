@@ -82,6 +82,15 @@ class Query(graphene.ObjectType):
         orderBy=graphene.List(of_type=graphene.String),
         get_unique=graphene.String(required=False, description="Get unique bank names only")
     )
+
+    workforce_bank_management = graphene.List(
+        WorkforceBankGQLType,
+        orderBy=graphene.List(of_type=graphene.String),
+        banks_only= graphene.Boolean(),
+        districts_only= graphene.Boolean(),
+        bank_id=graphene.String(required=False),
+        district_code = graphene.String(required=False),
+    )
     workforce_employee_dependent = OrderedDjangoFilterConnectionField(
         WorkforceEmployeeDependentGQLType,
         orderBy=graphene.List(of_type=graphene.String),
@@ -515,6 +524,25 @@ class Query(graphene.ObjectType):
             query = query.distinct('district_name_en', 'district_name_bn')
 
         return gql_optimizer.query(query, info)
+
+    def resolve_workforce_bank_management(self, info, banks_only=False, districts_only=False, bank_id=None, district_code=None):
+        query = Bank.objects.filter(is_deleted=False)
+
+        # Apply unique filtering if requested
+        if banks_only:
+            query = query.filter(parent_id__isnull=True).order_by("name_en")
+
+        if districts_only:
+            query = query.distinct('district_name_en', 'district_name_bn').filter(district_name_en__isnull=False).order_by("district_name_en")
+
+        if bank_id:
+            query = query.filter(parent_id= bank_id).order_by("name_en")
+
+        if district_code:
+            query = query.filter(district_code__iexact=district_code).order_by("name_en")
+        return query
+
+
     def resolve_workforce_employee_dependents(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("Unauthorized access"))
