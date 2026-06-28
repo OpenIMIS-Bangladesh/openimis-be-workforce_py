@@ -447,15 +447,15 @@ class WorkforceEmployee(HistoryModel):
     present_address = models.TextField(null=True, blank=True)
     permanent_address = models.TextField(null=True, blank=True)
     phone_number = models.CharField(
-        max_length=20, null=True, blank=True, unique=True)
+        max_length=20, null=True, blank=True)
     email = models.CharField(max_length=255, null=True,
-                             blank=True, unique=True)
+                             blank=True)
     birth_date = models.DateField(null=True, blank=True)
-    nid = models.CharField(max_length=30, null=True, blank=True, unique=True)
+    nid = models.CharField(max_length=30, null=True, blank=True)
     birth_certificate_no = models.CharField(
-        max_length=30, null=True, blank=True, unique=True)
+        max_length=30, null=True, blank=True)
     passport_no = models.CharField(
-        max_length=30, null=True, blank=True, unique=True)
+        max_length=30, null=True, blank=True)
     registration_date = models.DateField(null=True, blank=True)
     life_status = models.CharField(max_length=30, null=True, blank=True)
     disability_status = models.CharField(max_length=30, null=True, blank=True)
