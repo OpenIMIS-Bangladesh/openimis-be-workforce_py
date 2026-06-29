@@ -1,4 +1,5 @@
 import base64
+import json
 import random
 import re
 import uuid
@@ -10,6 +11,7 @@ from django.utils import timezone
 from core.models import Role
 from datetime import datetime
 import requests
+from django.db import transaction
 
 from ..models import WorkforceGrantMoney, WorkforceEisPaymentProcess, WorkforceFactory, WorkforceDocument, \
     WorkforceAllAssociation
@@ -166,57 +168,58 @@ def generate_random_number(digit_count: int) -> int:
     return random.randint(start, end)
 
 
-def generate_beneficiary_id(association, accident_type, application_id=None, dependent_count=None):
-    while True:
-        eis_payment_process_instance = WorkforceEisPaymentProcess.objects.filter(
+def generate_beneficiary_id(association, accident_type, case_type, application_id=None, dependent_count=None):
+    application = WorkforceApplication.objects.filter(id=application_id).first()
+
+    yyyy = str(timezone.now().year)
+    if application:
+        if application.application_type == "financialAssistance" and application.metadata:
+            metadata = json.loads(application.metadata) if isinstance(application.metadata,
+                                                                      str) else application.metadata
+            death_date = metadata.get("deathDate")
+            if death_date:
+                yyyy = str(death_date)[:4]
+        elif application.application_type == "disability" and application.employee_accident_info:
+            accident_info = json.loads(application.employee_accident_info) if isinstance(
+                application.employee_accident_info, str) else application.employee_accident_info
+            accident_date = accident_info.get("accidentDate")
+            if accident_date:
+                yyyy = str(accident_date)[:4]
+
+    association_map = {
+        "BGMEA": "01",
+        "BKMEA": "02",
+        "BEPZA": "03",
+        "LFMEAB": "04"
+    }
+    aa = association_map.get(association, "00")
+    atct = f"{accident_type}{case_type}"
+
+    with transaction.atomic():
+        eis_instance = WorkforceEisPaymentProcess.objects.filter(
             workforce_application_id=application_id
         ).first()
-        if eis_payment_process_instance is None:
-            random_number = generate_random_number(5)
-        else:
-            beneficiary_id_existing = eis_payment_process_instance.beneficiary_id
-            random_number = beneficiary_id_existing.split(".")[-2]
 
-        if accident_type:
-            grant_money_instance = WorkforceGrantMoney.objects.filter(
-                organization_type="eis",
-                application_type=accident_type
-            ).first()
-            accident_type_no = str(grant_money_instance.application_type_no)
-        else:
-            accident_type_no = "00"
-
-        associations= WorkforceAllAssociation.objects.all().order_by("short_name_en")
-        association_position_in_db= 0
-        for ass in associations:
-            if ass.short_name_en== association:
-                association_position_in_db += 1
-                break
+        if eis_instance and eis_instance.beneficiary_id:
+            parts = eis_instance.beneficiary_id.split('.')
+            if len(parts) >= 4:
+                case_id = f"{parts[0]}.{parts[1]}.{parts[2]}.{parts[3]}"
             else:
-                association_position_in_db += 1
-
-
-        # Using dummy data for association.
-        # Patch this part after building association numbering mechanism.
-        if association is None:
-            association = "00"
-        # elif association == "BGMEA":
-        #     association = "01"
-        # elif association == "BEPZA":
-        #     association = "02"
+                case_id = f"{yyyy}.{aa}.{atct}.00000"
         else:
-            association = f"{association_position_in_db:02}"
+            app_count = WorkforceApplication.objects.filter(
+                organization_type="eis",
+                is_deleted=False
+            ).count()
 
-        if dependent_count is None:
-            beneficiary_id = f"EIS.{get_current_year()}.{association}.{accident_type_no}.{random_number}"
-        else:
-            beneficiary_id = f"EIS.{get_current_year()}.{association}.{accident_type_no}.{random_number}.{dependent_count}"
+            serial = f"{app_count:05d}"
+            case_id = f"{yyyy}.{aa}.{atct}.{serial}"
 
-        # Check for duplicate
-        if not WorkforceEisPaymentProcess.objects.filter(beneficiary_id=beneficiary_id).exists():
-            break
+        if dependent_count:
+            bb = f"{int(dependent_count):02d}"
+            return f"{case_id}.{bb}"
 
-    return beneficiary_id
+        return case_id
 
 
 def cf_and_eis_application_movement_to_factory_admin(self, application_instance, application_id_for_movement):
