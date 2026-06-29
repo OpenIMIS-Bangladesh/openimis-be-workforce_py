@@ -125,7 +125,7 @@ class WorkforceApplicationServices(BaseService):
         if "employee_dependent_info" in obj_data:
             dependents_data = obj_data.get("employee_dependent_info")
 
-            if dependents_data and dependents_data != "[{}]":
+            if dependents_data and application_instance.application_type=="financialAssistance":
                 try:
                     dependents = json.loads(dependents_data)
                     for dep in dependents:
@@ -419,7 +419,7 @@ class WorkforceApplicationServices(BaseService):
                             )
                             dep_instance.save(username=self.user.username)
                         try:
-                            if attachments is not None and attachments != "[{}]":
+                            if attachments is not None and application_instance.application_type=="financialAssistance":
 
                                 for attr in attachments:
                                     files = attr.get("files", [])
@@ -595,7 +595,7 @@ class WorkforceApplicationServices(BaseService):
                         try:
                             dependent.save(username=self.user.username)
                             attachments = bank_data.get("attachments", [])
-                            if attachments and attachments != "[{}]":
+                            if attachments and application_instance.application_type=="financialAssistance":
                                 for attr in attachments:
                                     files = attr.get("files", [])
                                     # file_data = [
@@ -646,7 +646,7 @@ class WorkforceApplicationServices(BaseService):
                         entry.save(username=self.user.username)
                         bank_info_id= entry.id
                         attachments = bank_data.get("attachments", [])
-                        if attachments and attachments != "[{}]":
+                        if attachments and application_instance.application_type=="financialAssistance":
                             for attr in attachments:
                                 files = attr.get("files", [])
                                 file_data = [
