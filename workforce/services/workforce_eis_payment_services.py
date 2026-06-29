@@ -117,7 +117,7 @@ class WorkforceEisPaymentServices(BaseService):
             approved_amount = safe_decimal(workforce_application.eis_approved_amount) if workforce_application.eis_approved_amount is not None else 0
             now = datetime.now()
             beneficiary_id = generate_beneficiary_id(
-                association, accident_type, workforce_application.id
+                association, workforce_application.id
             )
 
             # ---------- SAVE FULL MONTH PAYMENTS ----------
@@ -161,7 +161,7 @@ class WorkforceEisPaymentServices(BaseService):
                     bank_instance= Bank.objects.get(id= dep.bank_id)
                     now = datetime.now()
                     dependent_count = dependent_count+1
-                    beneficiary_id = generate_beneficiary_id(association, accident_type, workforce_application.id, str(dependent_count))
+                    beneficiary_id = generate_beneficiary_id(association, workforce_application.id, str(dependent_count))
 
                     payment_obj = WorkforceEisPaymentProcess(
                         workforce_application=workforce_application,
