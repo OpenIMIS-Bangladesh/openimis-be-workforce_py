@@ -180,13 +180,13 @@ class WorkforceApplicationServices(BaseService):
         user_id = self.user.id
 
         #try updating dependent info if super().update(obj_data) fails to update it
-        try:
-            application_to_update= WorkforceApplication.objects.get(id=application_id)
-            if application_to_update.application_type=="financialAssistance":
-                application_to_update.employee_dependent_info= obj_data["employee_dependent_info"]
-                application_to_update.save()
-        except Exception as e:
-            raise Exception(f"Failed to update application because of Exception: {e}")
+        # try:
+        #     application_to_update= WorkforceApplication.objects.get(id=application_id)
+        #     if application_to_update.application_type=="financialAssistance":
+        #         application_to_update.employee_dependent_info= obj_data.get("employee_dependent_info")
+        #         application_to_update.save()
+        # except Exception as e:
+        #     raise Exception(f"Failed to update application because of Exception: {e}")
 
         # Fetch the complete instance after update
         try:
@@ -293,7 +293,7 @@ class WorkforceApplicationServices(BaseService):
 
         # if dependents_data and dependents_data != "[{}]":
         dependent_update_request = obj_data.get("employee_dependent_info", [])
-        if dependent_update_request and dependent_update_request != "[{}]":
+        if dependent_update_request and application_instance.application_type=="financialAssistance":
             try:
                 if application_status == "draft" or application_status == "new":
                     # Remove old dependents + related banking info for CF application
@@ -327,7 +327,7 @@ class WorkforceApplicationServices(BaseService):
                     dependents_data = WorkforceApplication.objects.get(id=application_id).employee_dependent_info
                     dependents = json.loads(dependents_data)
 
-                if dependents_data and dependents_data != "[{}]":
+                if dependents_data and application_instance.application_type=="financialAssistance":
                     incoming_ids = []
                     if application_status not in  ["new", "draft"]:
                         for dep in dependents:
