@@ -113,7 +113,10 @@ class WorkforceApplicationServices(BaseService):
                 raise
 
         # Save dependents data to workforce_employee_dependent table
-        application = super().create(obj_data)
+        try:
+            application = super().create(obj_data)
+        except Exception as e:
+            raise Exception(f"Failed to create application because of Exception: {e}")
 
         application_id = application.get("data", {}).get("id")
         application_instance = WorkforceApplication.objects.get(id=application_id)
@@ -167,10 +170,23 @@ class WorkforceApplicationServices(BaseService):
         except WorkforceApplication.DoesNotExist:
             raise Exception(f"Application with id {application_id} not found")
 
-        application = super().update(obj_data)
+        try:
+            application = super().update(obj_data)
+        except Exception as e:
+            raise Exception(f"Failed to update application because of Exception: {e}")
+
         application_status = obj_data.get("status")
         status = obj_data.get("status")
         user_id = self.user.id
+
+        #try updating dependent info if super().update(obj_data) fails to update it
+        try:
+            application_to_update= WorkforceApplication.objects.get(id=application_id)
+            if application_to_update.application_type=="financialAssistance":
+                application_to_update.employee_dependent_info= obj_data["employee_dependent_info"]
+                application_to_update.save()
+        except Exception as e:
+            raise Exception(f"Failed to update application because of Exception: {e}")
 
         # Fetch the complete instance after update
         try:
