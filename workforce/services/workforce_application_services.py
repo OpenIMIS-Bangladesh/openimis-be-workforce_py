@@ -125,7 +125,7 @@ class WorkforceApplicationServices(BaseService):
         if "employee_dependent_info" in obj_data:
             dependents_data = obj_data.get("employee_dependent_info")
 
-            if dependents_data and dependents_data != "[{}]":
+            if dependents_data and application_instance.application_type=="financialAssistance":
                 try:
                     dependents = json.loads(dependents_data)
                     for dep in dependents:
