@@ -278,7 +278,7 @@ class WorkforceApplicationServices(BaseService):
 
         employee_accident_info_json=  obj_data.get("employee_accident_info", None)
         if employee_accident_info_json:
-            employee_accident_info = json.loads(employee_accident_info_json)
+            employee_accident_info = json.loads(employee_accident_info_json, strict=False)
             accident_date= employee_accident_info.get("accidentDate", None)
             try:
                 workforce_application_instance= WorkforceApplication.objects.get(id= application_instance.id)
