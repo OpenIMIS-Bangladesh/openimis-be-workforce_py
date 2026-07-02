@@ -172,7 +172,8 @@ def generate_beneficiary_id(association, application_id=None, dependent_count=No
     application = WorkforceApplication.objects.filter(id=application_id).first()
     if application is None:
         return ""
-    all_applications = WorkforceApplication.objects.filter(organization_type="eis", status="verified").order_by("-date_created")
+    all_applications = WorkforceApplication.objects.filter(organization_type="eis")
+    # all_applications = WorkforceApplication.objects.filter(organization_type="eis", status="verified").order_by("-date_created")
     position_in_table=1
     for app in all_applications:
         if app.id== application.id:
