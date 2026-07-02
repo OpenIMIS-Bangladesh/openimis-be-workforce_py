@@ -1546,7 +1546,6 @@ class Query(graphene.ObjectType):
     def resolve_workforce_signatures(self, info, related_users):
         users_qs = InteractiveUser.objects.filter(id__in=related_users)
         users_map = {str(u.id): u for u in users_qs}
-
         # role_ids = {
         #     u.role_id for u in users_qs if u.role_id is not None
         # }
@@ -1571,7 +1570,10 @@ class Query(graphene.ObjectType):
 
         for user_id in related_users:
             user = users_map.get(user_id)
-
+            committee_data = WorkforceCommitteeUser.objects.filter(related_user_id=user_id).first()
+            # print(committee_data)
+            # for committee in committee_data:
+            #     print(committee.designation)
             if not user:
                 results.append({
                     "user_id": user_id,
@@ -1587,6 +1589,7 @@ class Query(graphene.ObjectType):
                 "user_id": user_id,
                 "last_name": user.last_name,
                 "other_names": user.other_names,
+                "designation":committee_data.designation,
                 "role": {
                     # "id": user.role_id,
                     # "name": roles_map.
