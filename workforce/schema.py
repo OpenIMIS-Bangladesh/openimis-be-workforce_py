@@ -1590,6 +1590,8 @@ class Query(graphene.ObjectType):
                 "last_name": user.last_name,
                 "other_names": user.other_names,
                 "designation":committee_data.designation,
+                "organization_name":committee_data.organization_name,
+                "representative_type":committee_data.representative_type,
                 "role": {
                     # "id": user.role_id,
                     # "name": roles_map.
