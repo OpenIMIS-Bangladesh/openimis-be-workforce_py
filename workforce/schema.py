@@ -1571,7 +1571,14 @@ class Query(graphene.ObjectType):
         for user_id in related_users:
             user = users_map.get(user_id)
             committee_data = WorkforceCommitteeUser.objects.filter(related_user_id=user_id).first()
-            # print(committee_data)
+            committee_map_data = None
+
+            if committee_data:
+                committee_map_data = WorkforceCommitteeUserMap.objects.filter(
+                    workforce_committee_user_id=committee_data.id
+                ).first()
+            print(committee_data)
+            print(committee_map_data)
             # for committee in committee_data:
             #     print(committee.designation)
             if not user:
@@ -1592,6 +1599,7 @@ class Query(graphene.ObjectType):
                 "designation":committee_data.designation,
                 "organization_name":committee_data.organization_name,
                 "representative_type":committee_data.representative_type,
+                "role_in_committee":committee_map_data.role_in_committee,
                 "role": {
                     # "id": user.role_id,
                     # "name": roles_map.
