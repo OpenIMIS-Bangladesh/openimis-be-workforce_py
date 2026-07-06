@@ -125,7 +125,8 @@ class WorkforceApplicationServices(BaseService):
         if "employee_dependent_info" in obj_data:
             dependents_data = obj_data.get("employee_dependent_info")
 
-            if dependents_data and application_instance.application_type=="financialAssistance":
+            # if dependents_data and application_instance.application_type=="financialAssistance":
+            if dependents_data and application_instance.application_type in ["financialAssistance", "deadlyGrant","medicalAssistance", "medicalDonation"]:
                 try:
                     dependents = json.loads(dependents_data)
                     for dep in dependents:
@@ -293,7 +294,8 @@ class WorkforceApplicationServices(BaseService):
 
         # if dependents_data and dependents_data != "[{}]":
         dependent_update_request = obj_data.get("employee_dependent_info", [])
-        if dependent_update_request and application_instance.application_type=="financialAssistance":
+        # if dependent_update_request and application_instance.application_type=="financialAssistance":
+        if dependent_update_request and application_instance.application_type in ["financialAssistance", "deadlyGrant","medicalAssistance","medicalDonation"]:
             try:
                 if application_status == "draft" or application_status == "new":
                     # Remove old dependents + related banking info for CF application
@@ -327,7 +329,8 @@ class WorkforceApplicationServices(BaseService):
                     dependents_data = WorkforceApplication.objects.get(id=application_id).employee_dependent_info
                     dependents = json.loads(dependents_data)
 
-                if dependents_data and application_instance.application_type=="financialAssistance":
+                # if dependents_data and application_instance.application_type=="financialAssistance":
+                if dependents_data and application_instance.application_type in ["financialAssistance","deadlyGrant", "medicalAssistance","medicalDonation"]:
                     incoming_ids = []
                     if application_status not in  ["new", "draft"]:
                         for dep in dependents:
