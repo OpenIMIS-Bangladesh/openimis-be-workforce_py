@@ -38,7 +38,7 @@ class WorkforceCommitteeServices(BaseService):
         try:
             new_role = Role(
                 uuid=uuid.uuid4(),
-                name=name_en,
+                name=name_en[:50],
                 is_system=0,
                 is_blocked=False,
                 audit_user_id=1
