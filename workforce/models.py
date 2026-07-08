@@ -1725,7 +1725,7 @@ class WorkforceAssociationUserMap(HistoryModel):
 
 
 class WorkforceCommittee(HistoryModel):
-    name_en = models.CharField(max_length=50, null=True, blank=True, db_comment="factory, officer")
+    name_en = models.TextField(null=True, blank=True)
     name_bn = models.TextField(null=True, blank=True)
     associations= models.JSONField(null=True, blank=True)
     organization_type= models.TextField(null=True, blank=True)
