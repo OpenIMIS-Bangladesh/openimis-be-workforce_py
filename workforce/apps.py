@@ -167,6 +167,10 @@ DEFAULT_CFG = {
 # WorkforceEisBgmeaBkmeaCommittee (812xxx)
     "gql_workforce_minister_perms": ["818000"],
 
+
+# WorkforceBlwfAccountant (812xxx)
+    "gql_workforce_blwf_accountant_perms": ["819000"],
+
     "default_validations_disabled": False,
 }
 
@@ -333,6 +337,9 @@ class WorkforceConfig(AppConfig):
 
     # WorkforceEisBgmeaBkmeaCommittee (xxx)
     gql_workforce_minister_perms = []
+
+    # WorkforceBlwfAccountant (xxx)
+    gql_workforce_blwf_accountant_perms = []
 
     # # WorkforceSendConfirmationLink (xxx)
     # gql_query_send_confirmation_link_perms =[]
