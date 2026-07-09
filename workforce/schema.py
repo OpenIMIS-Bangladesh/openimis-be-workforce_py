@@ -593,8 +593,18 @@ class Query(graphene.ObjectType):
             query = query.filter(organization_type__in=organization_type_in)
 
         if application_to:
-            application_to_id = application_to
-            query = query.filter(application__application_to_id=application_to_id).distinct()
+            if status_in and 'revert' in status_in:
+                latest_revert_subquery = Subquery(
+                    WorkforceApplicationMovement.objects.filter(
+                        application_id=OuterRef("pk"),
+                        status='revert'
+                    ).order_by("-date_created").values("application_to_id")[:1]
+                )
+                query = query.annotate(last_revert_to=latest_revert_subquery).filter(
+                    last_revert_to=application_to
+                ).distinct()
+            else:
+                query = query.filter(application__application_to_id=application_to).distinct()
 
         if application_from:
             application_from_id = application_from
