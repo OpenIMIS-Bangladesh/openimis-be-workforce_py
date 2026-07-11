@@ -337,10 +337,13 @@ class WorkforceApplicationServices(BaseService):
                             dep_id = dep.get("id")
                             if dep_id:
                                 incoming_ids.append(extract_uuid(dep_id))
-                        WorkforceDocument.objects.filter(workforce_application=application_instance, workforce_dependent_id__isnull=False).exclude(workforce_dependent_id__in=incoming_ids).delete()
-                        WorkforceEisPaymentProcess.objects.filter(workforce_application=application_instance).exclude(workforce_employee_dependent_id__in=incoming_ids).delete()
-                        WorkforceEmployeeBankingInfo.objects.filter(application=application_instance).exclude(dependant_id__in=incoming_ids).delete()
-                        WorkforceEmployeeDependent.objects.filter(workforce_application=application_instance).exclude(id__in=incoming_ids).delete()
+                        try:
+                            WorkforceDocument.objects.filter(workforce_application=application_instance, workforce_dependent_id__isnull=False).exclude(workforce_dependent_id__in=incoming_ids).delete()
+                            WorkforceEisPaymentProcess.objects.filter(workforce_application=application_instance).exclude(workforce_employee_dependent_id__in=incoming_ids).delete()
+                            WorkforceEmployeeBankingInfo.objects.filter(application=application_instance).exclude(dependant_id__in=incoming_ids).delete()
+                            WorkforceEmployeeDependent.objects.filter(workforce_application=application_instance).exclude(id__in=incoming_ids).delete()
+                        except Exception as e:
+                            print(e)
                     for dep in dependents:
                         dependent_id= dep.get("id")
                         if dependent_id is not None:
@@ -678,7 +681,16 @@ class WorkforceApplicationServices(BaseService):
                                     except Exception as e:
                                         continue
 
-
+        #clean up document table where dependent and bank id is null
+        try:
+            WorkforceDocument.objects.filter(workforce_application=application_instance,
+                                             workforce_document_type__form_step_no="employeeDependentInfo",
+                                             workforce_dependent_id__isnull=True).delete()
+            WorkforceDocument.objects.filter(workforce_application=application_instance,
+                                             workforce_document_type__form_step_no="employeeBankInfo",
+                                             workforce_employee_banking_info_id__isnull=True).delete()
+        except Exception as e:
+            print(e)
         # ================================================================
         # 4. Handle BLWF new application movement to DIFE admin
         # ================================================================
