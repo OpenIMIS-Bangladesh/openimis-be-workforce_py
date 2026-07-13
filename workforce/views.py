@@ -470,7 +470,7 @@ class EisRoutingNumberUpdate(APIView):
 
             payment_processes= WorkforceEisPaymentProcess.objects.all()
             for payment_process in payment_processes:
-                bank_info= WorkforceEmployeeBankingInfo.objects.filter(application_id= payment_process.workforce_application_id, account_no=payment_process.bank_account_no, rounting_number__isnull=False).first()
+                bank_info= WorkforceEmployeeBankingInfo.objects.filter(application_id= payment_process.workforce_application_id, account_no=payment_process.bank_account_no, routing_number__isnull=False).first()
                 try:
                     payment_process.routing_number= bank_info.routing_number
                     payment_process.save(username=user.login_name)
