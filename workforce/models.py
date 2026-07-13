@@ -672,6 +672,7 @@ class WorkforceEmployeeDependent(HistoryModel):
         related_name="workforce_banks",
     )
     bank_account_no = models.CharField(max_length=50, null=True, blank=True)
+    routing_number = models.CharField(max_length=50, null=True, blank=True)
     bank_account_holder_name = models.CharField(max_length=255, null=True, blank=True)
     eis_payment_type = models.CharField(max_length=50, null=True, blank=True)
     eis_calculated_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)
@@ -1296,6 +1297,7 @@ class WorkforceEmployeeBankingInfo(HistoryModel):
     type = models.CharField(max_length=255, null=True, blank=True)
     amount = models.CharField(max_length=20, null=True, blank=True)
     account_no = models.CharField(max_length=20, null=True, blank=True)
+    routing_number = models.CharField(max_length=50, null=True, blank=True)
     bank_account_type = models.CharField(max_length=64, null=True, blank=True)
     nid = models.CharField(max_length=64, null=True, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
@@ -1477,6 +1479,7 @@ class WorkforceEisPaymentProcess(HistoryModel):
     )
 
     bank_account_no = models.CharField(max_length=50, null=True, blank=True)
+    routing_number = models.CharField(max_length=50, null=True, blank=True)
     bank_account_holder_name = models.CharField(max_length=255, null=True, blank=True)
 
     eis_payment_type = models.CharField(max_length=50, null=True, blank=True)
@@ -1568,6 +1571,7 @@ class WorkforceEisPaymentDisbursementStage(HistoryModel):
     )
 
     bank_account_no = models.CharField(max_length=50, null=True, blank=True)
+    routing_number = models.CharField(max_length=50, null=True, blank=True)
     bank_account_holder_name = models.CharField(max_length=255, null=True, blank=True)
 
     eis_payment_type = models.CharField(max_length=50, null=True, blank=True)
@@ -1650,6 +1654,7 @@ class WorkforceEisPaymentDisbursement(HistoryModel):
     )
 
     bank_account_no = models.CharField(max_length=50, null=True, blank=True)
+    routing_number = models.CharField(max_length=50, null=True, blank=True)
     bank_account_holder_name = models.CharField(max_length=255, null=True, blank=True)
     eis_payment_type = models.CharField(max_length=50, null=True, blank=True)
     eis_calculated_amount = models.DecimalField(max_digits=25, decimal_places=5, null=True, blank=True)

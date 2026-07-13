@@ -526,6 +526,7 @@ class WorkforceApplicationServices(BaseService):
                             try:
                                 dependent.bank = parent.bank
                                 dependent.bank_account_no = parent.bank_account_no
+                                dependent.routing_number = parent.routing_number
                                 dependent.bank_account_holder_name = parent.bank_account_holder_name
                                 dependent.parent_dependent = parent
                             except Exception as e:
@@ -538,6 +539,7 @@ class WorkforceApplicationServices(BaseService):
                                 continue
 
                             dependent.bank_account_no = bank_data.get("accountNumber")
+                            dependent.routing_number = bank_data.get("routingNumber")
                             dependent.bank_account_holder_name = bank_data.get("accountHolderName")
 
                             if holder_type == "other":
@@ -561,6 +563,7 @@ class WorkforceApplicationServices(BaseService):
                             update_banking_info.application = application_instance
                             update_banking_info.account_holder_name = dependent.bank_account_holder_name
                             update_banking_info.account_no = dependent.bank_account_no
+                            update_banking_info.routing_number = dependent.routing_number
                             update_banking_info.branch = dependent.bank
                             update_banking_info.nid = dependent.nid if dependent.nid else dependent.account_holder_nid,
                             update_banking_info.date_of_birth = dependent.account_holder_dob
@@ -586,6 +589,7 @@ class WorkforceApplicationServices(BaseService):
                                 application=application_instance,
                                 account_holder_name=dependent.bank_account_holder_name,
                                 account_no=dependent.bank_account_no,
+                                routing_number=dependent.routing_number,
                                 branch=dependent.bank,
                                 nid=dependent.nid if dependent.nid else dependent.account_holder_nid,
                                 date_of_birth=dependent.account_holder_dob,
@@ -645,6 +649,7 @@ class WorkforceApplicationServices(BaseService):
                             type="applicant",
                             amount="0",
                             account_no=bank_data.get("accountNumber"),
+                            routing_number= bank_data.get("routingNumber"),
                             nid=employee.nid,
                             date_of_birth=employee.birth_date,
                             status="active"

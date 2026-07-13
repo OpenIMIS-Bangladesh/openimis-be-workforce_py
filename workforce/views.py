@@ -12,7 +12,7 @@ from .services.file_services import save_uploaded_file, retrieve_file_response
 from .services.workforce_application_services import WorkforceApplicationServices
 from .services.workforce_sms_services import send_sms
 from .models import WorkforceEmployee, generate_otp, WorkforceEisPaymentProcess, WorkforceOtherCompensationInfo, \
-    WorkforceEmployeeDependent, WorkforceApplication, WorkforceApplicationMovement
+    WorkforceEmployeeDependent, WorkforceApplication, WorkforceApplicationMovement, WorkforceEmployeeBankingInfo
 from core.models import InteractiveUser
 import os
 from rest_framework.permissions import AllowAny
@@ -120,6 +120,8 @@ class SendOtpView(APIView):
 
 
 class EisSiteData(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
     def get_district_name_by_location_id(self, location_id):
         district_name = None
         try:
@@ -295,6 +297,8 @@ class EisSiteData(APIView):
 
 
 class EisCaseData(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
     def get(self, request):
         try:
             user= InteractiveUser.objects.get(id=1)
@@ -412,4 +416,69 @@ class EisCaseData(APIView):
         except Exception as e:
             return Response({'status': 'error', 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+
+class EisRoutingNumberUpdate(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    def get(self, request):
+        try:
+            final_data= []
+            user= InteractiveUser.objects.get(id=1)
+            applications= WorkforceApplication.objects.all()
+            for application in applications:
+                if application.employee_bank_info is not None and application.employee_bank_info!="[{}]":
+                    bank_data= json.loads(application.employee_bank_info)
+                    for bank in bank_data:
+                        if bank.get("accountHolderType") == "self" or bank.get("accountHolderType") is None:
+                            workforceEmployeebankInfo= WorkforceEmployeeBankingInfo.objects.filter(application_id= application.id, account_no= bank.get("accountNumber"))
+                            for data in workforceEmployeebankInfo:
+                                data.routing_number= bank.get("routingNumber")
+                                try:
+                                    data.save(username=user.login_name)
+                                except Exception as e:
+                                    continue
+                            for bdata in workforceEmployeebankInfo:
+                                if bdata.type=="dependent":
+                                    dependent= WorkforceEmployeeDependent.objects.get(id=bdata.dependant_id)
+                                    dependent.routing_number= bdata.routing_number
+                                    try:
+                                        dependent.save(username=user.login_name)
+                                    except Exception as e:
+                                        continue
+
+                        if bank.get("accountHolderType")=="select_from_another_dependent":
+                            parent_dependent_id_obj= bank.get("parentDependentId")
+                            parent_dependent_id= parent_dependent_id_obj.get("id")
+                            for parentbank in bank_data:
+                                if parentbank.get("dependentId")==parent_dependent_id:
+                                    workforceEmployeebankInfo = WorkforceEmployeeBankingInfo.objects.filter(
+                                        application_id=application.id, account_no=parentbank.get("accountNumber"))
+                                    for data in workforceEmployeebankInfo:
+                                        data.routing_number = parentbank.get("routingNumber")
+                                        try:
+                                            data.save(username=user.login_name)
+                                        except Exception as e:
+                                            continue
+                                    for bdata in workforceEmployeebankInfo:
+                                        if bdata.type == "dependent":
+                                            dependent = WorkforceEmployeeDependent.objects.get(id=bdata.dependant_id)
+                                            dependent.routing_number = bdata.routing_number
+                                            try:
+                                                dependent.save(username=user.login_name)
+                                            except Exception as e:
+                                                continue
+
+            payment_processes= WorkforceEisPaymentProcess.objects.all()
+            for payment_process in payment_processes:
+                bank_info= WorkforceEmployeeBankingInfo.objects.filter(application_id= payment_process.workforce_application_id, account_no=payment_process.bank_account_no, rounting_number__isnull=False).first()
+                try:
+                    payment_process.routing_number= bank_info.routing_number
+                    payment_process.save(username=user.login_name)
+                except Exception as e:
+                    continue
+
+            return Response({'status': 'success', 'message': 'Data Retrieved Successfully', 'data': list(final_data)}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({'status': 'error', 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 

@@ -150,6 +150,7 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
                 workforce_employee_dependent = workforce_eis_payment_process.workforce_employee_dependent,
                 bank = workforce_eis_payment_process.bank,
                 bank_account_no = workforce_eis_payment_process.bank_account_no,
+                routing_number = workforce_eis_payment_process.routing_number,
                 bank_account_holder_name = workforce_eis_payment_process.bank_account_holder_name,
                 eis_payment_type = workforce_eis_payment_process.eis_payment_type,
                 eis_calculated_amount = workforce_eis_payment_process.eis_calculated_amount,

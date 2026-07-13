@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import FileUploadView, FileRetrieveView, LogoRetrieveView, SendOtpView, EisSiteData, EisCaseData
+from .views import FileUploadView, FileRetrieveView, LogoRetrieveView, SendOtpView, EisSiteData, EisCaseData, EisRoutingNumberUpdate
 
 urlpatterns = [
     path('document/upload', FileUploadView.as_view(), name='document-upload'),
@@ -8,4 +8,5 @@ urlpatterns = [
     path('send/otp', SendOtpView.as_view(), name='send-otp'),
     path('eis/site-data', EisSiteData.as_view(), name='eis-site-data'),
     path('eis/case-data', EisCaseData.as_view(), name='eis-case-data'),
+    path('eis/update-routing-number', EisRoutingNumberUpdate.as_view(), name='update-routing-number'),
 ]
