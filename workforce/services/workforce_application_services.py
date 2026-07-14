@@ -539,7 +539,7 @@ class WorkforceApplicationServices(BaseService):
                                 continue
 
                             dependent.bank_account_no = bank_data.get("accountNumber")
-                            dependent.routing_number = bank_data.get("routingNumber")
+                            dependent.routing_number = bank_data.get("routingNumber", None)
                             dependent.bank_account_holder_name = bank_data.get("accountHolderName")
 
                             if holder_type == "other":
@@ -649,7 +649,7 @@ class WorkforceApplicationServices(BaseService):
                             type="applicant",
                             amount="0",
                             account_no=bank_data.get("accountNumber"),
-                            routing_number= bank_data.get("routingNumber"),
+                            routing_number= bank_data.get("routingNumber", None),
                             nid=employee.nid,
                             date_of_birth=employee.birth_date,
                             status="active"

@@ -136,7 +136,7 @@ class WorkforceEisPaymentServices(BaseService):
                     workforce_application=workforce_application,
                     bank=bank_instance,
                     bank_account_no=bank_info[0]["accountNumber"],
-                    routing_number=bank_info[0]["routingNumber"],
+                    routing_number=bank_info[0]["routingNumber"] if "routingNumber" in bank_info[0] else bank_instance.routing_number,
                     bank_account_holder_name=bank_info[0]["accountHolderName"],
                     eis_payment_type="monthly",
                     eis_calculated_amount=workforce_application.eis_calculated_amount,
