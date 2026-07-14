@@ -322,6 +322,9 @@ def build_payment_confirmation_link(disbursement_id: str, base_url: str = None) 
     base_url = base_url.rstrip("/")
     return f"{base_url}/front/workforce/confirmation?disbursement_id={disbursement_id}"
 
+def extract_uuid(encoded_str):
+    decoded = base64.b64decode(encoded_str).decode()
+    return decoded.split(":")[1]
 # def relate_document_with_banking_info(dependent_id):
 #     document_instance = WorkforceDocument.objects.file()
 #     pass

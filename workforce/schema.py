@@ -19,6 +19,8 @@ from core.schema import OrderedDjangoFilterConnectionField
 from .gql_mutations import *
 from .gql_queries import *
 from .models import *
+from .services.helper_service import extract_uuid
+# from .services.workforce_application_services import extract_uuid
 from .services.workforce_committee_user_services import WorkforceCommitteeUserServices
 from django.db.models.expressions import RawSQL
 
@@ -122,7 +124,8 @@ class Query(graphene.ObjectType):
         date_created_from= graphene.String(),
         date_created_to= graphene.String(),
         all_association_id_in= graphene.List(graphene.String),
-        eis_application_summary_id= graphene.String()
+        eis_application_summary_id= graphene.String(),
+        status_in_summary = graphene.String()
     )
 
     workforce_document_types = OrderedDjangoFilterConnectionField(
@@ -576,6 +579,7 @@ class Query(graphene.ObjectType):
             eis_verified = None,
             all_association_id_in= None,
             eis_application_summary_id = None,
+            status_in_summary=None,
             **kwargs
     ):
         service = WorkforceApplicationServices(info.context.user)
@@ -656,6 +660,18 @@ class Query(graphene.ObjectType):
         if eis_application_summary_id:
             query = query.filter(eis_application_summary_id=eis_application_summary_id)
 
+        if status_in_summary:
+            summary_id = eis_application_summary_id or kwargs.get('blwf_application_summary__id') or kwargs.get(
+                'cf_application_summary__id')
+
+            if summary_id:
+                summary_obj = WorkforceApplicationSummary.objects.filter(id=summary_id).first()
+                if summary_obj and summary_obj.application_data:
+                    print(summary_obj.application_data)
+                    decoded_ids = [extract_uuid(b64_id) for b64_id in summary_obj.application_data]
+                    query = query.filter(id__in=decoded_ids, status=status_in_summary)
+                else:
+                    query = query.none()
 
         latest_movement_subquery = WorkforceApplicationMovement.objects.filter(
             application_id=OuterRef("pk")
