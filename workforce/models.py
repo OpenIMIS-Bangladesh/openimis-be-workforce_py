@@ -929,7 +929,7 @@ class WorkforceApplication(HistoryModel):
     eis_approved_by_ids= models.JSONField(null=True, blank=True)
     accident_date= models.DateField(null=True, blank=True)
     committee_id = models.CharField(max_length=50, null=True, blank=True)
-
+    committee_remarks = models.TextField(null=True, blank=True)
     class Meta:
         managed = True
         db_table = 'workforce_applications'

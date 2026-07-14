@@ -572,6 +572,7 @@ class WorkforceApplicationGQLType(DjangoObjectType):
             "committee_id": ["exact"],
             "workforce_employee__nid": ["exact"],
             "application__status": ["exact"],
+            "committee_remarks": ["exact"],
         }
         connection_class = ExtendedConnection
 
