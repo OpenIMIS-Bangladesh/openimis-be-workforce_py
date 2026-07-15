@@ -171,7 +171,8 @@ class Query(graphene.ObjectType):
         status_in=graphene.List(graphene.String),
         section_type_in=graphene.List(graphene.String),
         organization_type_in=graphene.List(graphene.String),
-        user_id= graphene.String()
+        user_id= graphene.String(),
+        application_status_in=graphene.List(graphene.String)
     )
     workforce_application_summary_movement = OrderedDjangoFilterConnectionField(
         WorkforceApplicationSummaryMovementGQLType,
@@ -773,7 +774,14 @@ class Query(graphene.ObjectType):
         except Exception as e:
             return {"error": f"NID fetch error: {str(e)}"}
 
-    def resolve_workforce_application_summary(self, info, status_in=None, section_type_in=None, organization_type_in=None, user_id=None, **kwargs):
+    def resolve_workforce_application_summary(self,
+                                              info,
+                                              status_in=None,
+                                              section_type_in=None,
+                                              organization_type_in=None,
+                                              user_id=None,
+                                              application_status_in=None,
+                                              **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("Unauthorized access"))
 
@@ -797,6 +805,8 @@ class Query(graphene.ObjectType):
                 Q(cf_application_summary_id=summary.id) |
                 Q(eis_application_summary_id=summary.id)
             )
+            if application_status_in:
+                applications = applications.filter(status__in=application_status_in)
 
             if applications.exists() or (client_mutation_id is not None and client_mutation_id!=""):
                 # or summary.date_created >= recent_threshold:
@@ -819,6 +829,7 @@ class Query(graphene.ObjectType):
         #block end. You can remove this block if necessary.
 
         return gql_optimizer.query(query, info)
+
     def resolve_workforce_application_summary_movement(self, info, **kwargs):
         if not info.context.user.has_perms(WorkforceConfig.gql_query_workforces_perms):
             raise PermissionDenied(_("Unauthorized access"))
