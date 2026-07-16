@@ -146,8 +146,9 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
 
 
             # FIRST DISBURSEMENT ARREAR CALCULATION NUMBER OF MONTHS END ================
-
-
+            prev_stage_data= WorkforceEisPaymentDisbursementStage.objects.filter(workforce_eis_payment_process_id= process_id, is_deleted=False, month_index__lt=int(month), year=year).first()
+            if prev_stage_data is not None:
+                months_gone=1 #it will be multiplied with payable amount so reset it to 1 if this is not first payment.
 
             if safe_decimal(workforce_eis_payment_process.arrear_payment_month) == safe_decimal(month) -1 and safe_decimal(workforce_eis_payment_process.arrear_payment_year) == safe_decimal(year):
                 paid_amount = safe_decimal(workforce_eis_payment_process.payable_amount) + safe_decimal(workforce_eis_payment_process.arrear_amount)
