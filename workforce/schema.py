@@ -1466,7 +1466,7 @@ class Query(graphene.ObjectType):
 
                 qs = qs.exclude(beneficiary_id__in=beneficiary_ids)
 
-            qs = qs.order_by("-beneficiary_id")
+            qs = qs.order_by("beneficiary_id")
 
             if not any([
                 workforce_application_id,
@@ -1532,7 +1532,7 @@ class Query(graphene.ObjectType):
                 qs= qs.filter(workforce_eis_bank_advice_id= workforce_eis_bank_advice_id)
 
             qs = qs.filter(is_deleted=False)
-            qs = qs.order_by("-beneficiary_id")
+            qs = qs.order_by("beneficiary_id")
 
             if not any([
                 month,
