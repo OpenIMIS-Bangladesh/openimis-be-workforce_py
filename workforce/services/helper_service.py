@@ -208,7 +208,7 @@ def generate_beneficiary_id(association, application_id=None,count_of_distinct_a
             death_date = metadata.get("deathDate")
             if death_date:
                 yyyy = str(death_date)[:4]
-        elif application.application_type == "disability" and application.employee_accident_info:
+        elif application.application_type == "disabilityAssistance" and application.employee_accident_info:
             accident_info = json.loads(application.employee_accident_info) if isinstance(
                 application.employee_accident_info, str) else application.employee_accident_info
             accident_date = accident_info.get("accidentDate")
