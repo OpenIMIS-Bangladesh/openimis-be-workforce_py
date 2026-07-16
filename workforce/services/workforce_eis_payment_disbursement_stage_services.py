@@ -12,10 +12,11 @@ from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 from math import floor
 from workforce.services.helper_service import generate_beneficiary_id
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from django.db import transaction
+import calendar
 
 
 logger = logging.getLogger(__name__)
@@ -132,8 +133,17 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
                     (target_date.year - calculation_start_date.year) * 12
                     + (target_date.month - calculation_start_date.month)
             )
-            if target_date.day < calculation_start_date.day:
-                months_gone -= 1
+
+            # if target_date.day < calculation_start_date.day:
+            #     months_gone -= 1
+            days_in_month = calendar.monthrange(target_date.year, target_date.month)[1]
+            difference= target_date.day - calculation_start_date.day
+
+            months_gone += (target_date.day - calculation_start_date.day) / days_in_month
+            if difference<0:
+                months_gone+=1
+
+
 
             # FIRST DISBURSEMENT ARREAR CALCULATION NUMBER OF MONTHS END ================
 
@@ -142,7 +152,17 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
             if safe_decimal(workforce_eis_payment_process.arrear_payment_month) == safe_decimal(month) -1 and safe_decimal(workforce_eis_payment_process.arrear_payment_year) == safe_decimal(year):
                 paid_amount = safe_decimal(workforce_eis_payment_process.payable_amount) + safe_decimal(workforce_eis_payment_process.arrear_amount)
             else:
-                paid_amount = workforce_eis_payment_process.payable_amount * months_gone
+                payable_amount = safe_decimal(workforce_eis_payment_process.payable_amount).quantize(
+                    Decimal("0.01"), rounding=ROUND_HALF_UP
+                )
+
+                months_gone = safe_decimal(months_gone).quantize(
+                    Decimal("0.01"), rounding=ROUND_HALF_UP
+                )
+
+                paid_amount = (payable_amount * months_gone).quantize(
+                    Decimal("0.01"), rounding=ROUND_HALF_UP
+                )
             new_stage= WorkforceEisPaymentDisbursementStage(
                 workforce_eis_payment_process= workforce_eis_payment_process,
                 workforce_application = workforce_eis_payment_process.workforce_application,
