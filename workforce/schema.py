@@ -23,6 +23,7 @@ from .services.helper_service import extract_uuid
 # from .services.workforce_application_services import extract_uuid
 from .services.workforce_committee_user_services import WorkforceCommitteeUserServices
 from django.db.models.expressions import RawSQL
+import json
 
 
 class Query(graphene.ObjectType):
@@ -412,6 +413,40 @@ class Query(graphene.ObjectType):
         visitor_email= graphene.String(required=False),
         visitor_number= graphene.String(required=False),
     )
+
+    workforce_check_application_duplicacy = graphene.List(
+        WorkforceApplicationGQLType,
+        application_type_in= graphene.List(graphene.String),
+        nid= graphene.String(required=False),
+        organization_type=graphene.String(required=False),
+        get_other_application_list=graphene.Boolean(required=False),
+        client_mutation_id=graphene.String(required=False),
+        orderBy=graphene.List(of_type=graphene.String),
+    )
+
+
+    def resolve_workforce_check_application_duplicacy(self, info, application_type_in=None, nid=None, organization_type=None, get_other_application_list=False, client_mutation_id=None, orderBy=None):
+        applications = WorkforceApplication.objects.filter(organization_type= organization_type).exclude(status="draft")
+        if get_other_application_list:
+            applications = applications.filter(workforce_employee__nid=nid).exclude(application_type__in=["financialAssistance", "deadlyGrant"])
+            return applications.order_by("-date_created")
+        else:
+            if application_type_in:
+                applications = applications.filter(application_type__in=application_type_in)
+            if nid:
+                found_id=None
+                for app in applications:
+                    worker_info= json.loads(app.deceased_worker_info)
+                    if worker_info.get("nid") == nid:
+                        found_id=app.id
+                        break;
+                if found_id:
+                    return WorkforceApplication.objects.filter(id=found_id)
+                else:
+                    return []
+            return applications
+
+
 
     def resolve_website_visitor_messages(self, info, visitor_name=None, visitor_email=None, visitor_number=None,  **kwargs):
         qs = WebsiteVisitorMessage.objects.all().order_by("-date_created")

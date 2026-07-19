@@ -28,6 +28,44 @@ def extract_uuid(encoded_str):
     decoded = base64.b64decode(encoded_str).decode()
     return decoded.split(":")[1]
 
+def check_death_application_duplicacy(application=None, user=None):
+    if application is None:
+        Response({'status': 'error',
+                  'message': 'Application was not found',
+                  'key': 'APPLICATION_NOT_FOUND'}, status=status.HTTP_400_BAD_REQUEST)
+    deceased_worker_info= json.loads(application.deceased_worker_info)
+    existing_application = WorkforceApplication.objects.filter(
+                                organization_type=application.organization_type,
+                                application_type__in=["financialAssistance","deadlyGrant"]
+                                # deceased_worker_info__nid=deceased_worker_info.get("nid")
+                            ).exclude(
+                                id=application.id
+                            ).exclude(
+                                status="draft"
+                            )
+    # if existing_application is not None:
+    #     Response({'status': 'error',
+    #               'message': f'Application for death already exists for this NID for organization {application.organization_type}',
+    #               'key': 'APPLICATION ALREADY EXISTS'}, status=status.HTTP_400_BAD_REQUEST)
+    #     return False
+    # else:
+    #     return True
+    found= False
+    for app_data in existing_application:
+        dead_worker= json.loads(app_data.deceased_worker_info)
+        if dead_worker.get("nid") == deceased_worker_info.get("nid"):
+            found= True
+            break
+    ekhane_thambe= found
+    if found:
+        raise ValidationError(
+            "An application for financial assistance from cf already exists for this NID."
+        )
+        # Response({'status': 'error',
+        #           'message': f'Application for death already exists for this NID for organization {application.get("organization_type")}',
+        #           'key': 'APPLICATION ALREADY EXISTS'}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 class WorkforceApplicationServices(BaseService):
     OBJECT_TYPE = WorkforceApplication
@@ -66,7 +104,7 @@ class WorkforceApplicationServices(BaseService):
                 obj_data["tracking_number"] = tracking_number
 
                 # Restrict to 1 application per NID for financialAssistance of CF and EIS individually
-                if application_type == "financialAssistance":
+                if application_type in ["financialAssistance","deadlyGrant"]:
                     try:
                         workforce_employee = WorkforceEmployee.objects.get(
                             id=obj_data.get("workforce_employee_id")
@@ -192,6 +230,8 @@ class WorkforceApplicationServices(BaseService):
         # Fetch the complete instance after update
         try:
             application_instance = WorkforceApplication.objects.get(id=application_id)
+            # if application_instance.application_type in ["financialAssistance", "deadlyGrant"]:
+            #     check_death_application_duplicacy(application_instance, self.user)
             if application_instance.status in ["verified", "forward_to_eis_advisor", "approved_by_eis_advisor", "forward_to_comiitee", "approved_by_committee"]:
                 application_instance.eis_verified = True
             else:
