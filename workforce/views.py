@@ -12,8 +12,9 @@ from .services.file_services import save_uploaded_file, retrieve_file_response
 from .services.workforce_application_services import WorkforceApplicationServices
 from .services.workforce_sms_services import send_sms
 from .models import WorkforceEmployee, generate_otp, WorkforceEisPaymentProcess, WorkforceOtherCompensationInfo, \
-    WorkforceEmployeeDependent, WorkforceApplication, WorkforceApplicationMovement, WorkforceEmployeeBankingInfo
-from core.models import InteractiveUser
+    WorkforceEmployeeDependent, WorkforceApplication, WorkforceApplicationMovement, WorkforceEmployeeBankingInfo, \
+    WorkforceEisPaymentDisbursementStage, WorkforceEisPaymentDisbursement
+from core.models import InteractiveUser, user
 import os
 from rest_framework.permissions import AllowAny
 from django.db.models import F, Sum
@@ -49,6 +50,13 @@ def getAccidentType(key):
     accident_type["workforce.accident.mainType.onDutyRTA"] = "কর্মস্থলের কাজে যাওয়ার পথে সড়ক দুর্ঘটনা"
     accident_type["workforce.accident.mainType.commuting"] = "বাসা থেকে কর্মস্থল/কর্মস্থল থেকে বাসায় যাওয়ার পথে দুর্ঘটনা"
     return accident_type[key]
+
+def bangla_to_english_numbers(text):
+    translation_table = str.maketrans("০১২৩৪৫৬৭৮৯", "0123456789")
+    if text is not None:
+        return text.translate(translation_table)
+    else:
+        return None
 
 
 class FileUploadView(APIView):
@@ -482,3 +490,89 @@ class EisRoutingNumberUpdate(APIView):
         except Exception as e:
             return Response({'status': 'error', 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+class CorrectBnEn(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    def get(self, request):
+        try:
+            user= InteractiveUser.objects.get(id=1)
+            applications= WorkforceApplication.objects.all()
+            for application in applications:
+                if application.last_base_salary is not None or application.last_base_salary!='':
+                    application.last_base_salary= bangla_to_english_numbers(application.last_base_salary)
+                try:
+                    application.save(username=user.login_name)
+                except Exception as e:
+                    continue
+
+
+            bankinfos= WorkforceEmployeeBankingInfo.objects.all()
+            for bankinfo in bankinfos:
+                if bankinfo.routing_number is not None or bankinfo.routing_number!='':
+                    bankinfo.routing_number= bangla_to_english_numbers(bankinfo.routing_number)
+                if bankinfo.account_no is not None or bankinfo.account_no!='':
+                    bankinfo.account_no= bangla_to_english_numbers(bankinfo.account_no)
+                if bankinfo.nid is not None or bankinfo.nid!='':
+                    bankinfo.nid= bangla_to_english_numbers(bankinfo.nid)
+                try:
+                    bankinfo.save(username=user.login_name)
+                except Exception as e:
+                    continue
+
+
+            dependents = WorkforceEmployeeDependent.objects.all()
+            for dependent in dependents:
+                if dependent.routing_number is not None or dependent.routing_number!='':
+                    dependent.routing_number= bangla_to_english_numbers(dependent.routing_number)
+                if dependent.bank_account_no is not None or dependent.bank_account_no!='':
+                    dependent.bank_account_no= bangla_to_english_numbers(dependent.bank_account_no)
+                if dependent.nid is not None or dependent.nid!='':
+                    dependent.nid= bangla_to_english_numbers(dependent.nid)
+
+                try:
+                    dependent.save(username=user.login_name)
+                except Exception as e:
+                    continue
+
+            payment_processes= WorkforceEisPaymentProcess.objects.all()
+            for payment_process in payment_processes:
+                if payment_process.bank_account_no is not None or payment_process.bank_account_no!='':
+                    payment_process.bank_account_no= bangla_to_english_numbers(payment_process.bank_account_no)
+                if payment_process.routing_number is not None or payment_process.routing_number!='':
+                    payment_process.routing_number= bangla_to_english_numbers(payment_process.routing_number)
+                try:
+                    payment_process.save(username=user.login_name)
+                except Exception as e:
+                    continue
+
+            payment_stages= WorkforceEisPaymentDisbursementStage.objects.all()
+            for payment_stage in payment_stages:
+                if payment_stage.bank_account_no is not None or payment_stage.bank_account_no!='':
+                    payment_stage.bank_account_no= bangla_to_english_numbers(payment_stage.bank_account_no)
+                if payment_stage.routing_number is not None or payment_stage.routing_number!='':
+                    payment_stage.routing_number= bangla_to_english_numbers(payment_stage.routing_number)
+                try:
+                    payment_stage.save(username=user.login_name)
+                except Exception as e:
+                    continue
+
+
+            disbursements= WorkforceEisPaymentDisbursement.objects.all()
+            for disbursement in disbursements:
+                if disbursement.bank_account_no is not None or disbursement.bank_account_no!='':
+                    disbursement.bank_account_no= bangla_to_english_numbers(disbursement.bank_account_no)
+                if disbursement.routing_number is not None or disbursement.routing_number!='':
+                    disbursement.routing_number= bangla_to_english_numbers(disbursement.routing_number)
+                try:
+                    disbursement.save(username=user.login_name)
+                except Exception as e:
+                    continue
+
+
+
+
+
+            return Response({'status': 'success', 'message': 'Data Retrieved Successfully', 'data': "All Done"}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({'status': 'error', 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
