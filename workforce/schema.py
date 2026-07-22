@@ -424,28 +424,36 @@ class Query(graphene.ObjectType):
         orderBy=graphene.List(of_type=graphene.String),
     )
 
+    def resolve_workforce_check_application_duplicacy(self, info, application_type_in=None, nid=None,organization_type=None, get_other_application_list=False,client_mutation_id=None, orderBy=None):
+        applications = WorkforceApplication.objects.exclude(status="draft")
 
-    def resolve_workforce_check_application_duplicacy(self, info, application_type_in=None, nid=None, organization_type=None, get_other_application_list=False, client_mutation_id=None, orderBy=None):
-        applications = WorkforceApplication.objects.filter(organization_type= organization_type).exclude(status="draft")
+        if organization_type:
+            applications = applications.filter(organization_type=organization_type)
+
         if get_other_application_list:
-            applications = applications.filter(workforce_employee__nid=nid).exclude(application_type__in=["financialAssistance", "deadlyGrant"])
-            return applications.order_by("-date_created")
-        else:
-            if application_type_in:
-                applications = applications.filter(application_type__in=application_type_in)
-            if nid:
-                found_id=None
-                for app in applications:
-                    worker_info= json.loads(app.deceased_worker_info)
-                    if worker_info.get("nid") == nid:
-                        found_id=app.id
-                        break;
-                if found_id:
-                    return WorkforceApplication.objects.filter(id=found_id)
-                else:
-                    return []
-            return applications
+            return applications.filter(workforce_employee__nid=nid).order_by("-date_created")
 
+        if application_type_in:
+            applications = applications.filter(application_type__in=application_type_in)
+
+        if nid:
+            found_id = None
+            for app in applications:
+                if app.application_type in ["financialAssistance", "deadlyGrant"]:
+                    worker_info = json.loads(app.deceased_worker_info or "{}")
+                    if worker_info.get("nid") == nid:
+                        found_id = app.id
+                        break
+                else:
+                    if app.workforce_employee and app.workforce_employee.nid == nid:
+                        found_id = app.id
+                        break
+
+            if found_id:
+                return WorkforceApplication.objects.filter(id=found_id)
+            return []
+
+        return applications
 
 
     def resolve_website_visitor_messages(self, info, visitor_name=None, visitor_email=None, visitor_number=None,  **kwargs):
