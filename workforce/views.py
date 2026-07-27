@@ -17,7 +17,7 @@ from .models import WorkforceEmployee, generate_otp, WorkforceEisPaymentProcess,
 from core.models import InteractiveUser, user
 import os
 from rest_framework.permissions import AllowAny
-from django.db.models import F, Sum
+from django.db.models import F, Sum, Q
 from django.db.models.fields.json import KeyTextTransform
 from datetime import datetime, timezone, date
 import json
@@ -574,5 +574,81 @@ class CorrectBnEn(APIView):
 
             return Response({'status': 'success', 'message': 'Data Retrieved Successfully', 'data': "All Done"}, status=status.HTTP_200_OK)
 
+        except Exception as e:
+            return Response({'status': 'error', 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class CorrectAccountHolderName(APIView):
+    permission_classes=[AllowAny]
+    authentication_classes=[]
+    def get(self, request):
+        try:
+            user= InteractiveUser.objects.get(id=1)
+            owners = (
+                WorkforceEmployeeBankingInfo.objects
+                .filter(
+                    Q(name_bn=F('account_holder_name')) |
+                    Q(name_en=F('account_holder_name'))
+                )
+            )
+
+            for owner in owners:
+                dependents= WorkforceEmployeeBankingInfo.objects.filter(account_no=owner.account_no, account_holder_name=owner.account_holder_name).exclude(id=owner.id)
+                for dependent in dependents:
+                    try:
+                        dependent.account_holder_name= owner.name_en
+                        dependent.save(username=user.login_name)
+                    except Exception as e:
+                        continue
+                try:
+                    owner.account_holder_name= owner.name_en
+                    owner.save(username=user.login_name)
+                except Exception as e:
+                    continue
+
+            workforce_dependents= WorkforceEmployeeDependent.objects.all()
+            for workforce_dependent in workforce_dependents:
+                bank_info= WorkforceEmployeeBankingInfo.objects.filter(dependant_id= workforce_dependent.id).first()
+                if bank_info is not None:
+                    try:
+                        workforce_dependent.bank_account_holder_name= bank_info.account_holder_name
+                        workforce_dependent.save(username=user.login_name)
+                    except Exception as e:
+                        continue
+
+            eis_processes= WorkforceEisPaymentProcess.objects.all()
+            for eis_process in eis_processes:
+                if eis_process.workforce_application.application_type=='financialAssistance':
+                    bank_info= WorkforceEmployeeBankingInfo.objects.filter(dependant_id= eis_process.workforce_employee_dependent_id).first()
+                    try:
+                        eis_process.bank_account_holder_name= bank_info.account_holder_name
+                        eis_process.save(username=user.login_name)
+                    except Exception as e:
+                        continue
+                else:
+                    bank_info = WorkforceEmployeeBankingInfo.objects.filter(application_id=eis_process.workforce_application_id, type='applicant').first()
+                    try:
+                        eis_process.bank_account_holder_name = bank_info.account_holder_name
+                        eis_process.save(username=user.login_name)
+                    except Exception as e:
+                        continue
+
+            eis_processes= WorkforceEisPaymentDisbursementStage.objects.all()
+            for eis_process in eis_processes:
+                if eis_process.workforce_application.application_type=='financialAssistance':
+                    bank_info= WorkforceEmployeeBankingInfo.objects.filter(dependant_id= eis_process.workforce_employee_dependent_id).first()
+                    try:
+                        eis_process.bank_account_holder_name= bank_info.account_holder_name
+                        eis_process.save(username=user.login_name)
+                    except Exception as e:
+                        continue
+                else:
+                    bank_info = WorkforceEmployeeBankingInfo.objects.filter(application_id=eis_process.workforce_application_id, type='applicant').first()
+                    try:
+                        eis_process.bank_account_holder_name = bank_info.account_holder_name
+                        eis_process.save(username=user.login_name)
+                    except Exception as e:
+                        continue
+
+            return Response({'status': 'success', 'message': 'Data Retrieved Successfully', 'data': owners.count()}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'status': 'error', 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
