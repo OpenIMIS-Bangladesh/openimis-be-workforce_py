@@ -15,6 +15,7 @@ from .gql_types import *
 from .models import Bank
 from .services.website_legal_guideline_services import WebsiteLegalGuidelineServices
 from .services.workforce_association_user_map_services import WorkforceAssociationUserMapServices
+from .services.workforce_eis_payment_services import safe_decimal
 from .services.workforce_organization_services import WorkforceOrganizationServices
 from .services.workforce_other_compensation_info_services import WorkforceOtherCompensationInfoServices
 from .services.workforce_representative_services import WorkforceRepresentativeServices
@@ -2004,10 +2005,11 @@ class UpdateWorkforceEisPaymentProcessPaymentTypeMutation(graphene.Mutation):
                     payment_process.payment_type_remarks= f"The beneficiary will get One-time payment of {payment_process.eis_approved_amount:.2f}"
                     payment_process.eis_payment_type= data["payment_type"]
                 elif data["payment_type"]== "installment":
-                    payment_process.trimonthly_amount = payment_process.eis_approved_amount
+                    payment_process.trimonthly_amount = safe_decimal(payment_process.eis_approved_amount)/3
+                    payment_process.payable_amount = safe_decimal(payment_process.eis_approved_amount)/3
                     #payment_process.payment_type_remarks = f"The beneficiary will get Tri-monthly payment of {(payment_process.eis_monthly_amount*3):.2f}"
                     #murad vai told me to change this to total amount
-                    payment_process.payment_type_remarks = f"The beneficiary will get Tri-monthly payment of {payment_process.eis_approved_amount :.2f}"
+                    payment_process.payment_type_remarks = f"The beneficiary will get Tri-monthly payment of {safe_decimal(payment_process.eis_approved_amount)/3 :.2f}"
                     payment_process.eis_payment_type = data["payment_type"]
                 else:
                     payment_process.eis_payment_type = data["payment_type"]
