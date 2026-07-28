@@ -13,7 +13,7 @@ from .services.workforce_application_services import WorkforceApplicationService
 from .services.workforce_sms_services import send_sms
 from .models import WorkforceEmployee, generate_otp, WorkforceEisPaymentProcess, WorkforceOtherCompensationInfo, \
     WorkforceEmployeeDependent, WorkforceApplication, WorkforceApplicationMovement, WorkforceEmployeeBankingInfo, \
-    WorkforceEisPaymentDisbursementStage, WorkforceEisPaymentDisbursement
+    WorkforceEisPaymentDisbursementStage, WorkforceEisPaymentDisbursement, WorkforceDocument
 from core.models import InteractiveUser, user
 import os
 from rest_framework.permissions import AllowAny
@@ -23,6 +23,7 @@ from datetime import datetime, timezone, date
 import json
 from workforce.services.workforce_employee_dependent_services import WorkforceEmployeeDependentServices
 import base64
+from django.core.files.storage import default_storage
 
 def extract_uuid(encoded_str):
     decoded = base64.b64decode(encoded_str).decode()
@@ -652,3 +653,54 @@ class CorrectAccountHolderName(APIView):
             return Response({'status': 'success', 'message': 'Data Retrieved Successfully', 'data': owners.count()}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'status': 'error', 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class DeleteOrphanFiles(APIView):
+    permission_classes=[AllowAny]
+    authentication_classes=[]
+
+    def get(self, request):
+        """
+        Delete files from storage that are not referenced in WorkforceDocument.path.
+        """
+        dry_run = True
+        base_dir = default_storage.path("content/workforce")
+
+        # Paths stored in the database
+        db_paths = set(
+            WorkforceDocument.objects.exclude(path__isnull=True)
+            .exclude(path="")
+            .values_list("path", flat=True)
+        )
+
+        deleted = 0
+
+        for root, _, files in os.walk(base_dir):
+            for filename in files:
+                full_path = os.path.join(root, filename)
+
+                # e.g. content/workforce/abc.pdf
+                relative_path = os.path.relpath(
+                    full_path,
+                    default_storage.path("")
+                ).replace("\\", "/")
+
+                # e.g. /file_storage/content/workforce/abc.pdf
+                storage_url = default_storage.url(relative_path)
+
+                if storage_url not in db_paths:
+                    if dry_run:
+                        print(f"Would delete: {storage_url}")
+                        deleted += 1
+                    else:
+                        default_storage.delete(relative_path)
+                        print(f"Deleted: {storage_url}")
+                        deleted += 1
+                countindb=0
+                matched= 0
+                for path in db_paths:
+                    countindb+=1
+                    if storage_url == path:
+                        matched+=1
+        print(f"Deleted {deleted} orphan files.")
+        return Response({'status': 'success', 'message': 'Data Retrieved Successfully', 'data': f"Deleted {deleted} orphan files. but count in db: {countindb}. Match: {matched}"},
+                        status=status.HTTP_200_OK)
