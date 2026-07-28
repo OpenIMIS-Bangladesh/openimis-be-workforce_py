@@ -687,20 +687,21 @@ class DeleteOrphanFiles(APIView):
                 # e.g. /file_storage/content/workforce/abc.pdf
                 storage_url = default_storage.url(relative_path)
 
+                matched= 0
+                countindb=0
+                for path in db_paths:
+                    countindb+=1
                 if storage_url not in db_paths:
                     if dry_run:
                         print(f"Would delete: {storage_url}")
                         deleted += 1
+                        for path in db_paths:
+                            if storage_url == path:
+                                matched+=1
                     else:
                         default_storage.delete(relative_path)
                         print(f"Deleted: {storage_url}")
                         deleted += 1
-                countindb=0
-                matched= 0
-                for path in db_paths:
-                    countindb+=1
-                    if storage_url == path:
-                        matched+=1
         print(f"Deleted {deleted} orphan files.")
         return Response({'status': 'success', 'message': 'Data Retrieved Successfully', 'data': f"Deleted {deleted} orphan files. but count in db: {countindb}. Match: {matched}"},
                         status=status.HTTP_200_OK)
