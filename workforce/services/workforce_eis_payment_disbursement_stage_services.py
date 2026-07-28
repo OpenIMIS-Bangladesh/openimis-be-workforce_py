@@ -14,9 +14,9 @@ from math import floor
 from workforce.services.helper_service import generate_beneficiary_id
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from datetime import date
-from dateutil.relativedelta import relativedelta
 from django.db import transaction
 import calendar
+from calendar import monthrange
 
 
 logger = logging.getLogger(__name__)
@@ -127,21 +127,15 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
                 calculation_start_date = datetime.strptime(calculation_start_date, "%Y-%m-%d").date() if isinstance(
                     calculation_start_date, str) else calculation_start_date
 
-            target_date = date(int(year), int(month), 1)
+            last_day = monthrange(int(year), int(month))[1]
+            target_date = date(int(year), int(month), last_day)
 
-            months_gone = (
-                    (target_date.year - calculation_start_date.year) * 12
-                    + (target_date.month - calculation_start_date.month)
-            )
+            rd = relativedelta(target_date, calculation_start_date)
 
-            # if target_date.day < calculation_start_date.day:
-            #     months_gone -= 1
-            days_in_month = calendar.monthrange(target_date.year, target_date.month)[1]
-            difference= target_date.day - calculation_start_date.day
+            months = rd.years * 12 + rd.months
+            fraction = rd.days / monthrange(target_date.year, target_date.month)[1]
 
-            months_gone += (target_date.day - calculation_start_date.day) / days_in_month
-            if difference<0:
-                months_gone+=1
+            months_gone = months + fraction
 
 
 
