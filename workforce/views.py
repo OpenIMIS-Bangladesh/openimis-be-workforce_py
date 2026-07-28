@@ -673,6 +673,7 @@ class DeleteOrphanFiles(APIView):
         )
 
         deleted = 0
+        would_delete_files=[]
 
         for root, _, files in os.walk(base_dir):
             for filename in files:
@@ -687,9 +688,11 @@ class DeleteOrphanFiles(APIView):
                 # e.g. /file_storage/content/workforce/abc.pdf
                 storage_url = default_storage.url(relative_path)
 
+
                 if storage_url not in db_paths:
                     if dry_run:
                         print(f"Would delete: {storage_url}")
+                        would_delete_files.append(storage_url)
                         deleted += 1
                     else:
                         default_storage.delete(relative_path)
@@ -697,5 +700,5 @@ class DeleteOrphanFiles(APIView):
                         deleted += 1
 
         print(f"Deleted {deleted} orphan files.")
-        return Response({'status': 'success', 'message': 'Data Retrieved Successfully', 'data': f"Deleted {storage_url} orphan files."},
+        return Response({'status': 'success', 'message': 'Data Retrieved Successfully', 'data': f"Deleted {deleted} orphan files. File names: {would_delete_files}"},
                         status=status.HTTP_200_OK)
