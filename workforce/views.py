@@ -662,7 +662,7 @@ class DeleteOrphanFiles(APIView):
         """
         Delete files from storage that are not referenced in WorkforceDocument.path.
         """
-        dry_run = True
+        dry_run = False
         base_dir = default_storage.path("content/workforce")
 
         # Paths stored in the database
