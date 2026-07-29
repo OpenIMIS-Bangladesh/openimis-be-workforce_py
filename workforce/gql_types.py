@@ -455,6 +455,7 @@ class WorkforceApplicationInputType(OpenIMISMutation.Input):
     eis_approved_by_ids= graphene.String()
     committee_id= graphene.String()
     committee_remarks= graphene.String()
+    rejected_ids= graphene.String()
 
 
 class WorkforceDocumentTypeInputType(OpenIMISMutation.Input):
