@@ -525,6 +525,7 @@ class WorkforceApplicationServices(BaseService):
                 "verified",
                 "forward_for_verification",
                 "approved_by_doctor",
+                "revert"
             }
             if (
                 all_bank_data
