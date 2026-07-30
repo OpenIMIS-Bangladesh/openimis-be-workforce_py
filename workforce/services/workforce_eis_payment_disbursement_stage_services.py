@@ -136,6 +136,7 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
             fraction = rd.days / monthrange(target_date.year, target_date.month)[1]
 
             months_gone = months + fraction
+            months_gone= round(months_gone, 1)
 
 
 
