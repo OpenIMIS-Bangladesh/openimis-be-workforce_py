@@ -127,6 +127,10 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
                 calculation_start_date = datetime.strptime(calculation_start_date, "%Y-%m-%d").date() if isinstance(
                     calculation_start_date, str) else calculation_start_date
 
+            #if beneficiary were on hold, then take the hold date as calculation start date...
+            if workforce_eis_payment_process.beneficiary_status =="hold":
+                calculation_start_date = workforce_eis_payment_process.last_live_check_date
+
             last_day = monthrange(int(year), int(month))[1]
             target_date = date(int(year), int(month), last_day)
 
@@ -190,6 +194,52 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
             )
             try:
                 new_stage.save(username=user.username)
+                if workforce_eis_payment_process.beneficiary_status=="hold":
+                    try:
+                        workforce_eis_payment_process.status= "inactive"
+                        workforce_eis_payment_process.save(username=user.username)
+                    except Exception as e:
+                        continue
+                    new_main_row= WorkforceEisPaymentProcess(
+                        workforce_application=workforce_eis_payment_process.workforce_application,
+                        workforce_application_summary=workforce_eis_payment_process.workforce_application_summary,
+                        workforce_employee_dependent=workforce_eis_payment_process.workforce_employee_dependent,
+                        bank=workforce_eis_payment_process.bank,
+                        bank_account_no=workforce_eis_payment_process.bank_account_no,
+                        routing_number=workforce_eis_payment_process.routing_number,
+                        bank_account_holder_name=workforce_eis_payment_process.bank_account_holder_name,
+                        eis_payment_type=workforce_eis_payment_process.eis_payment_type,
+                        payment_type_remarks=workforce_eis_payment_process.payment_type_remarks,
+                        eis_calculated_amount=workforce_eis_payment_process.eis_calculated_amount,
+                        eis_approved_amount=workforce_eis_payment_process.eis_approved_amount,
+                        eis_initial_replacement_rate=workforce_eis_payment_process.eis_initial_replacement_rate,
+                        eis_initial_monthly_amount=workforce_eis_payment_process.eis_initial_monthly_amount,
+                        eis_monthly_amount=workforce_eis_payment_process.eis_monthly_amount,
+                        increment_amount=workforce_eis_payment_process.increment_amount,
+                        increment_date=workforce_eis_payment_process.increment_date,
+                        decrement_amount=workforce_eis_payment_process.decrement_amount,
+                        decrement_date=workforce_eis_payment_process.decrement_date,
+                        month_index=workforce_eis_payment_process.month_index,
+                        year=workforce_eis_payment_process.year,
+                        processing_date=workforce_eis_payment_process.processing_date,
+                        is_disbursed=workforce_eis_payment_process.is_disbursed,
+                        approved=workforce_eis_payment_process.approved,
+                        beneficiary_id=workforce_eis_payment_process.beneficiary_id,
+                        beneficiary_status="eligible",
+                        status="active",
+                        reason=workforce_eis_payment_process.reason,
+                        remarks=None,
+                        remarriage_or_death_date=None,
+                        last_live_check_date=None,
+                        live_check_remarks=None,
+                        payable_amount=workforce_eis_payment_process.payable_amount,
+                        phone_number=workforce_eis_payment_process.phone_number
+                    )
+
+                    try:
+                        new_main_row.save(username=user.username)
+                    except Exception as e:
+                        return e
             except Exception as e:
                 continue
         return "success"

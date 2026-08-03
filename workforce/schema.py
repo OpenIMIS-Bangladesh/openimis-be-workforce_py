@@ -24,6 +24,7 @@ from .services.helper_service import extract_uuid
 from .services.workforce_committee_user_services import WorkforceCommitteeUserServices
 from django.db.models.expressions import RawSQL
 import json
+from django.db.models import Max
 
 
 class Query(graphene.ObjectType):
@@ -423,6 +424,22 @@ class Query(graphene.ObjectType):
         client_mutation_id=graphene.String(required=False),
         orderBy=graphene.List(of_type=graphene.String),
     )
+
+    workforce_eis_last_payment_date = graphene.Field(
+        WorkforceEisPaymentDisbursementStageGQLType,
+        beneficiary_id=graphene.String(required=False)
+    )
+
+    def resolve_workforce_eis_last_payment_date(self, info, beneficiary_id=None):
+        return (
+            WorkforceEisPaymentDisbursementStage.objects
+            .filter(
+                beneficiary_id=beneficiary_id,
+                is_deleted=False
+            )
+            .order_by("-year", "-month_index")
+            .first()
+        )
 
     def resolve_workforce_check_application_duplicacy(self, info, application_type_in=None, nid=None,organization_type=None, get_other_application_list=False,client_mutation_id=None, orderBy=None):
         applications = WorkforceApplication.objects.exclude(status="draft")
@@ -1477,13 +1494,13 @@ class Query(graphene.ObjectType):
 
             combined_year_month_date = None
 
-            if year and month:
-                combined_year_month_date = date(int(year), int(month), 1)
-            if combined_year_month_date:
-                qs = qs.filter(
-                    Q(remarriage_or_death_date__isnull=True) |
-                    Q(remarriage_or_death_date__gt=combined_year_month_date)
-                )
+            # if year and month:
+            #     combined_year_month_date = date(int(year), int(month), 1)
+            # if combined_year_month_date:
+            #     qs = qs.filter(
+            #         Q(remarriage_or_death_date__isnull=True) |
+            #         Q(remarriage_or_death_date__gt=combined_year_month_date)
+            #     )
 
             if approved:
                 qs = qs.filter(approved=approved)
@@ -1501,13 +1518,29 @@ class Query(graphene.ObjectType):
                 qs = qs.filter(workforce_application__accident_date__lte= accident_date_to)
 
             if not_in_stage == "yes" and year and month:
-                beneficiary_ids = WorkforceEisPaymentDisbursementStage.objects.filter(
-                    month_index=month,
-                    year=year,
-                    is_deleted=False
+                #hide the month if payment is made for the selected month and less than them
+                stages = (
+                    WorkforceEisPaymentDisbursementStage.objects
+                    .filter(is_deleted=False)
+                    .values("beneficiary_id")
+                    .annotate(
+                        latest_ym=Max(F("year") * 100 + F("month_index"))
+                    )
+                )
+
+                selected_ym = int(f"{year}{int(month):02d}")
+
+                beneficiary_ids = stages.filter(
+                    latest_ym__gte=selected_ym
                 ).values_list("beneficiary_id", flat=True)
+                # beneficiary_ids = WorkforceEisPaymentDisbursementStage.objects.filter(
+                #     month_index=month,
+                #     year=year,
+                #     is_deleted=False
+                # ).values_list("beneficiary_id", flat=True)
 
                 qs = qs.exclude(beneficiary_id__in=beneficiary_ids)
+
 
             qs = qs.order_by("beneficiary_id")
 
