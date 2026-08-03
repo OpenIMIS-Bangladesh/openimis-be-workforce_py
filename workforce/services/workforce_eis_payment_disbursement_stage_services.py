@@ -96,58 +96,96 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
         eis_process_ids= data["workforceEisPaymentProcessIdIn"]
         month= data["month"]
         year= data["year"]
+        year = int(year)
+        month = int(month)
 
         for eis_process_id in eis_process_ids:
             process_id= extract_uuid(eis_process_id)
             workforce_eis_payment_process= WorkforceEisPaymentProcess.objects.get(id=process_id)
             workforce_application= workforce_eis_payment_process.workforce_application
 
+            calculation_start_date = None
+            day_inclusive_calculation= True
+            exists_in_stage = WorkforceEisPaymentDisbursementStage.objects.filter(beneficiary_id=workforce_eis_payment_process.beneficiary_id, is_deleted=False).first()
             #FIRST DISBURSEMENT ARREAR CALCULATION NUMBER OF MONTHS ================
-            calculation_start_date = ""
-            if workforce_application.application_type == "disabilityAssistance":
-                doctor_json = json.loads(
-                    workforce_application.doctors_entry) if workforce_application.doctors_entry else None
-                if doctor_json is None:
-                    return False
-                accident_info_json = json.loads(
-                    workforce_application.employee_accident_info) if workforce_application.employee_accident_info else None
+            if exists_in_stage is None:
+                day_inclusive_calculation= True
+                if workforce_application.application_type == "disabilityAssistance":
+                    doctor_json = json.loads(
+                        workforce_application.doctors_entry) if workforce_application.doctors_entry else None
+                    if doctor_json is None:
+                        return False
+                    accident_info_json = json.loads(
+                        workforce_application.employee_accident_info) if workforce_application.employee_accident_info else None
 
 
-                calculation_start_date = accident_info_json.get("dateOfRejoining") if accident_info_json.get(
-                    "dateOfRejoining") else doctor_json.get("dateOfAssessment")
-                calculation_start_date = datetime.strptime(calculation_start_date, "%Y-%m-%d").date() if isinstance(
-                    calculation_start_date, str) else calculation_start_date
-            else:
-                accident_info_json = json.loads(
-                    workforce_application.employee_accident_info) if workforce_application.employee_accident_info else None
-                if accident_info_json is None:
-                    return False
-                calculation_start_date = accident_info_json.get("dateOfDeath") if accident_info_json.get(
-                    "dateOfDeath") else None
-                calculation_start_date = datetime.strptime(calculation_start_date, "%Y-%m-%d").date() if isinstance(
-                    calculation_start_date, str) else calculation_start_date
-
+                    calculation_start_date = accident_info_json.get("dateOfRejoining") if accident_info_json.get(
+                        "dateOfRejoining") else doctor_json.get("dateOfAssessment")
+                    calculation_start_date = datetime.strptime(calculation_start_date, "%Y-%m-%d").date() if isinstance(
+                        calculation_start_date, str) else calculation_start_date
+                else:
+                    accident_info_json = json.loads(
+                        workforce_application.employee_accident_info) if workforce_application.employee_accident_info else None
+                    if accident_info_json is None:
+                        return False
+                    calculation_start_date = accident_info_json.get("dateOfDeath") if accident_info_json.get(
+                        "dateOfDeath") else None
+                    calculation_start_date = datetime.strptime(calculation_start_date, "%Y-%m-%d").date() if isinstance(
+                        calculation_start_date, str) else calculation_start_date
             #if beneficiary were on hold, then take the hold date as calculation start date...
-            if workforce_eis_payment_process.beneficiary_status =="hold":
+            elif workforce_eis_payment_process.beneficiary_status =="hold":
+                day_inclusive_calculation= True
                 calculation_start_date = workforce_eis_payment_process.last_live_check_date
+            #search if payment is clear for previous month
+            else:
+                day_inclusive_calculation= False
+                if month-1==0:
+                    prev_month=12
+                    search_year= year-1
+                else:
+                    prev_month= month-1
+                    search_year= year
+                prev_month_payment= WorkforceEisPaymentDisbursementStage.objects.filter(beneficiary_id= workforce_eis_payment_process.beneficiary_id, year=search_year, month_index= prev_month, is_deleted=False).first()
+                if prev_month_payment is None:
+                    last_payment= WorkforceEisPaymentDisbursementStage.objects.filter(beneficiary_id= workforce_eis_payment_process.beneficiary_id, is_deleted=False).order_by('-year', '-month_index').first()
+                    if last_payment is not None:
+                        last_pay_year= last_payment.year
+                        last_pay_month= last_payment.month_index
+                        if last_pay_month == 12:
+                            next_month = 1
+                            set_year = last_pay_year + 1
+                        else:
+                            next_month = last_pay_month + 1
+                            set_year = last_pay_year
+                        calculation_start_date = date(set_year, next_month, 1)
 
-            last_day = monthrange(int(year), int(month))[1]
-            target_date = date(int(year), int(month), last_day)
+            last_day = monthrange(year, month)[1]
+            target_date = date(year, month, last_day)
+            if calculation_start_date is not None:
+                if day_inclusive_calculation:
 
-            rd = relativedelta(target_date, calculation_start_date)
+                    rd = relativedelta(target_date, calculation_start_date)
 
-            months = rd.years * 12 + rd.months
-            fraction = rd.days / monthrange(target_date.year, target_date.month)[1]
+                    months = rd.years * 12 + rd.months
+                    fraction = rd.days / monthrange(target_date.year, target_date.month)[1]
 
-            months_gone = months + fraction
-            # months_gone= round(months_gone, 1)
+                    months_gone = months + fraction
+                    # months_gone= round(months_gone, 1)
 
+                    pay_from_date= calculation_start_date
+                    pay_to_date= target_date
+                else:
+                    months_gone = (target_date.year - calculation_start_date.year) * 12 + (target_date.month - calculation_start_date.month) + 1
+            else:
+                months_gone = 1
 
+            if workforce_eis_payment_process.eis_payment_type!="monthly":
+                months_gone = 1
 
-            # FIRST DISBURSEMENT ARREAR CALCULATION NUMBER OF MONTHS END ================
-            prev_stage_data= WorkforceEisPaymentDisbursementStage.objects.filter(workforce_eis_payment_process_id= process_id, is_deleted=False, month_index__lt=int(month), year=year).first()
-            if prev_stage_data is not None or workforce_eis_payment_process.eis_payment_type!="monthly":
-                months_gone=1 #it will be multiplied with payable amount so reset it to 1 if this is not first payment or not monthly payment.
+            if months_gone==1:
+                pay_from_date = date(year, month, 1)
+                pay_to_date = target_date
+
 
             if safe_decimal(workforce_eis_payment_process.arrear_payment_month) == safe_decimal(month) -1 and safe_decimal(workforce_eis_payment_process.arrear_payment_year) == safe_decimal(year):
                 paid_amount = safe_decimal(workforce_eis_payment_process.payable_amount) + safe_decimal(workforce_eis_payment_process.arrear_amount)
@@ -190,7 +228,9 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
                 is_confirmed = False,
                 approved = "yes",
                 beneficiary_id = workforce_eis_payment_process.beneficiary_id,
-                phone_number = workforce_eis_payment_process.phone_number
+                phone_number = workforce_eis_payment_process.phone_number,
+                pay_from_date= pay_from_date,
+                pay_to_date= pay_to_date
             )
             try:
                 new_stage.save(username=user.username)

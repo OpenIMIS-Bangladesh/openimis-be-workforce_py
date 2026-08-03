@@ -1601,6 +1601,8 @@ class WorkforceEisPaymentDisbursementStage(HistoryModel):
     approved = models.CharField(max_length=10, null=True, blank=True)
     beneficiary_id = models.CharField(max_length=50, null=True, blank=True)
     phone_number = models.CharField(max_length=50, null=True, blank=True)
+    pay_from_date= models.DateField(blank=True, null=True)
+    pay_to_date= models.DateField(blank=True, null=True)
     workforce_eis_bank_advice = models.ForeignKey(
         "WorkforceEisBankAdvice",
         models.DO_NOTHING,
