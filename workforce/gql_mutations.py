@@ -2043,7 +2043,7 @@ class UpdateWorkforceEisPaymentProcessApprovalMutation(graphene.Mutation):
 
             payment_process_instance= WorkforceEisPaymentProcess.objects.filter(beneficiary_id= data["beneficiary_id"], status="active").first()
             service_instance = WorkforceEisPaymentServices(user)
-            service_instance.calculate_arrear(payment_process_instance)
+            # service_instance.calculate_arrear(payment_process_instance)
 
             return cls(success=True, errors=[])
         except Exception as e:
