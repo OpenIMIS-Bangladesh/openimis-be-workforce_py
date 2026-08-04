@@ -171,11 +171,10 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
 
                     months_gone = months + fraction
                     # months_gone= round(months_gone, 1)
-
-                    pay_from_date= calculation_start_date
-                    pay_to_date= target_date
                 else:
                     months_gone = (target_date.year - calculation_start_date.year) * 12 + (target_date.month - calculation_start_date.month) + 1
+                pay_from_date = calculation_start_date
+                pay_to_date = target_date
             else:
                 months_gone = 1
 

@@ -1541,6 +1541,54 @@ class Query(graphene.ObjectType):
 
                 qs = qs.exclude(beneficiary_id__in=beneficiary_ids)
 
+                #onetime exclusions
+                excluded_beneficiary_ids=[]
+                for beneficiary in qs:
+                    one_time_exists= WorkforceEisPaymentDisbursementStage.objects.filter(beneficiary_id=beneficiary.beneficiary_id, is_deleted=False, eis_payment_type="onetime").first()
+                    if one_time_exists is not None:
+                        excluded_beneficiary_ids.append(one_time_exists.beneficiary_id)
+                qs = qs.exclude(beneficiary_id__in=excluded_beneficiary_ids)
+
+                #installment exclusions
+                excluded_beneficiary_ids = []
+
+                selected_year = int(year)
+                selected_month = int(month)
+
+                for beneficiary in qs:
+
+                    installments = (
+                        WorkforceEisPaymentDisbursementStage.objects
+                        .filter(
+                            beneficiary_id=beneficiary.beneficiary_id,
+                            is_deleted=False,
+                            eis_payment_type="installment"
+                        )
+                        .order_by("-year", "-month_index")
+                    )
+
+                    payment_count = installments.count()
+
+                    # Already received all 3 installments
+                    if payment_count >= 3:
+                        excluded_beneficiary_ids.append(beneficiary.beneficiary_id)
+                        continue
+
+                    # Has previous installment(s)
+                    last_payment = installments.first()
+                    if last_payment:
+                        months_diff = (
+                                (selected_year - last_payment.year) * 12 +
+                                (selected_month - last_payment.month_index)
+                        )
+
+                        # Must wait at least 3 months
+                        if months_diff < 3:
+                            excluded_beneficiary_ids.append(beneficiary.beneficiary_id)
+
+                qs = qs.exclude(beneficiary_id__in=excluded_beneficiary_ids)
+
+
 
             qs = qs.order_by("beneficiary_id")
 
