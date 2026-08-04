@@ -24,6 +24,7 @@ import json
 from workforce.services.workforce_employee_dependent_services import WorkforceEmployeeDependentServices
 import base64
 from django.core.files.storage import default_storage
+from calendar import monthrange
 
 def extract_uuid(encoded_str):
     decoded = base64.b64decode(encoded_str).decode()
@@ -701,4 +702,67 @@ class DeleteOrphanFiles(APIView):
 
         print(f"Deleted {deleted} orphan files.")
         return Response({'status': 'success', 'message': 'Data Retrieved Successfully', 'data': f"Deleted {deleted} orphan files. File names: {would_delete_files}"},
+                        status=status.HTTP_200_OK)
+
+class FixPayDates(APIView):
+    permission_classes=[AllowAny]
+    authentication_classes=[]
+
+    def get(self, request):
+        user = InteractiveUser.objects.get(id=1)
+        beneficiary_ids= WorkforceEisPaymentProcess.objects.filter(status="active")
+        first_payments=[]
+        for bid in beneficiary_ids:
+            stage_instance= WorkforceEisPaymentDisbursementStage.objects.filter(is_deleted=False, beneficiary_id=bid.beneficiary_id).order_by('year', 'month_index').first()
+            calculation_start_date = None
+            if stage_instance is not None:
+                workforce_application = stage_instance.workforce_application
+                if workforce_application.application_type == "disabilityAssistance":
+                    doctor_json = json.loads(
+                        workforce_application.doctors_entry) if workforce_application.doctors_entry else None
+                    if doctor_json is None:
+                        return False
+                    accident_info_json = json.loads(
+                        workforce_application.employee_accident_info) if workforce_application.employee_accident_info else None
+
+                    calculation_start_date = accident_info_json.get("dateOfRejoining") if accident_info_json.get(
+                        "dateOfRejoining") else doctor_json.get("dateOfAssessment")
+                    calculation_start_date = datetime.strptime(calculation_start_date, "%Y-%m-%d").date() if isinstance(
+                        calculation_start_date, str) else calculation_start_date
+                else:
+                    accident_info_json = json.loads(
+                        workforce_application.employee_accident_info) if workforce_application.employee_accident_info else None
+                    if accident_info_json is None:
+                        return False
+                    calculation_start_date = accident_info_json.get("dateOfDeath") if accident_info_json.get(
+                        "dateOfDeath") else None
+                    calculation_start_date = datetime.strptime(calculation_start_date, "%Y-%m-%d").date() if isinstance(
+                        calculation_start_date, str) else calculation_start_date
+                year= int(stage_instance.year)
+                month= int(stage_instance.month_index)
+                last_day = monthrange(year, month)[1]
+                calculation_end_date = date(year, month, last_day)
+                stage_instance.pay_from_date= calculation_start_date
+                stage_instance.pay_to_date= calculation_end_date
+                first_payments.append(stage_instance.id)
+                try:
+                    stage_instance.save(username= user.login_name)
+                except Exception as e:
+                    continue
+
+        other_stages_excluding_first_payments= WorkforceEisPaymentDisbursementStage.objects.filter(is_deleted=False).exclude(id__in=first_payments)
+        for stage_record in other_stages_excluding_first_payments:
+            year= int(stage_record.year)
+            month= int(stage_record.month_index)
+            start_date = date(year, month, 1)
+            last_day = monthrange(year, month)[1]
+            end_date = date(year, month, last_day)
+            try:
+                stage_record.pay_from_date= start_date
+                stage_record.pay_to_date= end_date
+                stage_record.save(username= user.login_name)
+            except Exception as e:
+                continue
+
+        return Response({'status': 'success', 'message': 'Procedure Successfully', 'data': ""},
                         status=status.HTTP_200_OK)
