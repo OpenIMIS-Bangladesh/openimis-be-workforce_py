@@ -387,7 +387,7 @@ class WorkforceApplicationServices(BaseService):
                     for dep in dependents:
                         dependent_id= dep.get("id")
                         if dependent_id is not None:
-                            dep_instance= WorkforceEmployeeDependent.objects.get(id=extract_uuid(dep.get("id")))
+                            dep_instance= WorkforceEmployeeDependent.objects.filter(id=extract_uuid(dep.get("id"))).first()
                         else: dep_instance = None
                         eligibility_status = dep.get("isEligible", True)
                         remarks = dep.get("remarks", None)
