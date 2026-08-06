@@ -11,7 +11,7 @@ from rx.linq.observable.blocking.first import first
 from workforce.models import (
     WorkforceApplication, WorkforceGrantMoney, WorkforceEmployee, WorkforceEmployeeDependent,
     WorkforceEmployeeBankingInfo, WorkforceDocument, WorkforceFactory, Bank, WorkforceEisPaymentProcess,
-    WorkforceApplicationSummary, WorkforceApplicationMovement
+    WorkforceApplicationSummary, WorkforceApplicationMovement, WorkforceDocumentMap
 )
 from workforce.models import WorkforceAssociation, WorkforceOrganizationEmployee
 from .helper_service import create_application_movement, cf_and_eis_application_movement_to_factory_admin, dependent_uuid_to_base64
@@ -339,29 +339,34 @@ class WorkforceApplicationServices(BaseService):
             try:
                 if application_status == "draft" or application_status == "new":
                     # Remove old dependents + related banking info for CF application
-                    existing_dependents = WorkforceEmployeeDependent.objects.filter(
-                        workforce_application=application_instance
-                    )
-                    for dependent in existing_dependents:
-                        WorkforceEmployeeBankingInfo.objects.filter(dependant=dependent).delete()
-                        WorkforceDocument.objects.filter(
-                            workforce_dependent=dependent
-                        ).update(workforce_dependent=None)
+                    # existing_dependents = WorkforceEmployeeDependent.objects.filter(
+                    #     workforce_application=application_instance
+                    # )
+                    # for dependent in existing_dependents:
+                    #     WorkforceEmployeeBankingInfo.objects.filter(dependant=dependent).delete()
+                    #     WorkforceDocument.objects.filter(
+                    #         workforce_dependent=dependent
+                    #     ).update(workforce_dependent=None)
+                    # # existing_dependents.delete()
+                    #
+                    # # Remove old dependents + related banking info for EIS (if exists)
+                    # if application_eis_instance:
+                    #     existing_dependents_eis = WorkforceEmployeeDependent.objects.filter(
+                    #         workforce_application=application_eis_instance
+                    #     )
+                    #     for dependent in existing_dependents_eis:
+                    #         WorkforceEmployeeBankingInfo.objects.filter(dependant=dependent).delete()
+                    #         WorkforceDocument.objects.filter(
+                    #             workforce_dependent=dependent
+                    #         ).update(workforce_dependent=None)
+                    #     # existing_dependents_eis.delete()
+                    # # Create new dependent data
                     # existing_dependents.delete()
-
-                    # Remove old dependents + related banking info for EIS (if exists)
-                    if application_eis_instance:
-                        existing_dependents_eis = WorkforceEmployeeDependent.objects.filter(
-                            workforce_application=application_eis_instance
-                        )
-                        for dependent in existing_dependents_eis:
-                            WorkforceEmployeeBankingInfo.objects.filter(dependant=dependent).delete()
-                            WorkforceDocument.objects.filter(
-                                workforce_dependent=dependent
-                            ).update(workforce_dependent=None)
-                        # existing_dependents_eis.delete()
-                    # Create new dependent data
-                    existing_dependents.delete()
+                    WorkforceDocumentMap.objects.filter(workforce_application_id=application_instance.id).delete()
+                    WorkforceDocument.objects.filter(workforce_application_id=application_instance.id, workforce_document_type__form_step_no="employeeDependentInfo").update(workforce_dependent=None)
+                    WorkforceDocument.objects.filter(workforce_application_id=application_instance.id, workforce_document_type__form_step_no="employeeBankInfo").update(workforce_employee_banking_info=None)
+                    WorkforceEmployeeBankingInfo.objects.filter(application_id=application_instance.id).delete()
+                    WorkforceEmployeeDependent.objects.filter(workforce_application_id=application_instance.id).delete()
                     dependents_data = obj_data.get("employee_dependent_info", [])
                     dependents = json.loads(dependents_data)
                 else:
@@ -378,7 +383,15 @@ class WorkforceApplicationServices(BaseService):
                             if dep_id:
                                 incoming_ids.append(extract_uuid(dep_id))
                         try:
-                            WorkforceDocument.objects.filter(workforce_application=application_instance, workforce_dependent_id__isnull=False).exclude(workforce_dependent_id__in=incoming_ids).delete()
+                            # WorkforceDocument.objects.filter(workforce_application=application_instance, workforce_dependent_id__isnull=False).exclude(workforce_dependent_id__in=incoming_ids).delete()
+                            WorkforceDocumentMap.objects.filter(
+                                workforce_application_id=application_instance.id).delete()
+                            WorkforceDocument.objects.filter(workforce_application_id=application_instance.id,
+                                                             workforce_document_type__form_step_no="employeeDependentInfo").update(
+                                workforce_dependent=None)
+                            WorkforceDocument.objects.filter(workforce_application_id=application_instance.id,
+                                                             workforce_document_type__form_step_no="employeeBankInfo").update(
+                                workforce_employee_banking_info=None)
                             WorkforceEisPaymentProcess.objects.filter(workforce_application=application_instance).exclude(workforce_employee_dependent_id__in=incoming_ids).delete()
                             WorkforceEmployeeBankingInfo.objects.filter(application=application_instance).exclude(dependant_id__in=incoming_ids).delete()
                             WorkforceEmployeeDependent.objects.filter(workforce_application=application_instance).exclude(id__in=incoming_ids).delete()
