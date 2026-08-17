@@ -131,7 +131,7 @@ class WorkforceEisPaymentServices(BaseService):
             # ---------- SAVE FULL MONTH PAYMENTS ----------
             if WorkforceEisPaymentProcess.objects.filter(workforce_application=workforce_application).exists():
                 return False
-            if approved_amount>0:
+            if approved_amount!=0:
                 payment_obj = WorkforceEisPaymentProcess(
                     workforce_application=workforce_application,
                     bank=bank_instance,
@@ -166,7 +166,7 @@ class WorkforceEisPaymentServices(BaseService):
                     continue
                 if WorkforceEisPaymentProcess.objects.filter(workforce_employee_dependent= dep).exists():
                     continue
-                if dep.is_eligible and dep.eis_approved_amount is not None and dep.eis_approved_amount > 0:
+                if dep.is_eligible and dep.eis_approved_amount is not None and dep.eis_approved_amount != 0:
                     bank_instance= Bank.objects.get(id= dep.bank_id)
                     now = datetime.now()
                     dependent_count = dependent_count+1
