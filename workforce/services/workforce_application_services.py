@@ -752,49 +752,49 @@ class WorkforceApplicationServices(BaseService):
         except Exception as e:
             print(e)
 
-        try:
-            documents= WorkforceDocument.objects.filter(workforce_application=application_instance, is_deleted=False)
-            for document in documents:
-                # --- NEW BIOMETRIC INTEGRATION ---
-                # Ensure we only process photos linked to the dependent
-                PHOTO_TYPES = {
-                    "nominee's photo",
-                    "nominee photo",
-                    "employee photo",
-                    "workers photo",
-                    "photo of worker",
-                }
-                if document.document_type in PHOTO_TYPES and document.path:
-                    try:
-                        path = document.path
-                        if 'file_storage' in path:
-                            filename = path.replace("/file_storage/content/workforce/", "")
-                        else:
-                            filename = path.replace("/content/workforce/", "")
-                        file_path = os.path.join('content', 'workforce', filename)
-                        if not default_storage.exists(file_path):
-                            continue
-                        file = default_storage.open(file_path)
-                        image_bytes = file.read()
-                        # Add this with your other imports at the top
-                        from biometric_verification.services import BiometricService
-                        # Use the new method that accepts raw bytes and document id
-                        result = BiometricService.compute_embedding_from_bytes(
-                            document_id=document.id,
-                            image_bytes=image_bytes
-                        )
-                        if result.success:
-                            logger.info(
-                                f"Generated biometric embedding for dependent {document.id}")
-                        else:
-                            logger.error(
-                                f"Failed to generate embedding for dependent {document.id}: {result.error}")
-                    except Exception as e:
-                        logger.error(
-                            f"Failed to generate embedding for dependent {document.id}: {e}")
-                # ---------------------------------
-        except Exception as e:
-            print(e)
+        # try:
+        #     documents= WorkforceDocument.objects.filter(workforce_application=application_instance, is_deleted=False)
+        #     for document in documents:
+        #         # --- NEW BIOMETRIC INTEGRATION ---
+        #         # Ensure we only process photos linked to the dependent
+        #         PHOTO_TYPES = {
+        #             "nominee's photo",
+        #             "nominee photo",
+        #             "employee photo",
+        #             "workers photo",
+        #             "photo of worker",
+        #         }
+        #         if document.document_type in PHOTO_TYPES and document.path:
+        #             try:
+        #                 path = document.path
+        #                 if 'file_storage' in path:
+        #                     filename = path.replace("/file_storage/content/workforce/", "")
+        #                 else:
+        #                     filename = path.replace("/content/workforce/", "")
+        #                 file_path = os.path.join('content', 'workforce', filename)
+        #                 if not default_storage.exists(file_path):
+        #                     continue
+        #                 file = default_storage.open(file_path)
+        #                 image_bytes = file.read()
+        #                 # Add this with your other imports at the top
+        #                 from biometric_verification.services import BiometricService
+        #                 # Use the new method that accepts raw bytes and document id
+        #                 result = BiometricService.compute_embedding_from_bytes(
+        #                     document_id=document.id,
+        #                     image_bytes=image_bytes
+        #                 )
+        #                 if result.success:
+        #                     logger.info(
+        #                         f"Generated biometric embedding for dependent {document.id}")
+        #                 else:
+        #                     logger.error(
+        #                         f"Failed to generate embedding for dependent {document.id}: {result.error}")
+        #             except Exception as e:
+        #                 logger.error(
+        #                     f"Failed to generate embedding for dependent {document.id}: {e}")
+        #         # ---------------------------------
+        # except Exception as e:
+        #     print(e)
 
         # ================================================================
         # 4. Handle BLWF new application movement to DIFE admin

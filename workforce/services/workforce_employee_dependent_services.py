@@ -367,7 +367,7 @@ class WorkforceEmployeeDependentServices(BaseService):
             disability_percentage = "100"
 
 
-        last_base_salary = float(workforce_application.last_base_salary) if workforce_application.last_base_salary else 0
+        last_base_salary = float(workforce_application.last_base_salary.replace(",","")) if workforce_application.last_base_salary else 0
         factory = WorkforceFactory.objects.get(id=workforce_application.employee_factory.id)
         association= WorkforceAllAssociation.objects.get(id= factory.all_association_id)
         minimum_salary= association.minimum_salary or 0
