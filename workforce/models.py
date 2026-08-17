@@ -602,6 +602,13 @@ class WorkforceDocument(HistoryModel):
     approval_date = models.DateField(null=True, blank=True)
     remarks = models.CharField(max_length=512, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
+    biometric_embedding = models.OneToOneField(
+        "biometric_verification.BiometricEmbedding",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="biometric_embedding_for_documents",
+    )
 
     class Meta:
         managed = True
