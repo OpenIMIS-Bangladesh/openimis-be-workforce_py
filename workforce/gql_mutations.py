@@ -1814,7 +1814,7 @@ class TestWorkforcePaymentMutation(graphene.Mutation):
 
 class CreateWorkforceEisPaymentProcessMutation(graphene.Mutation):
     class Arguments:
-        workforce_application_id = graphene.String(required=True)
+        workforce_application_ids = graphene.List(graphene.String)
         recall= graphene.String()
         month = graphene.String()
         year = graphene.String()
@@ -1830,53 +1830,47 @@ class CreateWorkforceEisPaymentProcessMutation(graphene.Mutation):
         from workforce.services.workforce_employee_dependent_services import WorkforceEmployeeDependentServices
         from workforce.services.workforce_eis_payment_services import WorkforceEisPaymentServices
         try:
-            workforce_application_id= data["workforce_application_id"]
-            user = info.context.user if hasattr(info.context, 'user') else None
-            workforce_application = WorkforceApplication.objects.get(id=data["workforce_application_id"])
-            if workforce_application.application_type == "disabilityAssistance":
-                # if WorkforceEisPaymentProcess.objects.filter(
-                #         workforce_application_id=data["workforce_application_id"]
-                # ).exists():
-                #     return cls(success=False, errors=["Disbursement already exists"])
-                if ("recall" in data and data["recall"] == "yes") or not WorkforceEisPaymentProcess.objects.filter(
-                        workforce_application_id=data["workforce_application_id"]
-                ).exists():
-                    WorkforceEisPaymentProcess.objects.filter(
-                                workforce_application_id=data["workforce_application_id"]
-                        ).delete()
-                    service = WorkforceEmployeeDependentServices(user)
-                    service.calculate_eis_amount(
-                        data["workforce_application_id"],
-                        workforce_application.application_type
-                    )
-                WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id)
+            workforce_application_ids= data["workforce_application_ids"]
+            for workforce_application_id in workforce_application_ids:
+                count_of_distinct_application = (
+                    WorkforceEisPaymentProcess.objects
+                    .values("workforce_application_id")
+                    .distinct()
+                    .count()
+                )
+                count_of_distinct_application+=1
+                old_instance= WorkforceEisPaymentProcess.objects.filter(workforce_application_id=workforce_application_id).first()
+                old_beneficiary_id= old_instance.beneficiary_id if old_instance else None
+                user = info.context.user if hasattr(info.context, 'user') else None
+                workforce_application = WorkforceApplication.objects.get(id=workforce_application_id)
+                if workforce_application.application_type == "disabilityAssistance":
+                    if ("recall" in data and data["recall"] == "yes") or not WorkforceEisPaymentProcess.objects.filter(
+                            workforce_application_id=workforce_application_id
+                    ).exists():
+                        WorkforceEisPaymentProcess.objects.filter(
+                                    workforce_application_id=workforce_application_id
+                            ).delete()
+                        service = WorkforceEmployeeDependentServices(user)
+                        service.calculate_eis_amount(
+                            workforce_application_id,
+                            workforce_application.application_type
+                        )
+                    WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id, count_of_distinct_application, old_beneficiary_id)
 
-            if workforce_application.application_type == "financialAssistance":
-                if ("recall" in data and data["recall"]=="yes") or not WorkforceEisPaymentProcess.objects.filter(
-                        workforce_application_id=data["workforce_application_id"]
-                ).exists():
-                    service = WorkforceEmployeeDependentServices(user)
-                    service.calculate_eis_amount(
-                        data["workforce_application_id"],
-                        workforce_application.application_type
-                    )
-                    WorkforceEisPaymentProcess.objects.filter(
-                        workforce_application_id=data["workforce_application_id"]).delete()
-                    WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id)
-                else:
-                    WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id)
-
-                # if WorkforceEmployeeDependent.objects.filter(
-                #         workforce_application_id=data["workforce_application_id"], eis_approved_amount__isnull=False
-                # ).exists():
-                #     WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id)
-                # else:
-                #     service = WorkforceEmployeeDependentServices(user)
-                #     service.calculate_eis_amount(
-                #         data["workforce_application_id"],
-                #         workforce_application.application_type
-                #     )
-                #     WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id)
+                if workforce_application.application_type == "financialAssistance":
+                    if ("recall" in data and data["recall"]=="yes") or not WorkforceEisPaymentProcess.objects.filter(
+                            workforce_application_id=workforce_application_id
+                    ).exists():
+                        service = WorkforceEmployeeDependentServices(user)
+                        service.calculate_eis_amount(
+                            workforce_application_id,
+                            workforce_application.application_type
+                        )
+                        WorkforceEisPaymentProcess.objects.filter(
+                            workforce_application_id=workforce_application_id).delete()
+                        WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id, count_of_distinct_application, old_beneficiary_id)
+                    else:
+                        WorkforceEisPaymentServices.create_payment_schedule(user, workforce_application_id, count_of_distinct_application, old_beneficiary_id)
             return cls(success=True, errors=[])
         except Exception as e:
             return cls(success=False, errors=[str(e)])
