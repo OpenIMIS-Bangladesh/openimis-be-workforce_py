@@ -339,30 +339,6 @@ class WorkforceApplicationServices(BaseService):
         if dependent_update_request and application_instance.application_type in ["financialAssistance", "deadlyGrant","medicalAssistance","medicalDonation"]:
             try:
                 if application_status == "draft" or application_status == "new":
-                    # Remove old dependents + related banking info for CF application
-                    # existing_dependents = WorkforceEmployeeDependent.objects.filter(
-                    #     workforce_application=application_instance
-                    # )
-                    # for dependent in existing_dependents:
-                    #     WorkforceEmployeeBankingInfo.objects.filter(dependant=dependent).delete()
-                    #     WorkforceDocument.objects.filter(
-                    #         workforce_dependent=dependent
-                    #     ).update(workforce_dependent=None)
-                    # # existing_dependents.delete()
-                    #
-                    # # Remove old dependents + related banking info for EIS (if exists)
-                    # if application_eis_instance:
-                    #     existing_dependents_eis = WorkforceEmployeeDependent.objects.filter(
-                    #         workforce_application=application_eis_instance
-                    #     )
-                    #     for dependent in existing_dependents_eis:
-                    #         WorkforceEmployeeBankingInfo.objects.filter(dependant=dependent).delete()
-                    #         WorkforceDocument.objects.filter(
-                    #             workforce_dependent=dependent
-                    #         ).update(workforce_dependent=None)
-                    #     # existing_dependents_eis.delete()
-                    # # Create new dependent data
-                    # existing_dependents.delete()
                     WorkforceDocumentMap.objects.filter(workforce_application_id=application_instance.id).delete()
                     WorkforceDocument.objects.filter(workforce_application_id=application_instance.id, workforce_document_type__form_step_no="employeeDependentInfo").update(workforce_dependent=None)
                     WorkforceDocument.objects.filter(workforce_application_id=application_instance.id, workforce_document_type__form_step_no="employeeBankInfo").update(workforce_employee_banking_info=None)
@@ -372,7 +348,8 @@ class WorkforceApplicationServices(BaseService):
                     dependents = json.loads(dependents_data)
                 else:
                     # get the originally updated json because tazwer always updates this
-                    dependents_data = WorkforceApplication.objects.get(id=application_id).employee_dependent_info
+                    dependents_data = obj_data.get("employee_dependent_info") or WorkforceApplication.objects.get(
+                        id=application_id).employee_dependent_info
                     dependents = json.loads(dependents_data)
 
                 # if dependents_data and application_instance.application_type=="financialAssistance":
@@ -483,31 +460,31 @@ class WorkforceApplicationServices(BaseService):
 
                                 for attr in attachments:
                                     files = attr.get("files", [])
-                                    # file_data= []
-                                    # for info in files:
-                                    #     file_obj= {
-                                    #         "file_url": info.get("uploadInfo", {}).get("url"),
-                                    #         "file_path": info.get("uploadInfo", {}).get("path")
-                                    #     }
+                                    document_type = attr.get("documentType", "")
                                     file_data = [
                                         {
                                             "file_url": info.get("url"),
-                                            "file_path": info.get("path")
+                                            "file_path": info.get("path"),
+                                            "document_type": document_type
                                         }
                                         for info in files
                                     ]
 
                                     for item in file_data:
                                         try:
-                                            document = WorkforceDocument.objects.filter(path=item.get("file_path"), url=item.get("file_url")).first()
-                                        except WorkforceDocument.DoesNotExist:
-                                            continue
-
-                                        try:
+                                            document = WorkforceDocument.objects.filter(
+                                                path=item.get("file_path")).first()
+                                            if not document:
+                                                document = WorkforceDocument(
+                                                    path=item.get("file_path"),
+                                                    url=item.get("file_url"),
+                                                    workforce_application_id=application_id,
+                                                    document_type=item.get("document_type")
+                                                )
                                             document.workforce_dependent_id = dep_instance.id
-                                            document.workforce_application_id = application_id
                                             document.save(username=self.user.username)
                                         except Exception as e:
+                                            logger.error(f"Document save error: {e}")
                                             continue
                         except Exception as e:
                             continue
@@ -663,23 +640,20 @@ class WorkforceApplicationServices(BaseService):
                             if attachments and attachments != "[{}]":
                                 for attr in attachments:
                                     files = attr.get("files", [])
-                                    # file_data = [
-                                    #     {
-                                    #         "file_url": info.get("uploadInfo", {}).get("file_url"),
-                                    #         "file_path": info.get("uploadInfo", {}).get("file_path")
-                                    #     }
-                                    #     for info in files
-                                    # ]
+                                    document_type = attr.get("documentType", "")  # Extract from parent object
                                     file_data = [
                                         {
                                             "file_url": info.get("url"),
-                                            "file_path": info.get("path")
+                                            "file_path": info.get("path"),
+                                            "document_type": document_type
                                         }
                                         for info in files
                                     ]
                                     for item in file_data:
                                         try:
-                                            document = WorkforceDocument.objects.filter(path=item.get("file_path"), url=item.get("file_url")).first()
+                                            document = WorkforceDocument.objects.filter(path=item.get("file_path"),
+                                                                                            url=item.get(
+                                                                                                "file_url")).first()
                                         except WorkforceDocument.DoesNotExist:
                                             continue
                                         try:
@@ -688,6 +662,7 @@ class WorkforceApplicationServices(BaseService):
                                             document.save(username=self.user.username)
                                         except Exception as e:
                                             continue
+
                         except Exception as e:
                             continue
                     else:
@@ -715,20 +690,15 @@ class WorkforceApplicationServices(BaseService):
                         if attachments and attachments != "[{}]":
                             for attr in attachments:
                                 files = attr.get("files", [])
+                                document_type = attr.get("documentType", "")  # Extract from parent object
                                 file_data = [
                                     {
                                         "file_url": info.get("url"),
-                                        "file_path": info.get("path")
+                                        "file_path": info.get("path"),
+                                        "document_type": document_type
                                     }
                                     for info in files
                                 ]
-                                # file_data = [
-                                #     {
-                                #         "file_url": info.get("uploadInfo", {}).get("file_url"),
-                                #         "file_path": info.get("uploadInfo", {}).get("file_path")
-                                #     }
-                                #     for info in files
-                                # ]
                                 for item in file_data:
                                     try:
                                         document = WorkforceDocument.objects.filter(path=item.get("file_path"),url=item.get("file_url")).first()
