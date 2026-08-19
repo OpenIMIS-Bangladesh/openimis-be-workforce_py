@@ -208,7 +208,8 @@ class WorkforceEisBankAdviceServices(BaseService):
                 year=stage_instance.year,
                 disbursement_date=today,
                 beneficiary_id=stage_instance.beneficiary_id,
-                phone_number=stage_instance.phone_number
+                phone_number=stage_instance.phone_number,
+                serial_number= stage_instance.serial_number
             )
             try:
                 disburse_instance.save(username=user.username)

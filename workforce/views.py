@@ -766,3 +766,31 @@ class FixPayDates(APIView):
 
         return Response({'status': 'success', 'message': 'Procedure Successfully', 'data': ""},
                         status=status.HTTP_200_OK)
+
+class UpdateSerialNumber(APIView):
+    permission_classes=[AllowAny]
+    authentication_classes=[]
+
+    def get(self, request):
+        user = InteractiveUser.objects.get(id=1)
+
+        processes= WorkforceEisPaymentProcess.objects.all()
+        for process in processes:
+            splitted_bid= process.beneficiary_id.split(".")
+            process.serial_number= int(splitted_bid[3])
+            process.save(username= user.login_name)
+
+        processes= WorkforceEisPaymentDisbursementStage.objects.all()
+        for process in processes:
+            splitted_bid= process.beneficiary_id.split(".")
+            process.serial_number= int(splitted_bid[3])
+            process.save(username= user.login_name)
+
+        processes= WorkforceEisPaymentDisbursement.objects.all()
+        for process in processes:
+            splitted_bid= process.beneficiary_id.split(".")
+            process.serial_number= int(splitted_bid[3])
+            process.save(username= user.login_name)
+
+        return Response({'status': 'success', 'message': 'Procedure Ran Successfully', 'data': ""},
+                        status=status.HTTP_200_OK)

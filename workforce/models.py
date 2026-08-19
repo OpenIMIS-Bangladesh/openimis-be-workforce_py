@@ -1535,6 +1535,7 @@ class WorkforceEisPaymentProcess(HistoryModel):
     noa_sms_sent=  models.BooleanField(default=False, null=True)
     noa_confirmed= models.BooleanField(default=False, null=True)
     noa_blocked= models.BooleanField(default=False, null=True)
+    serial_number= models.IntegerField(default=0, blank=True, null=True)
 
     class Meta:
         managed = True
@@ -1618,6 +1619,7 @@ class WorkforceEisPaymentDisbursementStage(HistoryModel):
         related_name="workforce_eis_bank_advice_payment_stage",
     )
     user_confirmed= models.BooleanField(default=False)
+    serial_number= models.IntegerField(default=0, blank=True, null=True)
 
     class Meta:
         managed = True
@@ -1686,6 +1688,7 @@ class WorkforceEisPaymentDisbursement(HistoryModel):
     )
     phone_number = models.CharField(max_length=50, null=True, blank=True)
     user_confirmed = models.BooleanField(default=False)
+    serial_number = models.IntegerField(default=0, blank=True, null=True)
 
     class Meta:
         managed = True

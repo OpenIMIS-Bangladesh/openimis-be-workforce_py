@@ -1590,7 +1590,7 @@ class Query(graphene.ObjectType):
 
 
 
-            qs = qs.order_by("beneficiary_id")
+            qs = qs.order_by("serial_number", "beneficiary_id")
 
             if not any([
                 workforce_application_id,
@@ -1656,7 +1656,7 @@ class Query(graphene.ObjectType):
                 qs= qs.filter(workforce_eis_bank_advice_id= workforce_eis_bank_advice_id)
 
             qs = qs.filter(is_deleted=False)
-            qs = qs.order_by("beneficiary_id")
+            qs = qs.order_by("serial_number", "beneficiary_id")
 
             if not any([
                 month,
@@ -1681,7 +1681,7 @@ class Query(graphene.ObjectType):
                 qs = qs.filter(month_index=month)
             if year:
                 qs = qs.filter(year=year)
-            return qs
+            return qs.order_by("serial_number, beneficiary_id")
         except WorkforceEisPaymentProcess.DoesNotExist:
             return None
 

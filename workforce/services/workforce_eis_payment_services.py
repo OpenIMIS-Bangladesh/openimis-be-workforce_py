@@ -115,6 +115,11 @@ class WorkforceEisPaymentServices(BaseService):
                 .count()
             )
             count_of_distinct_application+=1
+        if old_beneficiary_id is not None:
+            splitted_old_bid= old_beneficiary_id.split(".")
+            serial_number= int(splitted_old_bid[3])
+        else:
+            serial_number= count_of_distinct_application
         if workforce_application.application_type == "disabilityAssistance":
             bank_info = json.loads(workforce_application.employee_bank_info)
             bank_id = (
@@ -153,7 +158,8 @@ class WorkforceEisPaymentServices(BaseService):
                     beneficiary_id=beneficiary_id,
                     is_disbursed=False,
                     payable_amount=abs(workforce_application.eis_monthly_amount),
-                    phone_number= workforce_application.workforce_employee.phone_number or None
+                    phone_number= workforce_application.workforce_employee.phone_number or None,
+                    serial_number= serial_number
                 )
                 payment_obj.save(username=user.username)
             return None
@@ -194,7 +200,8 @@ class WorkforceEisPaymentServices(BaseService):
                         beneficiary_id=beneficiary_id,
                         is_disbursed=False,
                         payable_amount= abs(dep.eis_monthly_amount),
-                        phone_number= dep.phone_number or None
+                        phone_number= dep.phone_number or None,
+                        serial_number=serial_number
                     )
                     payment_obj.save(username=user.username)
                 else:
@@ -297,7 +304,8 @@ class WorkforceEisPaymentServices(BaseService):
             last_live_check_date=parse_frontend_date(data.get("last_live_check_date")),
             live_check_remarks=data.get("live_check_remarks"),
             payable_amount= safe_decimal(main_beneficiary.payable_amount) + main_increment - main_decrement,
-            phone_number= main_beneficiary.phone_number or None
+            phone_number= main_beneficiary.phone_number or None,
+            serial_number = main_beneficiary.serial_number or None
         )
         new_main_row.save(username=user.username)
 
@@ -391,7 +399,8 @@ class WorkforceEisPaymentServices(BaseService):
                 last_live_check_date=old_other.last_live_check_date if data.get("beneficiary_status")=="hold" else None,
                 live_check_remarks=old_other.live_check_remarks if data.get("beneficiary_status")=="hold" else None,
                 payable_amount= (max_monthly - recovery_amount) if data.get("beneficiary_status")=="closed" else (round_three(old_other.payable_amount + safe_decimal(increment) - safe_decimal(normal_decrement))),
-                phone_number= old_other.phone_number or None
+                phone_number= old_other.phone_number or None,
+                serial_number= old_other.serial_number or None,
             )
 
             new_other_row.save(username=user.username)
@@ -518,7 +527,8 @@ class WorkforceEisPaymentServices(BaseService):
             last_live_check_date=main_beneficiary.last_live_check_date,
             live_check_remarks=main_beneficiary.live_check_remarks,
             payable_amount= main_beneficiary.payable_amount,
-            phone_number= data.get("phone_number")
+            phone_number= data.get("phone_number"),
+            serial_number= main_beneficiary.serial_number
         )
 
         try:

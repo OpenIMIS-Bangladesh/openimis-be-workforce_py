@@ -229,7 +229,8 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
                 beneficiary_id = workforce_eis_payment_process.beneficiary_id,
                 phone_number = workforce_eis_payment_process.phone_number,
                 pay_from_date= pay_from_date,
-                pay_to_date= pay_to_date
+                pay_to_date= pay_to_date,
+                serial_number = workforce_eis_payment_process.serial_number
             )
             try:
                 new_stage.save(username=user.username)
@@ -272,7 +273,8 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
                         last_live_check_date=None,
                         live_check_remarks=None,
                         payable_amount=workforce_eis_payment_process.payable_amount,
-                        phone_number=workforce_eis_payment_process.phone_number
+                        phone_number=workforce_eis_payment_process.phone_number,
+                        serial_number=workforce_eis_payment_process.serial_number
                     )
 
                     try:

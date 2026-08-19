@@ -48,7 +48,8 @@ def my_test_job():
             status="active",
             reason= None,
             remarks="Automatically updated payable amount as decrementing period ended",
-            payable_amount=payment.payable_amount + payment.decrement_amount
+            payable_amount=payment.payable_amount + payment.decrement_amount,
+            serial_number=payment.serial_number
         )
         new_row.save(username="Admin")
 
