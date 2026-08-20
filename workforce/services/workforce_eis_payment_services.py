@@ -157,6 +157,7 @@ class WorkforceEisPaymentServices(BaseService):
                     processing_date=date.today(),
                     beneficiary_id=beneficiary_id,
                     is_disbursed=False,
+                    approved="yes",
                     payable_amount=abs(workforce_application.eis_monthly_amount),
                     phone_number= workforce_application.workforce_employee.phone_number or None,
                     serial_number= serial_number
@@ -199,6 +200,7 @@ class WorkforceEisPaymentServices(BaseService):
                         processing_date=date.today(),
                         beneficiary_id=beneficiary_id,
                         is_disbursed=False,
+                        approved="yes",
                         payable_amount= abs(dep.eis_monthly_amount),
                         phone_number= dep.phone_number or None,
                         serial_number=serial_number

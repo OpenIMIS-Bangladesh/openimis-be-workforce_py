@@ -794,3 +794,29 @@ class UpdateSerialNumber(APIView):
 
         return Response({'status': 'success', 'message': 'Procedure Ran Successfully', 'data': ""},
                         status=status.HTTP_200_OK)
+
+
+class UpdateInstallment(APIView):
+    permission_classes=[AllowAny]
+    authentication_classes=[]
+
+    def get(self, request):
+        user = InteractiveUser.objects.get(id=1)
+
+        beneficiary_ids = (
+            WorkforceEisPaymentProcess.objects
+            .values_list("beneficiary_id", flat=True)
+            .distinct()
+        )
+
+        for beneficiary_id in beneficiary_ids:
+            processes= WorkforceEisPaymentDisbursementStage.objects.filter(is_deleted=False, eis_payment_type="installment", beneficiary_id= beneficiary_id).order_by("date_created")
+            count=0
+            for process in processes:
+                count+=1
+                process.installment_number=count
+                process.save(username= user.login_name)
+
+
+        return Response({'status': 'success', 'message': 'Procedure Ran Successfully', 'data': ""},
+                        status=status.HTTP_200_OK)

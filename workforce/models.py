@@ -1620,6 +1620,7 @@ class WorkforceEisPaymentDisbursementStage(HistoryModel):
     )
     user_confirmed= models.BooleanField(default=False)
     serial_number= models.IntegerField(default=0, blank=True, null=True)
+    installment_number= models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = True

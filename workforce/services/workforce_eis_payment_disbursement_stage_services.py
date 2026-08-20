@@ -179,6 +179,9 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
                 months_gone = 1
 
             if workforce_eis_payment_process.eis_payment_type!="monthly":
+                if workforce_eis_payment_process.eis_payment_type=="installment":
+                    installment_count=WorkforceEisPaymentDisbursementStage.objects.filter(is_deleted=False, beneficiary_id= workforce_eis_payment_process.beneficiary_id).count()
+                    installment_count+=1
                 months_gone = 1
 
             if months_gone==1:
@@ -230,7 +233,8 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
                 phone_number = workforce_eis_payment_process.phone_number,
                 pay_from_date= pay_from_date,
                 pay_to_date= pay_to_date,
-                serial_number = workforce_eis_payment_process.serial_number
+                serial_number = workforce_eis_payment_process.serial_number,
+                installment_number= installment_count or None
             )
             try:
                 new_stage.save(username=user.username)
