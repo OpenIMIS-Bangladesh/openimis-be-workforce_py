@@ -737,11 +737,14 @@ class WorkforceApplicationServices(BaseService):
         #         if document.document_type in PHOTO_TYPES and document.path:
         #             try:
         #                 path = document.path
-        #                 if 'file_storage' in path:
-        #                     filename = path.replace("/file_storage/content/workforce/", "")
-        #                 else:
-        #                     filename = path.replace("/content/workforce/", "")
-        #                 file_path = os.path.join('content', 'workforce', filename)
+        #                 # filename= path.split("/")[-1]
+        #                 #
+        #                 # if 'file_storage' in path:
+        #                 #     filename = path.replace("/file_storage/content/workforce/", "")
+        #                 # else:
+        #                 #     filename = path.replace("/content/workforce/", "")
+        #                 # file_path = os.path.join('content', 'workforce', filename)
+        #                 file_path = path.lstrip("/file_storage") if "file_storage" in path else path.lstrip("/")
         #                 if not default_storage.exists(file_path):
         #                     continue
         #                 file = default_storage.open(file_path)

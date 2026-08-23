@@ -69,7 +69,8 @@ class FileUploadView(APIView):
     def post(self, request):
         file = request.FILES.get('file')
         name = request.POST.get('name')
-        file_url, file_path, error = save_uploaded_file(file, name)
+        application_id= request.POST.get('application_id') if "application_id" in request.POST else None
+        file_url, file_path, error = save_uploaded_file(file, name, application_id)
         if error:
             return Response(error, status=status.HTTP_400_BAD_REQUEST)
         return Response({'success': True, 'file_url': file_url, 'file_path': file_path}, status=status.HTTP_201_CREATED)
