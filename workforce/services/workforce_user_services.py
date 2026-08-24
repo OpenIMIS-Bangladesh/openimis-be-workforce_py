@@ -43,7 +43,9 @@ class WorkforceUserServices():
             "roles": obj_data.get("roles", []),
         }
 
-        created_user = create_or_update_interactive_user(None, data, 1, False)
+        admin_user = InteractiveUser.objects.get(id=1)
+
+        created_user = create_or_update_interactive_user(None, data, admin_user, False)
         create_user_id = created_user[0].id
 
         user_obj = WorkforceUser.objects.create(
@@ -86,7 +88,9 @@ class WorkforceUserServices():
             "roles": obj_data.get("roles", []),
         }
 
-        create_or_update_interactive_user(None, data, 1, False)
+        admin_user = InteractiveUser.objects.get(id=1)
+
+        create_or_update_interactive_user(None, data, admin_user, False)
 
     def get(self, **kwargs):
         filters = []
