@@ -42,8 +42,8 @@ class WorkforceEmployeeDependentServices(BaseService):
         else:
             return "Female"
 
-    def get_relation_for_api(self, dep_obj, worker_age):
-        age = self.calculate_age(dep_obj.birth_date)
+    def get_relation_for_api(self, dep_obj, worker_age, calculation_start_date=None):
+        age = self.calculate_age_custom(dep_obj.birth_date, calculation_start_date)
 
         relation = dep_obj.relation_with_worker
         marital = dep_obj.marital_status
@@ -328,23 +328,13 @@ class WorkforceEmployeeDependentServices(BaseService):
         workforce_application = WorkforceApplication.objects.get(id=workforce_application_id)
         worker = WorkforceEmployee.objects.get(id=workforce_application.workforce_employee_id)
 
-        # Calculate age
-        worker_age = self.calculate_age(worker.birth_date)
-        if worker_age is None or worker_age =="":
-            deceased_worker_info= json.loads(workforce_application.deceased_worker_info) if workforce_application.deceased_worker_info else None
-            if deceased_worker_info is not None and deceased_worker_info!="[{}]":
-                worker_dob= deceased_worker_info.get("birthDate", None)
-                worker_age= self.calculate_age(worker_dob) if worker_dob else 0
-        dependents = list(dependents)  # evaluate queryset once
-        dependents = [
-            dep for dep in dependents
-            if self.get_relation_for_api(dep,worker_age) and dep.is_eligible == True and dep.bank_id is not None
-        ]
+
 
 
         # metadata_json= workforce_application.metadata
         # metadata= json.loads(metadata_json)
         calculation_start_date= ""
+        date_for_worker_age_calculation=""
         if workforce_application.application_type == "disabilityAssistance":
             doctor_json = json.loads(workforce_application.doctors_entry) if workforce_application.doctors_entry else None
             if doctor_json is None:
@@ -367,6 +357,20 @@ class WorkforceEmployeeDependentServices(BaseService):
             disability_percentage = "100"
 
 
+        # Calculate age
+        date_for_worker_age_calculation = accident_info_json.get("accidentDate") if accident_info_json.get("accidentDate") else doctor_json.get("dateOfAssessment")
+        date_for_worker_age_calculation = datetime.strptime(date_for_worker_age_calculation, "%Y-%m-%d").date() if isinstance(date_for_worker_age_calculation, str) else date_for_worker_age_calculation
+        worker_age = self.calculate_age_custom(worker.birth_date, date_for_worker_age_calculation)
+        if worker_age is None or worker_age =="":
+            deceased_worker_info= json.loads(workforce_application.deceased_worker_info) if workforce_application.deceased_worker_info else None
+            if deceased_worker_info is not None and deceased_worker_info!="[{}]":
+                worker_dob= deceased_worker_info.get("birthDate", None)
+                worker_age= self.calculate_age_custom(worker_dob, calculation_start_date) if worker_dob else 0
+        dependents = list(dependents)  # evaluate queryset once
+        dependents = [
+            dep for dep in dependents
+            if self.get_relation_for_api(dep,worker_age, calculation_start_date) and dep.is_eligible == True and dep.bank_id is not None
+        ]
         last_base_salary = float(workforce_application.last_base_salary.replace(",","")) if workforce_application.last_base_salary else 0
         factory = WorkforceFactory.objects.get(id=workforce_application.employee_factory.id)
         association= WorkforceAllAssociation.objects.get(id= factory.all_association_id)
@@ -418,9 +422,9 @@ class WorkforceEmployeeDependentServices(BaseService):
                 # "ID": str(dep.id),
                 "ID": str(dep_key),
                 "Date of birth": dep.birth_date.strftime("%m/%d/%Y") if dep.birth_date else "11/02/1996",
-                "Age at calculation date": str(self.calculate_age(dep.birth_date)) if dep.birth_date else "30",
+                "Age at calculation date": str(self.calculate_age_custom(dep.birth_date, calculation_start_date)) if dep.birth_date else "30",
                 "Sex": self.get_gender_by_relation_for_api(dep.relation_with_worker) or "Female",
-                "Relationship": self.get_relation_for_api(dep, worker_age) or "",
+                "Relationship": self.get_relation_for_api(dep, worker_age, calculation_start_date) or "",
                 "nid": dep.nid
 
             })
@@ -465,7 +469,7 @@ class WorkforceEmployeeDependentServices(BaseService):
         if application_type == "financialAssistance":
             for dependent in dependents:
                 dep_obj = WorkforceEmployeeDependent.objects.get(id=dependent.id)
-                age = self.calculate_age(dep_obj.birth_date)
+                age = self.calculate_age_custom(dep_obj.birth_date, calculation_start_date)
 
                 dep_data_for_check = {}
 
