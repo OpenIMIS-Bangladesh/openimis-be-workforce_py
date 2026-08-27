@@ -334,6 +334,7 @@ class WorkforceEmployeeDependentServices(BaseService):
         # metadata_json= workforce_application.metadata
         # metadata= json.loads(metadata_json)
         calculation_start_date= ""
+        date_for_worker_age_calculation=""
         if workforce_application.application_type == "disabilityAssistance":
             doctor_json = json.loads(workforce_application.doctors_entry) if workforce_application.doctors_entry else None
             if doctor_json is None:
@@ -346,6 +347,8 @@ class WorkforceEmployeeDependentServices(BaseService):
 
             calculation_start_date = accident_info_json.get("dateOfRejoining") if accident_info_json.get("dateOfRejoining") else doctor_json.get("dateOfAssessment")
             calculation_start_date = datetime.strptime(calculation_start_date, "%Y-%m-%d").date() if isinstance(calculation_start_date, str) else calculation_start_date
+            date_for_worker_age_calculation = accident_info_json.get("accidentDate") if accident_info_json.get("accidentDate") else doctor_json.get("dateOfAssessment")
+            date_for_worker_age_calculation = datetime.strptime(date_for_worker_age_calculation, "%Y-%m-%d").date() if isinstance(date_for_worker_age_calculation, str) else date_for_worker_age_calculation
         else:
             accident_info_json = json.loads(
                 workforce_application.employee_accident_info) if workforce_application.employee_accident_info else None
@@ -357,7 +360,7 @@ class WorkforceEmployeeDependentServices(BaseService):
 
 
         # Calculate age
-        worker_age = self.calculate_age_custom(worker.birth_date, calculation_start_date)
+        worker_age = self.calculate_age_custom(worker.birth_date, date_for_worker_age_calculation)
         if worker_age is None or worker_age =="":
             deceased_worker_info= json.loads(workforce_application.deceased_worker_info) if workforce_application.deceased_worker_info else None
             if deceased_worker_info is not None and deceased_worker_info!="[{}]":
