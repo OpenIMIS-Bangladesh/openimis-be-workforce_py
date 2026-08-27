@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
-from .services.file_services import save_uploaded_file, retrieve_file_response
+from .services.file_services import save_uploaded_file, retrieve_file_response, delete_file_response
 from .services.workforce_application_services import WorkforceApplicationServices
 from .services.workforce_sms_services import send_sms
 from .models import WorkforceEmployee, generate_otp, WorkforceEisPaymentProcess, WorkforceOtherCompensationInfo, \
@@ -25,6 +25,8 @@ from workforce.services.workforce_employee_dependent_services import WorkforceEm
 import base64
 from django.core.files.storage import default_storage
 from calendar import monthrange
+import shutil
+
 
 def extract_uuid(encoded_str):
     decoded = base64.b64decode(encoded_str).decode()
@@ -69,8 +71,8 @@ class FileUploadView(APIView):
     def post(self, request):
         file = request.FILES.get('file')
         name = request.POST.get('name')
-        application_id= request.POST.get('application_id') if "application_id" in request.POST else None
-        file_url, file_path, error = save_uploaded_file(file, name, application_id)
+        # application_id= request.POST.get('application_id') if "application_id" in request.POST else None
+        file_url, file_path, error = save_uploaded_file(file, name, None)
         if error:
             return Response(error, status=status.HTTP_400_BAD_REQUEST)
         return Response({'success': True, 'file_url': file_url, 'file_path': file_path}, status=status.HTTP_201_CREATED)
@@ -82,6 +84,15 @@ class FileRetrieveView(APIView):
     def get(self, request, filename):
         try:
             return retrieve_file_response(filename)
+        except Http404 as e:
+            raise e
+
+class FileDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, filename):
+        try:
+            return delete_file_response(filename)
         except Http404 as e:
             raise e
 
@@ -817,6 +828,43 @@ class UpdateInstallment(APIView):
                 count+=1
                 process.installment_number=count
                 process.save(username= user.login_name)
+
+
+        return Response({'status': 'success', 'message': 'Procedure Ran Successfully', 'data': ""},
+                        status=status.HTTP_200_OK)
+
+
+class UpdateDocumentDirectory(APIView):
+    permission_classes=[AllowAny]
+    authentication_classes=[]
+
+    def get(self, request):
+        user = InteractiveUser.objects.get(id=1)
+        documents= WorkforceDocument.objects.all().order_by("-date_created")
+        for document in documents:
+            if document.path is None or "/2026/" in document.path:
+                continue
+            # application_id= document.workforce_application.id
+            old_path= document.path
+            created_date= document.date_created
+            actual_old_path= old_path.lstrip("/file_storage/") if "file_storage" in old_path else old_path.lstrip("/")
+            actual_file_name= actual_old_path.split("/")[-1]
+            #if file exists then move it
+            if default_storage.exists(actual_old_path):
+                new_path= os.path.join("content", "workforce", str(created_date.year), str(created_date.month), str(created_date.day), actual_file_name)
+                with default_storage.open(actual_old_path, "rb") as f:
+                    file_name= default_storage.save(new_path, f)
+                    file_path = default_storage.url(file_name)
+                    document.path= file_path
+                    document.save(username= user.login_name)
+                try:
+                    default_storage.delete(actual_old_path)
+                except Exception as e:
+                    print(e)
+                    continue
+            else:
+                continue
+
 
 
         return Response({'status': 'success', 'message': 'Procedure Ran Successfully', 'data': ""},

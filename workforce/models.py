@@ -1895,3 +1895,13 @@ class WebsiteVisitorMessage(HistoryModel):
         managed = True
         db_table = 'website_visitor_messages'
 
+
+class WorkforceDocumentTemp(HistoryModel):
+    filename= models.TextField(null=True, blank= True)
+    path= models.TextField(null=True, blank= True)
+    url = models.TextField(null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_document_temp'
+
