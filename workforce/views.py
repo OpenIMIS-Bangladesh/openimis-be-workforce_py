@@ -840,10 +840,12 @@ class UpdateDocumentDirectory(APIView):
 
     def get(self, request):
         user = InteractiveUser.objects.get(id=1)
-        documents= WorkforceDocument.objects.all().order_by("-date_created")
+        documents= WorkforceDocument.objects.all().exclude(path__icontains="/2026/").order_by("-date_created")
         for document in documents:
             if document.path is None or "/2026/" in document.path:
                 continue
+            if document.workforce_dependent_id is not None:
+                print("ekhane dependent ase")
             # application_id= document.workforce_application.id
             old_path= document.path
             created_date= document.date_created
@@ -863,9 +865,39 @@ class UpdateDocumentDirectory(APIView):
                     print(e)
                     continue
             else:
+                print(f"File Doesnot exist {document.path}")
                 continue
 
 
+        return Response({'status': 'success', 'message': 'Procedure Ran Successfully', 'data': ""},
+                        status=status.HTTP_200_OK)
+
+
+class UpdateSkippedDocuments(APIView):
+    permission_classes=[AllowAny]
+    authentication_classes=[]
+
+    def get(self, request):
+        user = InteractiveUser.objects.get(id=1)
+        documents = WorkforceDocument.objects.all().exclude(path__icontains="/2026/").order_by("-date_created")
+        for document in documents:
+            if document.path is None or "/2026/" in document.path:
+                continue
+            if document.workforce_dependent_id is not None:
+                print("ekhane dependent ase")
+            # application_id= document.workforce_application.id
+            old_path= document.path
+            created_date= document.date_created
+            actual_old_path= old_path.lstrip("/file_storage/") if "file_storage" in old_path else old_path.lstrip("/")
+            actual_file_name= actual_old_path.split("/")[-1]
+            new_path= os.path.join("content", "workforce", str(created_date.year), str(created_date.month), str(created_date.day), actual_file_name)
+            actual_new_path= default_storage.url(new_path)
+            try:
+                document.path= actual_new_path
+                document.save(username= user.login_name)
+            except Exception as e:
+                print(e)
+                continue
 
         return Response({'status': 'success', 'message': 'Procedure Ran Successfully', 'data': ""},
                         status=status.HTTP_200_OK)

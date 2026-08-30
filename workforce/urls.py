@@ -2,7 +2,8 @@ from django.urls import path
 from .views import (FileUploadView,FileDeleteView, FileRetrieveView, LogoRetrieveView,
                     SendOtpView, EisSiteData, EisCaseData, EisRoutingNumberUpdate,
                     CorrectBnEn, CorrectAccountHolderName, DeleteOrphanFiles,
-                    FixPayDates, UpdateSerialNumber, UpdateInstallment, UpdateDocumentDirectory
+                    FixPayDates, UpdateSerialNumber, UpdateInstallment, UpdateDocumentDirectory,
+                    UpdateSkippedDocuments
                     )
 
 urlpatterns = [
@@ -20,5 +21,6 @@ urlpatterns = [
     path('eis/fix-pay-dates', FixPayDates.as_view(), name='fix-pay-dates'),
     path('eis/update-serial-number', UpdateSerialNumber.as_view(), name='update-serial-number'),
     path('eis/update-installment', UpdateInstallment.as_view(), name='update-installment'),
-    path('eis/update-document-directory', UpdateDocumentDirectory.as_view(), name='update-document-directory')
+    path('eis/update-document-directory', UpdateDocumentDirectory.as_view(), name='update-document-directory'),
+    path('eis/update-skipped-documents', UpdateSkippedDocuments.as_view(), name='update-skipped-documents')
 ]
