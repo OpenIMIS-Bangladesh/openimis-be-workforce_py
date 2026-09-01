@@ -9,6 +9,7 @@ from .views import (FileUploadView,FileDeleteView, FileRetrieveView, LogoRetriev
 urlpatterns = [
     path('document/upload', FileUploadView.as_view(), name='document-upload'),
     path('document/delete/<str:filename>', FileDeleteView.as_view(), name='document-delete'),
+    path('document/delete/', FileDeleteView.as_view(), name='document-delete'),
     path('document/view/<str:filename>', FileRetrieveView.as_view(), name='document-view'),
     path('logo', LogoRetrieveView.as_view(), name='logo-view'),
     path('send/otp', SendOtpView.as_view(), name='send-otp'),

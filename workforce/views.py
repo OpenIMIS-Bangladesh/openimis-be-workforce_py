@@ -88,13 +88,55 @@ class FileRetrieveView(APIView):
             raise e
 
 class FileDeleteView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request, filename):
         try:
             return delete_file_response(filename)
         except Http404 as e:
             raise e
+
+    def post(self, request):
+        files = request.data
+
+        if not isinstance(files, list):
+            return Response(
+                {"error": "Request body must be an array of file objects."},
+                status=400
+            )
+
+        deleted_files = []
+
+        for file_data in files:
+            path = file_data.get("path")
+
+            if not path:
+                continue
+
+            try:
+                # Extract filename from path
+                filename = path.split("/")[-1]
+
+                delete_file_response(filename)
+
+                deleted_files.append({
+                    "name": file_data.get("name"),
+                    "path": path,
+                    "status": "deleted"
+                })
+
+            except Http404 as e:
+                raise e
+                deleted_files.append({
+                    "name": file_data.get("name"),
+                    "path": path,
+                    "status": "not_found"
+                })
+
+        return Response({
+            "message": "File deletion process completed.",
+            "deleted_files": deleted_files
+        })
 
 
 class LogoRetrieveView(APIView):

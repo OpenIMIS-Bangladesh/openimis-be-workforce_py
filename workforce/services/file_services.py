@@ -61,18 +61,52 @@ def retrieve_file_response(filename):
 
 def delete_file_response(filename):
     try:
-        document= WorkforceDocumentTemp.objects.filter(filename__icontains=filename).first()
+        document = WorkforceDocumentTemp.objects.filter(
+            filename__icontains=filename
+        ).first()
+
         if document is None:
-            document = WorkforceDocument.objects.filter(url__icontains=filename).first()
-        file_path = document.path.lstrip("/file_storage/") if "file_storage" in document.path else document.path.lstrip("/")
+            document = WorkforceDocument.objects.filter(
+                url__icontains=filename
+            ).first()
+
+        # IMPORTANT: Check document before accessing .path
+        if document is None:
+            raise Http404(
+                f"Document not found for filename: {filename}"
+            )
+
+        if not document.path:
+            raise Http404(
+                f"Document path is empty for filename: {filename}"
+            )
+
+        file_path = (
+            document.path.lstrip("/file_storage/")
+            if "file_storage" in document.path
+            else document.path.lstrip("/")
+        )
+
         if not default_storage.exists(file_path):
-            raise Http404("File does not exist")
+            raise Http404(
+                f"File does not exist: {file_path}"
+            )
+
         default_storage.delete(file_path)
         document.delete()
-        return Response({'success': True,}, status=status.HTTP_200_OK)
-    except Exception as e:
-        raise Http404(f"Error retrieving file: {str(e)}")
 
+        return Response(
+            {"success": True},
+            status=status.HTTP_200_OK
+        )
+
+    except Http404:
+        raise
+
+    except Exception as e:
+        raise Http404(
+            f"Error deleting file {filename}: {str(e)}"
+        )
 
 def delete_uploaded_file(filename):
     try:
