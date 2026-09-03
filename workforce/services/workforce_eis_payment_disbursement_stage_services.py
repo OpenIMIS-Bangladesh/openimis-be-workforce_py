@@ -183,6 +183,8 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
                     installment_count=WorkforceEisPaymentDisbursementStage.objects.filter(is_deleted=False, beneficiary_id= workforce_eis_payment_process.beneficiary_id).count()
                     installment_count+=1
                 months_gone = 1
+            else:
+                installment_count=None
 
             if months_gone==1:
                 pay_from_date = date(year, month, 1)
