@@ -379,8 +379,8 @@ class WorkforceEmployeeDependentServices(BaseService):
         maximum_salary = minimum_salary * 4
         if last_base_salary <= maximum_salary:
             salary_parameter = last_base_salary
-        elif last_base_salary == 85000:
-            salary_parameter = 85000
+        elif last_base_salary == 85000 or last_base_salary == 53000:
+            salary_parameter = last_base_salary
         else:
             salary_parameter = maximum_salary
 
