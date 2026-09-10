@@ -361,7 +361,7 @@ class WorkforceEmployeeDependentServices(BaseService):
         date_for_worker_age_calculation = accident_info_json.get("accidentDate") if accident_info_json.get("accidentDate") else doctor_json.get("dateOfAssessment")
         date_for_worker_age_calculation = datetime.strptime(date_for_worker_age_calculation, "%Y-%m-%d").date() if isinstance(date_for_worker_age_calculation, str) else date_for_worker_age_calculation
         worker_age = self.calculate_age_custom(worker.birth_date, date_for_worker_age_calculation)
-        if worker_age is None or worker_age =="":
+        if workforce_application=="financialAssistance":
             deceased_worker_info= json.loads(workforce_application.deceased_worker_info) if workforce_application.deceased_worker_info else None
             if deceased_worker_info is not None and deceased_worker_info!="[{}]":
                 worker_dob= deceased_worker_info.get("birthDate", None)
