@@ -98,6 +98,7 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
         year= data["year"]
         year = int(year)
         month = int(month)
+        installment_count= None
 
         for eis_process_id in eis_process_ids:
             process_id= extract_uuid(eis_process_id)
