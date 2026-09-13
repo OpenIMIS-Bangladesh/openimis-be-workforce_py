@@ -361,7 +361,7 @@ class WorkforceEmployeeDependentServices(BaseService):
         date_for_worker_age_calculation = accident_info_json.get("accidentDate") if accident_info_json.get("accidentDate") else doctor_json.get("dateOfAssessment")
         date_for_worker_age_calculation = datetime.strptime(date_for_worker_age_calculation, "%Y-%m-%d").date() if isinstance(date_for_worker_age_calculation, str) else date_for_worker_age_calculation
         worker_age = self.calculate_age_custom(worker.birth_date, date_for_worker_age_calculation)
-        if workforce_application=="financialAssistance":
+        if workforce_application.application_type=="financialAssistance":
             deceased_worker_info= json.loads(workforce_application.deceased_worker_info) if workforce_application.deceased_worker_info else None
             if deceased_worker_info is not None and deceased_worker_info!="[{}]":
                 worker_dob= deceased_worker_info.get("birthDate", None)
@@ -419,12 +419,14 @@ class WorkforceEmployeeDependentServices(BaseService):
         # Loop over dependents
         dep_key = 1
         for dep in dependents:
+            dependent_age= 0 if self.calculate_age_custom(dep.birth_date, calculation_start_date)<0 else self.calculate_age_custom(dep.birth_date, calculation_start_date)
+            dependent_date_of_birth= calculation_start_date if dependent_age==0 else dep.birth_date
             payload["Dependents"].append({
                 "Name": dep.name_en or dep.name_bn or "",
                 # "ID": str(dep.id),
                 "ID": str(dep_key),
-                "Date of birth": dep.birth_date.strftime("%m/%d/%Y") if dep.birth_date else "11/02/1996",
-                "Age at calculation date": str(self.calculate_age_custom(dep.birth_date, calculation_start_date)) if dep.birth_date else "30",
+                "Date of birth": dependent_date_of_birth.strftime("%m/%d/%Y") if dependent_date_of_birth else "11/02/1996",
+                "Age at calculation date": str(dependent_age) if dep.birth_date else "30",
                 "Sex": self.get_gender_by_relation_for_api(dep.relation_with_worker) or "Female",
                 "Relationship": self.get_relation_for_api(dep, worker_age, calculation_start_date) or "",
                 "nid": dep.nid
