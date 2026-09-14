@@ -2123,3 +2123,4 @@ class Mutation(graphene.ObjectType):
     confirm_noa = ConfirmNoaMutation.Field()
 
     block_noa = BlockNoaMutation.Field()
+    mark_all_notification_as_read = MarkAllNotificationAsReadMutation.Field()

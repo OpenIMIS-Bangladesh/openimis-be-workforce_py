@@ -2924,3 +2924,25 @@ class BlockNoaMutation(graphene.Mutation):
             return cls(success=True, message="NOA Download Blocking Successfull", errors=[])
         except Exception as e:
             return cls(success=False, message="Invalid Request", errors=[str(e)])
+
+class MarkAllNotificationAsReadMutation(graphene.Mutation):
+    class Arguments:
+        user_id= graphene.String()
+
+    success = graphene.Boolean()
+    message = graphene.String()
+    errors = graphene.List(graphene.String)
+
+    @classmethod
+    def mutate(cls, root, info, **data):
+        from workforce.models import WorkforceNotification
+        try:
+            if data["user_id"]:
+                try:
+                    WorkforceNotification.objects.filter(user_id=data["user_id"]).update(is_read=True)
+                except Exception as e:
+                    return cls(success=False, message="Invalid Request", errors=[str(e)])
+
+            return cls(success=True, message="NOA Download Blocking Successfull", errors=[])
+        except Exception as e:
+            return cls(success=False, message="Invalid Request", errors=[str(e)])
