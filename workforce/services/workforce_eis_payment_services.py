@@ -180,7 +180,16 @@ class WorkforceEisPaymentServices(BaseService):
                     bank_instance= Bank.objects.get(id= dep.bank_id)
                     now = datetime.now()
                     dependent_count = dependent_count+1
-                    beneficiary_id = old_beneficiary_id if old_beneficiary_id is not None else generate_beneficiary_id(association, workforce_application.id, count_of_distinct_application, str(dependent_count))
+                    beneficiary_id= ""
+                    if old_beneficiary_id is not None:
+                        actual_beneficiary_id= old_beneficiary_id[:-3]
+                        dependent_str = str(dependent_count).zfill(2)
+                        beneficiary_id= f"{actual_beneficiary_id}.{dependent_str}"
+                    else:
+                        beneficiary_id = generate_beneficiary_id(association, workforce_application.id, count_of_distinct_application, str(dependent_count))
+
+
+                    # beneficiary_id = old_beneficiary_id if old_beneficiary_id is not None else generate_beneficiary_id(association, workforce_application.id, count_of_distinct_application, str(dependent_count))
 
                     payment_obj = WorkforceEisPaymentProcess(
                         workforce_application=workforce_application,
