@@ -796,6 +796,48 @@ class UpdateSerialNumber(APIView):
                         status=status.HTTP_200_OK)
 
 
+from django.db.models import Sum, Count, Q
+class DashboardData(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    def get(self, request):
+        today = date.today()
+
+        data = request.data if isinstance(request.data, dict) else {}
+        year_param = request.query_params.get('year') or data.get('year')
+        month_param = request.query_params.get('month') or data.get('month')
+
+        target_year = int(year_param) if year_param else today.year
+        target_month = int(month_param) if month_param else today.month
+
+        qs = WorkforceEisPaymentDisbursementStage.objects.select_related('workforce_application')
+
+        amounts_by_type = qs.values('workforce_application__application_type').annotate(
+            total_approved=Sum('eis_approved_amount'),
+            total_paid=Sum('paid_amount')
+        )
+
+        status_counts = qs.filter(
+            year=target_year,
+            month_index=target_month
+        ).aggregate(
+            disbursed_count=Count('id', filter=Q(is_disbursed=True)),
+            pending_count=Count('id', filter=Q(is_disbursed=False, approved='Pending')),
+            on_hold_count=Count('id', filter=Q(is_disbursed=False, approved='Hold'))
+        )
+
+        return Response({
+            'status': 'success',
+            'message': 'Dashboard Data Retrieved Successfully',
+            'data': {
+                'year': target_year,
+                'month_index': target_month,
+                'amounts_by_application_type': list(amounts_by_type),
+                'status_counts': status_counts
+            }
+        }, status=status.HTTP_200_OK)
+
 class UpdateInstallment(APIView):
     permission_classes=[AllowAny]
     authentication_classes=[]
