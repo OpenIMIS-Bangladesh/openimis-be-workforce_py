@@ -1432,130 +1432,6 @@ class Query(graphene.ObjectType):
         except InteractiveUser.DoesNotExist:
             return None
 
-    def resolve_workforce_eis_payment_process(
-            self,
-            info,
-            process_id=None,
-            workforce_application_id=None,
-            beneficiary_id=None,
-            workforce_application_tracking_number=None,
-            workforce_factory_id=None,
-            all_association_id=None,
-            workforce_application_id_in=None,
-            month=None,
-            year=None,
-            status=None,
-            beneficiary_status=None,
-            approved=None,
-            approval_date_from=None,
-            approval_date_to=None,
-            accident_date_from=None,
-            accident_date_to=None,
-            not_in_stage=None
-    ):
-        try:
-            qs = WorkforceEisPaymentProcess.objects.filter(is_deleted=False).select_related(
-                "workforce_application",
-                "workforce_application__workforce_employee",
-                "workforce_application__employee_factory",
-                "workforce_application__employee_factory__all_association",
-                "workforce_employee_dependent",
-                "bank",
-                "bank__parent",
-            )
-
-            if process_id:
-                qs = qs.filter(id=process_id)
-            if workforce_application_id:
-                qs = qs.filter(workforce_application_id=workforce_application_id)
-            if beneficiary_id:
-                qs = qs.filter(beneficiary_id__icontains=beneficiary_id)
-            if workforce_application_id_in:
-                qs = qs.filter(workforce_application_id__in=workforce_application_id_in)
-            if workforce_factory_id:
-                qs = qs.filter(workforce_application__employee_factory_id=workforce_factory_id)
-            if workforce_application_tracking_number:
-                qs = qs.filter(workforce_application__tracking_number__icontains=workforce_application_tracking_number)
-            if all_association_id:
-                qs = qs.filter(workforce_application__employee_factory__all_association_id=all_association_id)
-
-            qs = qs.filter(status="active")
-
-            if beneficiary_status:
-                qs = qs.filter(beneficiary_status=beneficiary_status)
-            if approved:
-                qs = qs.filter(approved=approved)
-            if approval_date_from:
-                qs = qs.filter(approval_date__gte=approval_date_from)
-            if approval_date_to:
-                qs = qs.filter(approval_date__lte=approval_date_to)
-            if accident_date_from:
-                qs = qs.filter(workforce_application__accident_date__gte=accident_date_from)
-            if accident_date_to:
-                qs = qs.filter(workforce_application__accident_date__lte=accident_date_to)
-
-            if not_in_stage == "yes" and year and month:
-                selected_ym = int(f"{year}{int(month):02d}")
-                selected_year = int(year)
-                selected_month = int(month)
-
-                # 1. Base stage exclusion
-                stages = WorkforceEisPaymentDisbursementStage.objects.filter(
-                    is_deleted=False
-                ).values("beneficiary_id").annotate(
-                    latest_ym=Max(F("year") * 100 + F("month_index"))
-                ).filter(latest_ym__gte=selected_ym)
-
-                qs = qs.exclude(beneficiary_id__in=stages.values('beneficiary_id'))
-
-                # 2. Onetime exclusions
-                onetime_subquery = WorkforceEisPaymentDisbursementStage.objects.filter(
-                    beneficiary_id=OuterRef('beneficiary_id'),
-                    is_deleted=False,
-                    eis_payment_type="onetime"
-                )
-                qs = qs.exclude(Exists(onetime_subquery))
-
-                # 3. Installment exclusions
-                installment_data = WorkforceEisPaymentDisbursementStage.objects.filter(
-                    beneficiary_id__in=qs.values('beneficiary_id'),
-                    is_deleted=False,
-                    eis_payment_type="installment"
-                ).values('beneficiary_id').annotate(
-                    payment_count=Count('id'),
-                    last_year=Max('year'),
-                    last_month=Max('month_index')
-                )
-
-                excluded_beneficiary_ids = []
-                for data in installment_data:
-                    if data['payment_count'] >= 3:
-                        excluded_beneficiary_ids.append(data['beneficiary_id'])
-                    else:
-                        months_diff = (selected_year - data['last_year']) * 12 + (selected_month - data['last_month'])
-                        if months_diff < 3:
-                            excluded_beneficiary_ids.append(data['beneficiary_id'])
-
-                if excluded_beneficiary_ids:
-                    qs = qs.exclude(beneficiary_id__in=excluded_beneficiary_ids)
-
-            qs = qs.order_by("serial_number", "beneficiary_id")
-
-            if not any([
-                workforce_application_id,
-                workforce_application_id_in,
-                beneficiary_id,
-                workforce_application_tracking_number,
-                workforce_factory_id,
-                all_association_id,
-                month,
-                year,
-            ]):
-                qs = qs[:500]
-
-            return qs
-        except WorkforceEisPaymentProcess.DoesNotExist:
-            return None
     # def resolve_workforce_eis_payment_process(
     #         self,
     #         info,
@@ -1575,145 +1451,93 @@ class Query(graphene.ObjectType):
     #         approval_date_to=None,
     #         accident_date_from=None,
     #         accident_date_to=None,
-    #         not_in_stage= None
-    #     ):
+    #         not_in_stage=None
+    # ):
     #     try:
-    #         qs = WorkforceEisPaymentProcess.objects.filter(is_deleted=False)
+    #         qs = WorkforceEisPaymentProcess.objects.filter(is_deleted=False).select_related(
+    #             "workforce_application",
+    #             "workforce_application__workforce_employee",
+    #             "workforce_application__employee_factory",
+    #             "workforce_application__employee_factory__all_association",
+    #             "workforce_employee_dependent",
+    #             "bank",
+    #             "bank__parent",
+    #         )
     #
     #         if process_id:
-    #             qs= qs.filter(id=process_id)
-    #
+    #             qs = qs.filter(id=process_id)
     #         if workforce_application_id:
     #             qs = qs.filter(workforce_application_id=workforce_application_id)
-    #
     #         if beneficiary_id:
     #             qs = qs.filter(beneficiary_id__icontains=beneficiary_id)
-    #
     #         if workforce_application_id_in:
     #             qs = qs.filter(workforce_application_id__in=workforce_application_id_in)
-    #
     #         if workforce_factory_id:
-    #             qs = qs.filter(
-    #                 workforce_application__employee_factory_id=workforce_factory_id
-    #             )
+    #             qs = qs.filter(workforce_application__employee_factory_id=workforce_factory_id)
     #         if workforce_application_tracking_number:
-    #             qs = qs.filter(
-    #                 workforce_application__tracking_number__icontains=workforce_application_tracking_number
-    #             )
+    #             qs = qs.filter(workforce_application__tracking_number__icontains=workforce_application_tracking_number)
     #         if all_association_id:
-    #             qs = qs.filter(
-    #                 workforce_application__employee_factory__all_association_id=all_association_id
-    #             )
+    #             qs = qs.filter(workforce_application__employee_factory__all_association_id=all_association_id)
     #
-    #         # if status:
-    #         #     qs = qs.filter(status=status)
     #         qs = qs.filter(status="active")
+    #
     #         if beneficiary_status:
     #             qs = qs.filter(beneficiary_status=beneficiary_status)
-    #
-    #         # if month:
-    #         #     qs = qs.filter(month_index=month)
-    #         #
-    #         # if year:
-    #         #     qs = qs.filter(year=year)
-    #
-    #         combined_year_month_date = None
-    #
-    #         # if year and month:
-    #         #     combined_year_month_date = date(int(year), int(month), 1)
-    #         # if combined_year_month_date:
-    #         #     qs = qs.filter(
-    #         #         Q(remarriage_or_death_date__isnull=True) |
-    #         #         Q(remarriage_or_death_date__gt=combined_year_month_date)
-    #         #     )
-    #
     #         if approved:
     #             qs = qs.filter(approved=approved)
-    #
     #         if approval_date_from:
     #             qs = qs.filter(approval_date__gte=approval_date_from)
-    #
     #         if approval_date_to:
     #             qs = qs.filter(approval_date__lte=approval_date_to)
-    #
     #         if accident_date_from:
-    #             qs = qs.filter(workforce_application__accident_date__gte= accident_date_from)
-    #
+    #             qs = qs.filter(workforce_application__accident_date__gte=accident_date_from)
     #         if accident_date_to:
-    #             qs = qs.filter(workforce_application__accident_date__lte= accident_date_to)
+    #             qs = qs.filter(workforce_application__accident_date__lte=accident_date_to)
     #
     #         if not_in_stage == "yes" and year and month:
-    #             #hide the month if payment is made for the selected month and less than them
-    #             stages = (
-    #                 WorkforceEisPaymentDisbursementStage.objects
-    #                 .filter(is_deleted=False)
-    #                 .values("beneficiary_id")
-    #                 .annotate(
-    #                     latest_ym=Max(F("year") * 100 + F("month_index"))
-    #                 )
-    #             )
-    #
     #             selected_ym = int(f"{year}{int(month):02d}")
-    #
-    #             beneficiary_ids = stages.filter(
-    #                 latest_ym__gte=selected_ym
-    #             ).values_list("beneficiary_id", flat=True)
-    #             # beneficiary_ids = WorkforceEisPaymentDisbursementStage.objects.filter(
-    #             #     month_index=month,
-    #             #     year=year,
-    #             #     is_deleted=False
-    #             # ).values_list("beneficiary_id", flat=True)
-    #
-    #             qs = qs.exclude(beneficiary_id__in=beneficiary_ids)
-    #
-    #             #onetime exclusions
-    #             excluded_beneficiary_ids=[]
-    #             for beneficiary in qs:
-    #                 one_time_exists= WorkforceEisPaymentDisbursementStage.objects.filter(beneficiary_id=beneficiary.beneficiary_id, is_deleted=False, eis_payment_type="onetime").first()
-    #                 if one_time_exists is not None:
-    #                     excluded_beneficiary_ids.append(one_time_exists.beneficiary_id)
-    #             qs = qs.exclude(beneficiary_id__in=excluded_beneficiary_ids)
-    #
-    #             #installment exclusions
-    #             excluded_beneficiary_ids = []
-    #
     #             selected_year = int(year)
     #             selected_month = int(month)
     #
-    #             for beneficiary in qs:
+    #             # 1. Base stage exclusion
+    #             stages = WorkforceEisPaymentDisbursementStage.objects.filter(
+    #                 is_deleted=False
+    #             ).values("beneficiary_id").annotate(
+    #                 latest_ym=Max(F("year") * 100 + F("month_index"))
+    #             ).filter(latest_ym__gte=selected_ym)
     #
-    #                 installments = (
-    #                     WorkforceEisPaymentDisbursementStage.objects
-    #                     .filter(
-    #                         beneficiary_id=beneficiary.beneficiary_id,
-    #                         is_deleted=False,
-    #                         eis_payment_type="installment"
-    #                     )
-    #                     .order_by("-year", "-month_index")
-    #                 )
+    #             qs = qs.exclude(beneficiary_id__in=stages.values('beneficiary_id'))
     #
-    #                 payment_count = installments.count()
+    #             # 2. Onetime exclusions
+    #             onetime_subquery = WorkforceEisPaymentDisbursementStage.objects.filter(
+    #                 beneficiary_id=OuterRef('beneficiary_id'),
+    #                 is_deleted=False,
+    #                 eis_payment_type="onetime"
+    #             )
+    #             qs = qs.exclude(Exists(onetime_subquery))
     #
-    #                 # Already received all 3 installments
-    #                 if payment_count >= 3:
-    #                     excluded_beneficiary_ids.append(beneficiary.beneficiary_id)
-    #                     continue
+    #             # 3. Installment exclusions
+    #             installment_data = WorkforceEisPaymentDisbursementStage.objects.filter(
+    #                 beneficiary_id__in=qs.values('beneficiary_id'),
+    #                 is_deleted=False,
+    #                 eis_payment_type="installment"
+    #             ).values('beneficiary_id').annotate(
+    #                 payment_count=Count('id'),
+    #                 last_year=Max('year'),
+    #                 last_month=Max('month_index')
+    #             )
     #
-    #                 # Has previous installment(s)
-    #                 last_payment = installments.first()
-    #                 if last_payment:
-    #                     months_diff = (
-    #                             (selected_year - last_payment.year) * 12 +
-    #                             (selected_month - last_payment.month_index)
-    #                     )
-    #
-    #                     # Must wait at least 3 months
+    #             excluded_beneficiary_ids = []
+    #             for data in installment_data:
+    #                 if data['payment_count'] >= 3:
+    #                     excluded_beneficiary_ids.append(data['beneficiary_id'])
+    #                 else:
+    #                     months_diff = (selected_year - data['last_year']) * 12 + (selected_month - data['last_month'])
     #                     if months_diff < 3:
-    #                         excluded_beneficiary_ids.append(beneficiary.beneficiary_id)
+    #                         excluded_beneficiary_ids.append(data['beneficiary_id'])
     #
-    #             qs = qs.exclude(beneficiary_id__in=excluded_beneficiary_ids)
-    #
-    #
+    #             if excluded_beneficiary_ids:
+    #                 qs = qs.exclude(beneficiary_id__in=excluded_beneficiary_ids)
     #
     #         qs = qs.order_by("serial_number", "beneficiary_id")
     #
@@ -1732,6 +1556,190 @@ class Query(graphene.ObjectType):
     #         return qs
     #     except WorkforceEisPaymentProcess.DoesNotExist:
     #         return None
+    def resolve_workforce_eis_payment_process(
+            self,
+            info,
+            process_id=None,
+            workforce_application_id=None,
+            beneficiary_id=None,
+            workforce_application_tracking_number=None,
+            workforce_factory_id=None,
+            all_association_id=None,
+            workforce_application_id_in=None,
+            month=None,
+            year=None,
+            status=None,
+            beneficiary_status=None,
+            approved=None,
+            approval_date_from=None,
+            approval_date_to=None,
+            accident_date_from=None,
+            accident_date_to=None,
+            not_in_stage= None
+        ):
+        try:
+            qs = WorkforceEisPaymentProcess.objects.filter(is_deleted=False).select_related(
+                "workforce_application",
+                "workforce_application__workforce_employee",
+                "workforce_application__employee_factory",
+                "workforce_application__employee_factory__all_association",
+                "workforce_employee_dependent",
+                "bank",
+                "bank__parent",
+            )
+
+            if process_id:
+                qs= qs.filter(id=process_id)
+
+            if workforce_application_id:
+                qs = qs.filter(workforce_application_id=workforce_application_id)
+
+            if beneficiary_id:
+                qs = qs.filter(beneficiary_id__icontains=beneficiary_id)
+
+            if workforce_application_id_in:
+                qs = qs.filter(workforce_application_id__in=workforce_application_id_in)
+
+            if workforce_factory_id:
+                qs = qs.filter(
+                    workforce_application__employee_factory_id=workforce_factory_id
+                )
+            if workforce_application_tracking_number:
+                qs = qs.filter(
+                    workforce_application__tracking_number__icontains=workforce_application_tracking_number
+                )
+            if all_association_id:
+                qs = qs.filter(
+                    workforce_application__employee_factory__all_association_id=all_association_id
+                )
+
+            # if status:
+            #     qs = qs.filter(status=status)
+            qs = qs.filter(status="active")
+            if beneficiary_status:
+                qs = qs.filter(beneficiary_status=beneficiary_status)
+
+            # if month:
+            #     qs = qs.filter(month_index=month)
+            #
+            # if year:
+            #     qs = qs.filter(year=year)
+
+            combined_year_month_date = None
+
+            # if year and month:
+            #     combined_year_month_date = date(int(year), int(month), 1)
+            # if combined_year_month_date:
+            #     qs = qs.filter(
+            #         Q(remarriage_or_death_date__isnull=True) |
+            #         Q(remarriage_or_death_date__gt=combined_year_month_date)
+            #     )
+
+            if approved:
+                qs = qs.filter(approved=approved)
+
+            if approval_date_from:
+                qs = qs.filter(approval_date__gte=approval_date_from)
+
+            if approval_date_to:
+                qs = qs.filter(approval_date__lte=approval_date_to)
+
+            if accident_date_from:
+                qs = qs.filter(workforce_application__accident_date__gte= accident_date_from)
+
+            if accident_date_to:
+                qs = qs.filter(workforce_application__accident_date__lte= accident_date_to)
+
+            if not_in_stage == "yes" and year and month:
+                #hide the month if payment is made for the selected month and less than them
+                stages = (
+                    WorkforceEisPaymentDisbursementStage.objects
+                    .filter(is_deleted=False)
+                    .values("beneficiary_id")
+                    .annotate(
+                        latest_ym=Max(F("year") * 100 + F("month_index"))
+                    )
+                )
+
+                selected_ym = int(f"{year}{int(month):02d}")
+
+                beneficiary_ids = stages.filter(
+                    latest_ym__gte=selected_ym
+                ).values_list("beneficiary_id", flat=True)
+                # beneficiary_ids = WorkforceEisPaymentDisbursementStage.objects.filter(
+                #     month_index=month,
+                #     year=year,
+                #     is_deleted=False
+                # ).values_list("beneficiary_id", flat=True)
+
+                qs = qs.exclude(beneficiary_id__in=beneficiary_ids)
+
+                #onetime exclusions
+                excluded_beneficiary_ids=[]
+                for beneficiary in qs:
+                    one_time_exists= WorkforceEisPaymentDisbursementStage.objects.filter(beneficiary_id=beneficiary.beneficiary_id, is_deleted=False, eis_payment_type="onetime").first()
+                    if one_time_exists is not None:
+                        excluded_beneficiary_ids.append(one_time_exists.beneficiary_id)
+                qs = qs.exclude(beneficiary_id__in=excluded_beneficiary_ids)
+
+                #installment exclusions
+                excluded_beneficiary_ids = []
+
+                selected_year = int(year)
+                selected_month = int(month)
+
+                for beneficiary in qs:
+
+                    installments = (
+                        WorkforceEisPaymentDisbursementStage.objects
+                        .filter(
+                            beneficiary_id=beneficiary.beneficiary_id,
+                            is_deleted=False,
+                            eis_payment_type="installment"
+                        )
+                        .order_by("-year", "-month_index")
+                    )
+
+                    payment_count = installments.count()
+
+                    # Already received all 3 installments
+                    if payment_count >= 3:
+                        excluded_beneficiary_ids.append(beneficiary.beneficiary_id)
+                        continue
+
+                    # Has previous installment(s)
+                    last_payment = installments.first()
+                    if last_payment:
+                        months_diff = (
+                                (selected_year - last_payment.year) * 12 +
+                                (selected_month - last_payment.month_index)
+                        )
+
+                        # Must wait at least 3 months
+                        if months_diff < 3:
+                            excluded_beneficiary_ids.append(beneficiary.beneficiary_id)
+
+                qs = qs.exclude(beneficiary_id__in=excluded_beneficiary_ids)
+
+
+
+            qs = qs.order_by("serial_number", "beneficiary_id")
+
+            if not any([
+                workforce_application_id,
+                workforce_application_id_in,
+                beneficiary_id,
+                workforce_application_tracking_number,
+                workforce_factory_id,
+                all_association_id,
+                month,
+                year,
+            ]):
+                qs = qs[:500]
+
+            return qs
+        except WorkforceEisPaymentProcess.DoesNotExist:
+            return None
 
 
     def resolve_workforce_eis_payment_disbursement_stage(
