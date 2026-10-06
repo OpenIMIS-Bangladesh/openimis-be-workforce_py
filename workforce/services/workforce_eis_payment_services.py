@@ -20,7 +20,6 @@ from datetime import date
 from dateutil.relativedelta import relativedelta
 from django.db import transaction
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -28,17 +27,20 @@ def extract_uuid(encoded_str):
     decoded = base64.b64decode(encoded_str).decode()
     return decoded.split(":")[1]
 
+
 def safe_float(value, default=0.0):
     try:
         return float(value)
     except (TypeError, ValueError):
         return default
 
+
 def safe_decimal(value, default=Decimal("0.0")):
     try:
         return Decimal(str(value))
     except (InvalidOperation, TypeError, ValueError):
         return default
+
 
 def calculate_age_in_months(effective_date):
     if not effective_date:
@@ -87,6 +89,7 @@ def calculate_months_difference(start_date, end_date):
 
 THREE_DECIMAL = Decimal("0.001")
 
+
 def round_three(value):
     return value.quantize(THREE_DECIMAL, rounding=ROUND_HALF_UP)
 
@@ -100,26 +103,27 @@ class WorkforceEisPaymentServices(BaseService):
     def update(self, obj_data):
         return super().update(obj_data)
 
-    def create_payment_schedule(user, workforce_application_id, count_of_distinct_application=0, old_beneficiary_id=None):
-        workforce_application = WorkforceApplication.objects.get(id= workforce_application_id)
+    def create_payment_schedule(user, workforce_application_id, count_of_distinct_application=0,
+                                old_beneficiary_id=None):
+        workforce_application = WorkforceApplication.objects.get(id=workforce_application_id)
         association = workforce_application.association_type
         accident_type = workforce_application.application_type
         # interactive_user = InteractiveUser.objects.get(id=user.id) if user else None
 
         # count_of_distinct_application = count_of_distinct_application+1
-        if count_of_distinct_application==0:
+        if count_of_distinct_application == 0:
             count_of_distinct_application = (
                 WorkforceEisPaymentProcess.objects
                 .values("workforce_application_id")
                 .distinct()
                 .count()
             )
-            count_of_distinct_application+=1
+            count_of_distinct_application += 1
         if old_beneficiary_id is not None:
-            splitted_old_bid= old_beneficiary_id.split(".")
-            serial_number= int(splitted_old_bid[3])
+            splitted_old_bid = old_beneficiary_id.split(".")
+            serial_number = int(splitted_old_bid[3])
         else:
-            serial_number= count_of_distinct_application
+            serial_number = count_of_distinct_application
         if workforce_application.application_type == "disabilityAssistance":
             bank_info = json.loads(workforce_application.employee_bank_info)
             bank_id = (
@@ -129,22 +133,24 @@ class WorkforceEisPaymentServices(BaseService):
             )
             bank_instance = Bank.objects.get(id=bank_id)
 
-            approved_amount = safe_decimal(workforce_application.eis_approved_amount) if workforce_application.eis_approved_amount is not None else 0
+            approved_amount = safe_decimal(
+                workforce_application.eis_approved_amount) if workforce_application.eis_approved_amount is not None else 0
             now = datetime.now()
 
             beneficiary_id = old_beneficiary_id if old_beneficiary_id is not None else generate_beneficiary_id(
-                association, workforce_application.id,count_of_distinct_application
+                association, workforce_application.id, count_of_distinct_application
             )
 
             # ---------- SAVE FULL MONTH PAYMENTS ----------
             if WorkforceEisPaymentProcess.objects.filter(workforce_application=workforce_application).exists():
                 return False
-            if approved_amount!=0:
+            if approved_amount != 0:
                 payment_obj = WorkforceEisPaymentProcess(
                     workforce_application=workforce_application,
                     bank=bank_instance,
                     bank_account_no=bank_info[0]["accountNumber"],
-                    routing_number=bank_info[0]["routingNumber"] if "routingNumber" in bank_info[0] else bank_instance.routing_number,
+                    routing_number=bank_info[0]["routingNumber"] if "routingNumber" in bank_info[
+                        0] else bank_instance.routing_number,
                     bank_account_holder_name=bank_info[0]["accountHolderName"],
                     eis_payment_type="monthly",
                     eis_calculated_amount=abs(workforce_application.eis_calculated_amount),
@@ -159,37 +165,30 @@ class WorkforceEisPaymentServices(BaseService):
                     is_disbursed=False,
                     approved="yes",
                     payable_amount=abs(workforce_application.eis_monthly_amount),
-                    phone_number= workforce_application.workforce_employee.phone_number or None,
-                    serial_number= serial_number
+                    phone_number=workforce_application.workforce_employee.phone_number or None,
+                    serial_number=serial_number
                 )
                 payment_obj.save(username=user.username)
             return None
         else:
-            accident_info_json = json.loads(workforce_application.employee_accident_info) if workforce_application.employee_accident_info else None
+            accident_info_json = json.loads(
+                workforce_application.employee_accident_info) if workforce_application.employee_accident_info else None
             if accident_info_json is None:
                 return False
-            dependents=WorkforceEmployeeDependent.objects.filter(workforce_application= workforce_application)
-            dependent_count=0
-            beneficiary_id_of_employee=""
+            dependents = WorkforceEmployeeDependent.objects.filter(workforce_application=workforce_application)
+            dependent_count = 0
+            beneficiary_id_of_employee = ""
             for dep in dependents:
                 if dep.bank_id is None:
                     continue
-                if WorkforceEisPaymentProcess.objects.filter(workforce_employee_dependent= dep).exists():
+                if WorkforceEisPaymentProcess.objects.filter(workforce_employee_dependent=dep).exists():
                     continue
                 if dep.is_eligible and dep.eis_approved_amount is not None and dep.eis_approved_amount != 0:
-                    bank_instance= Bank.objects.get(id= dep.bank_id)
+                    bank_instance = Bank.objects.get(id=dep.bank_id)
                     now = datetime.now()
-                    dependent_count = dependent_count+1
-                    beneficiary_id= ""
-                    if old_beneficiary_id is not None:
-                        actual_beneficiary_id= old_beneficiary_id[:-3]
-                        dependent_str = str(dependent_count).zfill(2)
-                        beneficiary_id= f"{actual_beneficiary_id}.{dependent_str}"
-                    else:
-                        beneficiary_id = generate_beneficiary_id(association, workforce_application.id, count_of_distinct_application, str(dependent_count))
-
-
-                    # beneficiary_id = old_beneficiary_id if old_beneficiary_id is not None else generate_beneficiary_id(association, workforce_application.id, count_of_distinct_application, str(dependent_count))
+                    dependent_count = dependent_count + 1
+                    beneficiary_id = old_beneficiary_id if old_beneficiary_id is not None else generate_beneficiary_id(
+                        association, workforce_application.id, count_of_distinct_application, str(dependent_count))
 
                     payment_obj = WorkforceEisPaymentProcess(
                         workforce_application=workforce_application,
@@ -210,14 +209,13 @@ class WorkforceEisPaymentServices(BaseService):
                         beneficiary_id=beneficiary_id,
                         is_disbursed=False,
                         approved="yes",
-                        payable_amount= abs(dep.eis_monthly_amount),
-                        phone_number= dep.phone_number or None,
+                        payable_amount=abs(dep.eis_monthly_amount),
+                        phone_number=dep.phone_number or None,
                         serial_number=serial_number
                     )
                     payment_obj.save(username=user.username)
                 else:
                     continue
-
 
     @transaction.atomic
     def update_beneficiary(self, user, data):
@@ -279,8 +277,8 @@ class WorkforceEisPaymentServices(BaseService):
         main_beneficiary.status = "inactive"
         main_beneficiary.save(username=user.username)
 
-        main_increment= safe_decimal(data["increment_amount"]) if "increment_amount" in data else 0
-        main_decrement= safe_decimal(data["decrement_amount"]) if "decrement_amount" in data else 0
+        main_increment = safe_decimal(data["increment_amount"]) if "increment_amount" in data else 0
+        main_decrement = safe_decimal(data["decrement_amount"]) if "decrement_amount" in data else 0
 
         new_main_row = WorkforceEisPaymentProcess(
             workforce_application=main_beneficiary.workforce_application,
@@ -291,32 +289,33 @@ class WorkforceEisPaymentServices(BaseService):
             routing_number=main_beneficiary.routing_number,
             bank_account_holder_name=main_beneficiary.bank_account_holder_name,
             eis_payment_type=main_beneficiary.eis_payment_type,
-            payment_type_remarks= main_beneficiary.payment_type_remarks,
+            payment_type_remarks=main_beneficiary.payment_type_remarks,
             eis_calculated_amount=main_beneficiary.eis_calculated_amount,
             eis_approved_amount=main_beneficiary.eis_approved_amount,
             eis_initial_replacement_rate=main_beneficiary.eis_initial_replacement_rate,
             eis_initial_monthly_amount=main_beneficiary.eis_initial_monthly_amount,
             eis_monthly_amount=main_beneficiary.eis_monthly_amount,
-            increment_amount= round_three(main_increment) if "increment_amount" in data else None,
-            increment_date= today,
-            decrement_amount= round_three(main_decrement) if "decrement_amount" in data else None,
-            decrement_date= today,
+            increment_amount=round_three(main_increment) if "increment_amount" in data else None,
+            increment_date=today,
+            decrement_amount=round_three(main_decrement) if "decrement_amount" in data else None,
+            decrement_date=today,
             month_index=main_beneficiary.month_index,
             year=main_beneficiary.year,
             processing_date=today,
             is_disbursed=main_beneficiary.is_disbursed,
             approved=main_beneficiary.approved,
             beneficiary_id=main_beneficiary.beneficiary_id,
-            beneficiary_status= data.get("beneficiary_status") if "beneficiary_status" in data else main_beneficiary.beneficiary_status,
+            beneficiary_status=data.get(
+                "beneficiary_status") if "beneficiary_status" in data else main_beneficiary.beneficiary_status,
             status="active",
             reason=data.get("reason"),
             remarks=data.get("remarks"),
             remarriage_or_death_date=event_date,
             last_live_check_date=parse_frontend_date(data.get("last_live_check_date")),
             live_check_remarks=data.get("live_check_remarks"),
-            payable_amount= safe_decimal(main_beneficiary.payable_amount) + main_increment - main_decrement,
-            phone_number= main_beneficiary.phone_number or None,
-            serial_number = main_beneficiary.serial_number or None
+            payable_amount=safe_decimal(main_beneficiary.payable_amount) + main_increment - main_decrement,
+            phone_number=main_beneficiary.phone_number or None,
+            serial_number=main_beneficiary.serial_number or None
         )
         new_main_row.save(username=user.username)
 
@@ -331,7 +330,7 @@ class WorkforceEisPaymentServices(BaseService):
             for item in other_beneficiary_records:
                 old_other = item["obj"]
                 increment = item["increment"]
-                normal_decrement= item["normal_decrement"]
+                normal_decrement = item["normal_decrement"]
 
                 max_monthly = safe_decimal(old_other.eis_monthly_amount) + increment
                 capacity = max_monthly - MIN_ALLOWED_AMOUNT
@@ -374,8 +373,7 @@ class WorkforceEisPaymentServices(BaseService):
             except Exception as e:
                 continue
 
-
-            new_other_row=WorkforceEisPaymentProcess(
+            new_other_row = WorkforceEisPaymentProcess(
                 workforce_application=old_other.workforce_application,
                 workforce_application_summary=old_other.workforce_application_summary,
                 workforce_employee_dependent=old_other.workforce_employee_dependent,
@@ -384,7 +382,7 @@ class WorkforceEisPaymentServices(BaseService):
                 routing_number=old_other.routing_number,
                 bank_account_holder_name=old_other.bank_account_holder_name,
                 eis_payment_type=old_other.eis_payment_type,
-                payment_type_remarks= old_other.payment_type_remarks,
+                payment_type_remarks=old_other.payment_type_remarks,
                 eis_calculated_amount=old_other.eis_calculated_amount,
                 eis_approved_amount=old_other.eis_approved_amount,
                 eis_initial_replacement_rate=old_other.eis_initial_replacement_rate,
@@ -393,9 +391,9 @@ class WorkforceEisPaymentServices(BaseService):
                 eis_monthly_amount=old_other.eis_monthly_amount,
                 increment_amount=increment,
                 increment_date=event_date,
-                decrement_amount=recovery_amount if data.get("beneficiary_status")=="closed" else None,
-                decrement_date=today if data.get("beneficiary_status")=="closed" else None,
-                decrement_end_date=decrement_end_date if data.get("beneficiary_status")=="closed" else None,
+                decrement_amount=recovery_amount if data.get("beneficiary_status") == "closed" else None,
+                decrement_date=today if data.get("beneficiary_status") == "closed" else None,
+                decrement_end_date=decrement_end_date if data.get("beneficiary_status") == "closed" else None,
                 month_index=old_other.month_index,
                 year=old_other.year,
                 processing_date=today,
@@ -406,12 +404,15 @@ class WorkforceEisPaymentServices(BaseService):
                 status="active",
                 reason=old_other.beneficiary_status,
                 remarks=old_other.remarks,
-                remarriage_or_death_date=old_other.remarriage_or_death_date if data.get("beneficiary_status")=="closed" else None,
-                last_live_check_date=old_other.last_live_check_date if data.get("beneficiary_status")=="hold" else None,
-                live_check_remarks=old_other.live_check_remarks if data.get("beneficiary_status")=="hold" else None,
-                payable_amount= (max_monthly - recovery_amount) if data.get("beneficiary_status")=="closed" else (round_three(old_other.payable_amount + safe_decimal(increment) - safe_decimal(normal_decrement))),
-                phone_number= old_other.phone_number or None,
-                serial_number= old_other.serial_number or None,
+                remarriage_or_death_date=old_other.remarriage_or_death_date if data.get(
+                    "beneficiary_status") == "closed" else None,
+                last_live_check_date=old_other.last_live_check_date if data.get(
+                    "beneficiary_status") == "hold" else None,
+                live_check_remarks=old_other.live_check_remarks if data.get("beneficiary_status") == "hold" else None,
+                payable_amount=(max_monthly - recovery_amount) if data.get("beneficiary_status") == "closed" else (
+                    round_three(old_other.payable_amount + safe_decimal(increment) - safe_decimal(normal_decrement))),
+                phone_number=old_other.phone_number or None,
+                serial_number=old_other.serial_number or None,
             )
 
             new_other_row.save(username=user.username)
@@ -452,22 +453,25 @@ class WorkforceEisPaymentServices(BaseService):
                 decrement_amount = base_amount * (decrement_percent / 100)
 
                 # convert string to date if needed
-                inc_date = datetime.strptime(increment_effective_date, "%Y-%m-%d").date() if increment_effective_date!="" else None
-                dec_date = datetime.strptime(decrement_effective_date, "%Y-%m-%d").date() if decrement_effective_date!="" else None
+                inc_date = datetime.strptime(increment_effective_date,
+                                             "%Y-%m-%d").date() if increment_effective_date != "" else None
+                dec_date = datetime.strptime(decrement_effective_date,
+                                             "%Y-%m-%d").date() if decrement_effective_date != "" else None
 
                 # months calculation
-                increment_months = max(month_difference(inc_date, current_date), 0) -1 if inc_date is not None else 0 #calculate upto previous month becouse current months payable is already incremented
-                decrement_months = max(month_difference(dec_date, current_date), 0) -1 if dec_date is not None else 0
+                increment_months = max(month_difference(inc_date, current_date),
+                                       0) - 1 if inc_date is not None else 0  # calculate upto previous month becouse current months payable is already incremented
+                decrement_months = max(month_difference(dec_date, current_date), 0) - 1 if dec_date is not None else 0
 
                 # arrear calculations
                 arrear_increment = increment_months * increment_amount
                 arrear_decrement = decrement_months * decrement_amount
 
-
                 payment_process_instance.arrear_amount = arrear_increment - arrear_decrement
-                payment_process_instance.arrear_payment_month = current_date.month - 1 #because current month payment is already incremented payment. In advice need to calculate until prev month
+                payment_process_instance.arrear_payment_month = current_date.month - 1  # because current month payment is already incremented payment. In advice need to calculate until prev month
                 payment_process_instance.arrear_payment_year = current_date.year
-                payment_process_instance.payable_amount= round_three(safe_decimal(payment_process_instance.payable_amount)+increment_amount-decrement_amount)
+                payment_process_instance.payable_amount = round_three(
+                    safe_decimal(payment_process_instance.payable_amount) + increment_amount - decrement_amount)
 
                 try:
                     payment_process_instance.save(username=user.username)
@@ -490,8 +494,6 @@ class WorkforceEisPaymentServices(BaseService):
         except Exception as e:
             return e
 
-
-
     def update_beneficiary_bank(self, user, data):
 
         # 1. Fetch Main Beneficiary
@@ -500,10 +502,9 @@ class WorkforceEisPaymentServices(BaseService):
             status="active"
         ).first()
 
-        main_beneficiary.status= "inactive"
+        main_beneficiary.status = "inactive"
 
-        workforce_bank= Bank.objects.filter(id= data.get("bank_id")).first()
-
+        workforce_bank = Bank.objects.filter(id=data.get("bank_id")).first()
 
         new_main_row = WorkforceEisPaymentProcess(
             workforce_application=main_beneficiary.workforce_application,
@@ -514,32 +515,32 @@ class WorkforceEisPaymentServices(BaseService):
             routing_number=data.get("routing_number"),
             bank_account_holder_name=data.get("bank_account_holder_name"),
             eis_payment_type=main_beneficiary.eis_payment_type,
-            payment_type_remarks= main_beneficiary.payment_type_remarks,
+            payment_type_remarks=main_beneficiary.payment_type_remarks,
             eis_calculated_amount=main_beneficiary.eis_calculated_amount,
             eis_approved_amount=main_beneficiary.eis_approved_amount,
             eis_initial_replacement_rate=main_beneficiary.eis_initial_replacement_rate,
             eis_initial_monthly_amount=main_beneficiary.eis_initial_monthly_amount,
             eis_monthly_amount=main_beneficiary.eis_monthly_amount,
-            increment_amount= main_beneficiary.increment_amount,
-            increment_date= main_beneficiary.increment_date,
-            decrement_amount= main_beneficiary.decrement_amount,
-            decrement_date= main_beneficiary.decrement_date,
+            increment_amount=main_beneficiary.increment_amount,
+            increment_date=main_beneficiary.increment_date,
+            decrement_amount=main_beneficiary.decrement_amount,
+            decrement_date=main_beneficiary.decrement_date,
             month_index=main_beneficiary.month_index,
             year=main_beneficiary.year,
             processing_date=main_beneficiary.processing_date,
             is_disbursed=main_beneficiary.is_disbursed,
             approved=main_beneficiary.approved,
             beneficiary_id=main_beneficiary.beneficiary_id,
-            beneficiary_status= main_beneficiary.beneficiary_status,
+            beneficiary_status=main_beneficiary.beneficiary_status,
             status="active",
-            reason= main_beneficiary.reason,
+            reason=main_beneficiary.reason,
             remarks=main_beneficiary.remarriage_or_death_date,
             remarriage_or_death_date=main_beneficiary.remarriage_or_death_date,
             last_live_check_date=main_beneficiary.last_live_check_date,
             live_check_remarks=main_beneficiary.live_check_remarks,
-            payable_amount= main_beneficiary.payable_amount,
-            phone_number= data.get("phone_number"),
-            serial_number= main_beneficiary.serial_number
+            payable_amount=main_beneficiary.payable_amount,
+            phone_number=data.get("phone_number"),
+            serial_number=main_beneficiary.serial_number
         )
 
         try:
@@ -551,8 +552,9 @@ class WorkforceEisPaymentServices(BaseService):
     def calculate_arrear(self, payment_process_instance):
         workforce_application = payment_process_instance.workforce_application
         # ---------- Arrear Calculation ----------
-        if workforce_application.application_type=="disabilityAssistance":
-            doctor_json = json.loads(workforce_application.doctors_entry) if workforce_application.doctors_entry else None
+        if workforce_application.application_type == "disabilityAssistance":
+            doctor_json = json.loads(
+                workforce_application.doctors_entry) if workforce_application.doctors_entry else None
             if doctor_json is None:
                 return False
             accident_info_json = json.loads(
@@ -564,7 +566,7 @@ class WorkforceEisPaymentServices(BaseService):
                 "dateOfRejoining") else doctor_json.get("dateOfAssessment")
             calculation_start_date = datetime.strptime(calculation_start_date, "%Y-%m-%d").date() if isinstance(
                 calculation_start_date, str) else calculation_start_date
-        elif workforce_application.application_type=="financialAssistance":
+        elif workforce_application.application_type == "financialAssistance":
             accident_info_json = json.loads(
                 workforce_application.employee_accident_info) if workforce_application.employee_accident_info else None
             if accident_info_json is None:
@@ -596,19 +598,19 @@ class WorkforceEisPaymentServices(BaseService):
         arrear_year = today.year
 
         try:
-            if payment_process_instance.eis_payment_type== "onetime":
-                arrear_payment= round_three(payment_process_instance.eis_approved_amount)
-            elif payment_process_instance.eis_payment_type== "installment":
-                arrear_payment= round_three(payment_process_instance.payable_amount)* quarters
+            if payment_process_instance.eis_payment_type == "onetime":
+                arrear_payment = round_three(payment_process_instance.eis_approved_amount)
+            elif payment_process_instance.eis_payment_type == "installment":
+                arrear_payment = round_three(payment_process_instance.payable_amount) * quarters
             else:
-                arrear_payment= round_three(payment_process_instance.payable_amount)* months
+                arrear_payment = round_three(payment_process_instance.payable_amount) * months
 
-            if today.month-1<=0:
+            if today.month - 1 <= 0:
                 return False
             else:
-                payment_process_instance.arrear_amount= arrear_payment
-                payment_process_instance.arrear_payment_month= today.month-1
-                payment_process_instance.arrear_payment_year= today.year
-                payment_process_instance.save(username= self.user.username)
+                payment_process_instance.arrear_amount = arrear_payment
+                payment_process_instance.arrear_payment_month = today.month - 1
+                payment_process_instance.arrear_payment_year = today.year
+                payment_process_instance.save(username=self.user.username)
         except Exception as e:
             return e
