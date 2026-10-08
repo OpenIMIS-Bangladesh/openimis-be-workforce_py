@@ -1832,8 +1832,10 @@ class CreateWorkforceEisPaymentProcessMutation(graphene.Mutation):
         try:
             workforce_application_ids= data["workforce_application_ids"]
             for workforce_application_id in workforce_application_ids:
+                association_id_q= WorkforceApplication.objects.filter(id=workforce_application_id).first()
+                association_id= association_id_q.employee_factory.all_association_id
                 count_of_distinct_application = (
-                    WorkforceEisPaymentProcess.objects
+                    WorkforceEisPaymentProcess.objects.filter(workforce_application__employee_factory__all_association_id=association_id)
                     .values("workforce_application_id")
                     .distinct()
                     .count()
