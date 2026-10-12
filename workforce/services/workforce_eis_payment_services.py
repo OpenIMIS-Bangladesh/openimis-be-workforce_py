@@ -447,29 +447,41 @@ class WorkforceEisPaymentServices(BaseService):
                 if not payment_process_instance:
                     continue
 
+                last_payment= WorkforceEisPaymentDisbursementStage.objects.filter(beneficiary_id=payment_process_instance.beneficiary_id, is_deleted=False).order_by("-year", "-month_index").first()
                 base_amount = safe_decimal(payment_process_instance.payable_amount)
 
                 increment_amount = base_amount * (increment_percent / 100)
                 decrement_amount = base_amount * (decrement_percent / 100)
 
-                # convert string to date if needed
-                inc_date = datetime.strptime(increment_effective_date,
-                                             "%Y-%m-%d").date() if increment_effective_date != "" else None
-                dec_date = datetime.strptime(decrement_effective_date,
-                                             "%Y-%m-%d").date() if decrement_effective_date != "" else None
+                if last_payment is None:
+                    increment_months= 1
+                    decrement_months= 1
+                else:
+                    last_payment_date = (
+                        date(last_payment.year, last_payment.month_index, 1)
+                        if last_payment else None
+                    )
 
-                # months calculation
-                increment_months = max(month_difference(inc_date, current_date),
-                                       0) - 1 if inc_date is not None else 0  # calculate upto previous month becouse current months payable is already incremented
-                decrement_months = max(month_difference(dec_date, current_date), 0) - 1 if dec_date is not None else 0
 
-                # arrear calculations
-                arrear_increment = increment_months * increment_amount
-                arrear_decrement = decrement_months * decrement_amount
+                    # convert string to date if needed
+                    inc_date = datetime.strptime(increment_effective_date,
+                                                 "%Y-%m-%d").date() if increment_effective_date != "" else None
+                    dec_date = datetime.strptime(decrement_effective_date,
+                                                 "%Y-%m-%d").date() if decrement_effective_date != "" else None
 
-                payment_process_instance.arrear_amount = arrear_increment - arrear_decrement
-                payment_process_instance.arrear_payment_month = current_date.month - 1  # because current month payment is already incremented payment. In advice need to calculate until prev month
-                payment_process_instance.arrear_payment_year = current_date.year
+                    # months calculation
+                    current_date= last_payment_date
+                    increment_months = max(month_difference(inc_date, current_date), 0) if inc_date is not None else 0  # calculate upto previous month becouse current months payable is already incremented
+                    decrement_months = max(month_difference(dec_date, current_date), 0) if dec_date is not None else 0
+
+                    # arrear calculations
+                    arrear_increment = increment_months * increment_amount
+                    arrear_decrement = decrement_months * decrement_amount
+
+                    payment_process_instance.arrear_amount = arrear_increment - arrear_decrement
+                    payment_process_instance.arrear_payment_month = current_date.month  # because current month payment is already incremented payment. In advice need to calculate until prev month
+                    payment_process_instance.arrear_payment_year = current_date.year
+
                 payment_process_instance.payable_amount = round_three(
                     safe_decimal(payment_process_instance.payable_amount) + increment_amount - decrement_amount)
 
