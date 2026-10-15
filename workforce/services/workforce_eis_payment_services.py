@@ -255,22 +255,43 @@ class WorkforceEisPaymentServices(BaseService):
         # 2. Dates
         event_date = parse_frontend_date(data.get("remarriage_or_death_date")) or date.today()
         today = date.today()
+
         increment_date = parse_frontend_date(data.get("increment_date"))
         decrement_date = parse_frontend_date(data.get("decrement_date"))
 
-        # Prioritize increment_date, then decrement_date, otherwise fall back to today
-        reference_date = increment_date or decrement_date or today
-        # 🛡️ DEFENSIVE GUARD: Ensure both are strictly date objects
+        # Effective date is either increment_date or decrement_date
+        effective_date = increment_date or decrement_date
+
+        if effective_date:
+            # 1. Fetch last payment stage (same as in update_payment_by_association)
+            last_payment = WorkforceEisPaymentDisbursementStage.objects.filter(
+                beneficiary_id=main_beneficiary.beneficiary_id,
+                is_deleted=False
+            ).order_by("-year", "-month_index").first()
+
+            if last_payment:
+                # Normalize both dates to day 1 to ensure an exact whole-month difference
+                last_payment_date = date(last_payment.year, last_payment.month_index, 1)
+                effective_start = date(effective_date.year, effective_date.month, 1)
+
+                diff = relativedelta(last_payment_date, effective_start)
+                months_diff = abs(diff.years * 12 + diff.months)
+                months_elapsed = months_diff if months_diff > 0 else 1
+            else:
+                # Fallback if no disbursement records exist yet
+                months_elapsed = 1
+
+            reference_date = effective_date
+        else:
+            # 2. Previous functionality: diff from event_date to today
+            diff = relativedelta(today, event_date)
+            months_elapsed = diff.years * 12 + diff.months
+            months_elapsed = months_elapsed if months_elapsed > 0 else 1
+            reference_date = today
+
+        # Defensive guard to ensure reference_date is always a valid date
         if not isinstance(reference_date, date):
-            reference_date = date.today()
-        if not isinstance(event_date, date):
-            event_date = date.today()
-            
-        print(data)
-        # diff = relativedelta(today, event_date)
-        diff = relativedelta(reference_date, event_date)
-        months_elapsed = diff.years * 12 + diff.months
-        months_elapsed = months_elapsed if months_elapsed > 0 else 1
+            reference_date = today
 
         # 3. Parse other beneficiaries
         try:
@@ -312,6 +333,7 @@ class WorkforceEisPaymentServices(BaseService):
 
         main_increment = safe_decimal(data["increment_amount"]) if "increment_amount" in data else 0
         main_decrement = safe_decimal(data["decrement_amount"]) if "decrement_amount" in data else 0
+        total_arrier = main_increment * Decimal(months_elapsed) if main_increment>0 else main_decrement * Decimal(months_elapsed) * -1
 
         new_main_row = WorkforceEisPaymentProcess(
             workforce_application=main_beneficiary.workforce_application,
@@ -350,7 +372,7 @@ class WorkforceEisPaymentServices(BaseService):
             phone_number=main_beneficiary.phone_number or None,
             serial_number=main_beneficiary.serial_number or None,
             # Arrear & overpayment fields
-            arrear_amount = round_three(total_overpayment),
+            arrear_amount = round_three(total_arrier),
             arrear_payment_month = reference_date.month,
             arrear_payment_year = reference_date.year,
         )
