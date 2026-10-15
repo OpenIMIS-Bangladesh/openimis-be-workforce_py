@@ -16,9 +16,11 @@ from dateutil.relativedelta import relativedelta
 from math import floor
 from workforce.services.helper_service import generate_beneficiary_id
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
-from datetime import date
 from dateutil.relativedelta import relativedelta
 from django.db import transaction
+from datetime import date, datetime
+from dateutil.relativedelta import relativedelta
+from dateutil import parser
 
 logger = logging.getLogger(__name__)
 
@@ -69,23 +71,42 @@ def calculate_age_in_months(effective_date):
     return months
 
 
-def parse_frontend_date(date_str):
-    """Parses Y-m-d string to date object. Returns None if empty/invalid."""
-    if not date_str or date_str == "":
+# def parse_frontend_date(date_str):
+#     """Parses Y-m-d string to date object. Returns None if empty/invalid."""
+#     if not date_str or date_str == "":
+#         return None
+#     try:
+#         return datetime.strptime(date_str, "%Y-%m-%d").date()
+#     except ValueError:
+#         return None
+def parse_frontend_date(date_val):
+    """Safely converts any string, date, or datetime into a date object. Returns None if invalid or empty."""
+    if not date_val or date_val in ("null", "undefined", ""):
         return None
+    if isinstance(date_val, datetime):
+        return date_val.date()
+    if isinstance(date_val, date):
+        return date_val
     try:
-        return datetime.strptime(date_str, "%Y-%m-%d").date()
-    except ValueError:
+        return parser.parse(str(date_val)).date()
+    except Exception:
         return None
 
-
+#
+# def calculate_months_difference(start_date, end_date):
+#     """Calculates the number of months between two dates."""
+#     if not start_date or not end_date:
+#         return 0
+#     diff = relativedelta(end_date, start_date)
+#     return diff.years * 12 + diff.months
 def calculate_months_difference(start_date, end_date):
-    """Calculates the number of months between two dates."""
-    if not start_date or not end_date:
+    """Calculates the number of months between two dates safely."""
+    s = parse_frontend_date(start_date)
+    e = parse_frontend_date(end_date)
+    if not s or not e:
         return 0
-    diff = relativedelta(end_date, start_date)
+    diff = relativedelta(e, s)
     return diff.years * 12 + diff.months
-
 
 THREE_DECIMAL = Decimal("0.001")
 
@@ -234,8 +255,20 @@ class WorkforceEisPaymentServices(BaseService):
         # 2. Dates
         event_date = parse_frontend_date(data.get("remarriage_or_death_date")) or date.today()
         today = date.today()
+        increment_date = parse_frontend_date(data.get("increment_date"))
+        decrement_date = parse_frontend_date(data.get("decrement_date"))
 
-        diff = relativedelta(today, event_date)
+        # Prioritize increment_date, then decrement_date, otherwise fall back to today
+        reference_date = increment_date or decrement_date or today
+        # 🛡️ DEFENSIVE GUARD: Ensure both are strictly date objects
+        if not isinstance(reference_date, date):
+            reference_date = date.today()
+        if not isinstance(event_date, date):
+            event_date = date.today()
+            
+        print(data)
+        # diff = relativedelta(today, event_date)
+        diff = relativedelta(reference_date, event_date)
         months_elapsed = diff.years * 12 + diff.months
         months_elapsed = months_elapsed if months_elapsed > 0 else 1
 
@@ -315,7 +348,11 @@ class WorkforceEisPaymentServices(BaseService):
             live_check_remarks=data.get("live_check_remarks"),
             payable_amount=safe_decimal(main_beneficiary.payable_amount) + main_increment - main_decrement,
             phone_number=main_beneficiary.phone_number or None,
-            serial_number=main_beneficiary.serial_number or None
+            serial_number=main_beneficiary.serial_number or None,
+            # Arrear & overpayment fields
+            arrear_amount = round_three(total_overpayment),
+            arrear_payment_month = reference_date.month,
+            arrear_payment_year = reference_date.year,
         )
         new_main_row.save(username=user.username)
 
