@@ -9,6 +9,7 @@ from workforce.models import WorkforceEmployeeDependent, WorkforceApplication, W
 from datetime import datetime, timezone, date
 import requests
 import json
+from django.db.models import Sum, Q
 import os
 import base64
 from datetime import date, datetime
@@ -326,6 +327,20 @@ class WorkforceEisPaymentServices(BaseService):
 
         total_overpayment = (actual_monthly_total - target_monthly_total) * Decimal(months_elapsed)
         total_overpayment = max(total_overpayment, Decimal("0.00"))
+        # If remarried or died, calculate disbursements made after event_date
+        if data.get("beneficiary_status") == "closed" and event_date:
+            disbursed_after_event = WorkforceEisPaymentDisbursementStage.objects.filter(
+                beneficiary_id=main_beneficiary.beneficiary_id,
+                is_deleted=False,
+                is_disbursed=True
+            ).filter(
+                Q(pay_from_date__gt=event_date) |
+                Q(year__gt=event_date.year) |
+                Q(year=event_date.year, month_index__gt=event_date.month)
+            ).aggregate(total=Sum("paid_amount"))["total"]
+
+            overpayment_of_this_beneficiary = safe_decimal(disbursed_after_event)
+            total_overpayment += overpayment_of_this_beneficiary
 
         # 5. Close main beneficiary (do NOT zero amounts)
         main_beneficiary.status = "inactive"

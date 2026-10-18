@@ -1664,7 +1664,7 @@ class Query(graphene.ObjectType):
                 selected_ym = int(f"{year}{int(month):02d}")
 
                 beneficiary_ids = stages.filter(
-                    latest_ym__gte=selected_ym
+                    latest_ym=selected_ym
                 ).values_list("beneficiary_id", flat=True)
                 # beneficiary_ids = WorkforceEisPaymentDisbursementStage.objects.filter(
                 #     month_index=month,
