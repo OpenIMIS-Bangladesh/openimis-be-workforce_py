@@ -549,12 +549,13 @@ class WorkforceEisPaymentServices(BaseService):
                     decrement_months = max(month_difference(dec_date, current_date), 0) if dec_date is not None else 0
 
                     # arrear calculations
-                    arrear_increment = increment_months * increment_amount
-                    arrear_decrement = decrement_months * decrement_amount
+                    arrear_increment = round_three(increment_months * increment_amount) if increment_months != 0 else round_three(increment_amount)
+                    arrear_decrement = round_three(decrement_months * decrement_amount) if decrement_months != 0 else round_three(decrement_amount)
 
-                    payment_process_instance.arrear_amount = arrear_increment - arrear_decrement
-                    payment_process_instance.arrear_payment_month = current_date.month  # because current month payment is already incremented payment. In advice need to calculate until prev month
-                    payment_process_instance.arrear_payment_year = current_date.year
+                    if increment_months != 0 and decrement_months != 0:
+                        payment_process_instance.arrear_amount = arrear_increment - arrear_decrement
+                        payment_process_instance.arrear_payment_month = current_date.month  # because current month payment is already incremented payment. In advice need to calculate until prev month
+                        payment_process_instance.arrear_payment_year = current_date.year
 
                 payment_process_instance.payable_amount = round_three(
                     safe_decimal(payment_process_instance.payable_amount) + increment_amount - decrement_amount)

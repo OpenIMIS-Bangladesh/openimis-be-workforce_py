@@ -162,6 +162,8 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
 
             last_day = monthrange(year, month)[1]
             target_date = date(year, month, last_day)
+            if workforce_eis_payment_process.beneficiary_status =="closed":
+                target_date = workforce_eis_payment_process.remarriage_or_death_date
             if calculation_start_date is not None:
                 if calculation_start_date.year == target_date.year and calculation_start_date.month == target_date.month:
                     months_gone = 1
