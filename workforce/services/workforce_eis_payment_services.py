@@ -350,6 +350,8 @@ class WorkforceEisPaymentServices(BaseService):
         main_decrement = safe_decimal(data["decrement_amount"]) if "decrement_amount" in data else 0
         total_arrier = main_increment * Decimal(months_elapsed) if main_increment>0 else main_decrement * Decimal(months_elapsed) * -1
 
+        # if total_overpayment!=0:
+
         new_main_row = WorkforceEisPaymentProcess(
             workforce_application=main_beneficiary.workforce_application,
             workforce_application_summary=main_beneficiary.workforce_application_summary,
@@ -424,74 +426,124 @@ class WorkforceEisPaymentServices(BaseService):
         remaining_overpayment = total_overpayment
 
         for item in other_beneficiary_records:
-            if remaining_overpayment <= 0:
-                break
+            if total_overpayment == 0:
+                old_other.status = "inactive"
+                try:
+                    old_other.save(username=user.username)
+                except Exception as e:
+                    continue
 
-            old_other = item["obj"]
-            increment = item["increment"]
+                new_other_row = WorkforceEisPaymentProcess(
+                    workforce_application=old_other.workforce_application,
+                    workforce_application_summary=old_other.workforce_application_summary,
+                    workforce_employee_dependent=old_other.workforce_employee_dependent,
+                    bank=old_other.bank,
+                    bank_account_no=old_other.bank_account_no,
+                    routing_number=old_other.routing_number,
+                    bank_account_holder_name=old_other.bank_account_holder_name,
+                    eis_payment_type=old_other.eis_payment_type,
+                    payment_type_remarks=old_other.payment_type_remarks,
+                    eis_calculated_amount=old_other.eis_calculated_amount,
+                    eis_approved_amount=old_other.eis_approved_amount,
+                    eis_initial_replacement_rate=old_other.eis_initial_replacement_rate,
+                    # eis_initial_monthly_amount=(old_initial + increment) - recovery_amount,
+                    eis_initial_monthly_amount=old_other.eis_initial_monthly_amount,
+                    eis_monthly_amount=old_other.eis_monthly_amount,
+                    increment_amount=safe_decimal(item["increment"]),
+                    increment_date=event_date,
+                    decrement_amount=None,
+                    decrement_date=None,
+                    decrement_end_date=None,
+                    month_index=old_other.month_index,
+                    year=old_other.year,
+                    processing_date=today,
+                    is_disbursed=old_other.is_disbursed,
+                    approved=old_other.approved,
+                    beneficiary_id=old_other.beneficiary_id,
+                    beneficiary_status=old_other.beneficiary_status,
+                    status="active",
+                    reason=old_other.beneficiary_status,
+                    remarks=old_other.remarks,
+                    remarriage_or_death_date=old_other.remarriage_or_death_date if data.get(
+                        "beneficiary_status") == "closed" else None,
+                    last_live_check_date=old_other.last_live_check_date if data.get(
+                        "beneficiary_status") == "hold" else None,
+                    live_check_remarks=old_other.live_check_remarks if data.get(
+                        "beneficiary_status") == "hold" else None,
+                    payable_amount= round_three(old_other.payable_amount+ safe_decimal(item["increment"])),
+                    phone_number=old_other.phone_number or None,
+                    serial_number=old_other.serial_number or None,
+                )
+                new_other_row.save(username=user.username)
 
-            old_monthly = safe_decimal(old_other.eis_monthly_amount)
-            old_initial = safe_decimal(old_other.eis_initial_monthly_amount)
+            else:
+                if remaining_overpayment<=0:
+                    break
+                old_other = item["obj"]
+                increment = item["increment"]
 
-            max_monthly = old_monthly + increment
-            max_recoverable = max_monthly - MIN_ALLOWED_AMOUNT
+                old_monthly = safe_decimal(old_other.eis_monthly_amount)
+                old_initial = safe_decimal(old_other.eis_initial_monthly_amount)
 
-            if max_recoverable <= 0:
-                continue
+                max_monthly = old_monthly + increment
+                max_recoverable = max_monthly - MIN_ALLOWED_AMOUNT
 
-            recovery_amount = min(max_recoverable, remaining_overpayment)
+                if max_recoverable <= 0:
+                    continue
 
-            old_other.status = "inactive"
-            try:
-                old_other.save(username=user.username)
-            except Exception as e:
-                continue
+                recovery_amount = min(max_recoverable, remaining_overpayment)
 
-            new_other_row = WorkforceEisPaymentProcess(
-                workforce_application=old_other.workforce_application,
-                workforce_application_summary=old_other.workforce_application_summary,
-                workforce_employee_dependent=old_other.workforce_employee_dependent,
-                bank=old_other.bank,
-                bank_account_no=old_other.bank_account_no,
-                routing_number=old_other.routing_number,
-                bank_account_holder_name=old_other.bank_account_holder_name,
-                eis_payment_type=old_other.eis_payment_type,
-                payment_type_remarks=old_other.payment_type_remarks,
-                eis_calculated_amount=old_other.eis_calculated_amount,
-                eis_approved_amount=old_other.eis_approved_amount,
-                eis_initial_replacement_rate=old_other.eis_initial_replacement_rate,
-                # eis_initial_monthly_amount=(old_initial + increment) - recovery_amount,
-                eis_initial_monthly_amount=old_other.eis_initial_monthly_amount,
-                eis_monthly_amount=old_other.eis_monthly_amount,
-                increment_amount=increment,
-                increment_date=event_date,
-                decrement_amount=recovery_amount if data.get("beneficiary_status") == "closed" else None,
-                decrement_date=today if data.get("beneficiary_status") == "closed" else None,
-                decrement_end_date=decrement_end_date if data.get("beneficiary_status") == "closed" else None,
-                month_index=old_other.month_index,
-                year=old_other.year,
-                processing_date=today,
-                is_disbursed=old_other.is_disbursed,
-                approved=old_other.approved,
-                beneficiary_id=old_other.beneficiary_id,
-                beneficiary_status=old_other.beneficiary_status,
-                status="active",
-                reason=old_other.beneficiary_status,
-                remarks=old_other.remarks,
-                remarriage_or_death_date=old_other.remarriage_or_death_date if data.get(
-                    "beneficiary_status") == "closed" else None,
-                last_live_check_date=old_other.last_live_check_date if data.get(
-                    "beneficiary_status") == "hold" else None,
-                live_check_remarks=old_other.live_check_remarks if data.get("beneficiary_status") == "hold" else None,
-                payable_amount=(max_monthly - recovery_amount) if data.get("beneficiary_status") == "closed" else (
-                    round_three(old_other.payable_amount + safe_decimal(increment) - safe_decimal(normal_decrement))),
-                phone_number=old_other.phone_number or None,
-                serial_number=old_other.serial_number or None,
-            )
+                old_other.status = "inactive"
+                try:
+                    old_other.save(username=user.username)
+                except Exception as e:
+                    continue
 
-            new_other_row.save(username=user.username)
+                new_other_row = WorkforceEisPaymentProcess(
+                    workforce_application=old_other.workforce_application,
+                    workforce_application_summary=old_other.workforce_application_summary,
+                    workforce_employee_dependent=old_other.workforce_employee_dependent,
+                    bank=old_other.bank,
+                    bank_account_no=old_other.bank_account_no,
+                    routing_number=old_other.routing_number,
+                    bank_account_holder_name=old_other.bank_account_holder_name,
+                    eis_payment_type=old_other.eis_payment_type,
+                    payment_type_remarks=old_other.payment_type_remarks,
+                    eis_calculated_amount=old_other.eis_calculated_amount,
+                    eis_approved_amount=old_other.eis_approved_amount,
+                    eis_initial_replacement_rate=old_other.eis_initial_replacement_rate,
+                    # eis_initial_monthly_amount=(old_initial + increment) - recovery_amount,
+                    eis_initial_monthly_amount=old_other.eis_initial_monthly_amount,
+                    eis_monthly_amount=old_other.eis_monthly_amount,
+                    increment_amount=increment,
+                    increment_date=event_date,
+                    decrement_amount=recovery_amount if data.get("beneficiary_status") == "closed" else None,
+                    decrement_date=today if data.get("beneficiary_status") == "closed" else None,
+                    decrement_end_date=decrement_end_date if data.get("beneficiary_status") == "closed" else None,
+                    month_index=old_other.month_index,
+                    year=old_other.year,
+                    processing_date=today,
+                    is_disbursed=old_other.is_disbursed,
+                    approved=old_other.approved,
+                    beneficiary_id=old_other.beneficiary_id,
+                    beneficiary_status=old_other.beneficiary_status,
+                    status="active",
+                    reason=old_other.beneficiary_status,
+                    remarks=old_other.remarks,
+                    remarriage_or_death_date=old_other.remarriage_or_death_date if data.get(
+                        "beneficiary_status") == "closed" else None,
+                    last_live_check_date=old_other.last_live_check_date if data.get(
+                        "beneficiary_status") == "hold" else None,
+                    live_check_remarks=old_other.live_check_remarks if data.get("beneficiary_status") == "hold" else None,
+                    payable_amount=(max_monthly - recovery_amount) if data.get("beneficiary_status") == "closed" else (
+                        round_three(old_other.payable_amount + safe_decimal(increment) - safe_decimal(normal_decrement))),
+                    phone_number=old_other.phone_number or None,
+                    serial_number=old_other.serial_number or None,
+                )
 
-            remaining_overpayment -= recovery_amount
+                new_other_row.save(username=user.username)
+
+                remaining_overpayment -= recovery_amount
 
         return "Success"
 
