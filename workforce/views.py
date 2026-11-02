@@ -354,13 +354,15 @@ class EisCaseData(APIView):
 
                 ######## Set data from accident #######
                 worker_accident_info= json.loads(data.get("worker_accident_info")) if data.get("worker_accident_info") else None
-                # first_payment_process= WorkforceEisPaymentProcess.objects.filter(workforce_application_id=data.get("case_id"), status="active", approved="yes").first()
-                movement_data= WorkforceApplicationMovement.objects.filter(application_id=data.get("case_id"), status__in=["approved_by_committee"]).order_by("-date_created").first()
-                if movement_data is None:
+                first_payment_process= WorkforceEisPaymentProcess.objects.filter(workforce_application_id=data.get("case_id"), status="active", approved="yes").first()
+                # movement_data= WorkforceApplicationMovement.objects.filter(application_id=data.get("case_id"), status__in=["approved_by_committee"]).order_by("-date_created").first()
+                # if movement_data is None:
+                #     continue
+                if first_payment_process is None:
                     continue
                 accident_date= worker_accident_info.get("accidentDate", None)
                 accident_place= worker_accident_info.get('inOutsideFactory', None)
-                endorsement_date= movement_data.date_created.date()
+                endorsement_date= first_payment_process.approval_date
                 total_days_of_endorsement = dependent_service.calculate_days(worker_accident_info.get("accidentDate"), endorsement_date)
                 accident_type=  getAccidentType(worker_accident_info.get('accidentMainType')) if worker_accident_info.get('accidentMainType') else None
                 if worker_accident_info.get('inOutsideFactory') and worker_accident_info[
