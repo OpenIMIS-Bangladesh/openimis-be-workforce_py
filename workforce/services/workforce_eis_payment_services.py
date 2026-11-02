@@ -395,38 +395,10 @@ class WorkforceEisPaymentServices(BaseService):
         )
         new_main_row.save(username=user.username)
 
-        # 6. Determine decrement_end_date (month-based simulation)
-        remaining_overpayment = total_overpayment
-        current_month = today
-        months_needed = 0
-
-        while remaining_overpayment > 0:
-            monthly_capacity = Decimal("0.00")
-
+        if overpayment_of_this_beneficiary == 0:
             for item in other_beneficiary_records:
                 old_other = item["obj"]
                 increment = item["increment"]
-                normal_decrement = item["normal_decrement"]
-
-                max_monthly = safe_decimal(old_other.eis_monthly_amount) + increment
-                capacity = max_monthly - MIN_ALLOWED_AMOUNT
-
-                if capacity > 0:
-                    monthly_capacity += capacity
-
-            if monthly_capacity <= 0:
-                break  # no more recovery possible
-
-            remaining_overpayment -= monthly_capacity
-            months_needed += 1
-
-        decrement_end_date = today + relativedelta(months=months_needed)
-
-        # 7. Apply aggressive recovery (single new row per beneficiary)
-        remaining_overpayment = total_overpayment
-
-        for item in other_beneficiary_records:
-            if total_overpayment == 0:
                 old_other.status = "inactive"
                 try:
                     old_other.save(username=user.username)
@@ -449,7 +421,7 @@ class WorkforceEisPaymentServices(BaseService):
                     # eis_initial_monthly_amount=(old_initial + increment) - recovery_amount,
                     eis_initial_monthly_amount=old_other.eis_initial_monthly_amount,
                     eis_monthly_amount=old_other.eis_monthly_amount,
-                    increment_amount=safe_decimal(item["increment"]),
+                    increment_amount=safe_decimal(increment),
                     increment_date=event_date,
                     decrement_amount=None,
                     decrement_date=None,
@@ -470,13 +442,44 @@ class WorkforceEisPaymentServices(BaseService):
                         "beneficiary_status") == "hold" else None,
                     live_check_remarks=old_other.live_check_remarks if data.get(
                         "beneficiary_status") == "hold" else None,
-                    payable_amount= round_three(old_other.payable_amount+ safe_decimal(item["increment"])),
+                    payable_amount= round_three(old_other.payable_amount+ safe_decimal(increment)),
                     phone_number=old_other.phone_number or None,
                     serial_number=old_other.serial_number or None,
                 )
                 new_other_row.save(username=user.username)
+            return "Success"
+        else:
+            # 6. Determine decrement_end_date (month-based simulation)
+            remaining_overpayment = total_overpayment
+            current_month = today
+            months_needed = 0
 
-            else:
+            while remaining_overpayment > 0:
+                monthly_capacity = Decimal("0.00")
+
+                for item in other_beneficiary_records:
+                    old_other = item["obj"]
+                    increment = item["increment"]
+                    normal_decrement = item["normal_decrement"]
+
+                    max_monthly = safe_decimal(old_other.eis_monthly_amount) + increment
+                    capacity = max_monthly - MIN_ALLOWED_AMOUNT
+
+                    if capacity > 0:
+                        monthly_capacity += capacity
+
+                if monthly_capacity <= 0:
+                    break  # no more recovery possible
+
+                remaining_overpayment -= monthly_capacity
+                months_needed += 1
+
+            decrement_end_date = today + relativedelta(months=months_needed)
+
+            # 7. Apply aggressive recovery (single new row per beneficiary)
+            remaining_overpayment = total_overpayment
+
+            for item in other_beneficiary_records:
                 if remaining_overpayment<=0:
                     break
                 old_other = item["obj"]
@@ -544,8 +547,8 @@ class WorkforceEisPaymentServices(BaseService):
                 new_other_row.save(username=user.username)
 
                 remaining_overpayment -= recovery_amount
-
-        return "Success"
+            return "Success"
+        # return "Success"
 
     def update_payment_by_association(self, user, data):
         try:
