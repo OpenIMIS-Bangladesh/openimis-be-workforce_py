@@ -46,6 +46,48 @@ def get_district_name_by_location_id(location_id):
     except Exception as e:
         return None
 
+def get_gender_by_relation(relation_with_worker):
+    if "father" in relation_with_worker or "brother" in relation_with_worker or "son" in relation_with_worker:
+        return "workforce.gender.male"
+    else:
+        return "workforce.gender.female"
+
+def get_relation_type(relation_with_worker):
+    if relation_with_worker in ["workforce.relation.son", "workforce.relation.daughter"]:
+        return "children"
+    elif relation_with_worker in ["workforce.relation.father", "workforce.relation.mother"]:
+        return "parents"
+    elif relation_with_worker in ["workforce.relation.wife", "workforce.relation.husband"]:
+        return "spouse"
+    elif relation_with_worker in ["workforce.relation.brother", "workforce.relation.sister"]:
+        return "siblings"
+    else:
+        return "others"
+
+def calculate_age(dob):
+    if isinstance(dob, str):
+        dob = datetime.strptime(dob, "%Y-%m-%d").date()
+
+    today = date.today()
+
+    years = today.year - dob.year
+    months = today.month - dob.month
+    days = today.day - dob.day
+
+    if days < 0:
+        months -= 1
+        previous_month = today.month - 1 or 12
+        previous_year = today.year if today.month != 1 else today.year - 1
+
+        days += (date(previous_year, previous_month + 1, 1) -
+                 date(previous_year, previous_month, 1)).days
+
+    if months < 0:
+        years -= 1
+        months += 12
+
+    return years
+
 def getAccidentType(key):
     accident_type = {}
     accident_type["workforce.accident.mainType.workplace"] = "কর্মস্থলে দুর্ঘটনা"
@@ -354,7 +396,7 @@ class EisCaseData(APIView):
 
                 ######## Set data from accident #######
                 worker_accident_info= json.loads(data.get("worker_accident_info")) if data.get("worker_accident_info") else None
-                first_payment_process= WorkforceEisPaymentProcess.objects.filter(workforce_application_id=data.get("case_id"), status="active", approved="yes").first()
+                first_payment_process= WorkforceEisPaymentProcess.objects.filter(workforce_application_id=data.get("case_id"), status="active", beneficiary_status="eligible", approved="yes").first()
                 # movement_data= WorkforceApplicationMovement.objects.filter(application_id=data.get("case_id"), status__in=["approved_by_committee"]).order_by("-date_created").first()
                 # if movement_data is None:
                 #     continue
@@ -390,15 +432,19 @@ class EisCaseData(APIView):
                     final_data_item["worker_permanent_location_id"] = extract_uuid(dead_worker_info.get("permanentLocation").get("id"))
                     final_data_item["worker_present_location_id"] = extract_uuid(dead_worker_info.get("presentLocation").get("id"))
                     worker_age = dependent_service.calculate_age_custom(dead_worker_info.get("birthDate"), dead_worker_info.get("deathDate"))
-                    dependents= WorkforceEmployeeDependent.objects.filter(workforce_application_id=data.get("case_id"), is_eligible=True).values("id","eis_monthly_amount")
+                    dependents= WorkforceEmployeeDependent.objects.filter(workforce_application_id=data.get("case_id"), is_eligible=True).values("id", "eis_monthly_amount", "name_en","name_bn", "relation_with_worker", "marital_status", "birth_date")
                     total_benefit=0
                     dep_count=0
                     for dependent in dependents:
                         total_benefit+= safe_float(dependent["eis_monthly_amount"])
+                        dependent["dependent_gender"]= get_gender_by_relation(dependent["relation_with_worker"])
+                        dependent["dependent_relation_type"]= get_relation_type(dependent["relation_with_worker"])
+                        dependent["dependent_age"]= calculate_age(dependent["birth_date"])
                         dep_count+=1
                     final_data_item["monthly_benefit"]= total_benefit
 
                     final_data_item["worker_beneficiary_count"]= dep_count
+                    final_data_item["worker_dependents"]= dependents
 
                 other_compensations= WorkforceOtherCompensationInfo.objects.filter(workforce_application_id=data.get("case_id"), is_eis_benefit_adjustment_eligible="true")
                 total_compensations= 0
