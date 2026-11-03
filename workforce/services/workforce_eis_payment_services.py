@@ -301,7 +301,7 @@ class WorkforceEisPaymentServices(BaseService):
             return "Invalid other_beneficiary_data JSON"
 
         # 4. Calculate total overpayment
-        actual_monthly_total = safe_decimal(main_beneficiary.eis_monthly_amount)
+        actual_monthly_total = safe_decimal(main_beneficiary.payable_amount)
         target_monthly_total = Decimal("0.00")
         other_beneficiary_records = []
 
@@ -316,8 +316,8 @@ class WorkforceEisPaymentServices(BaseService):
 
             increment = safe_decimal(details.get("incrementAmount"))
             normal_decrement = safe_decimal(details.get("decrementAmount"))
-            actual_monthly_total += safe_decimal(other_obj.eis_monthly_amount)
-            target_monthly_total += safe_decimal(other_obj.eis_monthly_amount) + increment
+            actual_monthly_total += safe_decimal(other_obj.payable_amount)
+            target_monthly_total += safe_decimal(other_obj.payable_amount) + increment
 
             other_beneficiary_records.append({
                 "obj": other_obj,
@@ -328,6 +328,7 @@ class WorkforceEisPaymentServices(BaseService):
         total_overpayment = (actual_monthly_total - target_monthly_total) * Decimal(months_elapsed)
         total_overpayment = max(total_overpayment, Decimal("0.00"))
         # If remarried or died, calculate disbursements made after event_date
+        overpayment_of_this_beneficiary=0
         if data.get("beneficiary_status") == "closed" and event_date:
             disbursed_after_event = WorkforceEisPaymentDisbursementStage.objects.filter(
                 beneficiary_id=main_beneficiary.beneficiary_id,
@@ -462,7 +463,7 @@ class WorkforceEisPaymentServices(BaseService):
                     increment = item["increment"]
                     normal_decrement = item["normal_decrement"]
 
-                    max_monthly = safe_decimal(old_other.eis_monthly_amount) + increment
+                    max_monthly = safe_decimal(old_other.payable_amount) + increment
                     capacity = max_monthly - MIN_ALLOWED_AMOUNT
 
                     if capacity > 0:
@@ -485,7 +486,7 @@ class WorkforceEisPaymentServices(BaseService):
                 old_other = item["obj"]
                 increment = item["increment"]
 
-                old_monthly = safe_decimal(old_other.eis_monthly_amount)
+                old_monthly = safe_decimal(old_other.payable_amount)
                 old_initial = safe_decimal(old_other.eis_initial_monthly_amount)
 
                 max_monthly = old_monthly + increment
