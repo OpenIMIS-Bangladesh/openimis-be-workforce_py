@@ -432,6 +432,18 @@ class Query(graphene.ObjectType):
         beneficiary_id=graphene.String(required=False)
     )
 
+    workforce_eis_beneficiaries = graphene.List(
+        WorkforceEisPaymentProcessGQLType,
+        beneficiary_id=graphene.String(required=False)
+    )
+    workforce_eis_beneficiary_payments = graphene.List(
+        WorkforceEisPaymentDisbursementStageGQLType,
+        beneficiary_id=graphene.String(required=False),
+        year= graphene.String(required=False),
+        month_index= graphene.String(required=False)
+    )
+
+
     def resolve_workforce_eis_last_payment_date(self, info, beneficiary_id=None):
         return (
             WorkforceEisPaymentDisbursementStage.objects
@@ -2089,6 +2101,30 @@ class Query(graphene.ObjectType):
     def resolve_website_legal_guidelines(self, info):
         try:
             qs= WebsiteLegalGuideline.objects.order_by("-date_created").first()
+            return qs
+        except Exception as e:
+            return {"error": f"Token error: {str(e)}"}
+
+
+    def resolve_workforce_eis_beneficiaries(self, info, beneficiary_id=None):
+        try:
+            qs= WorkforceEisPaymentProcess.objects.filter(status="active", is_deleted=False).order_by("serial_number")
+            if beneficiary_id:
+                qs = qs.filter(beneficiary_id=beneficiary_id)
+            return qs
+        except Exception as e:
+            return {"error": f"Token error: {str(e)}"}
+
+
+    def resolve_workforce_eis_beneficiary_payments(self, info, beneficiary_id=None, year=None, month_index=None):
+        try:
+            qs= WorkforceEisPaymentDisbursementStage.objects.filter(is_deleted=False).order_by("-year", "-month_index")
+            if beneficiary_id:
+                qs = qs.filter(beneficiary_id=beneficiary_id)
+            if year:
+                qs = qs.filter(year=year)
+            if month_index:
+                qs= qs.filter(month_index=month_index)
             return qs
         except Exception as e:
             return {"error": f"Token error: {str(e)}"}
