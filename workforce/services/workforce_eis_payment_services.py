@@ -242,6 +242,7 @@ class WorkforceEisPaymentServices(BaseService):
     @transaction.atomic
     def update_beneficiary(self, user, data):
         print(data)
+        overpayment_of_this_beneficiary=0
         MIN_ALLOWED_AMOUNT = Decimal("0.00")
 
         # 1. Fetch Main Beneficiary
@@ -328,7 +329,7 @@ class WorkforceEisPaymentServices(BaseService):
         total_overpayment = (actual_monthly_total - target_monthly_total) * Decimal(months_elapsed)
         total_overpayment = max(total_overpayment, Decimal("0.00"))
         # If remarried or died, calculate disbursements made after event_date
-        overpayment_of_this_beneficiary=0
+
         if data.get("beneficiary_status") == "closed" and event_date:
             disbursed_after_event = WorkforceEisPaymentDisbursementStage.objects.filter(
                 beneficiary_id=main_beneficiary.beneficiary_id,
