@@ -2248,6 +2248,9 @@ class Mutation(graphene.ObjectType):
 
     send_sms_notification= SendSmsNotificationMutation.Field()
     create_workforce_send_confirmation_link = SendWorkforceConfirmationLinkMutation.Field()
+    # train_beneficiary_photo = TrainBeneficiaryPhotoMutation.Field()
+    create_train_beneficiary_photo =CreateTrainBeneficiaryPhotoMutation.Field()
+    update_train_beneficiary_photo =UpdateTrainBeneficiaryPhotoMutation.Field()
     create_website_legal_guideline = CreateWebsiteLegalGuidelineMutation.Field()
     update_website_legal_guideline = UpdateWebsiteLegalGuidelineMutation.Field()
 
