@@ -82,6 +82,16 @@ def extract_uuid(encoded_str):
     decoded = base64.b64decode(encoded_str).decode()
     return decoded.split(":")[1]
 
+def extract_year_month(value):
+    if isinstance(value, str):
+        value = datetime.strptime(value, "%Y-%m-%d").date()
+    elif isinstance(value, datetime):
+        value = value.date()
+
+    return {
+        "year": value.year,
+        "month": value.month
+    }
 
 class WorkforceEisPaymentDisbursementStageServices(BaseService):
     OBJECT_TYPE = WorkforceEisPaymentDisbursementStage
@@ -203,10 +213,35 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
                 payable_amount = safe_decimal(workforce_eis_payment_process.payable_amount).quantize(
                     Decimal("0.01"), rounding=ROUND_HALF_UP
                 )
+                ####### Remove increment part or add decrement part if the payment is before increment effective or decrement effective month#####
+                ##the procedure starts here##
+                increment_month = extract_year_month(workforce_eis_payment_process.increment_date) if workforce_eis_payment_process.increment_date else None
+                decrement_month = extract_year_month(workforce_eis_payment_process.decrement_date) if workforce_eis_payment_process.decrement_date else None
+
+                increment_year_month = 0
+                decrement_year_month = 0
+
+                filter_year_month = int(f"{year}{int(month):02d}")
+
+                if increment_month is not None:
+                    increment_year_month = int(
+                        f"{increment_month['year']}{increment_month['month']:02d}"
+                    )
+                    if filter_year_month < increment_year_month:
+                        payable_amount -= Decimal(str(workforce_eis_payment_process.increment_amount or 0))
+
+                if decrement_month is not None:
+                    decrement_year_month = int(
+                        f"{decrement_month['year']}{decrement_month['month']:02d}"
+                    )
+                    if filter_year_month < decrement_year_month:
+                        payable_amount += Decimal(str(workforce_eis_payment_process.decrement_amount or 0))
+
+                ##the removing increment or adding decrement procedure ends here##
 
                 months_gone = safe_decimal(months_gone).quantize(
                     Decimal("0.01"), rounding=ROUND_HALF_UP
-                )
+                ) if months_gone>0 else 1
 
                 paid_amount = (payable_amount * months_gone).quantize(
                     Decimal("0.01"), rounding=ROUND_HALF_UP
