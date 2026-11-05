@@ -177,9 +177,9 @@ def start():
     # NEW: Run once every 24 hours to check who has reached the 9-month threshold
     scheduler.add_job(
         send_nine_month_biometric_verification_link,
-        # trigger=IntervalTrigger(hours=24),  # or CronTrigger(hour=9, minute=0) for 9:00 AM daily
-        trigger=IntervalTrigger(seconds=30),  # Run every 30 seconds for testing
-        next_run_time=datetime.now(),
+        trigger=IntervalTrigger(hours=24),  # or CronTrigger(hour=9, minute=0) for 9:00 AM daily
+        # trigger=IntervalTrigger(seconds=30),  # Run every 30 seconds for testing
+        # next_run_time=datetime.now(),
         id="nine_month_biometric_verification_job",
         replace_existing=True,
     )
