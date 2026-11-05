@@ -58,6 +58,7 @@ from .services.workforce_committee_user_map_services import WorkforceCommitteeUs
 from .services.workforce_notification_services import WorkforceNotificationServices
 from .services.workforce_committee_bank_advice_map_services import WorkforceCommitteeBankAdviceMapServices
 from .services.SendConfirmationLnkServices import SendConfirmationLnkServices
+from .services.train_beneficiary_photo_services import TrainBeneficiaryPhotoServices
 from .gql_queries import (
     WorkforceInteractiveUserGQLType
 )
@@ -2762,6 +2763,54 @@ class SendWorkforceConfirmationLinkMutation(BaseHistoryModelCreateMutationMixin,
             service_instance=service_instance,
             user=user,
             data=data
+        )
+
+        return result
+
+class CreateTrainBeneficiaryPhotoMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateTrainBeneficiaryPhotoMutation"
+
+    class Input(WorkforceApplicationInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **kwargs):
+        failure_message = "workforce.mutation.failed_to_train_beneficiary_photo"
+        required_permission = ""
+        service_instance = TrainBeneficiaryPhotoServices()
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission='',
+            call_type='create',
+            service_instance=service_instance,
+            user=user,
+            data=kwargs
+        )
+
+        return result
+
+class UpdateTrainBeneficiaryPhotoMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateTrainBeneficiaryPhotoMutation"
+
+    class Input(WorkforceApplicationInputType):
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **kwargs):
+        failure_message = "workforce.mutation.failed_to_train_beneficiary_photo"
+        required_permission = ""
+        service_instance = TrainBeneficiaryPhotoServices()
+
+        result = auth_permission_validation(
+            failure_message=failure_message,
+            required_permission='',
+            call_type='update',
+            service_instance=service_instance,
+            user=user,
+            data=kwargs
         )
 
         return result
