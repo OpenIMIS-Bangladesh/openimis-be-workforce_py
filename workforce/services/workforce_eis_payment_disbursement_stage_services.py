@@ -226,29 +226,35 @@ class WorkforceEisPaymentDisbursementStageServices(BaseService):
                 #Cancel out incremented amount from total amount for non-incremented months
                 if workforce_eis_payment_process.increment_date is not None:
                     increment_target_date = workforce_eis_payment_process.increment_date
-                    inc_rd = relativedelta(increment_target_date, calculation_start_date)
-                    before_increment_months = inc_rd.years * 12 + inc_rd.months
-                    inc_fraction = inc_rd.days / monthrange(increment_target_date.year, increment_target_date.month)[1]
-                    before_increment_months_gone = before_increment_months + inc_fraction
-                    deducted_amount = (
-                            safe_decimal(str(before_increment_months_gone)) *
-                            safe_decimal(workforce_eis_payment_process.increment_amount)
-                    ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-                    paid_amount -= deducted_amount
+                    increment_year_month= int(f"{increment_target_date.year}{increment_target_date.month:02d}")
+                    target_year_month= int(f"{target_date.year}{target_date.month:02d}")
+                    if increment_year_month <= target_year_month:
+                        inc_rd = relativedelta(increment_target_date, calculation_start_date)
+                        before_increment_months = inc_rd.years * 12 + inc_rd.months
+                        inc_fraction = inc_rd.days / monthrange(increment_target_date.year, increment_target_date.month)[1]
+                        before_increment_months_gone = before_increment_months + inc_fraction
+                        deducted_amount = (
+                                safe_decimal(str(before_increment_months_gone)) *
+                                safe_decimal(workforce_eis_payment_process.increment_amount)
+                        ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                        paid_amount -= deducted_amount
 
 
                 #add decremented amount to total amount for non-decremental months
                 if workforce_eis_payment_process.decrement_date is not None:
                     decrement_target_date = workforce_eis_payment_process.decrement_date
-                    dec_rd = relativedelta(decrement_target_date, calculation_start_date)
-                    before_decrement_months = dec_rd.years * 12 + dec_rd.months
-                    dec_fraction = dec_rd.days / monthrange(decrement_target_date.year, decrement_target_date.month)[1]
-                    before_decrement_months_gone = before_decrement_months + dec_fraction
-                    added_amount = (
-                            safe_decimal(str(before_decrement_months_gone)) *
-                            safe_decimal(workforce_eis_payment_process.decrement_amount)
-                    ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-                    paid_amount += added_amount
+                    decrement_year_month= int(f"{decrement_target_date.year}{decrement_target_date.month:02d}")
+                    target_year_month= int(f"{target_date.year}{target_date.month:02d}")
+                    if decrement_year_month <= target_year_month:
+                        dec_rd = relativedelta(decrement_target_date, calculation_start_date)
+                        before_decrement_months = dec_rd.years * 12 + dec_rd.months
+                        dec_fraction = dec_rd.days / monthrange(decrement_target_date.year, decrement_target_date.month)[1]
+                        before_decrement_months_gone = before_decrement_months + dec_fraction
+                        added_amount = (
+                                safe_decimal(str(before_decrement_months_gone)) *
+                                safe_decimal(workforce_eis_payment_process.decrement_amount)
+                        ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                        paid_amount += added_amount
 
 
 
