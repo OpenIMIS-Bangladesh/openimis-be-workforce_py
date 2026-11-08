@@ -25,6 +25,7 @@ from workforce.services.workforce_employee_dependent_services import WorkforceEm
 import base64
 from django.core.files.storage import default_storage
 from calendar import monthrange
+from groq import Groq
 
 def extract_uuid(encoded_str):
     decoded = base64.b64decode(encoded_str).decode()
@@ -910,3 +911,51 @@ class UpdateInstallment(APIView):
 
         return Response({'status': 'success', 'message': 'Procedure Ran Successfully', 'data': ""},
                         status=status.HTTP_200_OK)
+
+
+class UpdateLocationEn(APIView):
+    authentication_classes=[]
+
+    def get(self, request):
+        user = InteractiveUser.objects.get(id=1)
+        client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        locations= Location.objects.filter(type__in=["D", "R"])
+        try:
+            for location in locations:
+                response = client.chat.completions.create(
+                    model="qwen/qwen3.8-27b",
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": (
+                                "You are a Bangladesh geographical location "
+                                "name translator. Convert Bangla Division and "
+                                "District names into their officially used "
+                                "English names. Return ONLY the English name. "
+                                "Do not translate the meaning; use the "
+                                "standard English spelling."
+                            )
+                        },
+                        {
+                            "role": "user",
+                            "content": location.name
+                        }
+                    ],
+                    temperature=0,
+                    max_tokens=30
+                )
+
+                english_name = response.choices[0].message.content.strip()
+
+                location.name_en= english_name
+                try:
+                    location.save()
+                except Exception as e:
+                    continue
+            return Response({'status': 'success', 'message': f"Location translation success:", 'data': ""},
+                            status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'status': 'failed', 'message': f"Location translation failed: {str(e)}", 'data': ""},
+                            status=status.HTTP_200_OK)
+
+
