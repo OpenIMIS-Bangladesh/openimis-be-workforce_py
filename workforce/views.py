@@ -46,6 +46,16 @@ def get_district_name_by_location_id(location_id):
         return district_name
     except Exception as e:
         return None
+def get_district_name_en_by_location_id(location_id):
+    district_name_en = None
+    try:
+        location = Location.objects.get(id=location_id)
+        upazilla = Location.objects.get(id=location.parent_id)
+        district = Location.objects.get(id=upazilla.parent_id)
+        district_name = district.name_en
+        return district_name
+    except Exception as e:
+        return None
 
 def get_gender_by_relation(relation_with_worker):
     if "father" in relation_with_worker or "brother" in relation_with_worker or "son" in relation_with_worker:
@@ -391,8 +401,10 @@ class EisCaseData(APIView):
 
                 if data.get('factory_location_id'):
                     final_data_item['factory_district'] = get_district_name_by_location_id(data.get('factory_location_id'))
+                    final_data_item['factory_district_en'] = get_district_name_en_by_location_id(data.get('factory_location_id'))
                 else:
                     final_data_item['factory_district'] = None
+                    final_data_item['factory_district_en'] = None
 
 
                 ######## Set data from accident #######
@@ -413,10 +425,13 @@ class EisCaseData(APIView):
                     if data.get('factory_location_id'):
                         accident_district = get_district_name_by_location_id(
                             data.get('factory_location_id'))
+                        accident_district_en = get_district_name_en_by_location_id(data.get('factory_location_id'))
                     else:
                         accident_district = None
+                        accident_district_en = None
                 else:
                     accident_district = None
+                    accident_district_en = None
                 worker_place_of_death = worker_accident_info.get('placeOfDeath', None)
                 worker_age= dependent_service.calculate_age_custom(final_data_item["worker_date_of_birth"])
                 ######## Set data from accident END #######
@@ -454,7 +469,9 @@ class EisCaseData(APIView):
 
                 ############# Final Data curating #############
                 final_data_item["worker_permanent_district"] = get_district_name_by_location_id(final_data_item["worker_permanent_location_id"])
+                final_data_item["worker_permanent_district_en"] = get_district_name_en_by_location_id(final_data_item["worker_permanent_location_id"])
                 final_data_item["worker_present_district"] = get_district_name_by_location_id(final_data_item["worker_present_location_id"])
+                final_data_item["worker_present_district_en"] = get_district_name_en_by_location_id(final_data_item["worker_present_location_id"])
                 final_data_item["worker_age"] = worker_age
                 final_data_item["endorsement_date"] = endorsement_date
                 final_data_item["total_days_of_endorsement"] = total_days_of_endorsement
@@ -462,6 +479,7 @@ class EisCaseData(APIView):
                 final_data_item["accident_type"] = accident_type
                 final_data_item["accident_place"] = accident_place
                 final_data_item["accident_district"] = accident_district
+                final_data_item["accident_district_en"] = accident_district_en
                 final_data_item["worker_death_place"] = worker_place_of_death
                 final_data_item["total_compensations_by_other_entities"] = total_compensations
 
