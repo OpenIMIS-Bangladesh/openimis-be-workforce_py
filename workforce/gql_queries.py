@@ -776,6 +776,8 @@ class WorkforceDocumentGQLType(DjangoObjectType):
             "approval_date": ["exact"],
             "remarks": ["exact", "icontains"],
             "status": ["exact", "icontains"],
+            "is_verify_request": ["exact"],
+            "verify_request_reason": ["exact"],
             **prefix_filterset("workforce_application__", WorkforceApplicationGQLType._meta.filter_fields),
         }
 
@@ -1436,3 +1438,29 @@ class WebsiteVisitorMessageGQLType(DjangoObjectType):
             "visitor_message": ["exact", "icontains"],
         }
         connection_class = ExtendedConnection
+
+class WorkforceLiveCheckRequestGQLType(DjangoObjectType):
+    class Meta:
+        model = WorkforceLiveCheckRequest
+        interfaces = (graphene.relay.Node,)
+        connection_class = ExtendedConnection
+        filter_fields = {
+            "id": ["exact"],
+            "workforce_application_id": ["exact"],
+            "workforce_application_summary_id": ["exact"],
+            "workforce_employee_dependent_id": ["exact"],
+            "workforce_document_id": ["exact"],
+            "processed_by_id": ["exact"],
+            "is_approved": ["exact"],
+            "processing_date": ["exact", "gte", "lte"],
+            "approval_date": ["exact", "gte", "lte"],
+            "beneficiary_id": ["exact", "icontains"],
+            "status": ["exact", "icontains"],
+            "beneficiary_name_en": ["exact", "icontains"],
+            "beneficiary_name_bn": ["exact", "icontains"],
+            "reason": ["exact", "icontains"],
+            "phone_number": ["exact", "icontains"],
+            "is_deleted": ["exact"],
+            "date_created": ["exact", "gte", "lte"],
+            "date_updated": ["exact", "gte", "lte"],
+        }

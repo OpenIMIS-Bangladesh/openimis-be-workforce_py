@@ -287,6 +287,8 @@ class WorkforceDocumentInputType(OpenIMISMutation.Input):
     remarks = graphene.String()
     is_deleted = graphene.Boolean()
     status = graphene.String()
+    is_verify_request = graphene.Boolean()
+    verify_request_reason = graphene.String()
 
 
 class WorkforceBankInputType(OpenIMISMutation.Input):
@@ -816,3 +818,50 @@ class WebsiteLegalGuidelineInputType(OpenIMISMutation.Input):
     document_url = graphene.String(required=False)
     document_path = graphene.String(required=False)
     description = graphene.String(required=False)
+
+
+class WorkforceLiveCheckRequestInputType(OpenIMISMutation.Input):
+    id = graphene.String(required=False)
+
+    # Foreign Keys (supports both direct name and _id)
+    workforce_application = graphene.String(required=False)
+    workforce_application_id = graphene.String(required=False)
+
+    workforce_application_summary = graphene.String(required=False)
+    workforce_application_summary_id = graphene.String(required=False)
+
+    workforce_employee_dependent = graphene.String(required=False)
+    workforce_employee_dependent_id = graphene.String(required=False)
+
+    workforce_document = graphene.String(required=False)
+    workforce_document_id = graphene.String(required=False)
+
+    processed_by = graphene.String(required=False)
+    processed_by_id = graphene.Int(required=False)
+
+    # Dates
+    processing_date = graphene.String(required=False)
+    approval_date = graphene.String(required=False)
+
+    # Status & Flags
+    is_approved = graphene.Boolean(required=False)
+    status = graphene.String(required=False)
+
+    # Beneficiary Details
+    beneficiary_id = graphene.String(required=False)
+    beneficiary_name_en = graphene.String(required=False)
+    beneficiary_name_bn = graphene.String(required=False)
+    phone_number = graphene.String(required=False)
+
+    # Verification Details & Remarks
+    reason = graphene.String(required=False)
+    remarks = graphene.String(required=False)
+
+    #for document path and url
+    path = graphene.String(required=False)
+    url = graphene.String(required=False)
+
+    # Audit & History
+    is_deleted = graphene.Boolean(required=False)
+    is_verify_request = graphene.Boolean()
+    verify_request_reason = graphene.String()

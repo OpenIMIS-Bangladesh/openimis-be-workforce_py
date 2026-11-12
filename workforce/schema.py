@@ -2170,6 +2170,9 @@ class Mutation(graphene.ObjectType):
     create_workforce_document = CreateWorkforceDocumentMutation.Field()
     update_workforce_document = UpdateWorkforceDocumentMutation.Field()
 
+    create_workforce_document_verify = CreateWorkforceDocumentVerifyMutation.Field()
+    update_workforce_document_verify = UpdateWorkforceDocumentVerifyMutation.Field()
+
     create_workforce_bank = CreateWorkforceBankMutation.Field()
     update_workforce_bank = UpdateWorkforceBankMutation.Field()
 

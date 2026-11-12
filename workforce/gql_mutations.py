@@ -4,7 +4,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils.translation import gettext as _
 import base64
-from core.models import InteractiveUser
+from core.models import User, InteractiveUser
 from core.schema import OpenIMISMutation
 from .apps import WorkforceConfig
 from datetime import date, datetime
@@ -13,6 +13,7 @@ import graphene
 from .gql_types import *
 
 from .models import Bank
+from .services import live_check_verify_request_services
 from .services.website_legal_guideline_services import WebsiteLegalGuidelineServices
 from .services.workforce_association_user_map_services import WorkforceAssociationUserMapServices
 from .services.workforce_eis_payment_services import safe_decimal
@@ -59,6 +60,8 @@ from .services.workforce_notification_services import WorkforceNotificationServi
 from .services.workforce_committee_bank_advice_map_services import WorkforceCommitteeBankAdviceMapServices
 from .services.SendConfirmationLnkServices import SendConfirmationLnkServices
 from .services.train_beneficiary_photo_services import TrainBeneficiaryPhotoServices
+from workforce.services.live_check_verify_request_services import LiveCheckVerifyRequestServices
+
 from .gql_queries import (
     WorkforceInteractiveUserGQLType
 )
@@ -746,6 +749,70 @@ class UpdateWorkforceDocumentMutation(BaseHistoryModelCreateMutationMixin, BaseM
 
         return result
 
+class CreateWorkforceDocumentVerifyMutation(BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "CreateWorkforceDocumentVerifyMutation"
+
+    class Input(WorkforceLiveCheckRequestInputType):
+        pass
+
+    @classmethod
+    def _validate_mutation(cls, user, **data):
+        # Allow unauthenticated callers
+        pass
+
+    @classmethod
+    def _mutate(cls, user, **kwargs):
+        failure_message = "workforce.mutation.failed_to_create_workforce_document_verify"
+
+        acting_user = (
+            user
+            if user and getattr(user, "is_authenticated", False)
+            else (User.objects.filter(i_user__isnull=False).first() or User.objects.first())
+        )
+        service_instance = LiveCheckVerifyRequestServices(acting_user)
+
+        payload = kwargs.get("input") if "input" in kwargs else kwargs
+
+        result = no_auth_validation(
+            failure_message=failure_message,
+            call_type="create",
+            service_instance=service_instance,
+            data=payload,
+        )
+
+        return result
+
+class UpdateWorkforceDocumentVerifyMutation(BaseMutation):
+    _mutation_module = mutation_module
+    _mutation_class = "UpdateWorkforceDocumentVerifyMutation"
+    # Uses the input type you created
+    class Input(WorkforceLiveCheckRequestInputType):
+        pass
+    @classmethod
+    def _validate_mutation(cls, user, **data):
+        # Override to allow unauthenticated callers
+        pass
+    @classmethod
+    def _mutate(cls, user, **kwargs):
+        failure_message = "workforce.mutation.failed_to_process_live_check_request"
+        # 1. Provide safe fallback User instance if unauthenticated
+        acting_user = (
+            user
+            if user and getattr(user, "is_authenticated", False)
+            else (User.objects.filter(i_user__isnull=False).first() or User.objects.first())
+        )
+        service_instance = LiveCheckVerifyRequestServices(acting_user)
+        # 2. Extract Relay client mutation input payload
+        payload = kwargs.get("input") if "input" in kwargs else kwargs
+        # 3. Use no_auth_validation to bypass auth checks
+        result = no_auth_validation(
+            failure_message=failure_message,
+            call_type="update",
+            service_instance=service_instance,
+            data=payload,
+        )
+        return result
 
 class CreateWorkforceBankMutation(BaseHistoryModelCreateMutationMixin, BaseMutation):
     _mutation_module = mutation_module

@@ -602,6 +602,8 @@ class WorkforceDocument(HistoryModel):
     approval_date = models.DateField(null=True, blank=True)
     remarks = models.CharField(max_length=512, null=True, blank=True)
     status = models.CharField(max_length=30, null=True, blank=True)
+    is_verify_request = models.BooleanField(default=False,blank=True)
+    verify_request_reason = models.TextField(null=True, blank=True)
     # biometric_embedding = models.OneToOneField(
     #     "biometric_verification.BiometricEmbedding",
     #     models.DO_NOTHING,
@@ -1895,3 +1897,54 @@ class WebsiteVisitorMessage(HistoryModel):
         managed = True
         db_table = 'website_visitor_messages'
 
+
+class WorkforceLiveCheckRequest(HistoryModel):
+    workforce_application = models.ForeignKey(
+        "WorkforceApplication",
+        models.DO_NOTHING,
+        blank=False,
+        null=False,
+        related_name="workforce_live_check_application",  # <--- Changed
+    )
+    workforce_application_summary = models.ForeignKey(
+        "WorkforceApplicationSummary",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_live_check_application_summary",  # <--- Changed
+    )
+    workforce_employee_dependent = models.ForeignKey(
+        "WorkforceEmployeeDependent",
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_live_check_employee_dependent",  # <--- Changed
+    )
+    workforce_document = models.ForeignKey(
+        WorkforceDocument,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_live_check_document",  # <--- Changed
+    )
+    processing_date = models.DateField(null=True, blank=True)
+    processed_by = models.ForeignKey(
+        InteractiveUser,
+        models.DO_NOTHING,
+        blank=True,
+        null=True,
+        related_name="workforce_live_check_processed_by",  # <--- Changed
+    )
+    is_approved = models.BooleanField()
+    approval_date= models.DateField(null=True, blank=True)
+    beneficiary_id = models.CharField(max_length=50, null=True, blank=True)
+    status = models.CharField(default="active", max_length=50, null=True, blank=True)
+    beneficiary_name_en = models.CharField(default="active", max_length=50, null=True, blank=True)
+    beneficiary_name_bn = models.CharField(default="active", max_length=50, null=True, blank=True)
+    reason= models.CharField(max_length=50, db_comment="Remarried, Died, live_check_denied", null=True, blank=True)
+    remarks= models.TextField(null=True, blank=True)
+    phone_number= models.CharField(max_length=50, null=True, blank=True)
+
+    class Meta:
+        managed = True
+        db_table = 'workforce_live_check_request'
