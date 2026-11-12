@@ -325,6 +325,17 @@ def build_payment_confirmation_link(disbursement_id: str, base_url: str = None) 
 def extract_uuid(encoded_str):
     decoded = base64.b64decode(encoded_str).decode()
     return decoded.split(":")[1]
+
+def get_sector_type(sector_type):
+    if sector_type==1:
+        return "Ready Made Garments(RMG)"
+    elif sector_type==2:
+        return "Footwear and Leathergoods Sector"
+    elif sector_type==3:
+        return "Export Processing Zones(EPZs)"
+    else:
+        return None
+
 # def relate_document_with_banking_info(dependent_id):
 #     document_instance = WorkforceDocument.objects.file()
 #     pass

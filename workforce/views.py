@@ -9,6 +9,7 @@ from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from .services.file_services import save_uploaded_file, retrieve_file_response
+from .services.helper_service import get_sector_type
 from .services.workforce_application_services import WorkforceApplicationServices
 from .services.workforce_sms_services import send_sms
 from .models import WorkforceEmployee, generate_otp, WorkforceEisPaymentProcess, WorkforceOtherCompensationInfo, \
@@ -385,6 +386,7 @@ class EisCaseData(APIView):
                 association_id= F('employee_factory__all_association_id'),
                 association_name_en= F('employee_factory__all_association__name_en'),
                 association_name_bn= F('employee_factory__all_association__name_bn'),
+                sector_type= F('employee_factory__all_association__sector_type'),
                 association_short_name_en= F('employee_factory__all_association__short_name_en'),
                 association_short_name_bn= F('employee_factory__all_association__short_name_bn'),
                 worker_accident_info= F('employee_accident_info'),
@@ -397,6 +399,7 @@ class EisCaseData(APIView):
             for data in application_data:
                 #set query result first
                 final_data_item= data
+                final_data_item["sector"]= get_sector_type(data.get("sector_type"))
                 final_data_item["worker_beneficiary_count"]= 0
 
                 if data.get('factory_location_id'):

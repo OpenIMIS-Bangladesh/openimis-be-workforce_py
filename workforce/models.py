@@ -385,6 +385,7 @@ class WorkforceAllAssociation(HistoryModel):
     minimum_salary = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     start_date= models.DateField(null=True, blank=True)
     association_number= models.IntegerField(null=True, blank=True)
+    sector_type= models.IntegerField(null=True, blank=True)
 
     class Meta:
         managed = True
