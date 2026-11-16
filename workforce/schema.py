@@ -443,6 +443,40 @@ class Query(graphene.ObjectType):
         month_index= graphene.String(required=False)
     )
 
+    workforce_live_check_requests = OrderedDjangoFilterConnectionField(
+        WorkforceLiveCheckRequestGQLType,
+        orderBy=graphene.List(of_type=graphene.String),
+        # is_approved=graphene.Boolean(required=False),
+        # beneficiary_id=graphene.String(required=False),
+        # status=graphene.String(required=False),
+        # phone_number=graphene.String(required=False),
+        # orderBy=graphene.List(of_type=graphene.String),
+    )
+
+
+    def resolve_workforce_live_check_requests(
+        self,
+        info,
+        # is_approved=None,
+        # beneficiary_id=None,
+        # status=None,
+        # phone_number=None,
+        **kwargs
+    ):
+        try:
+            qs = WorkforceLiveCheckRequest.objects.filter(is_deleted=False)
+            # Check 'is not None' so false is not ignored
+            # if is_approved is not None:
+            #     qs = qs.filter(is_approved=is_approved)
+            # if beneficiary_id:
+            #     qs = qs.filter(beneficiary_id__icontains=beneficiary_id)
+            # if status:
+            #     qs = qs.filter(status__iexact=status)
+            # if phone_number:
+            #     qs = qs.filter(phone_number__icontains=phone_number)
+            return gql_optimizer.query(qs, info)
+        except Exception as e:
+            return None
 
     def resolve_workforce_eis_last_payment_date(self, info, beneficiary_id=None):
         return (
@@ -2292,6 +2326,8 @@ class Mutation(graphene.ObjectType):
     update_train_beneficiary_photo =UpdateTrainBeneficiaryPhotoMutation.Field()
     create_website_legal_guideline = CreateWebsiteLegalGuidelineMutation.Field()
     update_website_legal_guideline = UpdateWebsiteLegalGuidelineMutation.Field()
+
+    update_workforce_eis_payment_process_live_check = UpdateWorkforceEisPaymentProcessLiveCheckMutation.Field()
 
     user_payment_confirmation = UserPaymentConfirmationMutation.Field()
 

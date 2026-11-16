@@ -753,35 +753,36 @@ class CreateWorkforceDocumentVerifyMutation(BaseMutation):
     _mutation_module = mutation_module
     _mutation_class = "CreateWorkforceDocumentVerifyMutation"
 
+    # Uses the input type you created
     class Input(WorkforceLiveCheckRequestInputType):
         pass
 
     @classmethod
     def _validate_mutation(cls, user, **data):
-        # Allow unauthenticated callers
+        # Override to allow unauthenticated callers
         pass
 
     @classmethod
     def _mutate(cls, user, **kwargs):
-        failure_message = "workforce.mutation.failed_to_create_workforce_document_verify"
-
+        failure_message = "workforce.mutation.failed_to_process_live_check_request"
+        # 1. Provide safe fallback User instance if unauthenticated
         acting_user = (
             user
             if user and getattr(user, "is_authenticated", False)
             else (User.objects.filter(i_user__isnull=False).first() or User.objects.first())
         )
         service_instance = LiveCheckVerifyRequestServices(acting_user)
-
+        # 2. Extract Relay client mutation input payload
         payload = kwargs.get("input") if "input" in kwargs else kwargs
-
+        # 3. Use no_auth_validation to bypass auth checks
         result = no_auth_validation(
             failure_message=failure_message,
             call_type="create",
             service_instance=service_instance,
             data=payload,
         )
-
         return result
+
 
 class UpdateWorkforceDocumentVerifyMutation(BaseMutation):
     _mutation_module = mutation_module
@@ -3064,3 +3065,100 @@ class MarkAllNotificationAsReadMutation(graphene.Mutation):
             return cls(success=True, message="NOA Download Blocking Successfull", errors=[])
         except Exception as e:
             return cls(success=False, message="Invalid Request", errors=[str(e)])
+
+
+class UpdateWorkforceEisPaymentProcessLiveCheckMutation(graphene.Mutation):
+    class Arguments:
+        document_id = graphene.String(required=True)
+        status = graphene.String(required=True)
+        remarks = graphene.String(required=False)
+
+    success = graphene.Boolean()
+    message = graphene.String()
+    beneficiary_id = graphene.String()
+    errors = graphene.List(graphene.String)
+
+    @classmethod
+    def mutate(cls, root, info, **data):
+        from datetime import date
+        from workforce.models import WorkforceDocument, WorkforceEisPaymentProcess, WorkforceLiveCheckRequest
+
+        try:
+            doc_id = data.get("document_id")
+            status = data.get("status")
+            remarks = data.get("remarks")
+
+            # 1. Fetch the WorkforceDocument
+            document = WorkforceDocument.objects.filter(id=doc_id, is_deleted=False).first()
+            if not document:
+                return cls(
+                    success=False,
+                    message="Document not found",
+                    beneficiary_id=None,
+                    errors=[f"WorkforceDocument with id '{doc_id}' does not exist."]
+                )
+
+            # 2. Locate related WorkforceEisPaymentProcess record(s)
+            payment_qs = WorkforceEisPaymentProcess.objects.filter(is_deleted=False)
+
+            if document.workforce_dependent:
+                payment_qs = payment_qs.filter(
+                    workforce_application=document.workforce_application,
+                    workforce_employee_dependent=document.workforce_dependent
+                )
+            elif document.workforce_application:
+                payment_qs = payment_qs.filter(workforce_application=document.workforce_application)
+
+            target_payment = payment_qs.first()
+
+            # Fallback via WorkforceLiveCheckRequest if not directly linked
+            if not target_payment:
+                live_check = WorkforceLiveCheckRequest.objects.filter(
+                    workforce_document=document,
+                    is_deleted=False
+                ).first()
+                if live_check and live_check.beneficiary_id:
+                    target_payment = WorkforceEisPaymentProcess.objects.filter(
+                        beneficiary_id=live_check.beneficiary_id,
+                        is_deleted=False
+                    ).first()
+
+            if not target_payment:
+                return cls(
+                    success=False,
+                    message="Payment process record not found",
+                    beneficiary_id=None,
+                    errors=["No matching WorkforceEisPaymentProcess record found for this document."]
+                )
+
+            # 3. Prepare update fields
+            update_fields = {
+                "beneficiary_status": status,
+                "last_live_check_date": date.today(),
+            }
+            if remarks:
+                update_fields["live_check_remarks"] = remarks
+
+            # 4. Perform update (using beneficiary_id if present to update all relevant records)
+            if target_payment.beneficiary_id:
+                WorkforceEisPaymentProcess.objects.filter(
+                    beneficiary_id=target_payment.beneficiary_id,
+                    is_deleted=False
+                ).update(**update_fields)
+            else:
+                payment_qs.update(**update_fields)
+
+            return cls(
+                success=True,
+                message="Workforce EIS payment process updated successfully.",
+                beneficiary_id=target_payment.beneficiary_id,
+                errors=[]
+            )
+
+        except Exception as e:
+            return cls(
+                success=False,
+                message="Error updating payment process",
+                beneficiary_id=None,
+                errors=[str(e)]
+            )

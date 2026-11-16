@@ -12,7 +12,7 @@ from workforce.models import (
     WorkforceLiveCheckRequest,
     WorkforceEisPaymentProcess,
     WorkforceEmployeeDependent,
-    WorkforceApplication,
+    WorkforceApplication, WorkforceEmployee,
 )
 from workforce.services.workforce_document_services import WorkforceDocumentServices
 
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class LiveCheckVerifyRequestServices(BaseService):
     OBJECT_TYPE = WorkforceLiveCheckRequest
 
-    def update(self, obj_data: dict):
+    def create(self, obj_data: dict):
         """
         1. Searches the document from the documents table using document_id (or id).
         2. Updates the document row via WorkforceDocumentServices.
@@ -31,7 +31,7 @@ class LiveCheckVerifyRequestServices(BaseService):
         doc_id = (
             obj_data.get("document_id")
             or obj_data.get("workforce_document_id")
-            or obj_data.get("id")
+            or obj_data.get("documentId")
         )
 
         if not doc_id:
@@ -52,10 +52,11 @@ class LiveCheckVerifyRequestServices(BaseService):
                 "is_verify_request": obj_data.get("is_verify_request", True),
                 "verify_request_reason": obj_data.get("verify_request_reason") or obj_data.get("reason"),
                 "status": obj_data.get("status") or document.status,
+                "note":obj_data.get("remarks") or document.note
             }
-            cleaned_doc_payload = {k: v for k, v in doc_payload.items() if v not in ("", None, "undefined")}
-            doc_service.update(cleaned_doc_payload)
-            document.refresh_from_db()
+            # cleaned_doc_payload = {k: v for k, v in doc_payload.items() if v not in ("", None, "undefined")}
+            # doc_service.update(cleaned_doc_payload)
+            # document.refresh_from_db()
 
             # 3. Pull details from document & related models
             application = document.workforce_application
@@ -72,6 +73,10 @@ class LiveCheckVerifyRequestServices(BaseService):
                 beneficiary_name_en = beneficiary_name_en or dependent.name_en
                 beneficiary_name_bn = beneficiary_name_bn or dependent.name_bn
                 phone_number = phone_number or dependent.phone_number
+            else:
+                beneficiary_name_en = application.workforceEmployee.father_name_en
+                beneficiary_name_bn = application.workforceEmployee.father_name_bn
+                phone_number = application.workforceEmployee.phone_number
 
             # Fallback to payment process to find beneficiary_id
             if not beneficiary_id and application:
@@ -102,6 +107,8 @@ class LiveCheckVerifyRequestServices(BaseService):
                 status=obj_data.get("status", "pending"),
                 reason=obj_data.get("reason") or obj_data.get("verify_request_reason"),
                 remarks=obj_data.get("remarks"),
+                path = obj_data.get("path") or document.path,
+                url = obj_data.get("url") or document.url,
             )
             live_check.save(user=self.user, username=getattr(self.user, "username", None))
 
@@ -117,5 +124,75 @@ class LiveCheckVerifyRequestServices(BaseService):
                 },
             }
 
-    def create(self, obj_data: dict):
-        return self.update(obj_data)
+    def update(self, obj_data: dict):
+        request_id = obj_data.get("id")
+        if not request_id:
+            raise ValidationError(_("id is required to update WorkforceLiveCheckRequest."))
+        with transaction.atomic():
+            live_check = WorkforceLiveCheckRequest.objects.get(id=request_id)
+            # document_id = live_check.workforceDocument
+            # document = WorkforceDocument.objects.filter(id=document_id).first()
+            #
+            # if not document:
+            #     raise ValidationError(_(f"WorkforceDocument with id '{doc_id}' not found."))
+            #
+            # # 2. Update the document row using WorkforceDocumentServices
+            # doc_service = WorkforceDocumentServices(self.user)
+            # doc_payload = {
+            #     "id": str(document.id),
+            #     "path": obj_data.get("path") or document.path,
+            #     "url": obj_data.get("url") or document.url,
+            #     "is_verify_request": obj_data.get("is_verify_request", True),
+            #     "verify_request_reason": obj_data.get("verify_request_reason") or obj_data.get("reason"),
+            #     "status": obj_data.get("status") or document.status,
+            #     "note":obj_data.get("remarks") or document.note
+            # }
+            # cleaned_doc_payload = {k: v for k, v in doc_payload.items() if v not in ("", None, "undefined")}
+            # doc_service.update(cleaned_doc_payload)
+            # document.refresh_from_db()
+            #
+            if not live_check:
+                raise ValidationError(_(f"WorkforceLiveCheckRequest with id '{request_id}' not found."))
+            updatable_fields = [
+                "status",
+                "is_approved",
+                "approval_date",
+                "processing_date",
+                "reason",
+                "remarks",
+                "beneficiary_id",
+                "beneficiary_name_en",
+                "beneficiary_name_bn",
+                "phone_number",
+                "is_deleted",
+            ]
+            for field in updatable_fields:
+                if field in obj_data and obj_data[field] not in ("", "undefined", None):
+                    setattr(live_check, field, obj_data[field])
+            # Processed by / Approver
+            if "processed_by_id" in obj_data and obj_data["processed_by_id"] not in ("", "undefined", None):
+                live_check.processed_by_id = obj_data["processed_by_id"]
+            elif hasattr(self.user, "i_user") and self.user.i_user:
+                live_check.processed_by = self.user.i_user
+            live_check.save(user=self.user, username=getattr(self.user, "username", None))
+            # Optional: if a new photo path/url was passed, also update the linked document
+            if live_check.workforce_document :
+                doc_service = WorkforceDocumentServices(self.user)
+                doc_payload = {
+                    "id": str(live_check.workforce_document.id),
+                    "path": live_check.path or obj_data.get("path"),
+                    "url": live_check.url or obj_data.get("url") ,
+                    "status": live_check.workforce_document.status or obj_data.get("status"),
+                    "note": live_check.workforce_document.note or obj_data.get("remarks") ,
+                }
+                cleaned_doc_payload = {k: v for k, v in doc_payload.items() if v not in ("", None, "undefined")}
+                doc_service.update(cleaned_doc_payload)
+            return {
+                "success": True,
+                "message": "Live check request updated successfully",
+                "data": {
+                    "id": str(live_check.id),
+                    "is_approved": live_check.is_approved,
+                    "status": live_check.status,
+                },
+            }

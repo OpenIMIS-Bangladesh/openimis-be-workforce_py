@@ -1940,12 +1940,13 @@ class WorkforceLiveCheckRequest(HistoryModel):
     approval_date= models.DateField(null=True, blank=True)
     beneficiary_id = models.CharField(max_length=50, null=True, blank=True)
     status = models.CharField(default="active", max_length=50, null=True, blank=True)
-    beneficiary_name_en = models.CharField(default="active", max_length=50, null=True, blank=True)
-    beneficiary_name_bn = models.CharField(default="active", max_length=50, null=True, blank=True)
-    reason= models.CharField(max_length=50, db_comment="Remarried, Died, live_check_denied", null=True, blank=True)
+    beneficiary_name_en = models.CharField(default="active", max_length=100, null=True, blank=True)
+    beneficiary_name_bn = models.CharField(default="active", max_length=100, null=True, blank=True)
+    reason= models.CharField(max_length=500, db_comment="Remarried, Died, live_check_denied", null=True, blank=True)
     remarks= models.TextField(null=True, blank=True)
     phone_number= models.CharField(max_length=50, null=True, blank=True)
-
+    path = models.CharField(max_length=512, null=True, blank=True)
+    url = models.CharField(max_length=512, null=True, blank=True)
     class Meta:
         managed = True
         db_table = 'workforce_live_check_request'

@@ -865,3 +865,4 @@ class WorkforceLiveCheckRequestInputType(OpenIMISMutation.Input):
     is_deleted = graphene.Boolean(required=False)
     is_verify_request = graphene.Boolean()
     verify_request_reason = graphene.String()
+    document_id= graphene.String(required=False)

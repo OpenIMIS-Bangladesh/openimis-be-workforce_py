@@ -1463,4 +1463,6 @@ class WorkforceLiveCheckRequestGQLType(DjangoObjectType):
             "is_deleted": ["exact"],
             "date_created": ["exact", "gte", "lte"],
             "date_updated": ["exact", "gte", "lte"],
+            "path": ["exact"],
+            "url": ["exact"],
         }
