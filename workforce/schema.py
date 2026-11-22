@@ -298,6 +298,7 @@ class Query(graphene.ObjectType):
         year=graphene.String(),
         workforce_factory_id= graphene.String(),
         all_association_id= graphene.String(),
+        all_association_id_in= graphene.List(graphene.String),
         is_disbursed= graphene.String(),
         not_in_disburse= graphene.String(),
         workforce_eis_bank_advice_id= graphene.String()
@@ -1797,7 +1798,8 @@ class Query(graphene.ObjectType):
             all_association_id= None,
             is_disbursed= None,
             not_in_disburse= None,
-            workforce_eis_bank_advice_id= None
+            workforce_eis_bank_advice_id= None,
+            all_association_id_in = None
         ):
         try:
             qs = WorkforceEisPaymentDisbursementStage.objects.filter(is_deleted=False)
@@ -1813,6 +1815,9 @@ class Query(graphene.ObjectType):
                     qs = qs.filter(is_disbursed=True)
                 elif is_disbursed == "no":
                     qs = qs.filter(is_disbursed=False)
+
+            if all_association_id_in:
+                qs = qs.filter(workforce_application__employee_factory__all_association_id__in=all_association_id_in)
 
             if workforce_factory_id:
                 qs = qs.filter(
