@@ -1699,25 +1699,10 @@ class Query(graphene.ObjectType):
 
             if not_in_stage == "yes" and year and month:
                 #hide the month if payment is made for the selected month and less than them
-                stages = (
-                    WorkforceEisPaymentDisbursementStage.objects
-                    .filter(is_deleted=False)
-                    .values("beneficiary_id")
-                    .annotate(
-                        latest_ym=Max(F("year") * 100 + F("month_index"))
-                    )
-                )
 
-                selected_ym = int(f"{year}{int(month):02d}")
-
-                beneficiary_ids = stages.filter(
-                    latest_ym=selected_ym
+                beneficiary_ids = WorkforceEisPaymentDisbursementStage.objects.filter(
+                    year= year, month_index=month, is_deleted=False
                 ).values_list("beneficiary_id", flat=True)
-                # beneficiary_ids = WorkforceEisPaymentDisbursementStage.objects.filter(
-                #     month_index=month,
-                #     year=year,
-                #     is_deleted=False
-                # ).values_list("beneficiary_id", flat=True)
 
                 qs = qs.exclude(beneficiary_id__in=beneficiary_ids)
 
