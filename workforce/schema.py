@@ -278,6 +278,7 @@ class Query(graphene.ObjectType):
         workforce_application_tracking_number = graphene.String(),
         workforce_factory_id=graphene.String(),
         all_association_id= graphene.String(),
+        all_association_id_in= graphene.List(graphene.String),
         workforce_application_id_in=graphene.List(of_type=graphene.String),
         month=graphene.String(),
         year=graphene.String(),
@@ -1612,6 +1613,7 @@ class Query(graphene.ObjectType):
             workforce_application_tracking_number=None,
             workforce_factory_id=None,
             all_association_id=None,
+            all_association_id_in=None,
             workforce_application_id_in=None,
             month=None,
             year=None,
@@ -1655,6 +1657,9 @@ class Query(graphene.ObjectType):
                 qs = qs.filter(
                     workforce_application__tracking_number__icontains=workforce_application_tracking_number
                 )
+            if all_association_id_in:
+                qs = qs.filter(workforce_application__employee_factory__all_association_id__in=all_association_id_in)
+
             if all_association_id:
                 qs = qs.filter(
                     workforce_application__employee_factory__all_association_id=all_association_id
